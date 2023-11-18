@@ -1,0 +1,41 @@
+.img {
+  width: 200px;
+  height: 200px;
+  display: block;
+  margin: 0 auto;
+}
+
+.text {
+  display: block;
+  text-align: center;
+}
+
+.linkText {
+  font-size: 18px;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 30px;
+}
+
+.stars {
+  display: flex;
+  width: 180px;
+  margin: 0 auto;
+}
+
+.star {
+  cursor: pointer;
+}
+
+.star:not(:last-of-type) {
+  margin-right: 5px;
+}
+
+.content {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
