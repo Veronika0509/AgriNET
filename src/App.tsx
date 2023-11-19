@@ -31,17 +31,17 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 // import '../../theme/variables.css';
 
-import {useState} from "react";
+import React, {useState} from "react";
 import s from './style.module.css'
 import Preloader from "./components/Preloader";
 import Login from "./pages/Login";
 import Info from "./pages/Info";
+import Menu from "./pages/Menu";
 
 setupIonicReact();
 
 const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
-
   return (
     <div>
       <Preloader setIsLoading={setIsLoading} />
@@ -50,10 +50,10 @@ const App: React.FC = () => {
           <IonTabs>
             <IonRouterOutlet>
               <Route exact path="/login">
-                <Login/>
+                <Login />
               </Route>
               <Route exact path="/info">
-                <Info/>
+                <Info />
               </Route>
               <Route exact path="/">
                 <Redirect to="/login"/>

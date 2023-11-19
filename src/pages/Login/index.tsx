@@ -1,31 +1,64 @@
 import {
-  IonButton, IonCol, IonContent, IonImg, IonInput,IonPage,IonRow,
+  IonButton, IonCol, IonContent, IonImg, IonInput, IonPage, IonRow, IonText,
 } from '@ionic/react';
 import '../../theme/variables.css';
+import axios from 'axios';
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import s from './style.module.css'
 import Logo from '../../assets/images/logo.png'
 
 const Login: React.FC = () => {
+  const [usernameInputValue, setUsernameInputValue] = useState('');
+  const [passwordInputValue, setPasswordInputValue] = useState('');
+  const [message, setMessage] = useState(false)
+
+  const handleUsernameInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUsernameInputValue(event.target.value);
+  };
+
+  const handlePasswordInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordInputValue(event.target.value);
+  };
+
+  const onFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      const response = await axios.get('https://app.agrinet.us/api/auth/try', {
+        params: {
+          username: usernameInputValue,
+          password: passwordInputValue,
+        },
+      });
+      console.log(response.status);
+    } catch (error) {
+      setMessage(true)
+    }
+  };
+
+
   return (
     <IonPage>
-      <IonContent>
+      <IonContent className={s.contentWrapper}>
         <IonRow class="ion-justify-content-center" className={s.content}>
-          <IonCol size="11" sizeMd="8" sizeLg="6" sizeXl="3" className='col'>
-            <div>
+          <IonCol size="11" sizeMd="6" sizeLg="6" sizeXl="3" className='col'>
+            <form onSubmit={onFormSubmit}>
               <IonImg className={s.img} src={Logo} alt='logo'/>
               <IonInput label="Username" labelPlacement="floating" required={true}
-                        errorText='Username is empty'></IonInput>
-              <IonInput label="Passwort" labelPlacement="floating" type='password' required={true}
-                        errorText='Password is incorrect'></IonInput>
+                        errorText='Username is empty' value={usernameInputValue}
+                        onIonChange={(e: any) => handleUsernameInputChange(e as React.ChangeEvent<HTMLInputElement>)}></IonInput>
+              <IonInput label="Password" labelPlacement="floating" type='password' required={true}
+                        errorText='Password is incorrect' value={passwordInputValue}
+                        onIonChange={(e: any) => handlePasswordInputChange(e as React.ChangeEvent<HTMLInputElement>)}></IonInput>
+              {message && <IonText color='danger'>Incorrect login or password</IonText>}
               <IonButton expand='full' type='submit' className={`${s.button} ${'ion-margin-top'}`}>sign in</IonButton>
-            </div>
+            </form>
           </IonCol>
         </IonRow>
       </IonContent>
     </IonPage>
-  )
+  );
 };
 
 export default Login;
