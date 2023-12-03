@@ -12,10 +12,14 @@
 
 .card {
   width: 23.68%;
-  height: 200px;
+  height: 250px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.text {
+  display: block;
 }

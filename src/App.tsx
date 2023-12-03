@@ -43,6 +43,8 @@ setupIonicReact();
 
 const App: React.FC = () => {
   const [page, setPage] = useState(0)
+  const [userId, setUserId] = useState(0)
+
   return (
     <div>
       {page === 0
@@ -54,7 +56,7 @@ const App: React.FC = () => {
               <IonTabs>
                 <IonRouterOutlet>
                   <Route exact path="/login">
-                    <Login setPage={setPage} />
+                    <Login setPage={setPage} setUserId={setUserId} />
                   </Route>
                   <Route exact path="/info">
                     <Info />
@@ -88,7 +90,7 @@ const App: React.FC = () => {
                 <Redirect to="/main"/>
               </Route>
               <Route exact path="/main">
-                <Main setPage={setPage} />
+                <Main setPage={setPage} userId={userId} />
               </Route>
             </IonReactRouter>
           </div>
