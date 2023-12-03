@@ -7,8 +7,13 @@ import axios from 'axios';
 import React, {useEffect, useState} from "react";
 import s from './style.module.css'
 import Logo from '../../assets/images/logo.png'
+import { useHistory } from 'react-router-dom';
 
-const Login: React.FC = () => {
+interface Login {
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+}
+
+const Login: React.FC<Login> = (props) => {
   const [usernameInputValue, setUsernameInputValue] = useState('');
   const [passwordInputValue, setPasswordInputValue] = useState('');
   const [message, setMessage] = useState(false)
@@ -31,12 +36,12 @@ const Login: React.FC = () => {
           password: passwordInputValue,
         },
       });
-      console.log(response.status);
+      props.setPage(1)
     } catch (error) {
+      console.log(error)
       setMessage(true)
     }
   };
-
 
   return (
     <IonPage>

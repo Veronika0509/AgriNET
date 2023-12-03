@@ -4,19 +4,13 @@ import {useEffect, useState} from "react";
 import s from './style.module.css'
 import preloaderLogo from '../../assets/images/logo.png'
 
-interface Preloader {
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-}
-
-const Preloader: React.FC<Preloader> = (props) => {
-
+const Preloader = () => {
   const [hidden, setHidden] = useState(false);
   const [done, setDone] = useState(false);
   useEffect(() => {
     setTimeout(() => {
       setHidden(true)
       setTimeout (() => {
-        props.setIsLoading(false)
         setDone(true)
       }, 800)
     }, 300);
