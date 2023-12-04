@@ -1,25 +1,11 @@
-.img {
-  width: 100px;
-  margin: 0 auto;
-}
-
-.cardContainer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: center;
-}
-
-.card {
-  width: 23.68%;
-  height: 250px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
 .text {
-  display: block;
+  width: 100%;
+}
+.item {
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+}
+.lightItem {
+  text-align: center;
 }

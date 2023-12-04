@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import s from './style.module.css';
 import {
   IonPage,
@@ -11,19 +11,22 @@ import {
   IonImg,
   IonCardContent,
   IonCardTitle,
-  IonCardSubtitle, IonText,
+  IonCardSubtitle, IonText, IonItem, IonLabel, IonNavLink,
 } from '@ionic/react';
 import Logo from '../../assets/images/logo.png';
 import axios from 'axios';
 import login from "../Login";
+import Chart from "../Chart";
+
 interface MainProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
   userId: number;
+  siteList: any;
+  setSiteList: any;
+  setSiteId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const Main: React.FC<MainProps> = (props) => {
-  const [siteList, setSiteList] = useState([]);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,8 +35,7 @@ const Main: React.FC<MainProps> = (props) => {
             userId: props.userId,
           },
         });
-        console.log(response.data)
-        setSiteList(response.data);
+        props.setSiteList(response.data);
       } catch (error) {
         console.log(error);
       }
@@ -42,30 +44,33 @@ const Main: React.FC<MainProps> = (props) => {
     fetchData();
   }, [props.userId]);
 
-  const onCardClick = () => {
-    props.setPage(2);
+  const onCardClick = (id: string) => {
+    props.setPage(2)
+    props.setSiteId(id)
   };
 
   return (
     <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>List</IonTitle>
+        </IonToolbar>
+      </IonHeader>
       <IonContent>
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>List</IonTitle>
-          </IonToolbar>
-        </IonHeader>
         <IonList className={s.cardContainer}>
-          {siteList.map((cardsArray: { layers: any[] }) => (
+          <IonItem className={s.lightItem}>
+            <IonText color='light' className={s.text}>Name</IonText>
+            <IonText color='light' className={s.text}>Type</IonText>
+            <IonText color='light' className={s.text}>Id</IonText>
+          </IonItem>
+          {props.siteList.map((cardsArray: { layers: any[] }) => (
             cardsArray.layers.map((cards) => (
               cards.markers.map((card: any) => (
-                <IonCard className={s.card} onClick={onCardClick}>
-                  <IonCardContent>
-                    <IonImg className={s.img} src={Logo} alt="Icon" />
-                    <IonCardTitle className="ion-text-center">{card.name}</IonCardTitle>
-                    <IonText className={`${s.text} ${'ion-text-center'}`}>{card.chartType}</IonText>
-                    <IonText className={`${s.text} ${'ion-text-center'}`}>{card.sensorId}</IonText>
-                  </IonCardContent>
-                </IonCard>
+                <IonItem onClick={() => onCardClick(card.sensorId)} className={s.item}>
+                  <IonText className={s.text}>{card.name}</IonText>
+                  <IonText className={s.text}>{card.chartType}</IonText>
+                  <IonText className={s.text}>{card.sensorId}</IonText>
+                </IonItem>
               ))
             ))
           ))}
