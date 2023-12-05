@@ -42,7 +42,7 @@ const Main: React.FC<MainProps> = (props) => {
     };
 
     fetchData();
-  }, [props.userId]);
+  });
 
   const onCardClick = (id: string) => {
     props.setPage(2)
