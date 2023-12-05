@@ -14,7 +14,6 @@ import axios from "axios";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
-import login from "../Login";
 
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -29,7 +28,7 @@ interface ChartState {
 }
 
 class Chart extends Component<ChartProps, ChartState> {
-  private root?: am5.Root | null = null; // Declare root property
+  private root?: am5.Root | null = null;
 
   constructor(props: ChartProps) {
     super(props);
@@ -45,7 +44,7 @@ class Chart extends Component<ChartProps, ChartState> {
   componentWillUnmount() {
     if (this.root) {
       this.root.dispose();
-      this.root = null; // Set to null when the component is unmounted
+      this.root = null;
     }
   }
 
@@ -58,10 +57,7 @@ class Chart extends Component<ChartProps, ChartState> {
           includeHistoricalData: false,
         },
       });
-
-      // Set the state with the data from the response
       this.setState({ chartData: response.data.data }, () => {
-        // Create chart after setting the state
         this.createChart();
       });
     } catch (error) {
@@ -70,10 +66,9 @@ class Chart extends Component<ChartProps, ChartState> {
   };
 
   createChart = (): void => {
+    const chartDataWrapper = this.state.chartData
 
-    // Check if the chart has already been created
     if (this.root) {
-      // Chart has already been created, no need to create it again
       return;
     }
 
@@ -94,14 +89,12 @@ class Chart extends Component<ChartProps, ChartState> {
     });
 
 // Set themes
-// https://www.amcharts.com/docs/v5/concepts/themes/
     root.setThemes([
       am5themes_Animated.new(root),
       myTheme
     ]);
 
 // Create chart
-// https://www.amcharts.com/docs/v5/charts/xy-chart/
     let chart = root.container.children.push(am5xy.XYChart.new(root, {
       panX: true,
       panY: true,
@@ -112,12 +105,11 @@ class Chart extends Component<ChartProps, ChartState> {
     }));
 
 // Create axes
-// https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
     let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
       maxDeviation: 0.2,
       baseInterval: {
-        timeUnit: "hour",
-        count: 1
+        timeUnit: "minute",
+        count: 30
       },
       renderer: am5xy.AxisRendererX.new(root, {
         minorGridEnabled: true
@@ -131,23 +123,16 @@ class Chart extends Component<ChartProps, ChartState> {
 
 
 // Add series
-// https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-    let date = new Date();
-    date.setHours(0, 0, 0, 0);
-
-    const chartDataWrapper = this.state.chartData
     function createChartData(chartDate: any, chartCount: number) {
-      am5.time.add(date, "hour", 1);
       return {
-        date: new Date(chartDate).getTime(),
+        date: chartDate,
         value: chartCount
       };
     }
-
     function createChartDataArray(count: number) {
       let data: any = [];
       chartDataWrapper.map((chartDataItem) => {
-        const chartDate = (chartDataItem.DateTime)
+        const chartDate = new Date(chartDataItem.DateTime).getTime()
         const chartData = createChartData(chartDate, chartDataItem['MS ' + count]);
         data.push(chartData);
       });
@@ -175,14 +160,11 @@ class Chart extends Component<ChartProps, ChartState> {
 
       series.data.setAll(data)
 
-      // Make stuff animate on load
-      // https://www.amcharts.com/docs/v5/concepts/animations/
       series.appear();
     }
 
 
 // Add cursor
-// https://www.amcharts.com/docs/v5/charts/xy-chart/cursor/
     let cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
       behavior: "none"
     }));
@@ -190,7 +172,6 @@ class Chart extends Component<ChartProps, ChartState> {
 
 
 // Add scrollbar
-// https://www.amcharts.com/docs/v5/charts/xy-chart/scrollbars/
     chart.set("scrollbarX", am5.Scrollbar.new(root, {
       orientation: "horizontal"
     }));
@@ -201,14 +182,12 @@ class Chart extends Component<ChartProps, ChartState> {
 
 
 // Add legend
-// https://www.amcharts.com/docs/v5/charts/xy-chart/legend-xy-series/
     let legend = chart.rightAxesContainer.children.push(am5.Legend.new(root, {
       width: 200,
       paddingLeft: 15,
       height: am5.percent(100)
     }));
 
-// When legend item container is hovered, dim all the series except the hovered one
     legend.itemContainers.template.events.on("pointerover", function (e) {
       let itemContainer = e.target;
 
@@ -229,7 +208,6 @@ class Chart extends Component<ChartProps, ChartState> {
       })
     })
 
-// When legend item container is unhovered, make all series as they are
     legend.itemContainers.template.events.on("pointerout", function (e) {
       let itemContainer = e.target;
       let series = itemContainer.dataItem.dataContext;
@@ -249,15 +227,11 @@ class Chart extends Component<ChartProps, ChartState> {
       textAlign: "right"
     });
 
-// It's is important to set legend data after all the events are set on template, otherwise events won't be copied
     legend.data.setAll(chart.series.values);
 
-
-// Make stuff animate on load
-// https://www.amcharts.com/docs/v5/concepts/animations/
     chart.appear(1000, 100);
 
-    this.root = root; // Assign the value to the class property
+    this.root = root;
   };
 
   back = (): void => {
