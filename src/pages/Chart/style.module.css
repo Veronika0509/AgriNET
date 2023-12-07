@@ -17,3 +17,22 @@
   height: 300px;
   margin-top: 20px;
 }
+
+.moisture {
+  color: white;
+  border-radius: 5px;
+  padding: 5px;
+  display: block;
+  margin-top: 10px;
+  width: 72px;
+  background: #428cff;
+}
+
+.watermark {
+  background: #fff;
+  position: absolute;
+  width: 62px;
+  height: 23px;
+  margin-top: -23px;
+  z-index: 1;
+}

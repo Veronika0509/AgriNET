@@ -14,12 +14,14 @@ import axios from "axios";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+import {setIndex} from "@amcharts/amcharts5/.internal/core/util/Array";
 
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
   siteList: any;
   setSiteList: any;
   siteId: string;
+  siteName: string;
 }
 
 interface ChartState {
@@ -101,7 +103,7 @@ class Chart extends Component<ChartProps, ChartState> {
       wheelX: "panX",
       wheelY: "zoomX",
       maxTooltipDistance: 0,
-      pinchZoomX: true
+      pinchZoomX: true,
     }));
 
 // Create axes
@@ -121,12 +123,14 @@ class Chart extends Component<ChartProps, ChartState> {
       renderer: am5xy.AxisRendererY.new(root, {})
     }));
 
+    yAxis.set('visible', false)
 
 // Add series
     function createChartData(chartDate: any, chartCount: number) {
       return {
         date: chartDate,
-        value: chartCount
+        value: chartCount,
+        percentValue: Number(chartCount.toFixed(1))
       };
     }
     function createChartDataArray(count: number) {
@@ -141,8 +145,9 @@ class Chart extends Component<ChartProps, ChartState> {
 
     let count = 4
     for (var i = 0; i < 3; i++) {
+      let name = count + ' inch'
       let series = chart.series.push(am5xy.LineSeries.new(root, {
-        name: count + ' inch',
+        name: name,
         xAxis: xAxis,
         yAxis: yAxis,
         valueYField: "value",
@@ -150,7 +155,7 @@ class Chart extends Component<ChartProps, ChartState> {
         legendValueText: "{valueY}",
         tooltip: am5.Tooltip.new(root, {
           pointerOrientation: "horizontal",
-          labelText: "{valueY} "
+          labelText: name + ' - ' + "{percentValue} %"
         })
       }));
 
@@ -170,16 +175,13 @@ class Chart extends Component<ChartProps, ChartState> {
     }));
     cursor.lineY.set("visible", false);
 
-
 // Add scrollbar
-    chart.set("scrollbarX", am5.Scrollbar.new(root, {
+    var scrollbarX = am5.Scrollbar.new(root, {
       orientation: "horizontal"
-    }));
+    });
 
-    chart.set("scrollbarY", am5.Scrollbar.new(root, {
-      orientation: "vertical"
-    }));
-
+    chart.set("scrollbarX", scrollbarX);
+    chart.bottomAxesContainer.children.push(scrollbarX);
 
 // Add legend
     let legend = chart.rightAxesContainer.children.push(am5.Legend.new(root, {
@@ -194,31 +196,31 @@ class Chart extends Component<ChartProps, ChartState> {
       // As series list is data of a legend, dataContext is series
       let series = itemContainer.dataItem.dataContext;
 
-      chart.series.each(function (chartSeries) {
-        if (chartSeries != series) {
-          chartSeries.strokes.template.setAll({
-            strokeOpacity: 0.15,
-            stroke: am5.color(0x000000)
-          });
-        } else {
-          chartSeries.strokes.template.setAll({
-            strokeWidth: 3
-          });
-        }
-      })
+      // chart.series.each(function (chartSeries) {
+      //   if (chartSeries != series) {
+      //     chartSeries.strokes.template.setAll({
+      //       strokeOpacity: 0.15,
+      //       stroke: am5.color(0x000000)
+      //     });
+      //   } else {
+      //     chartSeries.strokes.template.setAll({
+      //       strokeWidth: 3
+      //     });
+      //   }
+      // })
     })
 
     legend.itemContainers.template.events.on("pointerout", function (e) {
       let itemContainer = e.target;
       let series = itemContainer.dataItem.dataContext;
 
-      chart.series.each(function (chartSeries) {
-        chartSeries.strokes.template.setAll({
-          strokeOpacity: 1,
-          strokeWidth: 1,
-          stroke: chartSeries.get("fill")
-        });
-      });
+      // chart.series.each(function (chartSeries) {
+      //   chartSeries.strokes.template.setAll({
+      //     strokeOpacity: 1,
+      //     strokeWidth: 1,
+      //     stroke: chartSeries.get("fill")
+      //   });
+      // });
     })
 
     legend.itemContainers.template.set("width", am5.p100);
@@ -250,18 +252,23 @@ class Chart extends Component<ChartProps, ChartState> {
               size='large'
               icon={arrowBackOutline}
             ></IonIcon>
-            <IonTitle>Chart</IonTitle>
+            <IonTitle>{this.props.siteName} / {this.props.siteId}</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent>
           <div className={s.wrapper}>
             <IonText className={s.daysText}>14 days</IonText>
-            {this.props.siteList.map((cardsArray: any) =>
-              cardsArray.layers.map((cards: any) =>
-                cards.markers.map((card: any) =>
-                    card.sensorId === this.props.siteId && card.markerType === 'moist-fuel' && (
-                      <div className={s.chart} id='chartdiv'></div>
-                    )
+            {this.props.siteList.map((cardsArray: any, index1: number) =>
+              cardsArray.layers.map((cards: any, index2: number) =>
+                cards.markers.map((card: any, index3: number) =>
+                  card.sensorId === this.props.siteId && card.markerType === 'moist-fuel' && (
+                    <div>
+                      <IonText className={s.moisture}>Moisture</IonText>
+                      <div className={s.chart} key={`${index1}-${index2}-${index3}`} id='chartdiv'></div>
+                      <div className={s.watermark}></div>
+                    </div>
+
+                  )
                 )
               )
             )}

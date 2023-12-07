@@ -24,6 +24,7 @@ interface MainProps {
   siteList: any;
   setSiteList: any;
   setSiteId: React.Dispatch<React.SetStateAction<string>>;
+  setSiteName: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const Main: React.FC<MainProps> = (props) => {
@@ -44,9 +45,10 @@ const Main: React.FC<MainProps> = (props) => {
     fetchData();
   });
 
-  const onCardClick = (id: string) => {
+  const onCardClick = (id: string, name: string) => {
     props.setPage(2)
     props.setSiteId(id)
+    props.setSiteName(name)
   };
 
   return (
@@ -63,10 +65,10 @@ const Main: React.FC<MainProps> = (props) => {
             <IonText color='light' className={s.text}>Type</IonText>
             <IonText color='light' className={s.text}>Id</IonText>
           </IonItem>
-          {props.siteList.map((cardsArray: { layers: any[] }) => (
-            cardsArray.layers.map((cards) => (
-              cards.markers.map((card: any) => (
-                <IonItem onClick={() => onCardClick(card.sensorId)} className={s.item}>
+          {props.siteList.map((cardsArray: { layers: any[] }, index1: number) => (
+            cardsArray.layers.map((cards, index2) => (
+              cards.markers.map((card: any, index3: number) => (
+                <IonItem key={`${index1}-${index2}-${index3}`} onClick={() => onCardClick(card.sensorId, card.name)} className={s.item}>
                   <IonText className={s.text}>{card.name}</IonText>
                   <IonText className={s.text}>{card.chartType}</IonText>
                   <IonText className={s.text}>{card.sensorId}</IonText>

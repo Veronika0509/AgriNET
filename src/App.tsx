@@ -46,6 +46,7 @@ const App: React.FC = () => {
   const [userId, setUserId] = useState(0)
   const [siteList, setSiteList] = useState([]);
   const [siteId, setSiteId] = useState('')
+  const [siteName, setSiteName] = useState('')
 
   return (
     <IonApp>
@@ -103,7 +104,7 @@ const App: React.FC = () => {
                 <Redirect to="/main"/>
               </Route>
               <Route exact path="/main">
-                <Main setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId} />
+                <Main setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId} setSiteName={setSiteName} />
               </Route>
             </IonReactRouter>
             </div>
@@ -114,7 +115,7 @@ const App: React.FC = () => {
                   <Redirect to="/chart"/>
                 </Route>
                 <Route exact path="/chart">
-                  <Chart setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} />
+                  <Chart setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} />
                 </Route>
               </IonReactRouter>
             </div>
