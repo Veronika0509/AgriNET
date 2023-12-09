@@ -14,7 +14,6 @@ import axios from "axios";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
-import {setIndex} from "@amcharts/amcharts5/.internal/core/util/Array";
 
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -190,38 +189,6 @@ class Chart extends Component<ChartProps, ChartState> {
       height: am5.percent(100)
     }));
 
-    legend.itemContainers.template.events.on("pointerover", function (e) {
-      let itemContainer = e.target;
-
-      // As series list is data of a legend, dataContext is series
-      let series = itemContainer.dataItem.dataContext;
-
-      // chart.series.each(function (chartSeries) {
-      //   if (chartSeries != series) {
-      //     chartSeries.strokes.template.setAll({
-      //       strokeOpacity: 0.15,
-      //       stroke: am5.color(0x000000)
-      //     });
-      //   } else {
-      //     chartSeries.strokes.template.setAll({
-      //       strokeWidth: 3
-      //     });
-      //   }
-      // })
-    })
-
-    legend.itemContainers.template.events.on("pointerout", function (e) {
-      let itemContainer = e.target;
-      let series = itemContainer.dataItem.dataContext;
-
-      // chart.series.each(function (chartSeries) {
-      //   chartSeries.strokes.template.setAll({
-      //     strokeOpacity: 1,
-      //     strokeWidth: 1,
-      //     stroke: chartSeries.get("fill")
-      //   });
-      // });
-    })
 
     legend.itemContainers.template.set("width", am5.p100);
     legend.valueLabels.template.setAll({
