@@ -1,15 +1,16 @@
-import React, { Component, ReactNode } from 'react';
+import React, {Component, ReactNode} from 'react';
 import s from './style.module.css';
 import {
+  IonButton,
+  IonButtons,
   IonContent,
   IonHeader,
   IonIcon,
   IonPage,
-  IonText,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import { arrowBackOutline } from "ionicons/icons";
+import {arrowBackOutline} from "ionicons/icons";
 import axios from "axios";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
@@ -26,6 +27,7 @@ interface ChartProps {
 interface ChartState {
   root?: am5.Root;
   chartData: any[];
+  isMobile: boolean;
 }
 
 class Chart extends Component<ChartProps, ChartState> {
@@ -35,30 +37,36 @@ class Chart extends Component<ChartProps, ChartState> {
     super(props);
     this.state = {
       chartData: [],
+      isMobile: window.innerWidth < 850,
     };
   }
 
   componentDidMount(): void {
+    window.addEventListener('resize', this.handleResize);
     this.fetchData();
   }
 
   componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
     if (this.root) {
       this.root.dispose();
       this.root = null;
     }
   }
 
+  handleResize = () => {
+    this.setState({isMobile: window.innerWidth < 850});
+  };
+
   fetchData = async (): Promise<void> => {
     try {
       const response = await axios.get('https://app.agrinet.us/api/chart/m', {
         params: {
           sensorId: this.props.siteId,
-          days: 14,
-          includeHistoricalData: false,
+          days: 14
         },
       });
-      this.setState({ chartData: response.data.data }, () => {
+      this.setState({chartData: response.data.data}, () => {
         this.createChart();
       });
     } catch (error) {
@@ -67,7 +75,7 @@ class Chart extends Component<ChartProps, ChartState> {
   };
 
   createChart = (): void => {
-    const chartDataWrapper = this.state.chartData
+    const chartDataWrapper = this.state.chartData;
 
     if (this.root) {
       return;
@@ -89,13 +97,13 @@ class Chart extends Component<ChartProps, ChartState> {
       strokeOpacity: 0.05
     });
 
-// Set themes
+    // Set themes
     root.setThemes([
       am5themes_Animated.new(root),
       myTheme
     ]);
 
-// Create chart
+    // Create chart
     let chart = root.container.children.push(am5xy.XYChart.new(root, {
       panX: true,
       panY: true,
@@ -103,9 +111,10 @@ class Chart extends Component<ChartProps, ChartState> {
       wheelY: "zoomX",
       maxTooltipDistance: 0,
       pinchZoomX: true,
+      layout: this.state.isMobile ? root.verticalLayout : root.horizontalLayout
     }));
 
-// Create axes
+    // Create axes
     let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
       maxDeviation: 0.2,
       baseInterval: {
@@ -122,9 +131,9 @@ class Chart extends Component<ChartProps, ChartState> {
       renderer: am5xy.AxisRendererY.new(root, {})
     }));
 
-    yAxis.set('visible', false)
+    yAxis.set('visible', false);
 
-// Add series
+    // Add series
     function createChartData(chartDate: any, chartCount: number) {
       return {
         date: chartDate,
@@ -132,19 +141,20 @@ class Chart extends Component<ChartProps, ChartState> {
         percentValue: Number(chartCount.toFixed(1))
       };
     }
+
     function createChartDataArray(count: number) {
       let data: any = [];
       chartDataWrapper.map((chartDataItem) => {
-        const chartDate = new Date(chartDataItem.DateTime).getTime()
+        const chartDate = new Date(chartDataItem.DateTime).getTime();
         const chartData = createChartData(chartDate, chartDataItem['MS ' + count]);
         data.push(chartData);
       });
       return data;
     }
 
-    let count = 4
-    for (var i = 0; i < 3; i++) {
-      let name = count + ' inch'
+    let count = 4;
+    for (let i = 0; i < 3; i++) {
+      let name = count + ' inch';
       let series = chart.series.push(am5xy.LineSeries.new(root, {
         name: name,
         xAxis: xAxis,
@@ -158,23 +168,22 @@ class Chart extends Component<ChartProps, ChartState> {
         })
       }));
 
-      count += 4
+      count += 4;
 
-      let data = createChartDataArray(i + 1)
+      let data = createChartDataArray(i + 1);
 
-      series.data.setAll(data)
+      series.data.setAll(data);
 
       series.appear();
     }
 
-
-// Add cursor
+    // Add cursor
     let cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
       behavior: "none"
     }));
     cursor.lineY.set("visible", false);
 
-// Add scrollbar
+    // Add scrollbar
     var scrollbarX = am5.Scrollbar.new(root, {
       orientation: "horizontal"
     });
@@ -182,13 +191,12 @@ class Chart extends Component<ChartProps, ChartState> {
     chart.set("scrollbarX", scrollbarX);
     chart.bottomAxesContainer.children.push(scrollbarX);
 
-// Add legend
-    let legend = chart.rightAxesContainer.children.push(am5.Legend.new(root, {
+    // Add legend
+    let legend = chart.children.push(am5.Legend.new(root, {
       width: 200,
       paddingLeft: 15,
       height: am5.percent(100)
     }));
-
 
     legend.itemContainers.template.set("width", am5.p100);
     legend.valueLabels.template.setAll({
@@ -224,22 +232,24 @@ class Chart extends Component<ChartProps, ChartState> {
         </IonHeader>
         <IonContent>
           <div className={s.wrapper}>
-            <IonText className={s.daysText}>14 days</IonText>
             {this.props.siteList.map((cardsArray: any, index1: number) =>
               cardsArray.layers.map((cards: any, index2: number) =>
                 cards.markers.map((card: any, index3: number) =>
-                  card.sensorId === this.props.siteId && card.markerType === 'moist-fuel' && (
-                    <div>
-                      <IonText className={s.moisture}>Moisture</IonText>
-                      <div className={s.chart} key={`${index1}-${index2}-${index3}`} id='chartdiv'></div>
-                      <div className={s.watermark}></div>
-                    </div>
-
-                  )
+                    card.sensorId === this.props.siteId && card.markerType === 'moist-fuel' && (
+                      <div key={`${index1}-${index2}-${index3}`}>
+                        <div className={`${s.chart} ${this.state.isMobile ? s.mobileChart : ''}`} id='chartdiv'></div>
+                        <div className={s.watermark}></div>
+                      </div>
+                    )
                 )
               )
             )}
           </div>
+          <div className={s.buttons}>
+            <IonButton color='tertiary'>Prev Irigation Event</IonButton>
+            <IonButton color='tertiary'>Next Irigation Event</IonButton>
+          </div>
+
         </IonContent>
       </IonPage>
     );
