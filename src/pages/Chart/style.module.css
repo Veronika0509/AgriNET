@@ -36,3 +36,13 @@
   margin-top: -21px;
   z-index: 1;
 }
+
+.buttons {
+  text-align: center;
+}
+
+@media only screen and (max-width: 850px) {
+  .chart {
+    height: 450px;
+  }
+}

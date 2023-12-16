@@ -1,11 +1,11 @@
 import React, { Component, ReactNode } from 'react';
 import s from './style.module.css';
 import {
+  IonButton,
   IonContent,
   IonHeader,
   IonIcon,
   IonPage,
-  IonText,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
@@ -15,17 +15,35 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
+interface ChartDataItem {
+  DateTime: any;
+  [key: string]: number;
+}
+
+interface Marker {
+  sensorId: string;
+  markerType: string;
+}
+
+interface Cards {
+  markers: Marker[];
+}
+
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
-  siteList: any;
-  setSiteList: any;
+  siteList: any[];
+  setSiteList: React.Dispatch<React.SetStateAction<any[]>>;
   siteId: string;
   siteName: string;
+  userId: number;
 }
 
 interface ChartState {
   root?: am5.Root;
-  chartData: any[];
+  chartData: ChartDataItem[];
+  isMobile: boolean;
+  disableNextButton: boolean;
+  disablePrevButton: boolean;
 }
 
 class Chart extends Component<ChartProps, ChartState> {
@@ -35,42 +53,192 @@ class Chart extends Component<ChartProps, ChartState> {
     super(props);
     this.state = {
       chartData: [],
+      isMobile: window.innerWidth < 850,
+      disableNextButton: false,
+      disablePrevButton: false
     };
   }
 
   componentDidMount(): void {
-    this.fetchData();
+    window.addEventListener('resize', this.handleResize);
+    this.chartDataRequest();
   }
 
   componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
     if (this.root) {
       this.root.dispose();
       this.root = null;
     }
   }
 
-  fetchData = async (): Promise<void> => {
+  handleResize = () => {
+    this.setState({isMobile: window.innerWidth < 850});
+  };
+
+  chartDataRequest = async (): Promise<void> => {
     try {
       const response = await axios.get('https://app.agrinet.us/api/chart/m', {
         params: {
           sensorId: this.props.siteId,
-          days: 14,
-          includeHistoricalData: false,
+          days: 14
         },
       });
       this.setState({ chartData: response.data.data }, () => {
-        this.createChart();
+        this.updateChart()
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  setNextIrrigation = async (): Promise<void> => {
+    const currentDate = this.state.chartData[this.state.chartData.length - 1].DateTime.substring(0, 10)
+
+    let dateArray: any = []
+    try {
+      const response = await axios.get('https://app.agrinet.us/api/valve/scheduler', {
+        params: {
+          sensorId: 'VSM00209',
+          user: this.props.userId,
+          version: '42.2.1'
+        },
+      });
+      response.data.map((valve: any) => {
+        if (valve.valve1 === 'OFF') {
+          dateArray.push(valve.localTime.substring(0, 10))
+        }
+      })
+    } catch (error) {
+      console.log(error);
+    }
+
+    function findNearestDate(currentDate: string, dateList: string[]): string | null {
+      const currentDateObj = new Date(currentDate);
+      const dateObjects = dateList.map(date => new Date(date));
+      const futureDates = dateObjects.filter(date => date > currentDateObj);
+      if (futureDates.length > 0) {
+        const closestDate = new Date(Math.min(...futureDates.map(date => date.getTime())));
+        closestDate.setDate(closestDate.getDate() + 4);
+        return closestDate.toISOString().split('T')[0];
+      } else {
+        return null;
+      }
+    }
+
+    const nearestDate = findNearestDate(currentDate, dateArray)
+
+    if (nearestDate !== null) {
+      const nearestDateObj = new Date(nearestDate);
+      nearestDateObj.setDate(nearestDateObj.getDate() - 4);
+      const year = nearestDateObj.getFullYear();
+      const month = (nearestDateObj.getMonth() + 1).toString().padStart(2, '0');
+      const day = nearestDateObj.getDate().toString().padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
+      if (formattedDate.toString() === dateArray[0]) {
+        this.setState({disableNextButton: true})
+      }
+      if (formattedDate.toString() != dateArray[dateArray.length - 1]) {
+        this.setState({disablePrevButton: false})
+      }
+    } else {
+      console.log(123)
+    }
+
+    try {
+      const response = await axios.get('https://app.agrinet.us/api/chart/m', {
+        params: {
+          sensorId: this.props.siteId,
+          days: 8,
+          endDate: nearestDate,
+          user: this.props.userId,
+          v: 42
+        },
+      });
+      this.setState({ chartData: response.data.data }, () => {
+        this.updateChart()
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  setPrevIrrigation = async (): Promise<void> => {
+    const currentDate = this.state.chartData[0].DateTime.substring(0, 10)
+    let dateArray: any = []
+    try {
+      const response = await axios.get('https://app.agrinet.us/api/valve/scheduler', {
+        params: {
+          sensorId: 'VSM00209',
+          user: this.props.userId,
+          version: '42.2.1'
+        },
+      });
+      response.data.map((valve: any) => {
+        if (valve.valve1 === 'OFF') {
+          dateArray.push(valve.localTime.substring(0, 10))
+        }
+      })
+    } catch (error) {
+      console.log(error);
+    }
+    const findNearestDate = (currentDate: string, dateArray: string[]): string | null  => {
+      const currentDateObj = new Date(currentDate);
+      const dateArrayObjs = dateArray.map(dateString => new Date(dateString));
+      const validDates = dateArrayObjs.filter(dateObj => dateObj <= currentDateObj);
+      if (validDates.length === 0) {
+        return null;
+      }
+      const nearestDateObj = new Date(Math.max.apply(null, validDates.map(date => date.getTime())));
+      nearestDateObj.setDate(nearestDateObj.getDate() + 4);
+      return nearestDateObj.toISOString().split('T')[0];
+    }
+
+    let nearestDate = findNearestDate(currentDate, dateArray);
+
+    if (nearestDate !== null) {
+      const nearestDateObj = new Date(nearestDate);
+      nearestDateObj.setDate(nearestDateObj.getDate() - 4);
+      const year = nearestDateObj.getFullYear();
+      const month = (nearestDateObj.getMonth() + 1).toString().padStart(2, '0');
+      const day = nearestDateObj.getDate().toString().padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
+      if (formattedDate.toString() === dateArray[dateArray.length - 1]) {
+        this.setState({disablePrevButton: true})
+      }
+      if (formattedDate.toString() != dateArray[0]) {
+        this.setState({disableNextButton: false})
+      }
+    } else {
+      console.log(123)
+    }
+
+    try {
+      const response = await axios.get('https://app.agrinet.us/api/chart/m', {
+        params: {
+          sensorId: this.props.siteId,
+          days: 8,
+          endDate: findNearestDate(currentDate, dateArray),
+          user: this.props.userId,
+          v: 42
+        },
+      });
+      this.setState({ chartData: response.data.data }, () => {
+        this.updateChart()
       });
     } catch (error) {
       console.log(error);
     }
   };
 
-  createChart = (): void => {
-    const chartDataWrapper = this.state.chartData
+
+  updateChart = (): void => {
+    this.createChart(this.state.chartData);
+  };
+
+  createChart = (props: any): void => {
+    const chartDataWrapper = props
 
     if (this.root) {
-      return;
+      this.root.dispose();
     }
 
     let root = am5.Root.new("chartdiv");
@@ -103,7 +271,9 @@ class Chart extends Component<ChartProps, ChartState> {
       wheelY: "zoomX",
       maxTooltipDistance: 0,
       pinchZoomX: true,
+      layout: this.state.isMobile ? root.verticalLayout : root.horizontalLayout
     }));
+
 
 // Create axes
     let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
@@ -134,7 +304,7 @@ class Chart extends Component<ChartProps, ChartState> {
     }
     function createChartDataArray(count: number) {
       let data: any = [];
-      chartDataWrapper.map((chartDataItem) => {
+      chartDataWrapper.map((chartDataItem: any) => {
         const chartDate = new Date(chartDataItem.DateTime).getTime()
         const chartData = createChartData(chartDate, chartDataItem['MS ' + count]);
         data.push(chartData);
@@ -183,7 +353,7 @@ class Chart extends Component<ChartProps, ChartState> {
     chart.bottomAxesContainer.children.push(scrollbarX);
 
 // Add legend
-    let legend = chart.rightAxesContainer.children.push(am5.Legend.new(root, {
+    let legend = chart.children.push(am5.Legend.new(root, {
       width: 200,
       paddingLeft: 15,
       height: am5.percent(100)
@@ -224,15 +394,17 @@ class Chart extends Component<ChartProps, ChartState> {
         </IonHeader>
         <IonContent>
           <div className={s.wrapper}>
-            <IonText className={s.daysText}>14 days</IonText>
             {this.props.siteList.map((cardsArray: any, index1: number) =>
               cardsArray.layers.map((cards: any, index2: number) =>
                 cards.markers.map((card: any, index3: number) =>
                   card.sensorId === this.props.siteId && card.markerType === 'moist-fuel' && (
                     <div>
-                      <IonText className={s.moisture}>Moisture</IonText>
                       <div className={s.chart} key={`${index1}-${index2}-${index3}`} id='chartdiv'></div>
                       <div className={s.watermark}></div>
+                      <div className={s.buttons}>
+                        <IonButton color='tertiary' disabled={this.state.disablePrevButton} onClick={this.setPrevIrrigation}>Prev Irigation Event</IonButton>
+                        <IonButton color='tertiary' disabled={this.state.disableNextButton} onClick={this.setNextIrrigation}>Next Irigation Event</IonButton>
+                      </div>
                     </div>
 
                   )

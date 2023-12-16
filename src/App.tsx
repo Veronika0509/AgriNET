@@ -115,7 +115,7 @@ const App: React.FC = () => {
                   <Redirect to="/chart"/>
                 </Route>
                 <Route exact path="/chart">
-                  <Chart setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} />
+                  <Chart setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
                 </Route>
               </IonReactRouter>
             </div>
