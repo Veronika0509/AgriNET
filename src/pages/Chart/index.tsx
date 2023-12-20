@@ -5,7 +5,7 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
-  IonPage, IonSpinner,
+  IonPage,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
@@ -14,9 +14,6 @@ import axios from "axios";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
-import {array} from "@amcharts/amcharts5";
-import {ValueAxis} from "@amcharts/amcharts5/xy";
-import {range} from "@amcharts/amcharts5/.internal/core/util/Animation";
 
 interface ChartDataItem {
   DateTime: any;
