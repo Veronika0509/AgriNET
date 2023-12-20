@@ -28,15 +28,6 @@
   background: #428cff;
 }
 
-.watermark {
-  background: #fff;
-  position: absolute;
-  width: 62px;
-  height: 23px;
-  margin-top: -21px;
-  z-index: 1;
-}
-
 .buttons {
   text-align: center;
 }
@@ -44,5 +35,8 @@
 @media only screen and (max-width: 850px) {
   .chart {
     height: 450px;
+  }
+  .buttons {
+    margin-top: -127px;
   }
 }

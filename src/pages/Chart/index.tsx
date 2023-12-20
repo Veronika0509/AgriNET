@@ -5,7 +5,7 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
-  IonPage,
+  IonPage, IonSpinner,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
@@ -15,6 +15,8 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import {array} from "@amcharts/amcharts5";
+import {ValueAxis} from "@amcharts/amcharts5/xy";
+import {range} from "@amcharts/amcharts5/.internal/core/util/Animation";
 
 interface ChartDataItem {
   DateTime: any;
@@ -47,6 +49,7 @@ interface ChartState {
   disableNextButton: boolean;
   disablePrevButton: boolean;
   irrigationDates: string[];
+  fullIrrigationDates: string[];
 }
 
 class Chart extends Component<ChartProps, ChartState> {
@@ -59,7 +62,8 @@ class Chart extends Component<ChartProps, ChartState> {
       isMobile: window.innerWidth < 850,
       disableNextButton: true,
       disablePrevButton: false,
-      irrigationDates: []
+      irrigationDates: [],
+      fullIrrigationDates: []
     };
   }
 
@@ -98,6 +102,7 @@ class Chart extends Component<ChartProps, ChartState> {
   };
   irrigationDatesRequest = async (): Promise<void> => {
     let datesArray: any = []
+    let fullDatesArray: any = []
     try {
       const response = await axios.get('https://app.agrinet.us/api/valve/scheduler', {
         params: {
@@ -109,7 +114,8 @@ class Chart extends Component<ChartProps, ChartState> {
       response.data.map((valve: any) => {
         if (valve.valve1 === 'OFF') {
           datesArray.push(valve.localTime.substring(0, 10))
-          this.setState({irrigationDates: datesArray}, () => {
+          fullDatesArray.push(valve.localTime)
+          this.setState({irrigationDates: datesArray, fullIrrigationDates: fullDatesArray}, () => {
             this.updateChart()
           });
         }
@@ -226,9 +232,8 @@ class Chart extends Component<ChartProps, ChartState> {
       wheelY: "zoomX",
       maxTooltipDistance: 0,
       pinchZoomX: true,
-      layout: this.state.isMobile ? root.verticalLayout : root.horizontalLayout
+      layout: this.state.isMobile ? root.verticalLayout : root.horizontalLayout,
     }));
-
 
 // Create axes
     let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
@@ -248,6 +253,13 @@ class Chart extends Component<ChartProps, ChartState> {
     }));
 
     yAxis.set('visible', false)
+
+    this.state.fullIrrigationDates.map(date => {
+      var rangeDataItem = xAxis.makeDataItem({
+        value: new Date(date).getTime()
+      });
+      xAxis.createAxisRange(rangeDataItem);
+    })
 
 // Add series
     function createChartData(chartDate: any, chartCount: number) {
@@ -311,7 +323,7 @@ class Chart extends Component<ChartProps, ChartState> {
 // Add legend
     let legend = chart.children.push(am5.Legend.new(root, {
       width: 200,
-      paddingLeft: 15,
+      paddingLeft: this.state.isMobile ? -15 : 15,
       height: am5.percent(100)
     }));
 
@@ -335,7 +347,7 @@ class Chart extends Component<ChartProps, ChartState> {
 
   render(): ReactNode {
     return (
-      <IonPage>
+      <IonPage className={s.page}>
         <IonHeader>
           <IonToolbar>
             <IonIcon
@@ -348,7 +360,7 @@ class Chart extends Component<ChartProps, ChartState> {
             <IonTitle>{this.props.siteName} / {this.props.siteId}</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <IonContent>
+        <IonContent className={s.container}>
           <div className={s.wrapper}>
             {this.props.siteList.map((cardsArray: any, index1: number) =>
               cardsArray.layers.map((cards: any, index2: number) =>
@@ -356,7 +368,6 @@ class Chart extends Component<ChartProps, ChartState> {
                     card.sensorId === this.props.siteId && card.markerType === 'moist-fuel' && (
                       <div>
                         <div className={s.chart} key={`${index1}-${index2}-${index3}`} id='chartdiv'></div>
-                        <div className={s.watermark}></div>
                         <div className={s.buttons}>
                           <IonButton color='tertiary' disabled={this.state.disablePrevButton}
                                      onClick={() => this.onButtonClick(0)}>Prev Irigation Event</IonButton>
