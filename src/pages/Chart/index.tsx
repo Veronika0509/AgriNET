@@ -21,15 +21,6 @@ interface ChartDataItem {
   [key: string]: number;
 }
 
-interface Marker {
-  sensorId: string;
-  markerType: string;
-}
-
-interface Cards {
-  markers: Marker[];
-}
-
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
   siteList: any[];
@@ -242,7 +233,7 @@ class Chart extends Component<ChartProps, ChartState> {
       renderer: am5xy.AxisRendererX.new(root, {
         minorGridEnabled: true
       }),
-      tooltip: am5.Tooltip.new(root, {})
+      tooltip: am5.Tooltip.new(root, {}),
     }));
 
     let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
@@ -250,13 +241,6 @@ class Chart extends Component<ChartProps, ChartState> {
     }));
 
     yAxis.set('visible', false)
-
-    this.state.fullIrrigationDates.map(date => {
-      var rangeDataItem = xAxis.makeDataItem({
-        value: new Date(date).getTime()
-      });
-      xAxis.createAxisRange(rangeDataItem);
-    })
 
 // Add series
     function createChartData(chartDate: any, chartCount: number) {
@@ -277,10 +261,12 @@ class Chart extends Component<ChartProps, ChartState> {
       return data;
     }
 
+
     let count = 4
+    let series:any
     for (var i = 0; i < 3; i++) {
       let name = count + ' inch'
-      let series = chart.series.push(am5xy.LineSeries.new(root, {
+      series = chart.series.push(am5xy.LineSeries.new(root, {
         name: name,
         xAxis: xAxis,
         yAxis: yAxis,
@@ -301,6 +287,19 @@ class Chart extends Component<ChartProps, ChartState> {
 
       series.appear();
     }
+
+    this.state.fullIrrigationDates.map(date => {
+      let seriesRangeDataItem = xAxis.makeDataItem({
+        value: new Date(date).getTime()
+      });
+      series.createAxisRange(seriesRangeDataItem);
+      seriesRangeDataItem.get("grid")?.setAll({
+        strokeOpacity: 1,
+        visible: true,
+        stroke: am5.color(0x000000),
+        strokeDasharray: [2, 2]
+      });
+    });
 
 
 // Add cursor
