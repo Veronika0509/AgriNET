@@ -297,7 +297,7 @@ class Chart extends Component<ChartProps, ChartState> {
         strokeOpacity: 1,
         visible: true,
         stroke: am5.color(0x000000),
-        strokeDasharray: [2, 2]
+        strokeDasharray: [2, 2],
       });
     });
 
