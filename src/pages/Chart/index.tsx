@@ -361,18 +361,17 @@ class Chart extends Component<ChartProps, ChartState> {
             {this.props.siteList.map((cardsArray: any, index1: number) =>
               cardsArray.layers.map((cards: any, index2: number) =>
                 cards.markers.map((card: any, index3: number) =>
-                    card.sensorId === this.props.siteId && card.markerType === 'moist-fuel' && (
-                      <div>
-                        <div className={s.chart} key={`${index1}-${index2}-${index3}`} id='chartdiv'></div>
-                        <div className={s.buttons}>
-                          <IonButton color='tertiary' disabled={this.state.disablePrevButton}
-                                     onClick={() => this.onButtonClick(0)}>Prev Irigation Event</IonButton>
-                          <IonButton color='tertiary' disabled={this.state.disableNextButton}
-                                     onClick={() => this.onButtonClick(1)}>Next Irigation Event</IonButton>
-                        </div>
+                  card.sensorId === this.props.siteId && card.markerType === 'moist-fuel' && (
+                    <div>
+                      <div className={s.chart} key={`${index1}-${index2}-${index3}`} id='chartdiv'></div>
+                      <div className={s.buttons}>
+                        <IonButton color='tertiary' disabled={this.state.disablePrevButton}
+                                   onClick={() => this.onButtonClick(0)}>Prev Irigation Event</IonButton>
+                        <IonButton color='tertiary' disabled={this.state.disableNextButton}
+                                   onClick={() => this.onButtonClick(1)}>Next Irigation Event</IonButton>
                       </div>
-
-                    )
+                    </div>
+                  )
                 )
               )
             )}
