@@ -1,11 +1,8 @@
-.text {
-  width: 100%;
+.lightItem .text {
+  margin: 0 auto;
 }
-.item {
+
+.item .text {
+  margin: 0 auto;
   cursor: pointer;
-  width: 100%;
-  text-align: center;
-}
-.lightItem {
-  text-align: center;
 }

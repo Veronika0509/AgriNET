@@ -39,4 +39,7 @@
   .buttons {
     margin-top: -127px;
   }
+  .wrapper {
+    max-width: 100vw;
+  }
 }

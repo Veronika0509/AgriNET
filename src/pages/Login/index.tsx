@@ -22,7 +22,6 @@ const Login: React.FC<LoginProps> = (props) => {
   const [usernameInputValue, setUsernameInputValue] = useState('');
   const [passwordInputValue, setPasswordInputValue] = useState('');
   const [message, setMessage] = useState(false);
-
   const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     axios.get('https://app.agrinet.us/api/auth/try', {
@@ -31,13 +30,11 @@ const Login: React.FC<LoginProps> = (props) => {
         password: passwordInputValue,
       },
     }).then(response => {
-        if (response.status === 200) {
-          props.setPage(1);
-          props.setUserId(response.data.id);
-        } else {
-          setMessage(true);
-        }
-      })
+      props.setPage(1);
+      props.setUserId(response.data.id);
+    }).catch(() => {
+      setMessage(true)
+    })
   };
 
   return (
@@ -52,10 +49,9 @@ const Login: React.FC<LoginProps> = (props) => {
                 labelPlacement="floating"
                 required={true}
                 errorText="Username is empty"
-                value={usernameInputValue}
                 onInput={(e: any) => {
                   const inputValue = e.target.value;
-                  setUsernameInputValue(inputValue);
+                  setUsernameInputValue(inputValue)
                 }}
               ></IonInput>
               <IonInput
@@ -64,10 +60,9 @@ const Login: React.FC<LoginProps> = (props) => {
                 type="password"
                 required={true}
                 errorText="Password is incorrect"
-                value={passwordInputValue}
                 onInput={(e: any) => {
                   const inputValue = e.target.value;
-                  setPasswordInputValue(inputValue);
+                  setPasswordInputValue(inputValue)
                 }}
               ></IonInput>
               {message && <IonText color="danger">Incorrect login or password</IonText>}
