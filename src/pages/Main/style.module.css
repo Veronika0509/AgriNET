@@ -4,5 +4,8 @@
 
 .item .text {
   margin: 0 auto;
+}
+
+.item {
   cursor: pointer;
 }
