@@ -44,7 +44,7 @@ setupIonicReact();
 const App: React.FC = () => {
   const [page, setPage] = useState(-1)
   const [userId, setUserId] = useState(0)
-  const [siteList, setSiteList] = useState([]);
+  const [siteList, setSiteList] = useState<any[]>([]);
   const [siteId, setSiteId] = useState('')
   const [siteName, setSiteName] = useState('')
 
