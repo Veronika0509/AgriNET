@@ -14,6 +14,7 @@ import axios from 'axios';
 import {GoogleMap} from '@capacitor/google-maps';
 import {useRef} from 'react';
 import locationIcon from '../../assets/images/locationIcon.png'
+import login from "../Login";
 
 interface MainProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -26,7 +27,7 @@ interface MainProps {
 
 const Main: React.FC<MainProps> = (props) => {
 
-  const onCardClick = (id: string, name: string) => {
+  const onMarkerClick = (id: string, name: string) => {
     props.setPage(2)
     props.setSiteId(id)
     props.setSiteName(name)
@@ -34,6 +35,7 @@ const Main: React.FC<MainProps> = (props) => {
 
   const mapRef = useRef<HTMLElement>();
 
+  // request to server
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -51,21 +53,17 @@ const Main: React.FC<MainProps> = (props) => {
     fetchData();
   }, []);
 
-
+  // map creating
   useEffect(() => {
     const createMap = async () => {
       if (!mapRef.current || !props.siteList || props.siteList.length === 0) return;
-
-      if (!mapRef.current) {
-        console.error("Элемент контейнера карты не найден");
-        return;
-      }
 
       try {
         let newMap = await GoogleMap.create({
           id: 'My Map',
           element: mapRef.current,
           apiKey: 'AIzaSyAm9UR2FE8YwAqxKtaAyoBPWSl66w7Qdhc',
+          forceCreate: true,
           config: {
             center: {
               lat: 46.093354,
@@ -81,34 +79,50 @@ const Main: React.FC<MainProps> = (props) => {
               coordinate: {
                 lat: sensors.lat,
                 lng: sensors.lng
-              }
+              },
+              title: sensors.name
             });
           } catch (error) {
             console.error('Ошибка при добавлении маркера:', error);
           }
         }
+        let currentMarker
+
+        const getSensorItems = () => {
+          const sensorItems: any = []
+          props.siteList.map((sensors: any) => {
+            sensors.layers.map((sensor: any) => {
+              sensor.markers.map( async (sensorItem: any) => {
+                sensorItems.push(sensorItem)
+              })
+            })
+          })
+          return sensorItems
+        }
+
         await newMap.setOnMarkerClickListener(async (event) => {
-          for (const sensors of props.siteList) {
-            if (event.latitude === sensors.lat && event.longitude === sensors.lng) {
-              sensors.layers.map((sensor: any) => {
-                sensor.markers.map( async (sensorItem: any) => {
-                  await newMap.addMarker({
-                    coordinate: {
-                      lat: sensorItem.lat,
-                      lng: sensorItem.lng,
-                    },
-                    tintColor: {
-                      r: 135,
-                      g: 211,
-                      b: 124,
-                      a: 1
-                    },
-                    zIndex: 1,
-                  })
+          props.siteList.map( (sensors: any) => {
+            if (event.title === sensors.name) {
+              const sensorItems = getSensorItems()
+              sensorItems.map( async (sensorItem: any) => {
+                await newMap.addMarker({
+                  coordinate: {
+                    lat: sensorItem.lat,
+                    lng: sensorItem.lng,
+                  },
+                  title: sensorItem.sensorId,
+                  zIndex: 1,
                 })
               })
+            } else {
+              const sensorItems = getSensorItems()
+              sensorItems.map((sensorItem: any) => {
+                if (event.title === sensorItem.sensorId) {
+                  onMarkerClick(sensorItem.sensorId, sensorItem.name)
+                }
+              })
             }
-          }
+          })
         });
       } catch (error) {
         console.error('Ошибка при создании карты:', error);
@@ -125,7 +139,7 @@ const Main: React.FC<MainProps> = (props) => {
           <IonTitle>List</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
+      <IonContent className={s.ionContent}>
         {/*<IonList className={s.cardContainer}>*/}
         {/*  <IonItem className={s.lightItem}>*/}
         {/*    <IonText color='light' className={s.text}>Name</IonText>*/}
@@ -135,7 +149,7 @@ const Main: React.FC<MainProps> = (props) => {
         {/*  {props.siteList.map((cardsArray: { layers: any[] }, index1: number) => (*/}
         {/*    cardsArray.layers.map((cards, index2) => (*/}
         {/*      cards.markers.map((card: any, index3: number) => (*/}
-        {/*        <IonItem key={`${index1}-${index2}-${index3}`} onClick={() => onCardClick(card.sensorId, card.name)} className={s.item}>*/}
+        {/*        <IonItem key={`${index1}-${index2}-${index3}`} onClick={() => onMarkerClick(card.sensorId, card.name)} className={s.item}>*/}
         {/*          <IonText className={s.text}>{card.name}</IonText>*/}
         {/*          <IonText className={s.text}>{card.chartType}</IonText>*/}
         {/*          <IonText className={s.text}>{card.sensorId}</IonText>*/}
