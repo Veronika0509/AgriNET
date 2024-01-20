@@ -8,7 +8,7 @@ import {
   IonHeader,
   IonList,
   IonText,
-  IonItem
+  IonItem, IonModal, IonButton, IonButtons, IonLabel
 } from '@ionic/react';
 import axios from 'axios';
 import {GoogleMap} from '@capacitor/google-maps';
@@ -26,8 +26,12 @@ interface MainProps {
 }
 
 const Main: React.FC<MainProps> = (props) => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [sensorName, setSensorName] = useState('')
+  const [sensorId, setSensorId] = useState('')
+  const [sensorChartType, setSensorType] = useState('')
 
-  const onMarkerClick = (id: string, name: string) => {
+  const onSensorClick = (id: string, name: string) => {
     props.setPage(2)
     props.setSiteId(id)
     props.setSiteName(name)
@@ -53,13 +57,15 @@ const Main: React.FC<MainProps> = (props) => {
     fetchData();
   }, []);
 
+  let newMap: any = null
+
   // map creating
   useEffect(() => {
     const createMap = async () => {
       if (!mapRef.current || !props.siteList || props.siteList.length === 0) return;
 
       try {
-        let newMap = await GoogleMap.create({
+        newMap = await GoogleMap.create({
           id: 'My Map',
           element: mapRef.current,
           apiKey: 'AIzaSyAm9UR2FE8YwAqxKtaAyoBPWSl66w7Qdhc',
@@ -69,7 +75,7 @@ const Main: React.FC<MainProps> = (props) => {
               lat: 46.093354,
               lng: -118.274636
             },
-            zoom: 8
+            zoom: 18
           }
         });
 
@@ -86,13 +92,12 @@ const Main: React.FC<MainProps> = (props) => {
             console.error('Ошибка при добавлении маркера:', error);
           }
         }
-        let currentMarker
 
         const getSensorItems = () => {
           const sensorItems: any = []
           props.siteList.map((sensors: any) => {
             sensors.layers.map((sensor: any) => {
-              sensor.markers.map( async (sensorItem: any) => {
+              sensor.markers.map(async (sensorItem: any) => {
                 sensorItems.push(sensorItem)
               })
             })
@@ -100,25 +105,41 @@ const Main: React.FC<MainProps> = (props) => {
           return sensorItems
         }
 
-        await newMap.setOnMarkerClickListener(async (event) => {
-          props.siteList.map( (sensors: any) => {
-            if (event.title === sensors.name) {
+        await newMap.setOnMarkerClickListener(async (event: any) => {
+          const OFFSET = 0.0001;
+          const usedCoordinates = new Map();
+          const currentMarker = event
+          props.siteList.map( async (sensors: any) => {
+            if (currentMarker.title === sensors.name) {
+              await newMap.removeMarker(event.markerId)
               const sensorItems = getSensorItems()
-              sensorItems.map( async (sensorItem: any) => {
-                await newMap.addMarker({
-                  coordinate: {
-                    lat: sensorItem.lat,
-                    lng: sensorItem.lng,
-                  },
+              sensorItems.forEach( (sensorItem: any) => {
+                let lat = sensorItem.lat;
+                let lng = sensorItem.lng;
+                const key = `${lat}-${lng}`;
+                if (usedCoordinates.has(key)) {
+                  let count = usedCoordinates.get(key);
+                  lat += OFFSET * count;
+                  lng += OFFSET * count;
+                  usedCoordinates.set(key, count + 1);
+                } else {
+                  usedCoordinates.set(key, 1);
+                }
+                newMap.addMarker({
+                  coordinate: {lat, lng},
                   title: sensorItem.sensorId,
                   zIndex: 1,
-                })
-              })
+                });
+              });
             } else {
               const sensorItems = getSensorItems()
               sensorItems.map((sensorItem: any) => {
-                if (event.title === sensorItem.sensorId) {
-                  onMarkerClick(sensorItem.sensorId, sensorItem.name)
+                if (currentMarker.title === sensorItem.sensorId) {
+                  // onMarkerClick(sensorItem.sensorId, sensorItem.name)
+                  setIsModalOpen(true)
+                  setSensorName(sensorItem.name)
+                  setSensorId(sensorItem.sensorId)
+                  setSensorType(sensorItem.chartType)
                 }
               })
             }
@@ -165,6 +186,38 @@ const Main: React.FC<MainProps> = (props) => {
             height: '90vh'
           }}></capacitor-google-map>
         </div>
+        <IonModal isOpen={isModalOpen}>
+          <IonHeader>
+            <IonToolbar>
+              <IonButtons slot="start">
+                <IonButton onClick={() => setIsModalOpen(false)}>Cancel</IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <IonList lines="full">
+              <IonItem>
+                <IonLabel className="ion-text-wrap">
+                  <h2>Name:</h2>
+                  <p>{sensorName}</p>
+                </IonLabel>
+              </IonItem>
+              <IonItem>
+                <IonLabel className="ion-text-wrap">
+                  <h2>Sensor Id:</h2>
+                  <p>{sensorId}</p>
+                </IonLabel>
+              </IonItem>
+              <IonItem>
+                <IonLabel className="ion-text-wrap">
+                  <h2>Type:</h2>
+                  <p>{sensorChartType}</p>
+                </IonLabel>
+              </IonItem>
+            </IonList>
+            <IonButton expand="block" onClick={() => onSensorClick(sensorId, sensorName)}>Select</IonButton>
+          </IonContent>
+        </IonModal>
       </IonContent>
     </IonPage>
   );

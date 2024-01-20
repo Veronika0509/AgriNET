@@ -1,3 +1,7 @@
 .ionContent {
   --background: none;
 }
+
+.modalTitle {
+  display: inline;
+}

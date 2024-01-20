@@ -94,7 +94,7 @@ class Chart extends Component<ChartProps, ChartState> {
     try {
       const response = await axios.get('https://app.agrinet.us/api/valve/scheduler', {
         params: {
-          sensorId: 'VSM00209',
+          sensorId: this.props.siteId,
           user: this.props.userId,
           version: '42.2.1'
         },
