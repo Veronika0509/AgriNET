@@ -28,6 +28,7 @@ interface ChartProps {
   siteId: string;
   siteName: string;
   userId: number;
+  chartData: any[];
 }
 
 interface ChartState {
@@ -57,8 +58,11 @@ class Chart extends Component<ChartProps, ChartState> {
 
   componentDidMount(): void {
     window.addEventListener('resize', this.handleResize);
-    this.chartDataRequest();
     this.irrigationDatesRequest()
+    this.updateChart()
+    this.setState({chartData: this.props.chartData}, () => {
+      this.updateChart()
+    });
   }
 
   componentWillUnmount() {
@@ -72,22 +76,6 @@ class Chart extends Component<ChartProps, ChartState> {
   handleResize = () => {
     this.setState({isMobile: window.innerWidth < 850});
   };
-
-  chartDataRequest = async (): Promise<void> => {
-    try {
-      const response = await axios.get('https://app.agrinet.us/api/chart/m', {
-        params: {
-          sensorId: this.props.siteId,
-          days: 14
-        },
-      });
-      this.setState({chartData: response.data.data}, () => {
-        this.updateChart()
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
   irrigationDatesRequest = async (): Promise<void> => {
     let datesArray: any = []
     let fullDatesArray: any = []
@@ -99,6 +87,7 @@ class Chart extends Component<ChartProps, ChartState> {
           version: '42.2.1'
         },
       });
+      console.log(response)
       response.data.map((valve: any) => {
         if (valve.valve1 === 'OFF') {
           datesArray.push(valve.localTime.substring(0, 10))
@@ -263,7 +252,7 @@ class Chart extends Component<ChartProps, ChartState> {
 
 
     let count = 4
-    let series:any
+    let series: any
     for (var i = 0; i < 3; i++) {
       let name = count + ' inch'
       series = chart.series.push(am5xy.LineSeries.new(root, {
@@ -358,23 +347,15 @@ class Chart extends Component<ChartProps, ChartState> {
         </IonHeader>
         <IonContent className={s.container}>
           <div className={s.wrapper}>
-            {this.props.siteList.map((cardsArray: any, index1: number) =>
-              cardsArray.layers.map((cards: any, index2: number) =>
-                cards.markers.map((card: any, index3: number) =>
-                  card.sensorId === this.props.siteId && card.markerType === 'moist-fuel' && (
-                    <div>
-                      <div className={s.chart} key={`${index1}-${index2}-${index3}`} id='chartdiv'></div>
-                      <div className={s.buttons}>
-                        <IonButton color='tertiary' disabled={this.state.disablePrevButton}
-                                   onClick={() => this.onButtonClick(0)}>Prev Irigation Event</IonButton>
-                        <IonButton color='tertiary' disabled={this.state.disableNextButton}
-                                   onClick={() => this.onButtonClick(1)}>Next Irigation Event</IonButton>
-                      </div>
-                    </div>
-                  )
-                )
-              )
-            )}
+            <div>
+              <div className={s.chart} id='chartdiv'></div>
+              <div className={s.buttons}>
+                <IonButton color='tertiary' disabled={this.state.disablePrevButton}
+                           onClick={() => this.onButtonClick(0)}>Prev Irigation Event</IonButton>
+                <IonButton color='tertiary' disabled={this.state.disableNextButton}
+                           onClick={() => this.onButtonClick(1)}>Next Irigation Event</IonButton>
+              </div>
+            </div>
           </div>
         </IonContent>
       </IonPage>

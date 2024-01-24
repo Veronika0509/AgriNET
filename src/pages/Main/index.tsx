@@ -23,6 +23,8 @@ interface MainProps {
   setSiteList: any;
   setSiteId: React.Dispatch<React.SetStateAction<string>>;
   setSiteName: React.Dispatch<React.SetStateAction<string>>;
+  setChartData: React.Dispatch<React.SetStateAction<any>>;
+  chartData: any[];
 }
 
 const Main: React.FC<MainProps> = (props) => {
@@ -30,6 +32,7 @@ const Main: React.FC<MainProps> = (props) => {
   const [sensorName, setSensorName] = useState('')
   const [sensorId, setSensorId] = useState('')
   const [sensorChartType, setSensorType] = useState('')
+  const [isSelectDisabled, setIsSelectDisabled] = useState(false)
 
   const onSensorClick = (id: string, name: string) => {
     props.setPage(2)
@@ -56,6 +59,25 @@ const Main: React.FC<MainProps> = (props) => {
 
     fetchData();
   }, []);
+
+  const fetchData = async (SensorIdProp: string) => {
+    try {
+      const response = await axios.get('https://app.agrinet.us/api/chart/m', {
+        params: {
+          sensorId: SensorIdProp,
+          days: 14
+        },
+      });
+      props.setChartData(response.data.data)
+      if (response.data.data.length === 0) {
+        setIsSelectDisabled(true)
+      } else {
+        setIsSelectDisabled(false)
+      }
+    } catch (error) {
+      console.log('Something went wrong', error);
+    }
+  };
 
   let newMap: any = null
 
@@ -109,11 +131,11 @@ const Main: React.FC<MainProps> = (props) => {
           const OFFSET = 0.0001;
           const usedCoordinates = new Map();
           const currentMarker = event
-          props.siteList.map( async (sensors: any) => {
+          props.siteList.map(async (sensors: any) => {
             if (currentMarker.title === sensors.name) {
               await newMap.removeMarker(event.markerId)
               const sensorItems = getSensorItems()
-              sensorItems.forEach( (sensorItem: any) => {
+              sensorItems.forEach((sensorItem: any) => {
                 let lat = sensorItem.lat;
                 let lng = sensorItem.lng;
                 const key = `${lat}-${lng}`;
@@ -140,6 +162,7 @@ const Main: React.FC<MainProps> = (props) => {
                   setSensorName(sensorItem.name)
                   setSensorId(sensorItem.sensorId)
                   setSensorType(sensorItem.chartType)
+                  fetchData(sensorItem.sensorId)
                 }
               })
             }
@@ -215,7 +238,8 @@ const Main: React.FC<MainProps> = (props) => {
                 </IonLabel>
               </IonItem>
             </IonList>
-            <IonButton expand="block" onClick={() => onSensorClick(sensorId, sensorName)}>Select</IonButton>
+            {isSelectDisabled && <IonText color='danger'>Sorry, but the chart is still in development.</IonText>}
+            <IonButton expand="block" className={s.modalButton} disabled={isSelectDisabled} onClick={() => onSensorClick(sensorId, sensorName)}>Select</IonButton>
           </IonContent>
         </IonModal>
       </IonContent>

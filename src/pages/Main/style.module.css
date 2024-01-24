@@ -5,3 +5,7 @@
 .modalTitle {
   display: inline;
 }
+
+.modalButton {
+  margin: 10px 0 0 0;
+}
