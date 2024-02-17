@@ -5,7 +5,7 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
-  IonPage,
+  IonPage, IonText,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
@@ -34,11 +34,12 @@ interface ChartProps {
 interface ChartState {
   root?: am5.Root;
   chartData: ChartDataItem[];
-  isMobile: boolean;
-  disableNextButton: boolean;
-  disablePrevButton: boolean;
-  irrigationDates: string[];
-  fullIrrigationDates: string[];
+  isMobile: boolean
+  disableNextButton: boolean
+  disablePrevButton: boolean
+  irrigationDates: string[]
+  fullIrrigationDates: string[]
+  isIrrigationButtons: boolean
 }
 
 class Chart extends Component<ChartProps, ChartState> {
@@ -52,17 +53,15 @@ class Chart extends Component<ChartProps, ChartState> {
       disableNextButton: true,
       disablePrevButton: false,
       irrigationDates: [],
-      fullIrrigationDates: []
+      fullIrrigationDates: [],
+      isIrrigationButtons: true
     };
   }
 
   componentDidMount(): void {
     window.addEventListener('resize', this.handleResize);
+    this.setState({chartData: this.props.chartData});
     this.irrigationDatesRequest()
-    this.updateChart()
-    this.setState({chartData: this.props.chartData}, () => {
-      this.updateChart()
-    });
   }
 
   componentWillUnmount() {
@@ -80,14 +79,18 @@ class Chart extends Component<ChartProps, ChartState> {
     let datesArray: any = []
     let fullDatesArray: any = []
     try {
+      const idForIrrigationDataRequest = await axios.get(`https://app.agrinet.us/api/autowater/${this.props.siteId}`);
+      if (idForIrrigationDataRequest.data === '') {
+        this.setState({isIrrigationButtons: false})
+      }
+      const idForIrrigationData = idForIrrigationDataRequest.data.valve.sensorId
       const response = await axios.get('https://app.agrinet.us/api/valve/scheduler', {
         params: {
-          sensorId: this.props.siteId,
+          sensorId: idForIrrigationData,
           user: this.props.userId,
           version: '42.2.1'
         },
       });
-      console.log(response)
       response.data.map((valve: any) => {
         if (valve.valve1 === 'OFF') {
           datesArray.push(valve.localTime.substring(0, 10))
@@ -250,7 +253,6 @@ class Chart extends Component<ChartProps, ChartState> {
       return data;
     }
 
-
     let count = 4
     let series: any
     for (var i = 0; i < 3; i++) {
@@ -349,11 +351,19 @@ class Chart extends Component<ChartProps, ChartState> {
           <div className={s.wrapper}>
             <div>
               <div className={s.chart} id='chartdiv'></div>
-              <div className={s.buttons}>
-                <IonButton color='tertiary' disabled={this.state.disablePrevButton}
-                           onClick={() => this.onButtonClick(0)}>Prev Irigation Event</IonButton>
-                <IonButton color='tertiary' disabled={this.state.disableNextButton}
-                           onClick={() => this.onButtonClick(1)}>Next Irigation Event</IonButton>
+              {!this.state.isIrrigationButtons && (
+                <IonText color='danger'>Sorry, but irrigation data is not loaded</IonText>
+              )}
+              {this.state.isIrrigationButtons && (
+                <div className={s.buttons}>
+                  <IonButton color='tertiary' disabled={this.state.disablePrevButton}
+                             onClick={() => this.onButtonClick(0)}>Prev Irigation Event</IonButton>
+                  <IonButton color='tertiary' disabled={this.state.disableNextButton}
+                             onClick={() => this.onButtonClick(1)}>Next Irigation Event</IonButton>
+                </div>
+              )}
+              <div>
+
               </div>
             </div>
           </div>

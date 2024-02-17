@@ -8,13 +8,15 @@ import {
   IonHeader,
   IonList,
   IonText,
-  IonItem, IonModal, IonButton, IonButtons, IonLabel
+  IonItem, IonModal, IonButton, IonButtons, IonLabel, IonImg
 } from '@ionic/react';
 import axios from 'axios';
 import {GoogleMap} from '@capacitor/google-maps';
 import {useRef} from 'react';
-import locationIcon from '../../assets/images/locationIcon.png'
-import login from "../Login";
+import * as am5 from "@amcharts/amcharts5";
+import * as am5xy from "@amcharts/amcharts5/xy";
+import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+import InvalidChartDataImage from '../../assets/images/invalidChartData.png';
 
 interface MainProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -33,6 +35,8 @@ const Main: React.FC<MainProps> = (props) => {
   const [sensorId, setSensorId] = useState('')
   const [sensorChartType, setSensorType] = useState('')
   const [isSelectDisabled, setIsSelectDisabled] = useState(false)
+  const [moistChartDataContainer, setMoistChartDataContainer] = useState<any>([])
+  const [invalidChartDataContainer, setInvalidChartDataContainer] = useState([])
 
   const onSensorClick = (id: string, name: string) => {
     props.setPage(2)
@@ -40,11 +44,9 @@ const Main: React.FC<MainProps> = (props) => {
     props.setSiteName(name)
   };
 
-  const mapRef = useRef<HTMLElement>();
-
-  // request to server
+  // setSiteListRequest
   useEffect(() => {
-    const fetchData = async () => {
+    const setSiteListRequest = async () => {
       try {
         const response = await axios.get('https://app.agrinet.us/api/map/sites', {
           params: {
@@ -57,124 +59,248 @@ const Main: React.FC<MainProps> = (props) => {
       }
     };
 
-    fetchData();
+    setSiteListRequest();
   }, []);
 
-  const fetchData = async (SensorIdProp: string) => {
+  // Chart Data Request
+  const chartDataRequest = async (SensorIdProp: string) => {
     try {
       const response = await axios.get('https://app.agrinet.us/api/chart/m', {
         params: {
           sensorId: SensorIdProp,
-          days: 14
+          days: 14,
         },
       });
-      props.setChartData(response.data.data)
-      if (response.data.data.length === 0) {
-        setIsSelectDisabled(true)
+
+      props.setChartData(response.data.data);
+
+      if (response.data.data.length === 0 || response.data.data.length === 1) {
+        setIsSelectDisabled(true);
       } else {
-        setIsSelectDisabled(false)
+        setIsSelectDisabled(false);
       }
     } catch (error) {
-      console.log('Something went wrong', error);
+      console.log('Что-то пошло не так', error);
     }
   };
-
-  let newMap: any = null
-
-  // map creating
+  // Map Creating
+  let map: any = null
+  const mapRef = useRef<HTMLElement>();
+  const moistFuelChartsAmount: any = []
   useEffect(() => {
     const createMap = async () => {
       if (!mapRef.current || !props.siteList || props.siteList.length === 0) return;
 
-      try {
-        newMap = await GoogleMap.create({
-          id: 'My Map',
-          element: mapRef.current,
-          apiKey: 'AIzaSyAm9UR2FE8YwAqxKtaAyoBPWSl66w7Qdhc',
-          forceCreate: true,
-          config: {
-            center: {
-              lat: 46.093354,
-              lng: -118.274636
-            },
-            zoom: 18
-          }
-        });
-
-        for (const sensors of props.siteList) {
-          try {
-            await newMap.addMarker({
-              coordinate: {
-                lat: sensors.lat,
-                lng: sensors.lng
-              },
-              title: sensors.name
-            });
-          } catch (error) {
-            console.error('Ошибка при добавлении маркера:', error);
-          }
+      map = await GoogleMap.create({
+        id: 'My Map',
+        element: mapRef.current,
+        apiKey: 'AIzaSyAQ9J1_SwUUP6NCLvaTUNRSqbPt15lKBvY',
+        forceCreate: true,
+        config: {
+          center: {
+            lat: 46.093354,
+            lng: -118.274636
+          },
+          zoom: 18
         }
+      });
+      for (const sensors of props.siteList) {
+        try {
+          let marker: any = await map.addMarker({
+            coordinate: {
+              lat: sensors.lat,
+              lng: sensors.lng
+            },
+            title: sensors.name,
+            snippet: sensors.name
+          });
+        } catch (error) {
+          console.error('Ошибка при добавлении маркера:', error);
+        }
+      }
 
-        const getSensorItems = () => {
-          const sensorItems: any = []
-          props.siteList.map((sensors: any) => {
-            sensors.layers.map((sensor: any) => {
-              sensor.markers.map(async (sensorItem: any) => {
-                sensorItems.push(sensorItem)
-              })
+      const getSensorItems = () => {
+        const sensorItems: any = []
+        props.siteList.map((sensors: any) => {
+          sensors.layers.map((sensor: any) => {
+            sensor.markers.map(async (sensorItem: any) => {
+              sensorItems.push(sensorItem)
             })
           })
-          return sensorItems
-        }
-
-        await newMap.setOnMarkerClickListener(async (event: any) => {
-          const OFFSET = 0.0001;
-          const usedCoordinates = new Map();
-          const currentMarker = event
-          props.siteList.map(async (sensors: any) => {
-            if (currentMarker.title === sensors.name) {
-              await newMap.removeMarker(event.markerId)
-              const sensorItems = getSensorItems()
-              sensorItems.forEach((sensorItem: any) => {
-                let lat = sensorItem.lat;
-                let lng = sensorItem.lng;
-                const key = `${lat}-${lng}`;
-                if (usedCoordinates.has(key)) {
-                  let count = usedCoordinates.get(key);
-                  lat += OFFSET * count;
-                  lng += OFFSET * count;
-                  usedCoordinates.set(key, count + 1);
-                } else {
-                  usedCoordinates.set(key, 1);
-                }
-                newMap.addMarker({
-                  coordinate: {lat, lng},
-                  title: sensorItem.sensorId,
-                  zIndex: 1,
-                });
-              });
-            } else {
-              const sensorItems = getSensorItems()
-              sensorItems.map((sensorItem: any) => {
-                if (currentMarker.title === sensorItem.sensorId) {
-                  // onMarkerClick(sensorItem.sensorId, sensorItem.name)
-                  setIsModalOpen(true)
-                  setSensorName(sensorItem.name)
-                  setSensorId(sensorItem.sensorId)
-                  setSensorType(sensorItem.chartType)
-                  fetchData(sensorItem.sensorId)
-                }
-              })
-            }
-          })
-        });
-      } catch (error) {
-        console.error('Ошибка при создании карты:', error);
+        })
+        return sensorItems
       }
+
+      await map.setOnMarkerClickListener((event: any) => {
+        const OFFSET = 0.0001;
+        const usedCoordinates = new Map();
+        const currentMarker = event
+        props.siteList.map((sensors: any) => {
+          if (currentMarker.title === sensors.name) {
+            // await map.removeMarker(event.markerId)
+            const sensorItems = getSensorItems()
+            sensorItems.forEach((sensorItem: any) => {
+              let lat = sensorItem.lat;
+              let lng = sensorItem.lng;
+              const key = `${lat}-${lng}`;
+              if (usedCoordinates.has(key)) {
+                let count = usedCoordinates.get(key);
+                lat += OFFSET * count;
+                lng += OFFSET * count;
+                usedCoordinates.set(key, count + 1);
+              } else {
+                usedCoordinates.set(key, 1);
+              }
+              map.addMarker({
+                coordinate: {lat, lng},
+                title: sensorItem.sensorId,
+                zIndex: 1,
+                snippet: sensorItem.name
+              });
+              if (sensorItem.markerType === 'moist-fuel') {
+                moistFuelChartsAmount.push(sensorItem)
+                moistChartDataRequest(sensorItem.sensorId);
+              }
+
+            });
+          } else {
+            const sensorItems = getSensorItems()
+            sensorItems.map((sensorItem: any) => {
+              if (currentMarker.title === sensorItem.sensorId) {
+                // onMarkerClick(sensorItem.sensorId, sensorItem.name)
+                setIsModalOpen(true)
+                setSensorName(sensorItem.name)
+                setSensorId(sensorItem.sensorId)
+                setSensorType(sensorItem.chartType)
+                chartDataRequest(sensorItem.sensorId)
+              }
+            })
+          }
+        })
+      });
     };
 
     createMap();
-  }, [mapRef, props.siteList]);
+  }, [props.siteList]);
+
+  // Marker Chart
+  let moistChartData: any = []
+  let invalidChartData: any = []
+  let id = 0
+  const moistChartDataRequest = async (propsSensorId: string) => {
+    const response = await axios.get('https://app.agrinet.us/api/map/moist-fuel', {
+      params: {
+        sensorId: propsSensorId,
+        cacheFirst: true,
+        'do-not-catch-error': '',
+        user: props.userId,
+        v: 43
+      },
+    })
+    console.log(response)
+    id += 1
+    const moistChartDataItem = {
+      id: id,
+      data: response.data.data,
+      sensorId: propsSensorId
+    }
+    moistChartData.push(moistChartDataItem)
+    if (moistFuelChartsAmount.length === moistChartData.length) {
+      let updatedMoistChartData: any = []
+      moistChartData.map((data: any) => {
+        if (data.data.length !== 0 && data.data.length !== 1) {
+          updatedMoistChartData.push(data)
+        } else {
+          invalidChartData.push(data)
+        }
+      })
+      setInvalidChartDataContainer(invalidChartData)
+      setMoistChartDataContainer(updatedMoistChartData)
+    }
+  }
+
+  useEffect(() => {
+    const roots: any[] = [];
+    if (moistChartDataContainer) {
+      moistChartDataContainer.map((chartData: any) => {
+        let root = am5.Root.new(chartData.id);
+        roots.push(root);
+
+        root.setThemes([am5themes_Animated.new(root)]);
+
+        const chart = root.container.children.push(am5xy.XYChart.new(root, {
+          panX: false,
+          panY: false
+        }));
+
+// Generate random date
+        function createChartData(chartDate: any, chartDataValue: any) {
+          return {
+            date: chartDate,
+            value: chartDataValue
+          };
+        }
+
+        function createChartDataArray() {
+          let data: any = [];
+          chartData.data.map((chartDataItem: any) => {
+            const chartDate = new Date(chartDataItem.DateTime).getTime()
+            const chartData = createChartData(chartDate, chartDataItem.SumAve);
+            data.push(chartData);
+          });
+          return data;
+        }
+
+// Create axes
+// https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
+        let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
+          maxDeviation: 0.2,
+          baseInterval: {
+            timeUnit: "minute",
+            count: 30
+          },
+          renderer: am5xy.AxisRendererX.new(root, {
+            minorGridEnabled: true
+          }),
+          tooltip: am5.Tooltip.new(root, {})
+        }));
+        let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+          renderer: am5xy.AxisRendererY.new(root, {
+            pan: "zoom"
+          })
+        }));
+        yAxis.set('visible', false)
+        xAxis.set('visible', false)
+
+
+// Add series
+// https://www.amcharts.com/docs/v5/charts/xy-chart/series/
+        let series = chart.series.push(am5xy.LineSeries.new(root, {
+          name: "Series",
+          xAxis: xAxis,
+          yAxis: yAxis,
+          valueYField: "value",
+          valueXField: "date",
+          tooltip: am5.Tooltip.new(root, {
+            labelText: "{valueY}"
+          })
+        }));
+
+// Set data
+        let data = createChartDataArray();
+        series.data.setAll(data);
+
+
+// Make stuff animate on load
+// https://www.amcharts.com/docs/v5/concepts/animations/
+        series.appear(1000);
+        chart.appear(1000, 100);
+      })
+    }
+    return () => {
+      roots.forEach(root => root.dispose()); // Удаляем каждый график
+    };
+  }, [moistChartDataContainer]);
 
   return (
     <IonPage>
@@ -239,12 +365,30 @@ const Main: React.FC<MainProps> = (props) => {
               </IonItem>
             </IonList>
             {isSelectDisabled && <IonText color='danger'>Sorry, but the chart is still in development.</IonText>}
-            <IonButton expand="block" className={s.modalButton} disabled={isSelectDisabled} onClick={() => onSensorClick(sensorId, sensorName)}>Select</IonButton>
+            <IonButton expand="block" className={s.modalButton} disabled={isSelectDisabled}
+                       onClick={() => onSensorClick(sensorId, sensorName)}>Select</IonButton>
           </IonContent>
         </IonModal>
+        {moistChartDataContainer.map((data: any, index: number) => (
+          <div className={s.chartContainer}>
+            <div>
+              <div id={data.id} key={index} className={s.chart}></div>
+              <IonText className={s.sensorIdText}>{data.sensorId}</IonText>
+            </div>
+          </div>
+        ))}
+        {invalidChartDataContainer.map((data: any) => (
+          <div className={s.chartContainer}>
+            <div>
+              <IonImg src={InvalidChartDataImage} className={s.invalidChartDataImg} alt='Invalid Chart Data'
+                      key={data.id}></IonImg>
+              <IonText className={s.sensorIdText}>{data.sensorId}</IonText>
+            </div>
+          </div>
+        ))}
       </IonContent>
     </IonPage>
-  );
-};
+  )
+}
 
 export default Main;

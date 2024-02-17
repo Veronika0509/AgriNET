@@ -9,3 +9,25 @@
 .modalButton {
   margin: 10px 0 0 0;
 }
+
+.chart {
+  width: 100%;
+  height: 50px;
+}
+
+.invalidChartDataImg {
+  width: 70px;
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
+.chartContainer {
+  width: 80px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  margin-left: 15px;
+  margin-bottom: 10px;
+}
