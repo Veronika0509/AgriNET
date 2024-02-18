@@ -197,12 +197,13 @@ const Main: React.FC<MainProps> = (props) => {
         v: 43
       },
     })
-    console.log(response)
     id += 1
     const moistChartDataItem = {
       id: id,
       data: response.data.data,
-      sensorId: propsSensorId
+      sensorId: propsSensorId,
+      topBudgetLine: response.data.budgetLines[1].value,
+      bottomBudgetLine: response.data.budgetLines[4].value
     }
     moistChartData.push(moistChartDataItem)
     if (moistFuelChartsAmount.length === moistChartData.length) {
@@ -230,7 +231,11 @@ const Main: React.FC<MainProps> = (props) => {
 
         const chart = root.container.children.push(am5xy.XYChart.new(root, {
           panX: false,
-          panY: false
+          panY: false,
+          background: am5.Rectangle.new(root, {
+            fill: am5.color(0x96fd66),
+            fillOpacity: 1
+          })
         }));
 
 // Generate random date
@@ -286,10 +291,42 @@ const Main: React.FC<MainProps> = (props) => {
           })
         }));
 
+        const chartBackground = chart.plotContainer.get("background");
+        if (chartBackground !== undefined) {
+          chartBackground.setAll({
+            stroke: am5.color(0xCC0000),
+            strokeOpacity: 1,
+            fill: am5.color(0x08f908),
+            fillOpacity: 1,
+          });
+        }
+        chart.topAxesContainer.children.push(am5.Rectangle.new(root, {
+          stroke: am5.color(0xCCCC00),
+          strokeOpacity: 1,
+          fill: am5.color(0x02c5fd),
+          fillOpacity: 1,
+          width: am5.percent(100),
+          height: chartData.topBudgetLine,
+        }));
+        chart.bottomAxesContainer.children.push(am5.Rectangle.new(root, {
+          stroke: am5.color(0xCCCC00),
+          strokeOpacity: 1,
+          fill: am5.color(0xf6363b),
+          fillOpacity: 1,
+          width: am5.percent(100),
+          height: chartData.bottomBudgetLine,
+        }));
+        chart.chartContainer.children.push(am5.Label.new(root, {
+          text: chartData.sensorId,
+          fontSize: 13,
+          fontWeight: "400",
+          x: am5.p50,
+          centerX: am5.p50
+        }));
+
 // Set data
         let data = createChartDataArray();
         series.data.setAll(data);
-
 
 // Make stuff animate on load
 // https://www.amcharts.com/docs/v5/concepts/animations/
@@ -310,24 +347,6 @@ const Main: React.FC<MainProps> = (props) => {
         </IonToolbar>
       </IonHeader>
       <IonContent className={s.ionContent}>
-        {/*<IonList className={s.cardContainer}>*/}
-        {/*  <IonItem className={s.lightItem}>*/}
-        {/*    <IonText color='light' className={s.text}>Name</IonText>*/}
-        {/*    <IonText color='light' className={s.text}>Type</IonText>*/}
-        {/*    <IonText color='light' className={s.text}>Id</IonText>*/}
-        {/*  </IonItem>*/}
-        {/*  {props.siteList.map((cardsArray: { layers: any[] }, index1: number) => (*/}
-        {/*    cardsArray.layers.map((cards, index2) => (*/}
-        {/*      cards.markers.map((card: any, index3: number) => (*/}
-        {/*        <IonItem key={`${index1}-${index2}-${index3}`} onClick={() => onMarkerClick(card.sensorId, card.name)} className={s.item}>*/}
-        {/*          <IonText className={s.text}>{card.name}</IonText>*/}
-        {/*          <IonText className={s.text}>{card.chartType}</IonText>*/}
-        {/*          <IonText className={s.text}>{card.sensorId}</IonText>*/}
-        {/*        </IonItem>*/}
-        {/*      ))*/}
-        {/*    ))*/}
-        {/*  ))}*/}
-        {/*</IonList>*/}
         <div className="component-wrapper">
           <capacitor-google-map ref={mapRef} style={{
             display: 'inline-block',
@@ -371,18 +390,17 @@ const Main: React.FC<MainProps> = (props) => {
         </IonModal>
         {moistChartDataContainer.map((data: any, index: number) => (
           <div className={s.chartContainer}>
-            <div>
+            <div className={s.chartContainer}>
               <div id={data.id} key={index} className={s.chart}></div>
-              <IonText className={s.sensorIdText}>{data.sensorId}</IonText>
             </div>
           </div>
         ))}
         {invalidChartDataContainer.map((data: any) => (
-          <div className={s.chartContainer}>
+          <div className={s.invalidChartDataImgContainer}>
             <div>
               <IonImg src={InvalidChartDataImage} className={s.invalidChartDataImg} alt='Invalid Chart Data'
                       key={data.id}></IonImg>
-              <IonText className={s.sensorIdText}>{data.sensorId}</IonText>
+              <IonText className={s.invalidSensorIdText}>{data.sensorId}</IonText>
             </div>
           </div>
         ))}
