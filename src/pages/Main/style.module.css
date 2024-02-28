@@ -46,3 +46,8 @@
   align-items: center;
   justify-content: center;
 }
+
+.map {
+  height: 100%;
+  width: 100%;
+}

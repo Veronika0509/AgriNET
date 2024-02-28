@@ -60,8 +60,9 @@ class Chart extends Component<ChartProps, ChartState> {
 
   componentDidMount(): void {
     window.addEventListener('resize', this.handleResize);
-    this.setState({chartData: this.props.chartData});
+    this.setState({chartData: this.props.chartData})
     this.irrigationDatesRequest()
+    this.updateChart(this.props.chartData)
   }
 
   componentWillUnmount() {
@@ -82,24 +83,25 @@ class Chart extends Component<ChartProps, ChartState> {
       const idForIrrigationDataRequest = await axios.get(`https://app.agrinet.us/api/autowater/${this.props.siteId}`);
       if (idForIrrigationDataRequest.data === '') {
         this.setState({isIrrigationButtons: false})
+      } else {
+        const idForIrrigationData = idForIrrigationDataRequest.data.valve.sensorId
+        const response = await axios.get('https://app.agrinet.us/api/valve/scheduler', {
+          params: {
+            sensorId: idForIrrigationData,
+            user: this.props.userId,
+            version: '42.2.1'
+          },
+        });
+        response.data.map((valve: any) => {
+          if (valve.valve1 === 'OFF') {
+            datesArray.push(valve.localTime.substring(0, 10))
+            fullDatesArray.push(valve.localTime)
+            this.setState({irrigationDates: datesArray, fullIrrigationDates: fullDatesArray}, () => {
+              this.updateChart(this.state.chartData)
+            });
+          }
+        })
       }
-      const idForIrrigationData = idForIrrigationDataRequest.data.valve.sensorId
-      const response = await axios.get('https://app.agrinet.us/api/valve/scheduler', {
-        params: {
-          sensorId: idForIrrigationData,
-          user: this.props.userId,
-          version: '42.2.1'
-        },
-      });
-      response.data.map((valve: any) => {
-        if (valve.valve1 === 'OFF') {
-          datesArray.push(valve.localTime.substring(0, 10))
-          fullDatesArray.push(valve.localTime)
-          this.setState({irrigationDates: datesArray, fullIrrigationDates: fullDatesArray}, () => {
-            this.updateChart()
-          });
-        }
-      })
     } catch (error) {
       console.log(error);
     }
@@ -164,19 +166,20 @@ class Chart extends Component<ChartProps, ChartState> {
         },
       });
       this.setState({chartData: response.data.data}, () => {
-        this.updateChart()
+        this.updateChart(this.state.chartData)
       });
     } catch (error) {
       console.log(error);
     }
   }
 
-  updateChart = (): void => {
-    this.createChart(this.state.chartData);
+  updateChart = (props: any): void => {
+    this.createChart(props);
   };
 
   createChart = (props: any): void => {
     const chartDataWrapper = props
+    console.log(props)
 
     if (this.root) {
       this.root.dispose();
