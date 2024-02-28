@@ -109,3 +109,5 @@ class CustomOverlay extends google.maps.OverlayView {
     }
   }
 }
+
+export default CustomOverlay;
