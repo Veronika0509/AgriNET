@@ -14,6 +14,7 @@ import {ellipse, home, informationCircle, square, triangle} from 'ionicons/icons
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
+// AIzaSyAQ9J1_SwUUP6NCLvaTUNRSqbPt15lKBvY
 
 /* Basic CSS for apps built with Ionic */
 import '@ionic/react/css/normalize.css';
@@ -42,7 +43,7 @@ import Chart from "./pages/Chart";
 setupIonicReact();
 
 const App: React.FC = () => {
-  const [page, setPage] = useState(-1)
+  const [page, setPage] = useState(0)
   const [userId, setUserId] = useState(0)
   const [siteList, setSiteList] = useState<any[]>([]);
   const [siteId, setSiteId] = useState('')
@@ -72,6 +73,9 @@ const App: React.FC = () => {
                   <IonRouterOutlet>
                     <Route exact path="/login">
                       <Login setPage={setPage} setUserId={setUserId} />
+                    </Route>
+                    <Route exact path="/">
+                      <Redirect to="/login"/>
                     </Route>
                     <Route exact path="/info">
                       <Info />

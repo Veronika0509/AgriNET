@@ -51,3 +51,7 @@
   height: 100%;
   width: 100%;
 }
+
+.backIcon {
+  cursor: pointer;
+}

@@ -8,7 +8,7 @@ import {
   IonHeader,
   IonList,
   IonText,
-  IonItem, IonModal, IonButton, IonButtons, IonLabel
+  IonItem, IonModal, IonButton, IonButtons, IonLabel, IonIcon
 } from '@ionic/react';
 import axios from 'axios';
 import {useRef} from 'react';
@@ -17,7 +17,8 @@ import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import invalidChartDataImage from '../../assets/images/invalidChartData.png';
 import {Wrapper, Status} from "@googlemaps/react-wrapper";
-import CustomOverlayExport from "../../components/DrawMoistFuelMarker";
+import {arrowBackOutline} from "ionicons/icons";
+import {createRoot} from "react-dom/client";
 
 interface MainProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -38,12 +39,151 @@ const Main: React.FC<MainProps> = (props) => {
   const [isSelectDisabled, setIsSelectDisabled] = useState(false)
   const [moistChartDataContainer, setMoistChartDataContainer] = useState<any>([])
   const [invalidChartDataContainer, setInvalidChartDataContainer] = useState([])
+  const [overlayIsReady, setOverlayIsReady] = useState(false)
 
   const onSensorClick = (id: string, name: string) => {
     props.setPage(2)
     props.setSiteId(id)
     props.setSiteName(name)
   };
+
+  class CustomOverlayExport extends google.maps.OverlayView {
+    private bounds: google.maps.LatLngBounds;
+    private invalidChartDataImage: any;
+    private isValidChartData: boolean;
+    private chartData: any;
+    private setOverlayIsReady: any
+
+    private div?: HTMLElement;
+
+    constructor(bounds: google.maps.LatLngBounds, invalidChartDataImage: any, isValidChartData: boolean, chartData: any, setOverlayIsReady: any) {
+      super();
+
+      this.bounds = bounds;
+      this.invalidChartDataImage = invalidChartDataImage;
+      this.isValidChartData = isValidChartData;
+      this.chartData = chartData;
+      this.setOverlayIsReady = setOverlayIsReady;
+    }
+
+    /**
+     * onAdd is called when the map's panes are ready and the overlay has been
+     * added to the map.
+     */
+    onAdd() {
+      const onAddContent = new Promise((resolve) => {
+        this.div = document.createElement("div");
+        this.div.style.borderStyle = "none";
+        this.div.style.borderWidth = "0px";
+        this.div.style.position = "absolute";
+
+        const content = (
+          <div>
+            {this.isValidChartData ? (
+              <div className={s.chartContainer}>
+                <div className={s.chartContainer}>
+                  <div id={this.chartData.id.toString()} className={s.chart}></div>
+                </div>
+              </div>
+            ) : (
+              <div className={s.invalidChartDataImgContainer}>
+                <div>
+                  <img src={this.invalidChartDataImage} className={s.invalidChartDataImg} alt='Invalid Chart Data'/>
+                  <p className={s.invalidSensorIdText}>{this.chartData.sensorId}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )
+
+        const panes: any = this.getPanes()!
+        panes.floatPane.appendChild(this.div);
+
+        // document.body.appendChild(this.div);
+        const root = createRoot(this.div);
+        root.render(content);
+
+        resolve(content);
+      }).then((content) => {
+        this.setOverlayIsReady(true);
+      })
+    }
+
+    draw() {
+      // We use the south-west and north-east
+      // coordinates of the overlay to peg it to the correct position and size.
+      // To do this, we need to retrieve the projection from the overlay.
+      const overlayProjection = this.getProjection();
+      // console.log(overlayProjection, this.bounds.getSouthWest(), this.bounds.getNorthEast())
+
+      // Retrieve the south-west and north-east coordinates of this overlay
+      // in LatLngs and convert them to pixel coordinates.
+      // We'll use these coordinates to resize the div.
+      const sw = overlayProjection.fromLatLngToDivPixel(
+        this.bounds.getSouthWest()
+      )!;
+      const ne = overlayProjection.fromLatLngToDivPixel(
+        this.bounds.getNorthEast()
+      )!;
+
+      // Resize the image's div to fit the indicated dimensions.
+      if (this.div) {
+        this.div.style.left = sw.x + "px";
+        this.div.style.top = ne.y + "px";
+        this.div.style.width = "100px";
+        this.div.style.height = "130px";
+      }
+    }
+
+    /**
+     * The onRemove() method will be called automatically from the API if
+     * we ever set the overlay's map property to 'null'.
+     */
+    onRemove() {
+      if (this.div) {
+        (this.div.parentNode as HTMLElement).removeChild(this.div);
+        delete this.div;
+      }
+    }
+
+    /**
+     *  Set the visibility to 'hidden' or 'visible'.
+     */
+    hide() {
+      if (this.div) {
+        this.div.style.visibility = "hidden";
+      }
+    }
+
+    show() {
+      if (this.div) {
+        this.div.style.visibility = "visible";
+      }
+    }
+
+    setVisible(visible: boolean) {
+      if (visible) {
+        this.show();
+      } else {
+        this.hide();
+      }
+    }
+
+    getPosition() {
+      if (this.bounds) {
+        return this.bounds.getCenter();
+      } else {
+        return null;
+      }
+    }
+
+    setMap(map: any) {
+      return new Promise((resolve: any) => {
+        super.setMap(map);
+        resolve();
+      });
+    }
+  }
 
   // setSiteListRequest
   useEffect(() => {
@@ -206,144 +346,164 @@ const Main: React.FC<MainProps> = (props) => {
       })
     }
   }
-  useEffect(() => {
-    const roots: any[] = [];
-    if (moistChartDataContainer) {
-      moistChartDataContainer.map((chartData: any) => {
-        const overlay: any = new CustomOverlayExport(chartData[1], invalidChartDataImage, true, chartData[0].id, chartData[0].sensorId);
-        map && overlay.setMap(map)
-        setTimeout(() => {
-          let root = am5.Root.new(chartData[0].id);
-          roots.push(root);
-          root.setThemes([am5themes_Animated.new(root)]);
+  const createMarkerOverlay = (chartData: any, roots: any) => {
+    let root = am5.Root.new(chartData.id.toString());
+    roots.push(root);
+    root.setThemes([am5themes_Animated.new(root)]);
 
-          const chart = root.container.children.push(am5xy.XYChart.new(root, {
-            panX: false,
-            panY: false,
-            background: am5.Rectangle.new(root, {
-              fill: am5.color(0x96fd66),
-              fillOpacity: 1
-            })
-          }));
+    const chart = root.container.children.push(am5xy.XYChart.new(root, {
+      panX: false,
+      panY: false,
+      background: am5.Rectangle.new(root, {
+        fill: am5.color(0x96fd66),
+        fillOpacity: 1
+      })
+    }));
 
 // Generate random date
-          function createChartData(chartDate: any, chartDataValue: any) {
-            return {
-              date: chartDate,
-              value: chartDataValue
-            };
-          }
+    function createChartData(chartDate: any, chartDataValue: any) {
+      return {
+        date: chartDate,
+        value: chartDataValue
+      };
+    }
 
-          function createChartDataArray() {
-            let data: any = [];
-            chartData[0].data.map((chartDataItem: any) => {
-              const chartDate = new Date(chartDataItem.DateTime).getTime()
-              const chartData = createChartData(chartDate, chartDataItem.SumAve);
-              data.push(chartData);
-            });
-            return data;
-          }
+    function createChartDataArray() {
+      let data: any = [];
+      chartData.data.map((chartDataItem: any) => {
+        const chartDate = new Date(chartDataItem.DateTime).getTime()
+        const chartData = createChartData(chartDate, chartDataItem.SumAve);
+        data.push(chartData);
+      });
+      return data;
+    }
 
 // Create axes
 // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-          let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
-            maxDeviation: 0.2,
-            baseInterval: {
-              timeUnit: "minute",
-              count: 30
-            },
-            renderer: am5xy.AxisRendererX.new(root, {
-              minorGridEnabled: true
-            }),
-            tooltip: am5.Tooltip.new(root, {})
-          }));
-          let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-            renderer: am5xy.AxisRendererY.new(root, {
-              pan: "zoom"
-            })
-          }));
-          yAxis.set('visible', false)
-          xAxis.set('visible', false)
-
+    let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
+      maxDeviation: 0.2,
+      baseInterval: {
+        timeUnit: "minute",
+        count: 30
+      },
+      renderer: am5xy.AxisRendererX.new(root, {
+        minorGridEnabled: true
+      }),
+      tooltip: am5.Tooltip.new(root, {})
+    }));
+    let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+      renderer: am5xy.AxisRendererY.new(root, {
+        pan: "zoom"
+      })
+    }));
+    yAxis.set('visible', false)
+    xAxis.set('visible', false)
 
 // Add series
 // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-          let series = chart.series.push(am5xy.LineSeries.new(root, {
-            name: "Series",
-            xAxis: xAxis,
-            yAxis: yAxis,
-            valueYField: "value",
-            valueXField: "date",
-            tooltip: am5.Tooltip.new(root, {
-              labelText: "{valueY}"
-            })
-          }));
+    let series = chart.series.push(am5xy.LineSeries.new(root, {
+      name: "Series",
+      xAxis: xAxis,
+      yAxis: yAxis,
+      valueYField: "value",
+      valueXField: "date",
+      tooltip: am5.Tooltip.new(root, {
+        labelText: "{valueY}"
+      })
+    }));
 
-          const chartBackground = chart.plotContainer.get("background");
-          if (chartBackground !== undefined) {
-            chartBackground.setAll({
-              stroke: am5.color(0xCC0000),
-              strokeOpacity: 1,
-              fill: am5.color(0x08f908),
-              fillOpacity: 1,
-            });
-          }
-          chart.topAxesContainer.children.push(am5.Rectangle.new(root, {
-            stroke: am5.color(0xCCCC00),
-            strokeOpacity: 1,
-            fill: am5.color(0x02c5fd),
-            fillOpacity: 1,
-            width: am5.percent(100),
-            height: chartData[0].topBudgetLine,
-          }));
-          chart.bottomAxesContainer.children.push(am5.Rectangle.new(root, {
-            stroke: am5.color(0xCCCC00),
-            strokeOpacity: 1,
-            fill: am5.color(0xf6363b),
-            fillOpacity: 1,
-            width: am5.percent(100),
-            height: chartData[0].bottomBudgetLine,
-          }));
-          chart.chartContainer.children.push(am5.Label.new(root, {
-            text: chartData[0].sensorId,
-            fontSize: 13,
-            fontWeight: "400",
-            x: am5.p50,
-            centerX: am5.p50
-          }));
+    const chartBackground = chart.plotContainer.get("background");
+    if (chartBackground !== undefined) {
+      chartBackground.setAll({
+        stroke: am5.color(0xCC0000),
+        strokeOpacity: 1,
+        fill: am5.color(0x08f908),
+        fillOpacity: 1,
+      });
+    }
+    chart.topAxesContainer.children.push(am5.Rectangle.new(root, {
+      stroke: am5.color(0xCCCC00),
+      strokeOpacity: 1,
+      fill: am5.color(0x02c5fd),
+      fillOpacity: 1,
+      width: am5.percent(100),
+      height: chartData.topBudgetLine,
+    }));
+    chart.bottomAxesContainer.children.push(am5.Rectangle.new(root, {
+      stroke: am5.color(0xCCCC00),
+      strokeOpacity: 1,
+      fill: am5.color(0xf6363b),
+      fillOpacity: 1,
+      width: am5.percent(100),
+      height: chartData.bottomBudgetLine,
+    }));
+    chart.chartContainer.children.push(am5.Label.new(root, {
+      text: chartData.sensorId,
+      fontSize: 13,
+      fontWeight: "400",
+      x: am5.p50,
+      centerX: am5.p50
+    }));
 
 // Set data
-          let data = createChartDataArray();
-          series.data.setAll(data);
+    let data = createChartDataArray();
+    series.data.setAll(data);
 
 // Make stuff animate on load
 // https://www.amcharts.com/docs/v5/concepts/animations/
-          series.appear(1000);
-          chart.appear(1000, 100);
-        }, 1000);
-      })
-    }
-    return () => {
-      roots.forEach(root => root.dispose()); // Удаляем каждый график
-    };
-  }, [moistChartDataContainer]);
+    series.appear(1000);
+    chart.appear(1000, 100);
+  }
   useEffect(() => {
-    if (invalidChartDataContainer) {
-      invalidChartDataContainer.map((chartData: any,) => {
-        const overlay: any = new CustomOverlayExport(chartData[1], invalidChartDataImage, false, chartData[0].id, chartData[0].sensorId)
+    if (moistChartDataContainer.length !== 0 && CustomOverlayExport) {
+      const addOverlay = (() => {
+        moistChartDataContainer.map((chartData: any) => {
+          const overlay = new CustomOverlayExport(chartData[1], invalidChartDataImage, true, chartData[0], setOverlayIsReady);
+          overlay.setMap(map);
+        })
+      })
+      addOverlay();
+    }
+  }, [moistChartDataContainer, CustomOverlayExport]);
+  useEffect(() => {
+    if (invalidChartDataContainer.length !== 0 && CustomOverlayExport) {
+      invalidChartDataContainer.map((chartData: any) => {
+        const overlay: any = new CustomOverlayExport(chartData[1], invalidChartDataImage, false, chartData[0], setOverlayIsReady);
         map && overlay.setMap(map)
       })
     }
-  }, [invalidChartDataContainer]);
+  }, [invalidChartDataContainer, CustomOverlayExport]);
+  useEffect(() => {
+    if (overlayIsReady) {
+      const roots: any[] = [];
+      moistChartDataContainer.map((chartData: any) => {
+        createMarkerOverlay(chartData[0], roots)
+      })
+      return () => {
+        roots.forEach(root => root.dispose());
+      };
+    }
+  }, [overlayIsReady]);
 
   const render = (status: Status) => {
     return <h1>{status}</h1>;
+  };
+
+  const back = () => {
+    props.setPage(0);
   };
 
   return (
     <IonPage>
       <IonHeader className={s.header}>
         <IonToolbar>
+          <IonIcon
+            onClick={back}
+            className={`${s.backIcon} ${'ion-margin-start'}`}
+            slot='start'
+            size='large'
+            icon={arrowBackOutline}
+          ></IonIcon>
           <IonTitle>List</IonTitle>
         </IonToolbar>
       </IonHeader>
