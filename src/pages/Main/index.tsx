@@ -40,6 +40,9 @@ const Main: React.FC<MainProps> = (props) => {
   const [moistChartDataContainer, setMoistChartDataContainer] = useState<any>([])
   const [invalidChartDataContainer, setInvalidChartDataContainer] = useState([])
   const [overlayIsReady, setOverlayIsReady] = useState(false)
+  const [isAllMoistFuelCoordinatesOfMarkersAreReady, setIsAllMoistFuelCoordinatesOfMarkersAreReady] = useState([])
+  let allMoistFuelCoordinatesOfMarkers: any = [];
+  let overlappingPairs: any[] = []
 
   const onSensorClick = (id: string, name: string) => {
     props.setPage(2)
@@ -47,6 +50,11 @@ const Main: React.FC<MainProps> = (props) => {
     props.setSiteName(name)
   };
 
+  const overlaysOverlap = (overlayProjection: any, overlayA: any, overlayB: any) => {
+    const positionA = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(overlayA.lat, overlayA.lng));
+    const positionB = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(overlayB.lat, overlayB.lng));
+    return Math.abs(positionA.x - positionB.x) < 100 && Math.abs(positionA.y - positionB.y) < 130;
+  }
   class CustomOverlayExport extends google.maps.OverlayView {
     private bounds: google.maps.LatLngBounds;
     private invalidChartDataImage: any;
@@ -66,12 +74,8 @@ const Main: React.FC<MainProps> = (props) => {
       this.setOverlayIsReady = setOverlayIsReady;
     }
 
-    /**
-     * onAdd is called when the map's panes are ready and the overlay has been
-     * added to the map.
-     */
     onAdd() {
-      const onAddContent = new Promise((resolve) => {
+      const onAddContent = new Promise((resolve: any) => {
         this.div = document.createElement("div");
         this.div.style.borderStyle = "none";
         this.div.style.borderWidth = "0px";
@@ -99,46 +103,105 @@ const Main: React.FC<MainProps> = (props) => {
         const panes: any = this.getPanes()!
         panes.floatPane.appendChild(this.div);
 
-        // document.body.appendChild(this.div);
         const root = createRoot(this.div);
         root.render(content);
 
-        resolve(content);
-      }).then((content) => {
+        resolve();
+      }).then(() => {
         this.setOverlayIsReady(true);
       })
     }
 
     draw() {
-      // We use the south-west and north-east
-      // coordinates of the overlay to peg it to the correct position and size.
-      // To do this, we need to retrieve the projection from the overlay.
       const overlayProjection = this.getProjection();
-      // console.log(overlayProjection, this.bounds.getSouthWest(), this.bounds.getNorthEast())
 
-      // Retrieve the south-west and north-east coordinates of this overlay
-      // in LatLngs and convert them to pixel coordinates.
-      // We'll use these coordinates to resize the div.
-      const sw = overlayProjection.fromLatLngToDivPixel(
-        this.bounds.getSouthWest()
-      )!;
-      const ne = overlayProjection.fromLatLngToDivPixel(
-        this.bounds.getNorthEast()
-      )!;
+      const sw: any = overlayProjection.fromLatLngToDivPixel(this.bounds.getSouthWest());
+      const ne: any = overlayProjection.fromLatLngToDivPixel(this.bounds.getNorthEast());
 
-      // Resize the image's div to fit the indicated dimensions.
       if (this.div) {
         this.div.style.left = sw.x + "px";
         this.div.style.top = ne.y + "px";
         this.div.style.width = "100px";
         this.div.style.height = "130px";
       }
+
+      const overlays: any = isAllMoistFuelCoordinatesOfMarkersAreReady
+      for (let i = 0; i < overlays.length; i++) {
+        for (let j = i + 1; j < overlays.length; j++) {
+          if (this.chartData.sensorId === overlays[i].id) {
+            overlays[i] = {
+              id: overlays[i].id,
+              lat: overlays[i].lat,
+              lng: overlays[i].lng,
+              div: this.div
+            }
+          } else if (this.chartData.sensorId === overlays[j].id) {
+            overlays[j] = {
+              id: overlays[j].id,
+              lat: overlays[j].lat,
+              lng: overlays[j].lng,
+              div: this.div
+            }
+          }
+          const newPair = [overlays[i], overlays[j]];
+          if (overlaysOverlap(overlayProjection, overlays[i], overlays[j])) {
+            const isPairExists = overlappingPairs.some(pair =>
+              (pair[0] === newPair[0] && pair[1] === newPair[1]) ||
+              (pair[0] === newPair[1] && pair[1] === newPair[0])
+            );
+
+            if (!isPairExists) {
+              overlappingPairs.push(newPair);
+            }
+          } else {
+            overlappingPairs = overlappingPairs.filter(pair =>
+              !((pair[0] === newPair[0] && pair[1] === newPair[1]) ||
+                (pair[0] === newPair[1] && pair[1] === newPair[0]))
+            );
+          }
+        }
+      }
+
+      overlappingPairs.map((newPair: any) => {
+        const overlay1 = newPair[0]
+        const overlay2 = newPair[1]
+
+        if (overlay1.div && overlay2.div) {
+          const position1: any = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(overlay1.lat, overlay1.lng));
+          const position2: any = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(overlay2.lat, overlay2.lng));
+
+          let offsetX, offsetY;
+
+          // Вычисляем дистанцию между оверлеями
+          const dx = position2.x - position1.x;
+          const dy = position2.y - position1.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          const offsetDistance = 80
+
+          if (distance === 0) {
+            offsetX = offsetDistance;
+            offsetY = -offsetDistance;
+          } else {
+            const nx = dx / distance;
+            const ny = dy / distance;
+            offsetX = nx * offsetDistance;
+            offsetY = ny * offsetDistance;
+          }
+
+          if (overlay1.div) {
+            overlay1.div.style.left = `${position1.x - offsetX}px`;
+            overlay1.div.style.top = `${position1.y - offsetY}px`;
+          }
+
+          if (overlay2.div) {
+            overlay2.div.style.left = `${position2.x + offsetX}px`;
+            overlay2.div.style.top = `${position2.y + offsetY}px`;
+          }
+        }
+      })
     }
 
-    /**
-     * The onRemove() method will be called automatically from the API if
-     * we ever set the overlay's map property to 'null'.
-     */
     onRemove() {
       if (this.div) {
         (this.div.parentNode as HTMLElement).removeChild(this.div);
@@ -158,14 +221,6 @@ const Main: React.FC<MainProps> = (props) => {
     show() {
       if (this.div) {
         this.div.style.visibility = "visible";
-      }
-    }
-
-    setVisible(visible: boolean) {
-      if (visible) {
-        this.show();
-      } else {
-        this.hide();
       }
     }
 
@@ -196,7 +251,7 @@ const Main: React.FC<MainProps> = (props) => {
         })
         props.setSiteList(response.data)
       } catch (error) {
-        console.log(error);
+        console.log('Error: ' + error)
       }
     };
 
@@ -220,12 +275,12 @@ const Main: React.FC<MainProps> = (props) => {
         setIsSelectDisabled(false);
       }
     } catch (error) {
-      console.log('Что-то пошло не так', error);
+      console.log('Something went wrong ', error);
     }
   };
 
   // Map Creating
-  const [map, setMap] = React.useState<google.maps.Map>();
+  const [map, setMap] = React.useState<any>();
   const moistFuelChartsAmount: any = []
   const mapRef = useRef(null);
   const [markers, setMarkers] = useState([]);
@@ -237,17 +292,24 @@ const Main: React.FC<MainProps> = (props) => {
     });
     setMap(initMap);
   }
-  const getSensorItems = () => {
+  const getSensorItems = (markerType: string | undefined) => {
     const sensorItems: any = []
     props.siteList.map((sensors: any) => {
       sensors.layers.map((sensor: any) => {
         sensor.markers.map(async (sensorItem: any) => {
-          sensorItems.push(sensorItem)
+          if (markerType) {
+            if (sensorItem.markerType === markerType) {
+              sensorItems.push(sensorItem)
+            }
+          } else {
+            sensorItems.push(sensorItem)
+          }
         })
       })
     })
     return sensorItems
   }
+
   useEffect(() => {
     if (map && props.siteList.length > 0 && markers.length === 0) {
       const newMarkers = props.siteList.map((sensorsGroupData: any) => {
@@ -259,33 +321,20 @@ const Main: React.FC<MainProps> = (props) => {
         groupMarker.addListener('click', () => {
           const markerTitle = groupMarker.getTitle();
           groupMarker.setMap(null);
-
-          const OFFSET = 0.0002;
-          const existingMarkers = new Map();
-
           props.siteList.map(async (sensors: any) => {
             if (markerTitle === sensors.name) {
-              const sensorItems = getSensorItems()
+              const sensorItems = getSensorItems(undefined)
               for (const sensorItem of sensorItems) {
-                let lat = sensorItem.lat;
-                let lng = sensorItem.lng;
-                const key = `${lat}-${lng}`;
-                if (existingMarkers.has(key)) {
-                  let count = existingMarkers.get(key);
-                  lat += OFFSET * count;
-                  lng += OFFSET * count;
-                  existingMarkers.set(key, count + 1);
-                } else {
-                  existingMarkers.set(key, 1);
-                }
                 if (sensorItem.markerType === 'moist-fuel') {
                   moistFuelChartsAmount.push(sensorItem);
                   const bounds: any = new google.maps.LatLngBounds(
-                    new google.maps.LatLng(lat, lng),
-                    new google.maps.LatLng(lat + 0.0001, lng + 0.0001)
+                    new google.maps.LatLng(sensorItem.lat, sensorItem.lng),
+                    new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
                   )
                   moistChartDataRequest(sensorItem.sensorId, bounds);
                 } else {
+                  const lat = sensorItem.lat
+                  const lng = sensorItem.lng
                   const sensorMarker = new google.maps.Marker({
                     position: {lat, lng},
                     map,
@@ -298,6 +347,17 @@ const Main: React.FC<MainProps> = (props) => {
                     setSensorType(sensorItem.markerType);
                     chartDataRequest(sensorItem.sensorId);
                   });
+                }
+                const lat = sensorItem.lat
+                const lng = sensorItem.lng
+                const id = sensorItem.sensorId
+                const type: string = sensorItem.markerType
+                const moistFuelSensorItems = getSensorItems('moist-fuel')
+                if (type === 'moist-fuel') {
+                  allMoistFuelCoordinatesOfMarkers.push({lat, lng, id})
+                }
+                if (allMoistFuelCoordinatesOfMarkers.length === moistFuelSensorItems.length) {
+                  setIsAllMoistFuelCoordinatesOfMarkersAreReady(allMoistFuelCoordinatesOfMarkers)
                 }
               }
             }
@@ -479,6 +539,7 @@ const Main: React.FC<MainProps> = (props) => {
       moistChartDataContainer.map((chartData: any) => {
         createMarkerOverlay(chartData[0], roots)
       })
+
       return () => {
         roots.forEach(root => root.dispose());
       };
