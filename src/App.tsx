@@ -33,12 +33,12 @@ import '@ionic/react/css/display.css';
 // import '../../theme/variables.css';
 
 import React, {useState} from "react";
-import s from './style.module.css'
 import Preloader from "./components/Preloader";
 import Login from "./pages/Login";
 import Info from "./pages/Info";
 import Main from "./pages/Main";
 import Chart from "./pages/Chart";
+import './App.css'
 
 setupIonicReact();
 

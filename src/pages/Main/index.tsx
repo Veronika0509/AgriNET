@@ -43,13 +43,13 @@ const Main: React.FC<MainProps> = (props) => {
   const [isAllMoistFuelCoordinatesOfMarkersAreReady, setIsAllMoistFuelCoordinatesOfMarkersAreReady] = useState([])
   let allMoistFuelCoordinatesOfMarkers: any = [];
   let overlappingPairs: any[] = []
-
   const onSensorClick = (id: string, name: string) => {
     props.setPage(2)
     props.setSiteId(id)
     props.setSiteName(name)
   };
 
+  // Custom Overlay
   const overlaysOverlap = (overlayProjection: any, overlayA: any, overlayB: any) => {
     const positionA = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(overlayA.lat, overlayA.lng));
     const positionB = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(overlayB.lat, overlayB.lng));
@@ -258,7 +258,7 @@ const Main: React.FC<MainProps> = (props) => {
     setSiteListRequest();
   }, []);
 
-  // Chart Data Request
+  // Chart Data Request (Chart Page)
   const chartDataRequest = async (SensorIdProp: string) => {
     try {
       const response = await axios.get('https://app.agrinet.us/api/chart/m', {
@@ -280,18 +280,6 @@ const Main: React.FC<MainProps> = (props) => {
   };
 
   // Map Creating
-  const [map, setMap] = React.useState<any>();
-  const moistFuelChartsAmount: any = []
-  const mapRef = useRef(null);
-  const [markers, setMarkers] = useState([]);
-  if (mapRef.current && !map) {
-    const initMap = new window.google.maps.Map(mapRef.current, {
-      center: {lat: 46.093354, lng: -118.274636},
-      zoom: 18,
-      mapTypeId: "satellite",
-    });
-    setMap(initMap);
-  }
   const getSensorItems = (markerType: string | undefined) => {
     const sensorItems: any = []
     props.siteList.map((sensors: any) => {
@@ -309,7 +297,18 @@ const Main: React.FC<MainProps> = (props) => {
     })
     return sensorItems
   }
-
+  const [map, setMap] = React.useState<any>();
+  const moistFuelChartsAmount: any = []
+  const mapRef = useRef(null);
+  const [markers, setMarkers] = useState([]);
+  if (mapRef.current && !map) {
+    const initMap = new window.google.maps.Map(mapRef.current, {
+      center: {lat: 46.093354, lng: -118.274636},
+      zoom: 18,
+      mapTypeId: "satellite",
+    });
+    setMap(initMap);
+  }
   useEffect(() => {
     if (map && props.siteList.length > 0 && markers.length === 0) {
       const newMarkers = props.siteList.map((sensorsGroupData: any) => {
@@ -318,6 +317,11 @@ const Main: React.FC<MainProps> = (props) => {
           map: map,
           title: sensorsGroupData.name,
         });
+        const info: string = sensorsGroupData.name
+        const infoWindow = new google.maps.InfoWindow({
+          content: info,
+        });
+        infoWindow.open(map, groupMarker);
         groupMarker.addListener('click', () => {
           const markerTitle = groupMarker.getTitle();
           groupMarker.setMap(null);
@@ -337,9 +341,12 @@ const Main: React.FC<MainProps> = (props) => {
                   const lng = sensorItem.lng
                   const sensorMarker = new google.maps.Marker({
                     position: {lat, lng},
-                    map,
-                    title: sensorItem.name,
+                    map
                   });
+                  const infoWindow = new google.maps.InfoWindow({
+                    content: sensorItem.name + '<br />' + sensorItem.sensorId,
+                  });
+                  infoWindow.open(map, sensorMarker);
                   sensorMarker.addListener('click', () => {
                     setIsModalOpen(true);
                     setSensorName(sensorItem.name);
