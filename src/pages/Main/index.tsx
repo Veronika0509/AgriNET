@@ -28,25 +28,38 @@ interface MainProps {
   setSiteId: React.Dispatch<React.SetStateAction<string>>;
   setSiteName: React.Dispatch<React.SetStateAction<string>>;
   setChartData: React.Dispatch<React.SetStateAction<any>>;
-  chartData: any[];
+  chartData: any;
 }
 
 const Main: React.FC<MainProps> = (props) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [sensorName, setSensorName] = useState('')
   const [sensorId, setSensorId] = useState('')
+  const [sensorName, setSensorName] = useState('')
   const [sensorChartType, setSensorType] = useState('')
   const [isSelectDisabled, setIsSelectDisabled] = useState(false)
   const [moistChartDataContainer, setMoistChartDataContainer] = useState<any>([])
   const [invalidChartDataContainer, setInvalidChartDataContainer] = useState([])
   const [overlayIsReady, setOverlayIsReady] = useState(false)
   const [isAllMoistFuelCoordinatesOfMarkersAreReady, setIsAllMoistFuelCoordinatesOfMarkersAreReady] = useState([])
+  const [isChartDataIsLoading, setIsChartDataIsLoading] = useState(false)
   let allMoistFuelCoordinatesOfMarkers: any = [];
   let overlappingPairs: any[] = []
   const onSensorClick = (id: string, name: string) => {
-    props.setPage(2)
-    props.setSiteId(id)
-    props.setSiteName(name)
+    if (sensorId !== id) {
+      new Promise((resolve: any) => {
+        const response = chartDataRequest(id)
+        resolve(response)
+      }).then((response: any) => {
+        props.setChartData(response.data.data)
+        props.setPage(2)
+        props.setSiteId(id)
+        props.setSiteName(name)
+      })
+    } else {
+      props.setPage(2)
+      props.setSiteId(id)
+      props.setSiteName(name)
+    }
   };
 
   // Custom Overlay
@@ -55,6 +68,7 @@ const Main: React.FC<MainProps> = (props) => {
     const positionB = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(overlayB.lat, overlayB.lng));
     return Math.abs(positionA.x - positionB.x) < 100 && Math.abs(positionA.y - positionB.y) < 130;
   }
+
   class CustomOverlayExport extends google.maps.OverlayView {
     private bounds: google.maps.LatLngBounds;
     private invalidChartDataImage: any;
@@ -62,7 +76,7 @@ const Main: React.FC<MainProps> = (props) => {
     private chartData: any;
     private setOverlayIsReady: any
 
-    private div?: HTMLElement;
+    private div?: any;
 
     constructor(bounds: google.maps.LatLngBounds, invalidChartDataImage: any, isValidChartData: boolean, chartData: any, setOverlayIsReady: any) {
       super();
@@ -76,35 +90,55 @@ const Main: React.FC<MainProps> = (props) => {
 
     onAdd() {
       const onAddContent = new Promise((resolve: any) => {
-        this.div = document.createElement("div");
-        this.div.style.borderStyle = "none";
-        this.div.style.borderWidth = "0px";
-        this.div.style.position = "absolute";
+        const divId = `overlay-${this.chartData.sensorId}`;
+        this.div = document.getElementById(divId);
 
-        const content = (
-          <div>
-            {this.isValidChartData ? (
-              <div className={s.chartContainer}>
-                <div className={s.chartContainer}>
-                  <div id={this.chartData.id.toString()} className={s.chart}></div>
+        if (!this.div) {
+          this.div = document.createElement("div");
+          this.div.id = divId;
+          this.div.style.borderStyle = "none";
+          this.div.style.borderWidth = "0px";
+          this.div.style.position = "absolute";
+
+          if (this.chartData.battery !== null) {
+            if (!this.chartData.battery.toString().includes(" VDC")) {
+              this.chartData.battery = this.chartData.battery + ' VDC'
+            }
+          }
+
+          // Содержимое оверлея
+          const content = (
+            <div className={s.overlayContainer}>
+              {this.isValidChartData ? (
+                <div onClick={() => onSensorClick(this.chartData.sensorId, this.chartData.name)}>
+                  <div className={s.chartContainer}>
+                    <div id={this.chartData.id.toString()} className={s.chart}></div>
+                  </div>
+                  <div className={s.chartInfo}>
+                    <p className={s.chartName}>{this.chartData.name}</p>
+                    {this.chartData.battery && <p className={s.chartName}>{this.chartData.battery}</p>}
+                    <p>{this.chartData.sensorId}</p>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className={s.invalidChartDataImgContainer}>
+              ) : (
                 <div>
-                  <img src={this.invalidChartDataImage} className={s.invalidChartDataImg} alt='Invalid Chart Data'/>
-                  <p className={s.invalidSensorIdText}>{this.chartData.sensorId}</p>
+                  <div className={s.invalidChartDataImgContainer}>
+                    <img src={this.invalidChartDataImage} className={s.invalidChartDataImg} alt='Invalid Chart Data'/>
+                    <p className={s.invalidSensorIdText}>{this.chartData.name}</p>
+                  </div>
+                  <div className={s.chartInfo}>
+                    <p className={s.chartName}>{this.chartData.sensorId}</p>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )
+              )}
+            </div>
+          )
 
-        const panes: any = this.getPanes()!
-        panes.floatPane.appendChild(this.div);
-
-        const root = createRoot(this.div);
-        root.render(content);
+          const panes: any = this.getPanes();
+          panes.floatPane.appendChild(this.div);
+          const root = createRoot(this.div);
+          root.render(content);
+        }
 
         resolve();
       }).then(() => {
@@ -122,7 +156,7 @@ const Main: React.FC<MainProps> = (props) => {
         this.div.style.left = sw.x + "px";
         this.div.style.top = ne.y + "px";
         this.div.style.width = "100px";
-        this.div.style.height = "130px";
+        this.div.style.height = "110px";
       }
 
       const overlays: any = isAllMoistFuelCoordinatesOfMarkersAreReady
@@ -261,19 +295,12 @@ const Main: React.FC<MainProps> = (props) => {
   // Chart Data Request (Chart Page)
   const chartDataRequest = async (SensorIdProp: string) => {
     try {
-      const response = await axios.get('https://app.agrinet.us/api/chart/m', {
+      return  axios.get('https://app.agrinet.us/api/chart/m', {
         params: {
           sensorId: SensorIdProp,
           days: 14,
         },
       });
-      props.setChartData(response.data.data);
-
-      if (response.data.data.length === 0 || response.data.data.length === 1) {
-        setIsSelectDisabled(true);
-      } else {
-        setIsSelectDisabled(false);
-      }
     } catch (error) {
       console.log('Something went wrong ', error);
     }
@@ -325,6 +352,8 @@ const Main: React.FC<MainProps> = (props) => {
         groupMarker.addListener('click', () => {
           const markerTitle = groupMarker.getTitle();
           groupMarker.setMap(null);
+          const OFFSET = 0.0002;
+          const existingMarkers = new Map();
           props.siteList.map(async (sensors: any) => {
             if (markerTitle === sensors.name) {
               const sensorItems = getSensorItems(undefined)
@@ -335,24 +364,45 @@ const Main: React.FC<MainProps> = (props) => {
                     new google.maps.LatLng(sensorItem.lat, sensorItem.lng),
                     new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
                   )
-                  moistChartDataRequest(sensorItem.sensorId, bounds);
+                  moistChartDataRequest(sensorItem.sensorId, bounds, sensorItem.name);
                 } else {
-                  const lat = sensorItem.lat
-                  const lng = sensorItem.lng
+                  let lat = sensorItem.lat;
+                  let lng = sensorItem.lng;
+                  const key = `${lat}-${lng}`;
+                  if (existingMarkers.has(key)) {
+                    let count = existingMarkers.get(key);
+                    lat += OFFSET * count;
+                    lng += OFFSET * count;
+                    existingMarkers.set(key, count + 1);
+                  } else {
+                    existingMarkers.set(key, 1);
+                  }
                   const sensorMarker = new google.maps.Marker({
                     position: {lat, lng},
                     map
                   });
                   const infoWindow = new google.maps.InfoWindow({
-                    content: sensorItem.name + '<br />' + sensorItem.sensorId,
+                    content: "Name: " + sensorItem.name + '<br />' + "Click to see more..."
                   });
                   infoWindow.open(map, sensorMarker);
                   sensorMarker.addListener('click', () => {
-                    setIsModalOpen(true);
                     setSensorName(sensorItem.name);
                     setSensorId(sensorItem.sensorId);
                     setSensorType(sensorItem.markerType);
-                    chartDataRequest(sensorItem.sensorId);
+                    setIsModalOpen(true);
+                    new Promise((resolve: any) => {
+                      const response: any = chartDataRequest(sensorItem.sensorId)
+                      setIsChartDataIsLoading(true)
+                      resolve(response)
+                    }).then((response: any) => {
+                      setIsChartDataIsLoading(false)
+                      if (response.data.data.length === 0 || response.data.data.length === 1) {
+                        setIsSelectDisabled(true);
+                      } else {
+                        setIsSelectDisabled(false);
+                        props.setChartData(response.data.data);
+                      }
+                    })
                   });
                 }
                 const lat = sensorItem.lat
@@ -380,7 +430,7 @@ const Main: React.FC<MainProps> = (props) => {
   let invalidChartData: any = []
   let id = 0
   let boundsArray: any = []
-  const moistChartDataRequest = async (propsSensorId: string, bounds: any) => {
+  const moistChartDataRequest = async (propsSensorId: string, bounds: any, name: string) => {
     const response = await axios.get('https://app.agrinet.us/api/map/moist-fuel', {
       params: {
         sensorId: propsSensorId,
@@ -393,8 +443,10 @@ const Main: React.FC<MainProps> = (props) => {
     id += 1
     const moistChartDataItem = {
       id: id,
-      data: response.data.data,
+      name: name,
+      battery: response.data.battery,
       sensorId: propsSensorId,
+      data: response.data.data,
       topBudgetLine: response.data.budgetLines[1].value,
       bottomBudgetLine: response.data.budgetLines[4].value
     }
@@ -504,8 +556,16 @@ const Main: React.FC<MainProps> = (props) => {
       width: am5.percent(100),
       height: chartData.bottomBudgetLine,
     }));
+
+    function truncateText(str: any) {
+      if (str.length > 13) {
+        return str.substring(0, 13 - 3) + '...';
+      } else {
+        return str;
+      }
+    }
     chart.chartContainer.children.push(am5.Label.new(root, {
-      text: chartData.sensorId,
+      text: truncateText(chartData.name),
       fontSize: 13,
       fontWeight: "400",
       x: am5.p50,
@@ -556,7 +616,6 @@ const Main: React.FC<MainProps> = (props) => {
   const render = (status: Status) => {
     return <h1>{status}</h1>;
   };
-
   const back = () => {
     props.setPage(0);
   };
@@ -608,9 +667,15 @@ const Main: React.FC<MainProps> = (props) => {
                 </IonLabel>
               </IonItem>
             </IonList>
-            {isSelectDisabled && <IonText color='danger'>Sorry, but the chart is still in development.</IonText>}
-            <IonButton expand="block" className={s.modalButton} disabled={isSelectDisabled}
-                       onClick={() => onSensorClick(sensorId, sensorName)}>Select</IonButton>
+            {isChartDataIsLoading ? (
+              <p>Loading...</p>
+            ) : (
+              <div>
+                {isSelectDisabled && <IonText color='danger'>Sorry, but the chart is still in development.</IonText>}
+                <IonButton expand="block" className={s.modalButton} disabled={isSelectDisabled}
+                           onClick={() => onSensorClick(sensorId, sensorName)}>Select</IonButton>
+              </div>
+            )}
           </IonContent>
         </IonModal>
       </IonContent>

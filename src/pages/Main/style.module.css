@@ -10,7 +10,21 @@
   margin: 10px 0 0 0;
 }
 
+.chartInfo {
+  display: none;
+  margin-top: 5px;
+  background: #f1e275;
+  color: #000;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.overlayContainer:hover .chartInfo {
+  display: block;
+}
+
 .invalidChartDataImg {
+  display: block;
   width: 70px;
   margin: 0 auto 10px auto;
 }
@@ -29,9 +43,6 @@
 }
 
 .invalidChartDataImgContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100px;
   background: #96fd66;
   border-radius: 10px;
