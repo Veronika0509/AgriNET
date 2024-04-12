@@ -69,6 +69,14 @@ const Main: React.FC<MainProps> = (props) => {
     return Math.abs(positionA.x - positionB.x) < 100 && Math.abs(positionA.y - positionB.y) < 130;
   }
 
+  function truncateText(str: any) {
+    if (str.length > 13) {
+      return str.substring(0, 13 - 3) + '...';
+    } else {
+      return str;
+    }
+  }
+
   class CustomOverlayExport extends google.maps.OverlayView {
     private bounds: google.maps.LatLngBounds;
     private invalidChartDataImage: any;
@@ -106,7 +114,6 @@ const Main: React.FC<MainProps> = (props) => {
             }
           }
 
-          // Содержимое оверлея
           const content = (
             <div className={s.overlayContainer}>
               {this.isValidChartData ? (
@@ -124,7 +131,7 @@ const Main: React.FC<MainProps> = (props) => {
                 <div>
                   <div className={s.invalidChartDataImgContainer}>
                     <img src={this.invalidChartDataImage} className={s.invalidChartDataImg} alt='Invalid Chart Data'/>
-                    <p className={s.invalidSensorIdText}>{this.chartData.name}</p>
+                    <p className={s.invalidSensorIdText}>{truncateText(this.chartData.name)}</p>
                   </div>
                   <div className={s.chartInfo}>
                     <p className={s.chartName}>{this.chartData.sensorId}</p>
@@ -557,13 +564,6 @@ const Main: React.FC<MainProps> = (props) => {
       height: chartData.bottomBudgetLine,
     }));
 
-    function truncateText(str: any) {
-      if (str.length > 13) {
-        return str.substring(0, 13 - 3) + '...';
-      } else {
-        return str;
-      }
-    }
     chart.chartContainer.children.push(am5.Label.new(root, {
       text: truncateText(chartData.name),
       fontSize: 13,
