@@ -39,6 +39,19 @@ const Chart = (props: ChartProps) => {
   const handleResize = () => {
     setIsMobile(window.innerWidth < 850)
   };
+
+  useEffect(() => {
+    if (isMobile) {
+      updateChart(props.chartData)
+    }
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (fullDatesArray) {
+      updateChart(props.chartData)
+    }
+  }, [fullDatesArray])
+
   const irrigationDatesRequest = async (): Promise<void> => {
     let datesArray: any = []
     let fullDatesArrayNs: any = []
@@ -143,6 +156,7 @@ const Chart = (props: ChartProps) => {
           count: 30
         },
         renderer: am5xy.AxisRendererX.new(root.current, {
+          opposite: true,
           minorGridEnabled: true
         }),
         tooltip: am5.Tooltip.new(root.current, {}),
@@ -198,7 +212,6 @@ const Chart = (props: ChartProps) => {
 
         series.appear();
       }
-
       fullDatesArray.map((date: any) => {
         let seriesRangeDataItem = xAxis.makeDataItem({
           value: new Date(date).getTime()
@@ -249,7 +262,6 @@ const Chart = (props: ChartProps) => {
   const updateChart = (props: any): void => {
     createChart(props);
   };
-
   const onButtonClick = async (buttonProps: number) => {
     let currentDate
 
@@ -318,7 +330,6 @@ const Chart = (props: ChartProps) => {
       console.log(error);
     }
   }
-
   const back = (): void => {
     props.setPage(1);
   };
@@ -326,7 +337,7 @@ const Chart = (props: ChartProps) => {
   useEffect(() => {
     setCurrentChartData(props.chartData)
     updateChart(props.chartData)
-    window.addEventListener('resize', handleResize);
+    handleResize()
     irrigationDatesRequest()
   }, []);
 

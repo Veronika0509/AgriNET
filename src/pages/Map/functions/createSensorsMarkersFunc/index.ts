@@ -1,0 +1,44 @@
+import {chartDataRequest} from "../../data/chartDataRequest";
+
+const OFFSET = 0.0002;
+
+export const createSensorsMarkers = (sensorItem: any, map: any, setSensorName: any, setSensorId: any, setSensorType: any, setIsModalOpen: any, setIsChartDataIsLoading: any, setIsSelectDisabled: any, setChartData: any, existingMarkers: any) => {
+  let lat = sensorItem.lat;
+  let lng = sensorItem.lng;
+  const key = `${lat}-${lng}`;
+  if (existingMarkers.has(key)) {
+    let count = existingMarkers.get(key);
+    lat += OFFSET * count;
+    lng += OFFSET * count;
+    existingMarkers.set(key, count + 1);
+  } else {
+    existingMarkers.set(key, 1);
+  }
+  const sensorMarker = new google.maps.Marker({
+    position: {lat, lng},
+    map
+  });
+  const infoWindow = new google.maps.InfoWindow({
+    content: "Name: " + sensorItem.name + '<br />' + "Click to see more..."
+  });
+  infoWindow.open(map, sensorMarker);
+  sensorMarker.addListener('click', () => {
+    setSensorName(sensorItem.name);
+    setSensorId(sensorItem.sensorId);
+    setSensorType(sensorItem.markerType);
+    setIsModalOpen(true);
+    new Promise((resolve: any) => {
+      const response: any = chartDataRequest(sensorItem.sensorId)
+      setIsChartDataIsLoading(true)
+      resolve(response)
+    }).then((response: any) => {
+      setIsChartDataIsLoading(false)
+      if (response.data.data.length === 0 || response.data.data.length === 1) {
+        setIsSelectDisabled(true);
+      } else {
+        setIsSelectDisabled(false);
+        setChartData(response.data.data);
+      }
+    })
+  });
+}
