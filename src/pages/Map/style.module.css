@@ -48,10 +48,8 @@
   border-radius: 10px;
   padding-top: 10px;
   padding-bottom: 10px;
-}
-
-.invalidChartDataImgContainer {
   border: 1px solid #000;
+  cursor: not-allowed;
 }
 
 .invalidSensorIdText {
@@ -65,5 +63,9 @@
 }
 
 .backIcon {
+  cursor: pointer;
+}
+
+.mainContainer {
   cursor: pointer;
 }

@@ -67,7 +67,7 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
             const content = (
               <div className={s.overlayContainer}>
                 {this.isValidChartData ? (
-                  <div onClick={() => this.onSensorClick(this.chartData.sensorId, this.chartData.name, this.sensorId, this.setChartData, this.setPage, this.setSiteId, this.setSiteName)}>
+                  <div className={s.mainContainer} onClick={() => this.onSensorClick(this.chartData.sensorId, this.chartData.name, this.sensorId, this.setChartData, this.setPage, this.setSiteId, this.setSiteName)}>
                     <div className={s.chartContainer}>
                       <div id={this.chartData.id.toString()} className={s.chart}></div>
                     </div>
