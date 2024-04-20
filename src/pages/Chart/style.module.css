@@ -1,3 +1,7 @@
+.container {
+  --background: #fff;
+}
+
 .backIcon {
   cursor: pointer;
 }

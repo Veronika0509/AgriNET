@@ -1,6 +1,7 @@
 import {getSensorItems} from "../../data/getSensorItems";
 import {moistChartDataRequest} from "../../data/moistChartDataRequest";
 import {createSensorsMarkers} from "../createSensorsMarkersFunc";
+import s from '../../style.module.css'
 
 export const setGroupMarkers = (map: any, siteList: any, markers: any, setMarkers: any, setSensorName: any, setSensorId: any, setSensorType: any, setIsModalOpen: any, setIsChartDataIsLoading: any, setIsSelectDisabled: any, setChartData: any, moistFuelChartsAmount: any, userId: any, setInvalidChartDataContainer: any, setMoistChartDataContainer: any, allMoistFuelCoordinatesOfMarkers: any, setIsAllMoistFuelCoordinatesOfMarkersAreReady: any, existingMarkers: any) => {
   if (map && siteList.length > 0 && markers.length === 0) {
@@ -10,7 +11,7 @@ export const setGroupMarkers = (map: any, siteList: any, markers: any, setMarker
         map: map,
         title: sensorsGroupData.name,
       });
-      const info: string = sensorsGroupData.name
+      const info: string = `<p class="infoWindowText">${sensorsGroupData.name}</p>`
       const infoWindow = new google.maps.InfoWindow({
         content: info,
       });

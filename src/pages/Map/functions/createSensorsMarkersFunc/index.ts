@@ -18,8 +18,9 @@ export const createSensorsMarkers = (sensorItem: any, map: any, setSensorName: a
     position: {lat, lng},
     map
   });
+  const info = `<div><p class="infoWindowText"><span>Name:</span> ${sensorItem.name}</p><p class="infoWindowText">Click to see more...</p></div>`
   const infoWindow = new google.maps.InfoWindow({
-    content: "Name: " + sensorItem.name + '<br />' + "Click to see more..."
+    content: info
   });
   infoWindow.open(map, sensorMarker);
   sensorMarker.addListener('click', () => {

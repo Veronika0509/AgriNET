@@ -35,8 +35,14 @@ export const moistChartDataRequest = async (propsSensorId: string, bounds: any, 
       } else {
         invalidChartData.push([moistChartData[index], bounds])
       }
-      setInvalidChartDataContainer(invalidChartData)
-      setMoistChartDataContainer(updatedMoistChartData)
+      new Promise((resolve: any) => {
+        setInvalidChartDataContainer(invalidChartData)
+        setMoistChartDataContainer(updatedMoistChartData)
+
+        resolve()
+      }).then(() => {
+        moistChartData = []
+      })
     })
   }
 }

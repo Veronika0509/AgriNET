@@ -55,6 +55,7 @@
 .invalidSensorIdText {
   font-size: 13px;
   text-align: center;
+  color: #000;
 }
 
 .map {

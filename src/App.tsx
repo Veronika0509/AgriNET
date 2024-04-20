@@ -86,7 +86,7 @@ const App: React.FC = () => {
                           <Route exact path="/info">
                             <Info />
                           </Route>
-                          <Route exact path="/main">
+                          <Route exact path="/map">
                             <Redirect to="/login"/>
                           </Route>
                           <Route exact path="/chart">
@@ -109,12 +109,12 @@ const App: React.FC = () => {
                     <div>
                       <IonReactRouter>
                         <Route exact path="/login">
-                          <Redirect to="/main"/>
+                          <Redirect to="/map"/>
                         </Route>
                         <Route exact path="/chart">
-                          <Redirect to="/main"/>
+                          <Redirect to="/map"/>
                         </Route>
-                        <Route exact path="/main">
+                        <Route exact path="/map">
                           <Main isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData} setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId} setSiteName={setSiteName} />
                         </Route>
                       </IonReactRouter>
@@ -122,7 +122,7 @@ const App: React.FC = () => {
                     : page === 2 &&
                           <div>
                               <IonReactRouter>
-                                  <Route exact path="/main">
+                                  <Route exact path="/map">
                                       <Redirect to="/chart"/>
                                   </Route>
                                   <Route exact path="/chart">
