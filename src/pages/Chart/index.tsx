@@ -40,10 +40,10 @@ const Chart = (props: ChartProps) => {
     setIsMobile(window.innerWidth < 850)
   };
 
+  window.addEventListener('resize', handleResize)
+
   useEffect(() => {
-    if (isMobile) {
-      updateChart(props.chartData)
-    }
+    updateChart(props.chartData)
   }, [isMobile]);
 
   useEffect(() => {
@@ -337,8 +337,8 @@ const Chart = (props: ChartProps) => {
   useEffect(() => {
     setCurrentChartData(props.chartData)
     updateChart(props.chartData)
-    handleResize()
     irrigationDatesRequest()
+    handleResize()
   }, []);
 
   return (

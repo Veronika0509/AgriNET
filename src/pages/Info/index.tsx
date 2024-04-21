@@ -17,8 +17,8 @@ const Info: React.FC = () => {
           <div>
             <a href="https://www.agrinet.us/" target='_blank' className={s.link}>
               <IonImg className={s.img} src={Logo} alt='Logo'/>
-              <a className={`${s.linkText} ${s.text} ${'ion-margin-top'}`} href="https://www.agrinet.us/">tuctronics.com</a>
             </a>
+            <a className={`${s.linkText} ${s.text} ${'ion-margin-top'}`} href="https://www.agrinet.us/">tuctronics.com</a>
             <h1 className={`${s.text} ${s.title} ${'ion-margin-top'}`}>Todd Tucker</h1>
             <IonText className={`${s.text} ${'ion-margin-top'}`}>Tuctronics, CTO</IonText>
             <IonText className={s.text}>Project Manager, System Deployment</IonText>

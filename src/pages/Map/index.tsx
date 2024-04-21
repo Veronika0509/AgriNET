@@ -14,8 +14,10 @@ import {setSiteListRequest} from "./data/siteListRequest";
 import {createMap} from "./functions/createMapFunc";
 import {setGroupMarkers} from "./functions/setGroupMarkersFunc";
 import {createMarkerOverlay} from "./functions/createMarkerOverlayFunc";
+import login from "../Login";
 
 interface MainProps {
+  page: any
   setPage: React.Dispatch<React.SetStateAction<number>>;
   userId: number;
   siteList: any;
@@ -27,7 +29,7 @@ interface MainProps {
   isGoogleApiLoaded: any;
 }
 
-const Main: React.FC<MainProps> = (props) => {
+const MapPage: React.FC<MainProps> = (props) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [sensorId, setSensorId] = useState('')
   const [sensorName, setSensorName] = useState('')
@@ -46,10 +48,17 @@ const Main: React.FC<MainProps> = (props) => {
   let overlappingPairs: any[] = []
   const existingMarkers = new Map();
 
-  setSiteListRequest(props.userId, props.setSiteList)
-
-  createMap(map, setMap, mapRef)
-  setGroupMarkers(map, props.siteList, markers, setMarkers, setSensorName, setSensorId, setSensorType, setIsModalOpen, setIsChartDataIsLoading, setIsSelectDisabled, props.setChartData, moistFuelChartsAmount, props.userId, setInvalidChartDataContainer, setMoistChartDataContainer, allMoistFuelCoordinatesOfMarkers, setIsAllMoistFuelCoordinatesOfMarkersAreReady, existingMarkers)
+  useEffect(() => {
+    if (props.page === 1) {
+      setSiteListRequest(props.userId, props.setSiteList)
+      createMap(map, setMap, mapRef)
+    }
+  }, [props.page])
+  useEffect(() => {
+    if (map && props.siteList.length > 0) {
+      setGroupMarkers(props.page, map, props.siteList, markers, setMarkers, setSensorName, setSensorId, setSensorType, setIsModalOpen, setIsChartDataIsLoading, setIsSelectDisabled, props.setChartData, moistFuelChartsAmount, props.userId, setInvalidChartDataContainer, setMoistChartDataContainer, allMoistFuelCoordinatesOfMarkers, setIsAllMoistFuelCoordinatesOfMarkersAreReady, existingMarkers)
+    }
+  }, [map, props.siteList]);
 
   // Marker Chart
   useEffect(() => {
@@ -100,4 +109,4 @@ const Main: React.FC<MainProps> = (props) => {
   )
 }
 
-export default Main;
+export default MapPage;

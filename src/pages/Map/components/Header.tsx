@@ -6,6 +6,7 @@ import {arrowBackOutline} from "ionicons/icons";
 const Header = (props: any) => {
   const back = () => {
     props.setPage(0);
+    window.location.reload()
   };
 
   return (

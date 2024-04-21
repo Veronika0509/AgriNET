@@ -7,13 +7,13 @@ export const onSensorClick = (id: string, name: string, sensorId: string, setCha
       resolve(response)
     }).then((response: any) => {
       setChartData(response.data.data)
-      setPage(2)
       setSiteId(id)
       setSiteName(name)
+      setPage(2)
     })
   } else {
-    setPage(2)
     setSiteId(id)
     setSiteName(name)
+    setPage(2)
   }
 };

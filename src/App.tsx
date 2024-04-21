@@ -1,4 +1,4 @@
-import {Redirect, Route} from 'react-router-dom';
+import {Redirect, Route, useLocation} from 'react-router-dom';
 import {
   IonApp,
   IonIcon,
@@ -9,7 +9,7 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import {home, informationCircle} from 'ionicons/icons';
+import {home, informationCircle, logoFacebook} from 'ionicons/icons';
 import {loadGoogleApi} from "./components/loadGoogleApiFunc";
 
 /* Core CSS required for Ionic components to work properly */
@@ -35,7 +35,7 @@ import React, {useEffect, useState} from "react";
 import Preloader from "./components/Preloader";
 import Login from "./pages/Login";
 import Info from "./pages/Info";
-import Main from "./pages/Map";
+import Map from "./pages/Map";
 import Chart from "./pages/Chart";
 import './App.css'
 
@@ -57,82 +57,83 @@ const App: React.FC = () => {
   return (
     <div>
       {isGoogleApiLoaded && (
-          <IonApp>
-            <div>
-              {page === -1 ?
+        <IonApp>
+          <div>
+            {page === -1 ?
+              <div>
+                <IonReactRouter>
+                  <Route exact path="/">
+                    <Redirect to="/login"/>
+                  </Route>
+                  <Route exact path="/login">
+                    <Login setPage={setPage} setUserId={setUserId} />
+                  </Route>
+                </IonReactRouter>
+              </div>
+              : page === 0
+                ?
                 <div>
+                  <Preloader/>
                   <IonReactRouter>
-                    <Route exact path="/">
-                      <Redirect to="/login"/>
-                    </Route>
-                    <Route exact path="/login">
-                      <Login setPage={setPage} setUserId={setUserId} />
-                    </Route>
-                  </IonReactRouter>
-                </div>
-                : page === 0
-                  ?
-                  <div>
-                    <Preloader/>
-                    <IonReactRouter>
-                      <IonTabs>
-                        <IonRouterOutlet>
-                          <Route exact path="/login">
-                            <Login setPage={setPage} setUserId={setUserId} />
-                          </Route>
-                          <Route exact path="/">
-                            <Redirect to="/login"/>
-                          </Route>
-                          <Route exact path="/info">
-                            <Info />
-                          </Route>
-                          <Route exact path="/map">
-                            <Redirect to="/login"/>
-                          </Route>
-                          <Route exact path="/chart">
-                            <Redirect to="/login"/>
-                          </Route>
-                        </IonRouterOutlet>
-                        <IonTabBar slot="bottom">
-                          <IonTabButton tab="login" layout="icon-start" href="/login">
-                            <IonIcon icon={home}/>
-                          </IonTabButton>
-                          <IonTabButton tab="info" href="/info">
-                            <IonIcon icon={informationCircle}/>
-                          </IonTabButton>
-                        </IonTabBar>
-                      </IonTabs>
-                    </IonReactRouter>
-                  </div>
-                  : page === 1
-                    ?
-                    <div>
-                      <IonReactRouter>
+                    <IonTabs>
+                      <IonRouterOutlet>
                         <Route exact path="/login">
-                          <Redirect to="/map"/>
+                          <Login setPage={setPage} setUserId={setUserId} />
                         </Route>
-                        <Route exact path="/chart">
-                          <Redirect to="/map"/>
+                        <Route exact path="/">
+                          <Redirect to="/login"/>
+                        </Route>
+                        <Route exact path="/info">
+                          <Info />
                         </Route>
                         <Route exact path="/map">
-                          <Main isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData} setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId} setSiteName={setSiteName} />
+                          <Redirect to="/login"/>
+                        </Route>
+                        <Route exact path="/chart">
+                          <Redirect to="/login"/>
+                        </Route>
+                      </IonRouterOutlet>
+                      <IonTabBar slot="bottom">
+                        <IonTabButton tab="login" layout="icon-start" href="/login">
+                          <IonIcon icon={home}/>
+                        </IonTabButton>
+                        <IonTabButton tab="info" href="/info">
+                          <IonIcon icon={informationCircle}/>
+                        </IonTabButton>
+                      </IonTabBar>
+                    </IonTabs>
+                  </IonReactRouter>
+                </div>
+                : page === 1
+                  ?
+                  <div>
+                    <IonReactRouter>
+                      <Route exact path="/login">
+                        <Redirect to="/map"/>
+                      </Route>
+                      <Route exact path="/chart">
+                        <Redirect to="/map"/>
+                      </Route>
+                    </IonReactRouter>
+                  </div>
+                  : page === 2 &&
+                    <div>
+                      <IonReactRouter>
+                        <Route exact path="/map">
+                          <Redirect to="/chart"/>
+                        </Route>
+                        <Route exact path="/chart">
+                          <Chart chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
                         </Route>
                       </IonReactRouter>
                     </div>
-                    : page === 2 &&
-                          <div>
-                              <IonReactRouter>
-                                  <Route exact path="/map">
-                                      <Redirect to="/chart"/>
-                                  </Route>
-                                  <Route exact path="/chart">
-                                      <Chart chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
-                                  </Route>
-                              </IonReactRouter>
-                          </div>
-              }
-            </div>
-          </IonApp>
+            }
+
+          </div>
+          <div style={{display: page === 1 ? 'block' : 'none'}}>
+            <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData} setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId} setSiteName={setSiteName} />
+          </div>
+        </IonApp>
       )}
     </div>
   );
