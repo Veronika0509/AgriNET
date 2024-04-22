@@ -1,4 +1,4 @@
-import {Redirect, Route} from 'react-router-dom';
+import {Redirect, Route, useLocation} from 'react-router-dom';
 import {
   IonApp,
   IonIcon,
@@ -9,7 +9,7 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import {home, informationCircle} from 'ionicons/icons';
+import {home, informationCircle, logoFacebook} from 'ionicons/icons';
 import {loadGoogleApi} from "./components/loadGoogleApiFunc";
 
 /* Core CSS required for Ionic components to work properly */
@@ -33,11 +33,11 @@ import '@ionic/react/css/display.css';
 
 import React, {useEffect, useState} from "react";
 import Preloader from "./components/Preloader";
-import './App.css'
 import Login from "./pages/Login";
 import Info from "./pages/Info";
+import Map from "./pages/Map";
 import Chart from "./pages/Chart";
-import Map from './pages/Map'
+import './App.css'
 
 setupIonicReact();
 
@@ -117,16 +117,16 @@ const App: React.FC = () => {
                     </IonReactRouter>
                   </div>
                   : page === 2 &&
-                    <div>
-                      <IonReactRouter>
-                        <Route exact path="/map">
-                          <Redirect to="/chart"/>
-                        </Route>
-                        <Route exact path="/chart">
-                          <Chart chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
-                        </Route>
-                      </IonReactRouter>
-                    </div>
+                        <div>
+                            <IonReactRouter>
+                                <Route exact path="/map">
+                                    <Redirect to="/chart"/>
+                                </Route>
+                                <Route exact path="/chart">
+                                    <Chart chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
+                                </Route>
+                            </IonReactRouter>
+                        </div>
             }
 
           </div>
