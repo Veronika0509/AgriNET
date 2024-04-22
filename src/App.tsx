@@ -33,11 +33,11 @@ import '@ionic/react/css/display.css';
 
 import React, {useEffect, useState} from "react";
 import Preloader from "./components/Preloader";
+import './App.css'
 import Login from "./pages/Login";
 import Info from "./pages/Info";
-import Map from "./pages/Map";
 import Chart from "./pages/Chart";
-import './App.css'
+import Map from './pages/Map'
 
 setupIonicReact();
 
@@ -63,7 +63,7 @@ const App: React.FC = () => {
               <div>
                 <IonReactRouter>
                   <Route exact path="/">
-                    <Redirect to="/login"/>
+                    <Redirect to="login"/>
                   </Route>
                   <Route exact path="login">
                     <Login setPage={setPage} setUserId={setUserId} />
@@ -81,23 +81,23 @@ const App: React.FC = () => {
                           <Login setPage={setPage} setUserId={setUserId} />
                         </Route>
                         <Route exact path="/">
-                          <Redirect to="/login"/>
+                          <Redirect to="login"/>
                         </Route>
                         <Route exact path="info">
                           <Info />
                         </Route>
                         <Route exact path="map">
-                          <Redirect to="/login"/>
+                          <Redirect to="login"/>
                         </Route>
                         <Route exact path="map">
-                          <Redirect to="/login"/>
+                          <Redirect to="login"/>
                         </Route>
                       </IonRouterOutlet>
                       <IonTabBar slot="bottom">
-                        <IonTabButton tab="login" layout="icon-start" href="/login">
+                        <IonTabButton tab="login" layout="icon-start" href="login">
                           <IonIcon icon={home}/>
                         </IonTabButton>
-                        <IonTabButton tab="info" href="/info">
+                        <IonTabButton tab="info" href="info">
                           <IonIcon icon={informationCircle}/>
                         </IonTabButton>
                       </IonTabBar>
@@ -109,10 +109,10 @@ const App: React.FC = () => {
                   <div>
                     <IonReactRouter>
                       <Route exact path="login">
-                        <Redirect to="/map"/>
+                        <Redirect to="map"/>
                       </Route>
                       <Route exact path="chart">
-                        <Redirect to="/map"/>
+                        <Redirect to="map"/>
                       </Route>
                     </IonReactRouter>
                   </div>
@@ -120,7 +120,7 @@ const App: React.FC = () => {
                     <div>
                       <IonReactRouter>
                         <Route exact path="map">
-                          <Redirect to="/chart"/>
+                          <Redirect to="chart"/>
                         </Route>
                         <Route exact path="chart">
                           <Chart chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
