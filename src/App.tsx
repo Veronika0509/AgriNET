@@ -1,4 +1,4 @@
-import {Redirect, Route, useLocation} from 'react-router-dom';
+import {Redirect, Route, Switch, useLocation} from 'react-router-dom';
 import {
   IonApp,
   IonIcon,
@@ -65,7 +65,7 @@ const App: React.FC = () => {
                   <Route exact path="/">
                     <Redirect to="/login"/>
                   </Route>
-                  <Route exact path="/login">
+                  <Route exact path="login">
                     <Login setPage={setPage} setUserId={setUserId} />
                   </Route>
                 </IonReactRouter>
@@ -77,19 +77,19 @@ const App: React.FC = () => {
                   <IonReactRouter>
                     <IonTabs>
                       <IonRouterOutlet>
-                        <Route exact path="/login">
+                        <Route exact path="login">
                           <Login setPage={setPage} setUserId={setUserId} />
                         </Route>
                         <Route exact path="/">
                           <Redirect to="/login"/>
                         </Route>
-                        <Route exact path="/info">
+                        <Route exact path="info">
                           <Info />
                         </Route>
-                        <Route exact path="/map">
+                        <Route exact path="map">
                           <Redirect to="/login"/>
                         </Route>
-                        <Route exact path="/map">
+                        <Route exact path="map">
                           <Redirect to="/login"/>
                         </Route>
                       </IonRouterOutlet>
@@ -108,10 +108,10 @@ const App: React.FC = () => {
                   ?
                   <div>
                     <IonReactRouter>
-                      <Route exact path="/login">
+                      <Route exact path="login">
                         <Redirect to="/map"/>
                       </Route>
-                      <Route exact path="/chart">
+                      <Route exact path="chart">
                         <Redirect to="/map"/>
                       </Route>
                     </IonReactRouter>
@@ -119,10 +119,10 @@ const App: React.FC = () => {
                   : page === 2 &&
                     <div>
                       <IonReactRouter>
-                        <Route exact path="/map">
+                        <Route exact path="map">
                           <Redirect to="/chart"/>
                         </Route>
-                        <Route exact path="/chart">
+                        <Route exact path="chart">
                           <Chart chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
                         </Route>
                       </IonReactRouter>
