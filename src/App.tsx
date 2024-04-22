@@ -74,7 +74,7 @@ const App: React.FC = () => {
                 ?
                 <div>
                   <Preloader/>
-                  <IonReactRouter>
+                  <IonReactRouter basename="/AgriNET">
                     <IonTabs>
                       <IonRouterOutlet>
                         <Route exact path="/login">
