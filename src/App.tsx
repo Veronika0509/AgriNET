@@ -117,16 +117,16 @@ const App: React.FC = () => {
                     </IonReactRouter>
                   </div>
                   : page === 2 &&
-                        <div>
-                            <IonReactRouter basename="/AgriNET">
-                                <Route exact path="/map">
-                                    <Redirect to="/chart"/>
-                                </Route>
-                                <Route exact path="/chart">
-                                    <Chart chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
-                                </Route>
-                            </IonReactRouter>
-                        </div>
+                    <div>
+                      <IonReactRouter basename="/AgriNET">
+                        <Route exact path="/map">
+                          <Redirect to="/chart"/>
+                        </Route>
+                        <Route exact path="/chart">
+                          <Chart chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
+                        </Route>
+                      </IonReactRouter>
+                    </div>
             }
 
           </div>
