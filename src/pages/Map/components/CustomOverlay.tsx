@@ -2,6 +2,7 @@ import s from "../style.module.css";
 import {createRoot} from "react-dom/client";
 import React from "react";
 import {truncateText} from "../functions/truncateTextFunc";
+import { useHistory } from 'react-router-dom';
 
 const overlaysOverlap = (overlayProjection: any, overlayA: any, overlayB: any) => {
   const positionA = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(overlayA.lat, overlayA.lng));
@@ -25,10 +26,11 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
       private setPage: any
       private setSiteId: any
       private setSiteName: any
+      private history: any
 
       private div?: any;
 
-      constructor(bounds: google.maps.LatLngBounds, invalidChartDataImage: any, isValidChartData: boolean, chartData: any, setOverlayIsReady: any, onSensorClick: any, isAllMoistFuelCoordinatesOfMarkersAreReady: any, overlappingPairs: any, sensorId: string, setChartData: any, setPage: any, setSiteId: any, setSiteName: any) {
+      constructor(bounds: google.maps.LatLngBounds, invalidChartDataImage: any, isValidChartData: boolean, chartData: any, setOverlayIsReady: any, onSensorClick: any, isAllMoistFuelCoordinatesOfMarkersAreReady: any, overlappingPairs: any, sensorId: string, setChartData: any, setPage: any, setSiteId: any, setSiteName: any, history: any) {
         super();
 
         this.bounds = bounds;
@@ -44,6 +46,7 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
         this.setPage = setPage
         this.setSiteId = setSiteId
         this.setSiteName = setSiteName
+        this.history = history
       }
 
       onAdd() {
@@ -67,7 +70,7 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
             const content = (
               <div className={s.overlayContainer}>
                 {this.isValidChartData ? (
-                  <div className={s.mainContainer} onClick={() => this.onSensorClick(this.chartData.sensorId, this.chartData.name, this.sensorId, this.setChartData, this.setPage, this.setSiteId, this.setSiteName)}>
+                  <div className={s.mainContainer} onClick={() => this.onSensorClick(this.history, this.chartData.sensorId, this.chartData.name, this.sensorId, this.setChartData, this.setPage, this.setSiteId, this.setSiteName)}>
                     <div className={s.chartContainer}>
                       <div id={this.chartData.id.toString()} className={s.chart}></div>
                     </div>

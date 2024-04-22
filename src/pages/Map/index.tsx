@@ -14,7 +14,7 @@ import {setSiteListRequest} from "./data/siteListRequest";
 import {createMap} from "./functions/createMapFunc";
 import {setGroupMarkers} from "./functions/setGroupMarkersFunc";
 import {createMarkerOverlay} from "./functions/createMarkerOverlayFunc";
-import login from "../Login";
+import { useHistory } from 'react-router-dom';
 
 interface MainProps {
   page: any
@@ -47,6 +47,7 @@ const MapPage: React.FC<MainProps> = (props) => {
   let allMoistFuelCoordinatesOfMarkers: any = [];
   let overlappingPairs: any[] = []
   const existingMarkers = new Map();
+  const history = useHistory();
 
   useEffect(() => {
     if (props.page === 1) {
@@ -66,7 +67,7 @@ const MapPage: React.FC<MainProps> = (props) => {
       const addOverlay = (() => {
         moistChartDataContainer.map((chartData: any) => {
           const CustomOverlayExport: any = initializeCustomOverlay(props.isGoogleApiLoaded)
-          const overlay = new CustomOverlayExport(chartData[1], invalidChartDataImage, true, chartData[0], setOverlayIsReady, onSensorClick, isAllMoistFuelCoordinatesOfMarkersAreReady, overlappingPairs, sensorId, props.setChartData, props.setPage, props.setSiteId, props.setSiteName);
+          const overlay = new CustomOverlayExport(chartData[1], invalidChartDataImage, true, chartData[0], setOverlayIsReady, onSensorClick, isAllMoistFuelCoordinatesOfMarkersAreReady, overlappingPairs, sensorId, props.setChartData, props.setPage, props.setSiteId, props.setSiteName, history);
           overlay.setMap(map);
         })
       })
@@ -77,7 +78,7 @@ const MapPage: React.FC<MainProps> = (props) => {
     if (invalidChartDataContainer.length !== 0) {
       invalidChartDataContainer.map((chartData: any) => {
         const CustomOverlayExport: any = initializeCustomOverlay(props.isGoogleApiLoaded)
-        const overlay: any = new CustomOverlayExport(chartData[1], invalidChartDataImage, false, chartData[0], setOverlayIsReady, onSensorClick, isAllMoistFuelCoordinatesOfMarkersAreReady, overlappingPairs, sensorId, props.setChartData, props.setPage, props.setSiteId, props.setSiteName);
+        const overlay: any = new CustomOverlayExport(chartData[1], invalidChartDataImage, false, chartData[0], setOverlayIsReady, onSensorClick, isAllMoistFuelCoordinatesOfMarkersAreReady, overlappingPairs, sensorId, props.setChartData, props.setPage, props.setSiteId, props.setSiteName, history);
         map && overlay.setMap(map)
       })
     }

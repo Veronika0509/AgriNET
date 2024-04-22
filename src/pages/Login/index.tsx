@@ -12,6 +12,7 @@ import axios from 'axios';
 import s from './style.module.css';
 import Logo from '../../assets/images/logo.png';
 import {useState} from "react";
+import { useHistory } from 'react-router-dom';
 
 interface LoginProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -22,6 +23,7 @@ const Login: React.FC<LoginProps> = (props) => {
   const [usernameInputValue, setUsernameInputValue] = useState('');
   const [passwordInputValue, setPasswordInputValue] = useState('');
   const [message, setMessage] = useState(false);
+  const history = useHistory();
   const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     axios.get('https://app.agrinet.us/api/auth/try', {
@@ -31,6 +33,7 @@ const Login: React.FC<LoginProps> = (props) => {
       },
     }).then(response => {
       props.setPage(1);
+      history.push('/map');
       props.setUserId(response.data.id);
     }).catch(() => {
       setMessage(true)

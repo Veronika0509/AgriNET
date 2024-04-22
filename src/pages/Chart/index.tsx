@@ -14,6 +14,7 @@ import axios from "axios";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+import { useHistory } from 'react-router-dom';
 
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -330,8 +331,10 @@ const Chart = (props: ChartProps) => {
       console.log(error);
     }
   }
+  const history = useHistory();
   const back = (): void => {
     props.setPage(1);
+    history.push('/map');
   };
 
   useEffect(() => {

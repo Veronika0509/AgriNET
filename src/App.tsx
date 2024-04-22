@@ -11,6 +11,7 @@ import {
 import {IonReactRouter} from '@ionic/react-router';
 import {home, informationCircle, logoFacebook} from 'ionicons/icons';
 import {loadGoogleApi} from "./components/loadGoogleApiFunc";
+import { useHistory } from 'react-router-dom';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -49,9 +50,11 @@ const App: React.FC = () => {
   const [siteName, setSiteName] = useState('')
   const [chartData, setChartData] = useState([])
   const [isGoogleApiLoaded, setGoogleApiLoaded] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);
+    history.push('/AgriNET/login');
   }, []);
 
   return (
@@ -59,20 +62,8 @@ const App: React.FC = () => {
       {isGoogleApiLoaded && (
         <IonApp>
           <div>
-            {page === -1 ?
-              <div>
-                <IonReactRouter basename="/AgriNET">
-                  <Route exact path="/">
-                    <Redirect to="/login"/>
-                  </Route>
-                  <Route exact path="/login">
-                    <Login setPage={setPage} setUserId={setUserId} />
-                  </Route>
-                </IonReactRouter>
-              </div>
-              : page === 0
-                ?
-                <div>
+            {page === 0
+                ? <div>
                   <Preloader/>
                   <IonReactRouter basename="/AgriNET">
                     <IonTabs>
@@ -80,17 +71,8 @@ const App: React.FC = () => {
                         <Route exact path="/login">
                           <Login setPage={setPage} setUserId={setUserId} />
                         </Route>
-                        <Route exact path="/">
-                          <Redirect to="/login"/>
-                        </Route>
                         <Route exact path="/info">
                           <Info />
-                        </Route>
-                        <Route exact path="/map">
-                          <Redirect to="/login"/>
-                        </Route>
-                        <Route exact path="/chart">
-                          <Redirect to="/login"/>
                         </Route>
                       </IonRouterOutlet>
                       <IonTabBar slot="bottom">
@@ -104,31 +86,15 @@ const App: React.FC = () => {
                     </IonTabs>
                   </IonReactRouter>
                 </div>
-                : page === 1
-                  ?
-                  <div>
-                    <IonReactRouter basename="/AgriNET">
-                      <Route path="/login">
-                        <Redirect to="/map"/>
-                      </Route>
-                      <Route path="/chart">
-                        <Redirect to="/map"/>
-                      </Route>
-                    </IonReactRouter>
-                  </div>
                   : page === 2 &&
                     <div>
                       <IonReactRouter basename="/AgriNET">
-                        <Route path="/map">
-                          <Redirect to="/chart"/>
-                        </Route>
                         <Route path="/chart">
                           <Chart chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
                         </Route>
                       </IonReactRouter>
                     </div>
             }
-
           </div>
           <div style={{display: page === 1 ? 'block' : 'none'}}>
             <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData} setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId} setSiteName={setSiteName} />
