@@ -1,4 +1,4 @@
-import {Redirect, Route, Switch, useLocation} from 'react-router-dom';
+import {Redirect, Route} from 'react-router-dom';
 import {
   IonApp,
   IonIcon,
@@ -9,7 +9,7 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import {home, informationCircle, logoFacebook} from 'ionicons/icons';
+import {home, informationCircle} from 'ionicons/icons';
 import {loadGoogleApi} from "./components/loadGoogleApiFunc";
 
 /* Core CSS required for Ionic components to work properly */
