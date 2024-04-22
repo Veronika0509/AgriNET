@@ -89,7 +89,7 @@ const App: React.FC = () => {
                         <Route exact path="/map">
                           <Redirect to="/login"/>
                         </Route>
-                        <Route exact path="/map">
+                        <Route exact path="/chart">
                           <Redirect to="/login"/>
                         </Route>
                       </IonRouterOutlet>
