@@ -63,9 +63,9 @@ const App: React.FC = () => {
               <div>
                 <IonReactRouter>
                   <Route exact path="/">
-                    <Redirect to="/AgriNET/login"/>
+                    <Redirect to="/login"/>
                   </Route>
-                  <Route exact path="/AgriNET/login">
+                  <Route exact path="/login">
                     <Login setPage={setPage} setUserId={setUserId} />
                   </Route>
                 </IonReactRouter>
@@ -77,27 +77,27 @@ const App: React.FC = () => {
                   <IonReactRouter>
                     <IonTabs>
                       <IonRouterOutlet>
-                        <Route exact path="/AgriNET/login">
+                        <Route exact path="/login">
                           <Login setPage={setPage} setUserId={setUserId} />
                         </Route>
                         <Route exact path="/">
-                          <Redirect to="/AgriNET/login"/>
+                          <Redirect to="/login"/>
                         </Route>
-                        <Route exact path="/AgriNET/info">
+                        <Route exact path="/info">
                           <Info />
                         </Route>
-                        <Route exact path="/AgriNET/map">
-                          <Redirect to="/AgriNET/login"/>
+                        <Route exact path="/map">
+                          <Redirect to="/login"/>
                         </Route>
-                        <Route exact path="/AgriNET/map">
-                          <Redirect to="/AgriNET/login"/>
+                        <Route exact path="/map">
+                          <Redirect to="/login"/>
                         </Route>
                       </IonRouterOutlet>
                       <IonTabBar slot="bottom">
-                        <IonTabButton tab="login" layout="icon-start" href="/AgriNET/login">
+                        <IonTabButton tab="login" layout="icon-start" href="/login">
                           <IonIcon icon={home}/>
                         </IonTabButton>
-                        <IonTabButton tab="info" href="/AgriNET/info">
+                        <IonTabButton tab="info" href="/info">
                           <IonIcon icon={informationCircle}/>
                         </IonTabButton>
                       </IonTabBar>
@@ -108,21 +108,21 @@ const App: React.FC = () => {
                   ?
                   <div>
                     <IonReactRouter>
-                      <Route exact path="/AgriNET/login">
-                        <Redirect to="/AgriNET/map"/>
+                      <Route exact path="/login">
+                        <Redirect to="/map"/>
                       </Route>
-                      <Route exact path="/AgriNET/chart">
-                        <Redirect to="/AgriNET/map"/>
+                      <Route exact path="/chart">
+                        <Redirect to="/map"/>
                       </Route>
                     </IonReactRouter>
                   </div>
                   : page === 2 &&
                     <div>
                       <IonReactRouter>
-                        <Route exact path="/AgriNET/map">
-                          <Redirect to="/AgriNET/chart"/>
+                        <Route exact path="/map">
+                          <Redirect to="/chart"/>
                         </Route>
-                        <Route exact path="/AgriNET/chart">
+                        <Route exact path="/chart">
                           <Chart chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
                         </Route>
                       </IonReactRouter>
