@@ -7,7 +7,7 @@ import { useHistory } from 'react-router-dom';
 const Header = (props: any) => {
   const history = useHistory();
   const back = () => {
-    history.push('/AgriNET/login');
+    history.push('/AgriNET/');
     props.setPage(0);
     window.location.reload()
   };
