@@ -8,7 +8,6 @@ const Header = (props: any) => {
   const history = useHistory();
   const back = () => {
     history.push('/AgriNET/');
-    console.log(123)
     props.setPage(0);
     window.location.reload()
   };
