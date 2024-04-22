@@ -108,10 +108,10 @@ const App: React.FC = () => {
                   ?
                   <div>
                     <IonReactRouter basename="/AgriNET">
-                      <Route exact path="/login">
+                      <Route path="/login">
                         <Redirect to="/map"/>
                       </Route>
-                      <Route exact path="/chart">
+                      <Route path="/chart">
                         <Redirect to="/map"/>
                       </Route>
                     </IonReactRouter>
@@ -119,10 +119,10 @@ const App: React.FC = () => {
                   : page === 2 &&
                     <div>
                       <IonReactRouter basename="/AgriNET">
-                        <Route exact path="/map">
+                        <Route path="/map">
                           <Redirect to="/chart"/>
                         </Route>
-                        <Route exact path="/chart">
+                        <Route path="/chart">
                           <Chart chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
                         </Route>
                       </IonReactRouter>
