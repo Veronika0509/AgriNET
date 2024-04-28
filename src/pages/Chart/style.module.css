@@ -2,6 +2,11 @@
   --background: #fff;
 }
 
+.topSection {
+  max-width: 80vw;
+  margin: 50px auto 0 auto;
+}
+
 .backIcon {
   cursor: pointer;
 }
@@ -24,6 +29,25 @@
 
 .buttons {
   text-align: center;
+}
+
+.datetimePickerWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.datetimePickerContainer {
+  display: flex;
+  align-items: center;
+}
+
+.datetimePicker {
+  margin-left: 10px;
+}
+
+.datetimePickerContainer:nth-child(2) {
+  margin-left: 10px;
+  margin-right: 20px;
 }
 
 @media only screen and (max-width: 850px) {
