@@ -50,6 +50,11 @@
   margin-right: 20px;
 }
 
+.datetimePickerWrapperContainer {
+  display: flex;
+  align-items: center;
+}
+
 @media only screen and (max-width: 850px) {
   .chart {
     height: 450px;
@@ -59,5 +64,25 @@
   }
   .wrapper {
     max-width: 100vw;
+  }
+  .topSection {
+    max-width: 98vw;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .datetimePickerWrapper {
+    display: block;
+  }
+}
+
+@media only screen and (max-width: 390px) {
+  .datetimePickerWrapperContainer {
+    display: block;
+  }
+  .datetimePickerContainer:nth-child(2) {
+    margin-top: 10px;
+    margin-left: 0;
+    margin-bottom: 10px;
   }
 }

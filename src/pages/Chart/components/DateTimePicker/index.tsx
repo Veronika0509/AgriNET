@@ -32,8 +32,10 @@ const DateTimePicker = (props: any) => {
   return (
     <div>
       <div className={s.datetimePickerWrapper}>
-        <DatetimeCalendar title={'From'} date={startDate} setDate={setStartDate} />
-        <DatetimeCalendar title={'To'} date={endDate} setDate={setEndDate}/>
+        <div className={s.datetimePickerWrapperContainer}>
+          <DatetimeCalendar title={'From'} date={startDate} setDate={setStartDate} />
+          <DatetimeCalendar title={'To'} date={endDate} setDate={setEndDate}/>
+        </div>
         <IonButton onClick={() => updateChartWithNewDatetime(startDate, endDate, presentToast, props.sensorId, props.root, props.isMobile, props.fullDatesArray, props.setCurrentChartData, props.setDisableNextButton, props.setDisablePrevButton)}>
           <IonIcon icon={refreshOutline}></IonIcon>
           update
