@@ -7,7 +7,6 @@ export const updateChartWithNewDatetime = (startDate: any, endDate: any, present
   if (checkDateValidity(startDate, endDate)) {
     presentToast()
   } else {
-    console.log(fullDatesRequest)
     const endDateDays = endDate.slice(0, 10)
     const startDatetime = new Date(startDate).getTime()
     const endDatetime = new Date(endDate).getTime()
