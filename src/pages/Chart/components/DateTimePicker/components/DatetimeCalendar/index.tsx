@@ -8,7 +8,7 @@ const DatetimeCalendar = (props: any) => {
   };
   return (
     <div className={s.datetimePickerContainer}>
-      <IonLabel>{props.title}</IonLabel>
+      <IonLabel className={s.datetimePickerTitle}>{props.title}</IonLabel>
       <div className={s.datetimePicker}>
         <IonDatetimeButton datetime={props.title}></IonDatetimeButton>
         <IonModal keepContentsMounted={true}>
