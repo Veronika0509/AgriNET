@@ -1,6 +1,6 @@
 import {getSensorItems} from "../../data/getSensorItems";
 import {moistChartDataRequest} from "../../data/moistChartDataRequest";
-import {createSensorsMarkers} from "../createSensorsMarkersFunc";
+import {createSensorsMarkers} from "../createSensorsMarkers";
 import s from '../../style.module.css'
 import login from "../../../Login";
 

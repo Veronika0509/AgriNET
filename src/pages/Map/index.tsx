@@ -9,11 +9,11 @@ import invalidChartDataImage from '../../assets/images/invalidChartData.png';
 import Header from "./components/Header";
 import ModalWindow from "./components/ModalWindow";
 import {initializeCustomOverlay} from "./components/CustomOverlay";
-import {onSensorClick} from "./functions/onSensorClickFunc";
+import {onSensorClick} from "./functions/onSensorClick";
 import {setSiteListRequest} from "./data/siteListRequest";
-import {createMap} from "./functions/createMapFunc";
-import {setGroupMarkers} from "./functions/setGroupMarkersFunc";
-import {createMarkerOverlay} from "./functions/createMarkerOverlayFunc";
+import {createMap} from "./functions/createMap";
+import {setGroupMarkers} from "./functions/setSite";
+import {createMarkerOverlay} from "./functions/createChartForOverlay";
 import { useHistory } from 'react-router-dom';
 
 interface MainProps {

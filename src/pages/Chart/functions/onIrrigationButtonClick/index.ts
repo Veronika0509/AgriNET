@@ -1,6 +1,7 @@
 import axios from "axios";
+import {getDatetime} from "../../components/DateTimePicker/functions/getDatetime";
 
-export const onIrrigationButtonClick = async (buttonProps: number, currentChartData: any, irrigationDates: any, setDisableNextButton: any, setDisablePrevButton: any, disableNextButton: any, disablePrevButton: any, siteId: string, userId: number, setCurrentChartData: any, updateChart: any, root: any, isMobile: any, fullDatesArray: any) => {
+export const onIrrigationButtonClick = async (buttonProps: number, currentChartData: any, irrigationDates: any, setDisableNextButton: any, setDisablePrevButton: any, disableNextButton: any, disablePrevButton: any, siteId: string, userId: number, setCurrentChartData: any, updateChart: any, root: any, isMobile: any, fullDatesArray: any, setStartDate: any, setEndDate: any) => {
   let currentDate
 
   if (buttonProps === 1) {
@@ -15,11 +16,11 @@ export const onIrrigationButtonClick = async (buttonProps: number, currentChartD
     const validDates = dateObjects.filter(buttonProps === 1 ? date => date > currentDateObj : dateObj => dateObj <= currentDateObj);
     if (buttonProps === 1) {
       const closestDate = new Date(Math.min(...validDates.map(date => date.getTime())));
-      closestDate.setDate(closestDate.getDate() + 4);
+      closestDate.setDate(closestDate.getDate() + 7);
       return closestDate.toISOString().split('T')[0];
     } else {
       const nearestDateObj = new Date(Math.max.apply(null, validDates.map(date => date.getTime())));
-      nearestDateObj.setDate(nearestDateObj.getDate() + 4);
+      nearestDateObj.setDate(nearestDateObj.getDate() + 7);
       return nearestDateObj.toISOString().split('T')[0];
     }
   }
@@ -31,6 +32,7 @@ export const onIrrigationButtonClick = async (buttonProps: number, currentChartD
   const day = nearestDate.getDate().toString().padStart(2, '0');
   const formattedNearestDate = `${year}-${month}-${day}`;
 
+  console.log(formattedNearestDate, irrigationDates[0])
   if (formattedNearestDate === irrigationDates[0]) {
     setDisableNextButton(true)
   }
@@ -48,12 +50,14 @@ export const onIrrigationButtonClick = async (buttonProps: number, currentChartD
     }
   }
 
+  const newNearestDate: any = findNearestDate(currentDate, irrigationDates)
+
   try {
     const response = await axios.get('https://app.agrinet.us/api/chart/m', {
       params: {
         sensorId: siteId,
-        days: 8,
-        endDate: findNearestDate(currentDate, irrigationDates),
+        days: 14,
+        endDate: newNearestDate,
         user: userId,
         v: 42
       },
@@ -63,6 +67,13 @@ export const onIrrigationButtonClick = async (buttonProps: number, currentChartD
       resolve()
     }).then(() => {
       updateChart(response.data.data, root, isMobile, fullDatesArray)
+
+      const endDateTimeDefault = new Date(newNearestDate)
+      const endDatetime = getDatetime(new Date(endDateTimeDefault.setDate(endDateTimeDefault.getDate() - 1)))
+      setEndDate(endDatetime)
+
+      const startDatetime = new Date(endDatetime)
+      setStartDate(getDatetime(new Date(startDatetime.setDate(startDatetime.getDate() - 14))))
     })
   } catch (error) {
     console.log(error);

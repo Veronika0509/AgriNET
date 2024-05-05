@@ -10,9 +10,9 @@ const DatetimeCalendar = (props: any) => {
     <div className={s.datetimePickerContainer}>
       <IonLabel className={s.datetimePickerTitle}>{props.title}</IonLabel>
       <div className={s.datetimePicker}>
-        <IonDatetimeButton datetime={props.title}></IonDatetimeButton>
+        <IonDatetimeButton datetime={props.title} ></IonDatetimeButton>
         <IonModal keepContentsMounted={true}>
-          <IonDatetime id={props.title} presentation='date' value={props.date} onIonChange={handleDateChange}></IonDatetime>
+          <IonDatetime id={props.title} presentation='date' value={props.date} onIonChange={handleDateChange} show-default-buttons="true"></IonDatetime>
         </IonModal>
       </div>
     </div>

@@ -8,10 +8,6 @@ import {getStartDate} from "./functions/getStartDate";
 import {updateChartWithNewDatetime} from "./functions/updateChartWithNewDatetime";
 import {isFourteenDays} from "./functions/isFourteenDays";
 const DateTimePicker = (props: any) => {
-  const currentDate: any = getCurrentDatetime()
-  const initialStartDate: any = getStartDate(getCurrentDatetime())
-  const [startDate, setStartDate] = useState<string>(initialStartDate);
-  const [endDate, setEndDate] = useState<string>(currentDate);
   const [present] = useIonToast();
 
   const presentToast = () => {
@@ -24,21 +20,20 @@ const DateTimePicker = (props: any) => {
   };
 
   useEffect(() => {
-    if (isFourteenDays(startDate, endDate)) {
-      setStartDate(getStartDate(endDate))
+    if (isFourteenDays(props.startDate, props.endDate)) {
+      props.setStartDate(getStartDate(props.endDate))
     }
-  }, [startDate, endDate]);
+  }, [props.startDate, props.endDate]);
 
   return (
     <div>
       <div className={s.datetimePickerWrapper}>
         <div className={s.datetimePickerWrapperContainer}>
-          <DatetimeCalendar title={'From'} date={startDate} setDate={setStartDate} />
-          <DatetimeCalendar title={'To'} date={endDate} setDate={setEndDate}/>
+          <DatetimeCalendar title={'From'} date={props.startDate} setDate={props.setStartDate} />
+          <DatetimeCalendar title={'To'} date={props.endDate} setDate={props.setEndDate}/>
         </div>
-        <IonButton onClick={() => updateChartWithNewDatetime(startDate, endDate, presentToast, props.sensorId, props.root, props.isMobile, props.fullDatesArray, props.setCurrentChartData, props.setDisableNextButton, props.setDisablePrevButton)}>
+        <IonButton onClick={() => updateChartWithNewDatetime(props.startDate, props.endDate, presentToast, props.sensorId, props.root, props.isMobile, props.fullDatesArray, props.setCurrentChartData, props.setDisableNextButton, props.setDisablePrevButton)}>
           <IonIcon icon={refreshOutline}></IonIcon>
-          update
         </IonButton>
       </div>
     </div>

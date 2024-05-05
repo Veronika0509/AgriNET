@@ -26,6 +26,8 @@ import Header from "./components/Header";
 import IrrigationButtons from "./components/IrrigationButtons";
 import DateTimePicker from "./components/DateTimePicker";
 import TopSection from "./components/TopSection";
+import {getCurrentDatetime} from "./components/DateTimePicker/functions/getCurrentTime";
+import {getStartDate} from "./components/DateTimePicker/functions/getStartDate";
 
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -47,6 +49,10 @@ const Chart = (props: ChartProps) => {
   const [fullDatesArray, setFullDatesArray] = useState([])
   const [isIrrigationButtons, setIsIrrigationButtons] = useState(true)
   const [isIrrigationDataIsLoading, setIsIrrigationDataIsLoading] = useState(false)
+  const currentDate: any = getCurrentDatetime()
+  const initialStartDate: any = getStartDate(getCurrentDatetime())
+  const [startDate, setStartDate] = useState<string>(initialStartDate);
+  const [endDate, setEndDate] = useState<string>(currentDate);
 
   window.addEventListener('resize', () => {
     handleResize(setIsMobile)
@@ -73,7 +79,8 @@ const Chart = (props: ChartProps) => {
         <div className={s.wrapper}>
           <TopSection sensorId={props.siteId} root={root} isMobile={isMobile} fullDatesArray={fullDatesArray}
                       setCurrentChartData={setCurrentChartData} setDisableNextButton={setDisableNextButton}
-                      setDisablePrevButton={setDisablePrevButton}/>
+                      setDisablePrevButton={setDisablePrevButton} startDate={startDate} setStartDate={setStartDate}
+                      endDate={endDate} setEndDate={setEndDate}/>
           <div>
             <div className={s.chart} id='chartdiv'></div>
             <IrrigationButtons isIrrigationDataIsLoading={isIrrigationDataIsLoading}
@@ -82,7 +89,8 @@ const Chart = (props: ChartProps) => {
                                setDisablePrevButton={setDisablePrevButton} disableNextButton={disableNextButton}
                                disablePrevButton={disablePrevButton} siteId={props.siteId} userId={props.userId}
                                setCurrentChartData={setCurrentChartData} root={root} isMobile={isMobile}
-                               fullDatesArray={fullDatesArray}/>
+                               fullDatesArray={fullDatesArray} setStartDate={setStartDate}
+                               setEndDate={setEndDate}/>
           </div>
         </div>
       </IonContent>

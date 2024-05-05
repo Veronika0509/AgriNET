@@ -8,7 +8,9 @@ const TopSection = (props: any) => {
       <DateTimePicker sensorId={props.sensorId} root={props.root} isMobile={props.isMobile}
                       fullDatesArray={props.fullDatesArray} setCurrentChartData={props.setCurrentChartData}
                       setDisableNextButton={props.setDisableNextButton}
-                      setDisablePrevButton={props.setDisablePrevButton}/>
+                      setDisablePrevButton={props.setDisablePrevButton} endDate={props.endDate}
+                      startDate={props.startDate}
+                      setEndDate={props.setEndDate} setStartDate={props.setStartDate}/>
     </div>
   )
 }
