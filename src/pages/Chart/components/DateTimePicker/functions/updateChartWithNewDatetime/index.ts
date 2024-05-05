@@ -11,21 +11,18 @@ export const updateChartWithNewDatetime = (startDate: any, endDate: any, present
     const startDatetime = new Date(startDate).getTime()
     const endDatetime = new Date(endDate).getTime()
     const days = Math.round((endDatetime - startDatetime) / 86400000)
-    fullDatesRequest.map((date: any) => {
-      const datetime = new Date(date).getTime()
-      if (endDatetime < datetime) {
-        setDisableNextButton(false)
-      }
-      if (endDatetime > datetime) {
-        setDisableNextButton(true)
-      }
-      if (startDatetime < datetime) {
-        setDisablePrevButton(true)
-      }
-      if (startDatetime > datetime) {
-        setDisablePrevButton(false)
-      }
-    })
+    if (endDatetime < new Date(fullDatesRequest[0]).getTime()) {
+      setDisableNextButton(false)
+    }
+    if (endDatetime >= new Date(fullDatesRequest[0]).getTime()) {
+      setDisableNextButton(true)
+    }
+    if (startDatetime < new Date(fullDatesRequest[fullDatesRequest.length - 1]).getTime()) {
+      setDisablePrevButton(true)
+    }
+    if (startDatetime >= new Date(fullDatesRequest[fullDatesRequest.length - 1]).getTime()) {
+      setDisablePrevButton(false)
+    }
     new Promise((resolve: any) => {
       const response = axios.get('https://app.agrinet.us/api/chart/m', {
         params: {

@@ -3,7 +3,7 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import {truncateText} from "../truncateTextFunc";
 
-export const createMarkerOverlay = (chartData: any, roots: any) => {
+export const createMarkerOverlay = (chartData: any, roots: any, overlayIsReady: any) => {
   let root = am5.Root.new(chartData.id.toString());
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);
@@ -111,4 +111,11 @@ export const createMarkerOverlay = (chartData: any, roots: any) => {
 // https://www.amcharts.com/docs/v5/concepts/animations/
   series.appear(1000);
   chart.appear(1000, 100);
+
+  overlayIsReady.map((overlay: any) => {
+    if (overlay.chartData.sensorId === chartData.sensorId) {
+      overlay.isChartDrawn = true
+      overlay.update();
+    }
+  })
 }

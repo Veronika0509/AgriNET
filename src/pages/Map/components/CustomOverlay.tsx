@@ -2,7 +2,6 @@ import s from "../style.module.css";
 import {createRoot} from "react-dom/client";
 import React from "react";
 import {truncateText} from "../functions/truncateTextFunc";
-import { useHistory } from 'react-router-dom';
 
 const overlaysOverlap = (overlayProjection: any, overlayA: any, overlayB: any) => {
   const positionA = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(overlayA.lat, overlayA.lng));
@@ -27,10 +26,12 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
       private setSiteId: any
       private setSiteName: any
       private history: any
+      private isChartDrawn: boolean
+      private root: any;
 
       private div?: any;
 
-      constructor(bounds: google.maps.LatLngBounds, invalidChartDataImage: any, isValidChartData: boolean, chartData: any, setOverlayIsReady: any, onSensorClick: any, isAllMoistFuelCoordinatesOfMarkersAreReady: any, overlappingPairs: any, sensorId: string, setChartData: any, setPage: any, setSiteId: any, setSiteName: any, history: any) {
+      constructor(bounds: google.maps.LatLngBounds, invalidChartDataImage: any, isValidChartData: boolean, chartData: any, setOverlayIsReady: any, onSensorClick: any, isAllMoistFuelCoordinatesOfMarkersAreReady: any, overlappingPairs: any, sensorId: string, setChartData: any, setPage: any, setSiteId: any, setSiteName: any, history: any, overlayIsReady: any, isChartDrawn: boolean) {
         super();
 
         this.bounds = bounds;
@@ -47,6 +48,46 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
         this.setSiteId = setSiteId
         this.setSiteName = setSiteName
         this.history = history
+        this.isChartDrawn = isChartDrawn
+      }
+
+      update() {
+        if (this.div && this.isChartDrawn && this.root) {
+          this.root.render(this.renderContent());
+        }
+      }
+
+      renderContent() {
+        return (
+          <div className={s.overlayContainer}>
+            {this.isValidChartData ? (
+              <div className={s.mainContainer} onClick={() => this.onSensorClick(this.history, this.chartData.sensorId, this.chartData.name, this.sensorId, this.setChartData, this.setPage, this.setSiteId, this.setSiteName)}>
+                <div className={s.chartContainer}>
+                  <div id={this.chartData.id.toString()} className={s.chart}>
+                    {this.isChartDrawn ? null : (
+                      <div className={s.loader}></div>
+                    )}
+                  </div>
+                </div>
+                <div className={s.chartInfo}>
+                  <p className={s.chartName}>{this.chartData.name}</p>
+                  {this.chartData.battery && <p className={s.chartName}>{this.chartData.battery}</p>}
+                  <p>{this.chartData.sensorId}</p>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className={s.invalidChartDataImgContainer}>
+                  <img src={this.invalidChartDataImage} className={s.invalidChartDataImg} alt='Invalid Chart Data'/>
+                  <p className={s.invalidSensorIdText}>{truncateText(this.chartData.name)}</p>
+                </div>
+                <div className={s.chartInfo}>
+                  <p className={s.chartName}>{this.chartData.sensorId}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        );
       }
 
       onAdd() {
@@ -67,44 +108,19 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
               }
             }
 
-            const content = (
-              <div className={s.overlayContainer}>
-                {this.isValidChartData ? (
-                  <div className={s.mainContainer} onClick={() => this.onSensorClick(this.history, this.chartData.sensorId, this.chartData.name, this.sensorId, this.setChartData, this.setPage, this.setSiteId, this.setSiteName)}>
-                    <div className={s.chartContainer}>
-                      <div id={this.chartData.id.toString()} className={s.chart}></div>
-                    </div>
-                    <div className={s.chartInfo}>
-                      <p className={s.chartName}>{this.chartData.name}</p>
-                      {this.chartData.battery && <p className={s.chartName}>{this.chartData.battery}</p>}
-                      <p>{this.chartData.sensorId}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className={s.invalidChartDataImgContainer}>
-                      <img src={this.invalidChartDataImage} className={s.invalidChartDataImg} alt='Invalid Chart Data'/>
-                      <p className={s.invalidSensorIdText}>{truncateText(this.chartData.name)}</p>
-                    </div>
-                    <div className={s.chartInfo}>
-                      <p className={s.chartName}>{this.chartData.sensorId}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-
             const panes: any = this.getPanes();
             panes.floatPane.appendChild(this.div);
-            const root = createRoot(this.div);
-            root.render(content);
+            if (!this.root) {
+              this.root = createRoot(this.div);
+            }
+            this.root.render(this.renderContent());
 
             this.draw()
           }
 
           resolve();
         }).then(() => {
-          this.setOverlayIsReady(true);
+          this.setOverlayIsReady((overlays: any) => [...overlays, this]);
         })
       }
 
@@ -168,7 +184,6 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
 
             let offsetX, offsetY;
 
-            // Вычисляем дистанцию между оверлеями
             const dx = position2.x - position1.x;
             const dy = position2.y - position1.y;
             const distance = Math.sqrt(dx * dx + dy * dy);

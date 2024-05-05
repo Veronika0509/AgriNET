@@ -4,7 +4,7 @@ import {createSensorsMarkers} from "../createSensorsMarkers";
 import s from '../../style.module.css'
 import login from "../../../Login";
 
-export const setGroupMarkers = (page: any, map: any, siteList: any, markers: any, setMarkers: any, setSensorName: any, setSensorId: any, setSensorType: any, setIsModalOpen: any, setIsChartDataIsLoading: any, setIsSelectDisabled: any, setChartData: any, moistFuelChartsAmount: any, userId: any, setInvalidChartDataContainer: any, setMoistChartDataContainer: any, allMoistFuelCoordinatesOfMarkers: any, setIsAllMoistFuelCoordinatesOfMarkersAreReady: any, existingMarkers: any) => {
+export const setSite = (page: any, map: any, siteList: any, markers: any, setMarkers: any, setSensorName: any, setSensorId: any, setSensorType: any, setIsModalOpen: any, setIsChartDataIsLoading: any, setIsSelectDisabled: any, setChartData: any, moistFuelChartsAmount: any, userId: any, setInvalidChartDataContainer: any, setMoistChartDataContainer: any, allMoistFuelCoordinatesOfMarkers: any, setIsAllMoistFuelCoordinatesOfMarkersAreReady: any, existingMarkers: any) => {
   if (markers.length === 0) {
     const newMarkers = siteList.map((sensorsGroupData: any) => {
       let groupMarker: any = new google.maps.Marker({
@@ -17,6 +17,7 @@ export const setGroupMarkers = (page: any, map: any, siteList: any, markers: any
         content: info,
       });
       infoWindow.open(map, groupMarker);
+
       groupMarker.addListener('click', async () => {
         await Promise.all(siteList.map(async () => {
           const sensorItems = getSensorItems(undefined, siteList)
@@ -53,5 +54,14 @@ export const setGroupMarkers = (page: any, map: any, siteList: any, markers: any
       })
     });
     setMarkers(newMarkers);
+
+    const bounds = new google.maps.LatLngBounds();
+    siteList.forEach((marker: any) => {
+      bounds.extend({
+        lat: marker.lat,
+        lng: marker.lng
+      });
+    });
+    map.fitBounds(bounds);
   }
 }
