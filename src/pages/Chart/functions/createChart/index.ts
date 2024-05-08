@@ -121,9 +121,21 @@ export const createChart = (props: any, root: any, isMobile: any, fullDatesArray
 
 // Add cursor
     let cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
-      behavior: "zoomXY",
-      xAxis: xAxis
+      behavior: "zoomX",
+      xAxis: xAxis,
     }));
+
+    cursor.selection.setAll({
+      fill: am5.color(0xff0000),
+      fillOpacity: 0.2
+    });
+
+    cursor.lineX.setAll({
+      stroke: am5.color(0xff0000),
+      strokeWidth: 1,
+      strokeDasharray: []
+    });
+
     cursor.lineY.set("visible", false);
 
 // Add legend

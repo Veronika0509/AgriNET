@@ -1,7 +1,6 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
-import {truncateText} from "../truncateTextFunc";
 
 export const createMarkerOverlay = (chartData: any, roots: any, overlayIsReady: any) => {
   let root = am5.Root.new(chartData.id.toString());
@@ -13,8 +12,12 @@ export const createMarkerOverlay = (chartData: any, roots: any, overlayIsReady: 
     panY: false,
     background: am5.Rectangle.new(root, {
       fill: am5.color(0x96fd66),
-      fillOpacity: 1
-    })
+      fillOpacity: 1,
+    }),
+    paddingTop: 5,
+    paddingLeft: 5,
+    paddingRight: 5,
+    paddingBottom: 0,
   }));
 
 // Generate random date
@@ -64,9 +67,10 @@ export const createMarkerOverlay = (chartData: any, roots: any, overlayIsReady: 
     yAxis: yAxis,
     valueYField: "value",
     valueXField: "date",
+    stroke: am5.color(0x000000),
     tooltip: am5.Tooltip.new(root, {
       labelText: "{valueY}"
-    })
+    }),
   }));
 
   const chartBackground = chart.plotContainer.get("background");
@@ -95,13 +99,7 @@ export const createMarkerOverlay = (chartData: any, roots: any, overlayIsReady: 
     height: chartData.bottomBudgetLine,
   }));
 
-  chart.chartContainer.children.push(am5.Label.new(root, {
-    text: truncateText(chartData.name),
-    fontSize: 13,
-    fontWeight: "400",
-    x: am5.p50,
-    centerX: am5.p50
-  }));
+  chart.zoomOutButton.set("forceHidden", true);
 
 // Set data
   let data = createChartDataArray();

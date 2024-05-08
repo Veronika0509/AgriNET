@@ -68,6 +68,7 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
                       <div className={s.loader}></div>
                     )}
                   </div>
+                  <p className={s.chartSensorId}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.chartInfo}>
                   <p className={s.chartName}>{this.chartData.name}</p>
@@ -133,8 +134,6 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
         if (this.div) {
           this.div.style.left = sw.x + "px";
           this.div.style.top = ne.y + "px";
-          this.div.style.width = "100px";
-          this.div.style.height = "110px";
         }
 
         const overlays: any = this.isAllMoistFuelCoordinatesOfMarkersAreReady
@@ -188,7 +187,7 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
             const dy = position2.y - position1.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            const offsetDistance = 80
+            const offsetDistance = 55
 
             if (distance === 0) {
               offsetX = offsetDistance;
