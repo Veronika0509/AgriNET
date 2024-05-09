@@ -10,7 +10,7 @@ const TopSection = (props: any) => {
                       setDisableNextButton={props.setDisableNextButton}
                       setDisablePrevButton={props.setDisablePrevButton} endDate={props.endDate}
                       startDate={props.startDate}
-                      setEndDate={props.setEndDate} setStartDate={props.setStartDate}/>
+                      setEndDate={props.setEndDate} setStartDate={props.setStartDate} linesCount={props.linesCount}/>
     </div>
   )
 }

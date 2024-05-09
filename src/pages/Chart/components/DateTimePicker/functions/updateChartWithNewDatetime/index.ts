@@ -2,8 +2,9 @@ import {checkDateValidity} from "../checkDateValidity";
 import axios from "axios";
 import {updateChart} from "../../../../functions/updateChart";
 import login from "../../../../../Login";
+import {getSensorItems} from "../../../../../Map/data/getSensorItems";
 
-export const updateChartWithNewDatetime = (startDate: any, endDate: any, presentToast: any, sensorId: string, root: any, isMobile: any, fullDatesRequest: any, setCurrentChartData: any, setDisableNextButton: any, setDisablePrevButton: any) => {
+export const updateChartWithNewDatetime = (startDate: any, endDate: any, presentToast: any, sensorId: string, root: any, isMobile: any, fullDatesRequest: any, setCurrentChartData: any, setDisableNextButton: any, setDisablePrevButton: any, linesCount: any) => {
   if (checkDateValidity(startDate, endDate)) {
     presentToast()
   } else {
@@ -36,7 +37,7 @@ export const updateChartWithNewDatetime = (startDate: any, endDate: any, present
       })
       resolve(response)
     }).then((response: any) => {
-      updateChart(response.data.data, root, isMobile, fullDatesRequest)
+      updateChart(response.data.data, root, isMobile, fullDatesRequest, linesCount)
       setCurrentChartData(response.data.data)
     })
   }

@@ -81,7 +81,7 @@ const Chart = (props: ChartProps) => {
           <TopSection sensorId={props.siteId} root={root} isMobile={isMobile} fullDatesArray={fullDatesArray}
                       setCurrentChartData={setCurrentChartData} setDisableNextButton={setDisableNextButton}
                       setDisablePrevButton={setDisablePrevButton} startDate={startDate} setStartDate={setStartDate}
-                      endDate={endDate} setEndDate={setEndDate}/>
+                      endDate={endDate} setEndDate={setEndDate} linesCount={props.linesCount}/>
           <div>
             <div className={s.chart} id='chartdiv'></div>
             <IrrigationButtons isIrrigationDataIsLoading={isIrrigationDataIsLoading}

@@ -32,7 +32,7 @@ const DateTimePicker = (props: any) => {
           <DatetimeCalendar title={'From'} date={props.startDate} setDate={props.setStartDate} />
           <DatetimeCalendar title={'To'} date={props.endDate} setDate={props.setEndDate}/>
         </div>
-        <IonButton onClick={() => updateChartWithNewDatetime(props.startDate, props.endDate, presentToast, props.sensorId, props.root, props.isMobile, props.fullDatesArray, props.setCurrentChartData, props.setDisableNextButton, props.setDisablePrevButton)}>
+        <IonButton onClick={() => updateChartWithNewDatetime(props.startDate, props.endDate, presentToast, props.sensorId, props.root, props.isMobile, props.fullDatesArray, props.setCurrentChartData, props.setDisableNextButton, props.setDisablePrevButton, props.linesCount)}>
           <IonIcon icon={refreshOutline}></IonIcon>
         </IonButton>
       </div>
