@@ -16,7 +16,7 @@ import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import {useHistory} from 'react-router-dom';
 import {refreshOutline} from 'ionicons/icons';
-import {irrigationDatesRequest} from "./functions/irriationDatesRequest";
+import {irrigationDatesRequest} from "./data/irriationDatesRequest";
 import {onIrrigationButtonClick} from "./functions/onIrrigationButtonClick";
 import {createChart} from "./functions/createChart";
 import {handleResize} from "./functions/handleResize";
@@ -28,6 +28,7 @@ import DateTimePicker from "./components/DateTimePicker";
 import TopSection from "./components/TopSection";
 import {getCurrentDatetime} from "./components/DateTimePicker/functions/getCurrentTime";
 import {getStartDate} from "./components/DateTimePicker/functions/getStartDate";
+import {sumChartDataRequest} from "./data/sumChartDataRequest";
 
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -42,6 +43,7 @@ interface ChartProps {
 
 const Chart = (props: ChartProps) => {
   const root = useRef<any>(null);
+  const sumRoot = useRef<any>(null);
   const [currentChartData, setCurrentChartData] = useState<any>([])
   const [isMobile, setIsMobile] = useState(false)
   const [disableNextButton, setDisableNextButton] = useState(true)
@@ -71,6 +73,8 @@ const Chart = (props: ChartProps) => {
     updateChart(props.chartData, root, isMobile, fullDatesArray, props.linesCount)
     irrigationDatesRequest(setIsIrrigationDataIsLoading, setIsIrrigationButtons, props.userId, props.siteId, setIrrigationDates, setFullDatesArray)
     handleResize(setIsMobile)
+
+    sumChartDataRequest(props.siteId, sumRoot)
   }, []);
 
   return (
@@ -92,6 +96,10 @@ const Chart = (props: ChartProps) => {
                                setCurrentChartData={setCurrentChartData} root={root} isMobile={isMobile}
                                fullDatesArray={fullDatesArray} setStartDate={setStartDate}
                                setEndDate={setEndDate}/>
+          </div>
+          <div className={s.sumChart}>
+            <IonTitle className='ion-text-center ion-margin-top'>Sum of Soil Moisture</IonTitle>
+            <div id='sumchart' className={s.sumChart}></div>
           </div>
         </div>
       </IonContent>
