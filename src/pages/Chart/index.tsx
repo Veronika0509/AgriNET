@@ -37,6 +37,7 @@ interface ChartProps {
   siteName: string;
   userId: number;
   chartData?: any;
+  linesCount: any
 }
 
 const Chart = (props: ChartProps) => {
@@ -58,16 +59,16 @@ const Chart = (props: ChartProps) => {
     handleResize(setIsMobile)
   })
   useEffect(() => {
-    updateChart(props.chartData, root, isMobile, fullDatesArray)
+    updateChart(props.chartData, root, isMobile, fullDatesArray, props.linesCount)
   }, [isMobile]);
   useEffect(() => {
     if (fullDatesArray) {
-      updateChart(props.chartData, root, isMobile, fullDatesArray)
+      updateChart(props.chartData, root, isMobile, fullDatesArray, props.linesCount)
     }
   }, [fullDatesArray])
   useEffect(() => {
     setCurrentChartData(props.chartData)
-    updateChart(props.chartData, root, isMobile, fullDatesArray)
+    updateChart(props.chartData, root, isMobile, fullDatesArray, props.linesCount)
     irrigationDatesRequest(setIsIrrigationDataIsLoading, setIsIrrigationButtons, props.userId, props.siteId, setIrrigationDates, setFullDatesArray)
     handleResize(setIsMobile)
   }, []);

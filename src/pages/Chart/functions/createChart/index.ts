@@ -2,7 +2,7 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
-export const createChart = (props: any, root: any, isMobile: any, fullDatesArray: any): void => {
+export const createChart = (props: any, root: any, isMobile: any, fullDatesArray: any, linesCount: any): void => {
   const chartDataWrapper = props
 
   if (root.current) {
@@ -81,7 +81,7 @@ export const createChart = (props: any, root: any, isMobile: any, fullDatesArray
 
     let count = 4
     let series: any
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < linesCount; i++) {
       let name = count + ' inch'
       series = chart.series.push(am5xy.LineSeries.new(root.current, {
         name: name,

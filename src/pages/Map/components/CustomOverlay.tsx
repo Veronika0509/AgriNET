@@ -28,10 +28,12 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
       private history: any
       private isChartDrawn: boolean
       private root: any;
+      private setLinesCount: any
+      private siteList: any
 
       private div?: any;
 
-      constructor(bounds: google.maps.LatLngBounds, invalidChartDataImage: any, isValidChartData: boolean, chartData: any, setOverlayIsReady: any, onSensorClick: any, isAllMoistFuelCoordinatesOfMarkersAreReady: any, overlappingPairs: any, sensorId: string, setChartData: any, setPage: any, setSiteId: any, setSiteName: any, history: any, overlayIsReady: any, isChartDrawn: boolean) {
+      constructor(bounds: google.maps.LatLngBounds, invalidChartDataImage: any, isValidChartData: boolean, chartData: any, setOverlayIsReady: any, onSensorClick: any, isAllMoistFuelCoordinatesOfMarkersAreReady: any, overlappingPairs: any, sensorId: string, setChartData: any, setPage: any, setSiteId: any, setSiteName: any, history: any, overlayIsReady: any, isChartDrawn: boolean, setLinesCount: any, siteList: any) {
         super();
 
         this.bounds = bounds;
@@ -49,6 +51,8 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
         this.setSiteName = setSiteName
         this.history = history
         this.isChartDrawn = isChartDrawn
+        this.setLinesCount = setLinesCount
+        this.siteList = siteList
       }
 
       update() {
@@ -61,7 +65,7 @@ export const initializeCustomOverlay = (isGoogleApiLoaded: any) => {
         return (
           <div className={s.overlayContainer}>
             {this.isValidChartData ? (
-              <div className={s.mainContainer} onClick={() => this.onSensorClick(this.history, this.chartData.sensorId, this.chartData.name, this.sensorId, this.setChartData, this.setPage, this.setSiteId, this.setSiteName)}>
+              <div className={s.mainContainer} onClick={() => this.onSensorClick(this.history, this.chartData.sensorId, this.chartData.name, this.sensorId, this.setChartData, this.setPage, this.setSiteId, this.setSiteName, this.setLinesCount, this.siteList)}>
                 <div className={s.chartContainer}>
                   <div id={this.chartData.id.toString()} className={s.chart}>
                     {this.isChartDrawn ? null : (

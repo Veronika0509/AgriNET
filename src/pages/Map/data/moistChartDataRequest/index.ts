@@ -23,7 +23,7 @@ export const moistChartDataRequest = async (propsSensorId: string, bounds: any, 
     sensorId: propsSensorId,
     data: response.data.data,
     topBudgetLine: response.data.budgetLines[1].value,
-    bottomBudgetLine: response.data.budgetLines[4].value
+    bottomBudgetLine: response.data.budgetLines[4].value,
   }
   moistChartData.push(moistChartDataItem)
   boundsArray.push(bounds)

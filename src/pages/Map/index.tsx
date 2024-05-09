@@ -27,6 +27,7 @@ interface MainProps {
   setChartData: React.Dispatch<React.SetStateAction<any>>;
   chartData: any;
   isGoogleApiLoaded: any;
+  setLinesCount: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const MapPage: React.FC<MainProps> = (props) => {
@@ -67,7 +68,7 @@ const MapPage: React.FC<MainProps> = (props) => {
       const addOverlay = (() => {
         moistChartDataContainer.map((chartData: any) => {
           const CustomOverlayExport: any = initializeCustomOverlay(props.isGoogleApiLoaded)
-          const overlay = new CustomOverlayExport(chartData[1], invalidChartDataImage, true, chartData[0], setOverlayIsReady, onSensorClick, isAllMoistFuelCoordinatesOfMarkersAreReady, overlappingPairs, sensorId, props.setChartData, props.setPage, props.setSiteId, props.setSiteName, history, overlayIsReady, isChartDrawn)
+          const overlay = new CustomOverlayExport(chartData[1], invalidChartDataImage, true, chartData[0], setOverlayIsReady, onSensorClick, isAllMoistFuelCoordinatesOfMarkersAreReady, overlappingPairs, sensorId, props.setChartData, props.setPage, props.setSiteId, props.setSiteName, history, overlayIsReady, isChartDrawn, props.setLinesCount, props.siteList)
           overlay.setMap(map)
         })
       })
@@ -78,7 +79,7 @@ const MapPage: React.FC<MainProps> = (props) => {
     if (invalidChartDataContainer.length !== 0) {
       invalidChartDataContainer.map((chartData: any) => {
         const CustomOverlayExport: any = initializeCustomOverlay(props.isGoogleApiLoaded)
-        const overlay: any = new CustomOverlayExport(chartData[1], invalidChartDataImage, false, chartData[0], setOverlayIsReady, onSensorClick, isAllMoistFuelCoordinatesOfMarkersAreReady, overlappingPairs, sensorId, props.setChartData, props.setPage, props.setSiteId, props.setSiteName, history, overlayIsReady, isChartDrawn);
+        const overlay: any = new CustomOverlayExport(chartData[1], invalidChartDataImage, false, chartData[0], setOverlayIsReady, onSensorClick, isAllMoistFuelCoordinatesOfMarkersAreReady, overlappingPairs, sensorId, props.setChartData, props.setPage, props.setSiteId, props.setSiteName, history, overlayIsReady, isChartDrawn, props.setLinesCount);
         map && overlay.setMap(map)
       })
     }
