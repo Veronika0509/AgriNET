@@ -96,7 +96,6 @@ export const createSumChart = (chartData: any, budgetLines: any, root: any) => {
 
 // Inside
     // Lines
-    console.log(budgetLines)
     if (budgetLines[2].value) {
       let seriesRangeDataItem = yAxis.makeDataItem({
         value: budgetLines[2].value
