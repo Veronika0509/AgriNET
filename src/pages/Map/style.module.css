@@ -113,3 +113,15 @@
   color: #00ade3;
   font-weight: 500;
 }
+
+.layersCheckbox {
+  width: 160px;
+  position: absolute;
+  top: 100px;
+  left: 10px;
+  opacity: 0.85;
+}
+
+.layersCheckbox > ion-item {
+  border-radius: 3px;
+}

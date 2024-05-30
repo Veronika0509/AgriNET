@@ -10,7 +10,7 @@ import {
 } from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
 import {home, informationCircle, logoFacebook} from 'ionicons/icons';
-import {loadGoogleApi} from "./components/loadGoogleApiFunc";
+import {loadGoogleApi} from "./functions/loadGoogleApiFunc";
 import { useHistory } from 'react-router-dom';
 
 /* Core CSS required for Ionic components to work properly */
