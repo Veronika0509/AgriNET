@@ -1,7 +1,25 @@
 import axios from "axios";
 import {getDatetime} from "../../components/DateTimePicker/functions/getDatetime";
 
-export const onIrrigationButtonClick = async (buttonProps: number, currentChartData: any, irrigationDates: any, setDisableNextButton: any, setDisablePrevButton: any, disableNextButton: any, disablePrevButton: any, siteId: string, userId: number, setCurrentChartData: any, updateChart: any, root: any, isMobile: any, fullDatesArray: any, setStartDate: any, setEndDate: any) => {
+export const onIrrigationButtonClick = async (
+  buttonProps: number,
+  currentChartData: any,
+  irrigationDates: any,
+  setDisableNextButton: any,
+  setDisablePrevButton: any,
+  disableNextButton: any,
+  disablePrevButton: any,
+  siteId: string,
+  userId: number,
+  setCurrentChartData: any,
+  updateChart: any,
+  root: any,
+  isMobile: any,
+  fullDatesArray: any,
+  setStartDate: any,
+  setEndDate: any,
+  linesCount: any
+) => {
   let currentDate: any
 
   if (buttonProps === 1) {
@@ -63,7 +81,7 @@ export const onIrrigationButtonClick = async (buttonProps: number, currentChartD
       setCurrentChartData(response.data.data)
       resolve()
     }).then(() => {
-      updateChart(response.data.data, root, isMobile, fullDatesArray)
+      updateChart(response.data.data, root, isMobile, fullDatesArray, linesCount)
 
       const endDateTimeDefault = new Date(findNearestDate(currentDate, irrigationDates))
       const endDatetime = getDatetime(new Date(endDateTimeDefault.setDate(endDateTimeDefault.getDate() - 1)))

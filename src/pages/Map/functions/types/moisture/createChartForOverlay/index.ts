@@ -2,7 +2,7 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
-export const createMarkerOverlay = (chartData: any, roots: any, overlayIsReady: any) => {
+export const createMarkerOverlay = (chartData: any, roots: any, moistOverlays: any) => {
   let root = am5.Root.new(chartData.id.toString());
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);
@@ -110,10 +110,12 @@ export const createMarkerOverlay = (chartData: any, roots: any, overlayIsReady: 
   series.appear(1000);
   chart.appear(1000, 100);
 
-  overlayIsReady.map((overlay: any) => {
-    if (overlay.chartData.sensorId === chartData.sensorId) {
-      overlay.isChartDrawn = true
-      overlay.update();
+  moistOverlays.map((overlay: any) => {
+    if (overlay.layerName === 'Moist') {
+      if (overlay.chartData.sensorId === chartData.sensorId) {
+        overlay.isChartDrawn = true
+        overlay.update();
+      }
     }
   })
 }

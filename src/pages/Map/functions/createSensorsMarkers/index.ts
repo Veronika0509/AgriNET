@@ -1,4 +1,4 @@
-import {chartDataRequest} from "../../data/chartDataRequest";
+import {chartDataRequest} from "../../data/types/moisture/chartDataRequest";
 
 const OFFSET = 0.0002;
 

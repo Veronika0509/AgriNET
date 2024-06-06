@@ -16,8 +16,8 @@ const LayerList = (props: any) => {
 
 
   const toggleLayer = (checkbox: any) => {
-    props.moistOverlays.forEach((overlay: any) => {
-      if (checkbox.target.innerText === overlay.chartData.layerName) {
+    props.overlays.forEach((overlay: any) => {
+      if (checkbox.target.innerText === overlay.layerName) {
         if (checkbox.detail.checked) {
           overlay.show()
         } else {

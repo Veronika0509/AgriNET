@@ -95,7 +95,7 @@ const Chart = (props: ChartProps) => {
                                disablePrevButton={disablePrevButton} siteId={props.siteId} userId={props.userId}
                                setCurrentChartData={setCurrentChartData} root={root} isMobile={isMobile}
                                fullDatesArray={fullDatesArray} setStartDate={setStartDate}
-                               setEndDate={setEndDate}/>
+                               setEndDate={setEndDate} linesCount={props.linesCount} />
           </div>
           <div className={s.sumChart}>
             <IonTitle className='ion-text-center ion-margin-top'>Sum of Soil Moisture</IonTitle>

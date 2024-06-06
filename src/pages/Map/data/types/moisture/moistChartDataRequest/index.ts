@@ -9,7 +9,7 @@ export const moistChartDataRequest = async (propsSensorId: string,
                                             bounds: any,
                                             name: string,
                                             userId: any,
-                                            setInvalidChartDataContainer: any,
+                                            setInvalidMoistChartDataContainer: any,
                                             setMoistChartDataContainer: any,
                                             moistFuelChartsAmount: any
 ) => {
@@ -35,17 +35,17 @@ export const moistChartDataRequest = async (propsSensorId: string,
   }
   moistChartData.push(moistChartDataItem)
   boundsArray.push(bounds)
-  console.log(moistFuelChartsAmount, moistChartData)
   if (moistFuelChartsAmount.length === moistChartData.length) {
     let updatedMoistChartData: any = []
     boundsArray.map((bounds: any, index: number) => {
+      console.log(boundsArray)
       if (moistChartData[index].data.length !== 0 && moistChartData[index].data.length !== 1) {
         updatedMoistChartData.push([moistChartData[index], bounds])
       } else {
         invalidChartData.push([moistChartData[index], bounds])
       }
       new Promise((resolve: any) => {
-        setInvalidChartDataContainer(invalidChartData)
+        setInvalidMoistChartDataContainer(invalidChartData)
         setMoistChartDataContainer(updatedMoistChartData)
 
         resolve()

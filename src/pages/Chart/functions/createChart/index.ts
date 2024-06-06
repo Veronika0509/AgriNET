@@ -1,6 +1,7 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
+import login from "../../../Login";
 
 export const createChart = (props: any, root: any, isMobile: any, fullDatesArray: any, linesCount: any): void => {
   const chartDataWrapper = props

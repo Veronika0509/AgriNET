@@ -14,9 +14,45 @@ const IrrigationButtons = (props: any) => {
           {props.isIrrigationButtons && (
             <div className={s.buttons}>
               <IonButton disabled={props.disablePrevButton}
-                         onClick={() => onIrrigationButtonClick(0, props.currentChartData, props.irrigationDates, props.setDisableNextButton, props.setDisablePrevButton, props.disableNextButton, props.disablePrevButton, props.siteId, props.userId, props.setCurrentChartData, updateChart, props.root, props.isMobile, props.fullDatesArray, props.setStartDate, props.setEndDate)}>Prev Irigation Event</IonButton>
+                         onClick={() => onIrrigationButtonClick(
+                           0,
+                           props.currentChartData,
+                           props.irrigationDates,
+                           props.setDisableNextButton,
+                           props.setDisablePrevButton,
+                           props.disableNextButton,
+                           props.disablePrevButton,
+                           props.siteId,
+                           props.userId,
+                           props.setCurrentChartData,
+                           updateChart,
+                           props.root,
+                           props.isMobile,
+                           props.fullDatesArray,
+                           props.setStartDate,
+                           props.setEndDate,
+                           props.linesCount
+                         )}>Prev Irigation Event</IonButton>
               <IonButton disabled={props.disableNextButton}
-                         onClick={() => onIrrigationButtonClick(1, props.currentChartData, props.irrigationDates, props.setDisableNextButton, props.setDisablePrevButton, props.disableNextButton, props.disablePrevButton, props.siteId, props.userId, props.setCurrentChartData, updateChart, props.root, props.isMobile, props.fullDatesArray, props.setStartDate, props.setEndDate)}>Next Irigation Event</IonButton>
+                         onClick={() => onIrrigationButtonClick(
+                           1,
+                           props.currentChartData,
+                           props.irrigationDates,
+                           props.setDisableNextButton,
+                           props.setDisablePrevButton,
+                           props.disableNextButton,
+                           props.disablePrevButton,
+                           props.siteId,
+                           props.userId,
+                           props.setCurrentChartData,
+                           updateChart,
+                           props.root,
+                           props.isMobile,
+                           props.fullDatesArray,
+                           props.setStartDate,
+                           props.setEndDate,
+                           props.linesCount
+                         )}>Next Irigation Event</IonButton>
             </div>
           )}
         </div>
