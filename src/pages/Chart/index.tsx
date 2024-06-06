@@ -98,7 +98,7 @@ const Chart = (props: ChartProps) => {
                                setEndDate={setEndDate} linesCount={props.linesCount} />
           </div>
           <div className={s.sumChart}>
-            <IonTitle className='ion-text-center ion-margin-top'>Sum of Soil Moisture</IonTitle>
+            <h2 className='ion-text-center ion-margin-top'>Sum of Soil Moisture</h2>
             <div id='sumchart' className={s.sumChart}></div>
           </div>
         </div>
