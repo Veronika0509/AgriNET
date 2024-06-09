@@ -4,8 +4,8 @@ import React from "react";
 import wxetOverlayMoon from '../../../../../assets/images/icons/wxetOverlayMoon.svg'
 import wxetOverlaySun from '../../../../../assets/images/icons/wxetOverlaySun.svg'
 import {moveOverlays} from "../../../functions/moveOverlays";
-import {onMoistSensorClick} from "../../../functions/types/moisture/onMoistSensorClick";
 import {truncateText} from "../../../functions/truncateTextFunc";
+import {onWxetSensorClick} from "../../../functions/types/wxet/onWxetSensorClick";
 
 export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
@@ -16,13 +16,14 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
       private setPage: any
       private setSiteId: any
       private setSiteName: any
-      private setLinesCount: any
+      private setAdditionalChartData: any
       private history: any
-      private siteList: any
+      private userId: any
       private bounds: google.maps.LatLngBounds;
       private isValidData: boolean;
       private data: any;
       private overlaysToFit: any
+      private setChartPageType: any
 
       private layerName: string
       private root: any;
@@ -35,13 +36,14 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         setPage: any,
         setSiteId: any,
         setSiteName: any,
-        setLinesCount: any,
+        setAdditionalChartData: any,
         history: any,
-        siteList: any,
+        userId: any,
         bounds: google.maps.LatLngBounds,
         isValidData: boolean,
         data: any,
-        overlaysToFit: any
+        overlaysToFit: any,
+        setChartPageType: any
       ) {
         super();
 
@@ -51,14 +53,15 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         this.setPage = setPage
         this.setSiteId = setSiteId
         this.setSiteName = setSiteName
-        this.setLinesCount = setLinesCount
+        this.setAdditionalChartData = setAdditionalChartData
         this.history = history
-        this.siteList = siteList
+        this.userId = userId
         this.bounds = bounds
         this.isValidData = isValidData
         this.data = data
         this.layerName = data.layerName
         this.overlaysToFit = overlaysToFit
+        this.setChartPageType = setChartPageType
       }
 
       update() {
@@ -83,12 +86,22 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         }
         const isBattery: boolean = this.data.data.battery !== undefined && this.data.data.battery !== null
         const isBatteryPercentage: boolean = this.data.data.batteryPercentage !== undefined && this.data.data.batteryPercentage !== null
-
         return (
           <div className={s.overlayContainer}>
             {
               this.isValidData ? (
-                <div>
+                <div onClick={() => onWxetSensorClick(
+                  this.history,
+                  this.data.sensorId,
+                  this.data.name,
+                  this.setChartData,
+                  this.setPage,
+                  this.setSiteId,
+                  this.setSiteName,
+                  this.setAdditionalChartData,
+                  this.setChartPageType,
+                  this.userId,
+                  )}>
                   <div className={s.wxetOverlayContainer}>
                     <div className={s.wxetOverlayInnerContainer} style={{backgroundColor: this.data.data.bgColor}}>
                       <img src={this.data.data.solar ? wxetOverlaySun : wxetOverlayMoon} className={s.wxetOverlayImage}

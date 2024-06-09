@@ -1,8 +1,8 @@
 import React from 'react'
-import s from "../../style.module.css";
+import s from "../style.module.css";
 import {IonButton, IonText} from "@ionic/react";
-import {onIrrigationButtonClick} from "../../functions/onIrrigationButtonClick";
-import {updateChart} from "../../functions/updateChart";
+import {onIrrigationButtonClick} from "../../../../functions/types/moist/onIrrigationButtonClick";
+import {updateMoistChart} from "../../../../functions/types/moist/updateMoistChart";
 
 const IrrigationButtons = (props: any) => {
   return (
@@ -25,13 +25,13 @@ const IrrigationButtons = (props: any) => {
                            props.siteId,
                            props.userId,
                            props.setCurrentChartData,
-                           updateChart,
+                           updateMoistChart,
                            props.root,
                            props.isMobile,
                            props.fullDatesArray,
                            props.setStartDate,
                            props.setEndDate,
-                           props.linesCount
+                           props.additionalChartData
                          )}>Prev Irigation Event</IonButton>
               <IonButton disabled={props.disableNextButton}
                          onClick={() => onIrrigationButtonClick(
@@ -45,13 +45,13 @@ const IrrigationButtons = (props: any) => {
                            props.siteId,
                            props.userId,
                            props.setCurrentChartData,
-                           updateChart,
+                           updateMoistChart,
                            props.root,
                            props.isMobile,
                            props.fullDatesArray,
                            props.setStartDate,
                            props.setEndDate,
-                           props.linesCount
+                           props.additionalChartData
                          )}>Next Irigation Event</IonButton>
             </div>
           )}

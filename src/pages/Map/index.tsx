@@ -28,7 +28,8 @@ interface MainProps {
   setChartData: React.Dispatch<React.SetStateAction<any>>;
   chartData: any;
   isGoogleApiLoaded: any;
-  setLinesCount: React.Dispatch<React.SetStateAction<any>>;
+  setAdditionalChartData: React.Dispatch<React.SetStateAction<any>>;
+  setChartPageType: React.Dispatch<React.SetStateAction<string>>
 }
 
 const MapPage: React.FC<MainProps> = (props) => {
@@ -93,6 +94,7 @@ const MapPage: React.FC<MainProps> = (props) => {
       )
     }
   }, [map, props.siteList]);
+
   // Moist Marker Chart
   useEffect(() => {
     if (moistChartDataContainer.length !== 0) {
@@ -113,11 +115,11 @@ const MapPage: React.FC<MainProps> = (props) => {
             props.setSiteName,
             history,
             isChartDrawn,
-            props.setLinesCount,
+            props.setAdditionalChartData,
             props.siteList,
             overlaysToFit,
             setMoistOverlays,
-            setOverlays
+            props.setChartPageType
           )
           setOverlays((prevOverlays) => [...prevOverlays, overlay]);
           overlay.setMap(map)
@@ -144,11 +146,11 @@ const MapPage: React.FC<MainProps> = (props) => {
           props.setSiteName,
           history,
           isChartDrawn,
-          props.setLinesCount,
+          props.setAdditionalChartData,
           props.siteList,
           overlaysToFit,
           setMoistOverlays,
-          setOverlays
+          props.setChartPageType
         )
         setOverlays((prevOverlays) => [...prevOverlays, overlay]);
         map && overlay.setMap(map)
@@ -181,13 +183,14 @@ const MapPage: React.FC<MainProps> = (props) => {
             props.setPage,
             props.setSiteId,
             props.setSiteName,
-            props.setLinesCount,
+            props.setAdditionalChartData,
             history,
-            props.siteList,
+            props.userId,
             data[1],
             true,
             data[0],
-            overlaysToFit
+            overlaysToFit,
+            props.setChartPageType
           )
           setOverlays((prevOverlays) => [...prevOverlays, overlay]);
           overlay.setMap(map)
@@ -208,13 +211,14 @@ const MapPage: React.FC<MainProps> = (props) => {
             props.setPage,
             props.setSiteId,
             props.setSiteName,
-            props.setLinesCount,
+            props.setAdditionalChartData,
             history,
-            props.siteList,
+            props.userId,
             data[1],
             false,
             data[0],
-            overlaysToFit
+            overlaysToFit,
+            props.setChartPageType
           )
           setOverlays((prevOverlays) => [...prevOverlays, overlay]);
           overlay.setMap(map)

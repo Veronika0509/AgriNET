@@ -2,14 +2,14 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
-export const createSumChart = (chartData: any, budgetLines: any, root: any) => {
+export const createMoistSumChart = (chartData: any, budgetLines: any, root: any) => {
   if (root.current) {
     root.current.dispose();
     root.current = null;
   }
 
   if (!root.current) {
-    root.current = am5.Root.new("sumchart");
+    root.current = am5.Root.new("moistSumChartDiv");
 
     const myTheme = am5.Theme.new(root.current);
 

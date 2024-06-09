@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const chartDataRequest = async (SensorIdProp: string) => {
+export const getMoistChartData = async (SensorIdProp: string) => {
   try {
     return axios.get('https://app.agrinet.us/api/chart/m', {
       params: {

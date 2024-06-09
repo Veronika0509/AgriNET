@@ -49,7 +49,8 @@ const App: React.FC = () => {
   const [siteId, setSiteId] = useState('')
   const [siteName, setSiteName] = useState('')
   const [chartData, setChartData] = useState([])
-  const [linesCount, setLinesCount] = useState(0)
+  const [additionalChartData, setAdditionalChartData] = useState([])
+  const [chartPageType, setChartPageType] = useState('')
   const [isGoogleApiLoaded, setGoogleApiLoaded] = useState(false);
   const history = useHistory();
 
@@ -91,14 +92,14 @@ const App: React.FC = () => {
                     <div>
                       <IonReactRouter basename="/AgriNET">
                         <Route path="/chart">
-                          <Chart linesCount={linesCount} chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} />
+                          <Chart additionalChartData={additionalChartData} chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} chartPageType={chartPageType} />
                         </Route>
                       </IonReactRouter>
                     </div>
             }
           </div>
           <div style={{display: page === 1 ? 'block' : 'none'}}>
-            <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData} setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId} setSiteName={setSiteName} setLinesCount={setLinesCount} />
+            <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData} setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId} setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData} setChartPageType={setChartPageType} />
           </div>
         </IonApp>
       )}

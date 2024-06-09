@@ -1,5 +1,5 @@
 import axios from "axios";
-import {createSumChart} from "../../functions/createSumChart";
+import {createMoistSumChart} from "../../functions/types/moist/createMoistSumChart";
 
 export const sumChartDataRequest = (sensorId: any, sumRoot: any) => {
   new Promise((resolve) => {
@@ -12,6 +12,6 @@ export const sumChartDataRequest = (sensorId: any, sumRoot: any) => {
     })
     resolve(response)
   }).then((response: any) => {
-    createSumChart(response.data.data, response.data.budgetLines, sumRoot)
+    createMoistSumChart(response.data.data, response.data.budgetLines, sumRoot)
   })
 }

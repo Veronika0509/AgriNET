@@ -1,20 +1,32 @@
-import {chartDataRequest} from "../../../../data/types/moisture/chartDataRequest";
+import {getMoistChartData} from "../../../../data/types/moisture/getMoistChartData";
 import {getSensorItems} from "../../../../data/getSensorItems";
 
-export const onMoistSensorClick = (history: any, id: string, name: string,  setChartData: any, setPage: any, setSiteId: any, setSiteName: any, setLinesCount: any, siteList: any) => {
+export const onMoistSensorClick = (
+  history: any,
+  id: string,
+  name: string,
+  setChartData: any,
+  setPage: any,
+  setSiteId: any,
+  setSiteName: any,
+  setAdditionalChartData: any,
+  siteList: any,
+  setChartPageType: any
+) => {
   // if (sensorId !== id) {
     new Promise((resolve: any) => {
-      const response = chartDataRequest(id)
+      const response = getMoistChartData(id)
       resolve(response)
     }).then((response: any) => {
-      setChartData(response.data.data)
       getSensorItems('moist-fuel', siteList).map((sensorItem: any) => {
         if (sensorItem.sensorId === id) {
-          setLinesCount(sensorItem.sensorCount)
+          setAdditionalChartData({linesCount: sensorItem.sensorCount})
         }
       })
+      setChartData(response.data.data)
       setSiteId(id)
       setSiteName(name)
+      setChartPageType('moistFuel')
       setPage(2)
       history.push('/AgriNET/chart');
     })

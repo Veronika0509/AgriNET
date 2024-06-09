@@ -1,10 +1,8 @@
-import {checkDateValidity} from "../checkDateValidity";
+import {checkDateValidity} from "../../../checkDateValidity";
 import axios from "axios";
-import {updateChart} from "../../../../functions/updateChart";
-import login from "../../../../../Login";
-import {getSensorItems} from "../../../../../Map/data/getSensorItems";
+import {updateMoistChart} from "../../../../../../functions/types/moist/updateMoistChart";
 
-export const updateChartWithNewDatetime = (startDate: any, endDate: any, presentToast: any, sensorId: string, root: any, isMobile: any, fullDatesRequest: any, setCurrentChartData: any, setDisableNextButton: any, setDisablePrevButton: any, linesCount: any) => {
+export const updateChartWithNewDatetime = (startDate: any, endDate: any, presentToast: any, sensorId: string, root: any, isMobile: any, fullDatesRequest: any, setCurrentChartData: any, setDisableNextButton: any, setDisablePrevButton: any, additionalChartData: any) => {
   if (checkDateValidity(startDate, endDate)) {
     presentToast()
   } else {
@@ -31,13 +29,12 @@ export const updateChartWithNewDatetime = (startDate: any, endDate: any, present
           days: days,
           endDate: endDateDays,
           includeHistoricalData: false,
-          user: 103,
-          Version: '42.2.1'
+          v: 43
         },
       })
       resolve(response)
     }).then((response: any) => {
-      updateChart(response.data.data, root, isMobile, fullDatesRequest, linesCount)
+      updateMoistChart(response.data.data, root, isMobile, fullDatesRequest, additionalChartData)
       setCurrentChartData(response.data.data)
     })
   }

@@ -1,5 +1,5 @@
 import axios from "axios";
-import {getDatetime} from "../../components/DateTimePicker/functions/getDatetime";
+import {getDatetime} from "../../../../components/DateTimePicker/functions/getDatetime";
 
 export const onIrrigationButtonClick = async (
   buttonProps: number,
@@ -12,13 +12,13 @@ export const onIrrigationButtonClick = async (
   siteId: string,
   userId: number,
   setCurrentChartData: any,
-  updateChart: any,
+  updateMoistChart: any,
   root: any,
   isMobile: any,
   fullDatesArray: any,
   setStartDate: any,
   setEndDate: any,
-  linesCount: any
+  additionalChartData: any
 ) => {
   let currentDate: any
 
@@ -81,7 +81,7 @@ export const onIrrigationButtonClick = async (
       setCurrentChartData(response.data.data)
       resolve()
     }).then(() => {
-      updateChart(response.data.data, root, isMobile, fullDatesArray, linesCount)
+      updateMoistChart(response.data.data, root, isMobile, fullDatesArray, additionalChartData)
 
       const endDateTimeDefault = new Date(findNearestDate(currentDate, irrigationDates))
       const endDatetime = getDatetime(new Date(endDateTimeDefault.setDate(endDateTimeDefault.getDate() - 1)))

@@ -1,5 +1,5 @@
 import React from 'react'
-import s from "../../../../style.module.css";
+import s from "../../../types/moist/style.module.css";
 import {IonDatetime, IonDatetimeButton, IonLabel, IonModal} from "@ionic/react";
 
 const DatetimeCalendar = (props: any) => {

@@ -21,10 +21,11 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
       private setSiteName: any
       private history: any
       private isChartDrawn: boolean
-      private setLinesCount: any
+      private setAdditionalChartData: any
       private siteList: any
       private overlaysToFit: any
       private setMoistOverlays: any
+      private setChartPageType: any
 
       private layerName: string
       private root: any;
@@ -44,10 +45,11 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         setSiteName: any,
         history: any,
         isChartDrawn: boolean,
-        setLinesCount: any,
+        setAdditionalChartData: any,
         siteList: any,
         overlaysToFit: any,
-        setMoistOverlays: any
+        setMoistOverlays: any,
+        setChartPageType: any
       ) {
         super();
 
@@ -64,11 +66,12 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         this.setSiteName = setSiteName
         this.history = history
         this.isChartDrawn = isChartDrawn
-        this.setLinesCount = setLinesCount
+        this.setAdditionalChartData = setAdditionalChartData
         this.siteList = siteList
         this.layerName = chartData.layerName
         this.overlaysToFit = overlaysToFit
         this.setMoistOverlays = setMoistOverlays
+        this.setChartPageType = setChartPageType
       }
 
       update() {
@@ -83,7 +86,18 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         return (
           <div className={s.overlayContainer}>
             {this.isValidChartData ? (
-              <div className={s.mainContainer} onClick={() => onMoistSensorClick(this.history, this.chartData.sensorId, this.chartData.name, this.setChartData, this.setPage, this.setSiteId, this.setSiteName, this.setLinesCount, this.siteList)}>
+              <div className={s.mainContainer} onClick={() => onMoistSensorClick(
+                this.history,
+                this.chartData.sensorId,
+                this.chartData.name,
+                this.setChartData,
+                this.setPage,
+                this.setSiteId,
+                this.setSiteName,
+                this.setAdditionalChartData,
+                this.siteList,
+                this.setChartPageType
+              )}>
                 <div className={s.chartContainer}>
                   <div id={this.chartData.id.toString()} className={s.chart}>
                     {this.isChartDrawn ? null : (

@@ -1,18 +1,20 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
-import login from "../../../Login";
 
-export const createChart = (props: any, root: any, isMobile: any, fullDatesArray: any, linesCount: any): void => {
-  const chartDataWrapper = props
-
+export const createWxetChart = (
+  chartData: any,
+  root: any,
+  isMobile: boolean,
+  additionalChartData: any
+) => {
   if (root.current) {
     root.current.dispose();
     root.current = null;
   }
 
   if (!root.current) {
-    root.current = am5.Root.new("chartdiv");
+    root.current = am5.Root.new("wxetChartDiv");
 
     const myTheme = am5.Theme.new(root.current);
 
@@ -39,6 +41,10 @@ export const createChart = (props: any, root: any, isMobile: any, fullDatesArray
       wheelY: "zoomX",
       maxTooltipDistance: 0,
       layout: isMobile ? root.current.verticalLayout : root.current.horizontalLayout,
+      paddingLeft: 0,
+      paddingTop: 20,
+      paddingRight: 0,
+      paddingBottom: 0
     }));
 
 // Create axes
@@ -59,32 +65,51 @@ export const createChart = (props: any, root: any, isMobile: any, fullDatesArray
       renderer: am5xy.AxisRendererY.new(root.current, {})
     }));
 
-    yAxis.set('visible', false)
-
 // Add series
-    function createChartData(chartDate: any, chartCount: number) {
+    function createChartData(chartDate: any, chartValue: number) {
       return {
         date: chartDate,
-        value: chartCount,
-        percentValue: Number(chartCount.toFixed(1))
+        value: chartValue,
       };
     }
 
-    function createChartDataArray(count: number) {
+    function createChartDataArray(lineLabel: string) {
       let data: any = [];
-      chartDataWrapper.map((chartDataItem: any) => {
+      chartData.map((chartDataItem: any) => {
         const chartDate = new Date(chartDataItem.DateTime).getTime()
-        const chartData = createChartData(chartDate, chartDataItem['MS ' + count]);
+        const chartData = createChartData(chartDate, chartDataItem[lineLabel]);
         data.push(chartData);
       });
       return data;
     }
 
-    let count = 4
-    let series: any
-    for (var i = 0; i < linesCount; i++) {
-      let name = count + ' inch'
-      series = chart.series.push(am5xy.LineSeries.new(root.current, {
+    const tempMetric: string = additionalChartData.metric === 'AMERICA' ? '°F' : '°C'
+    const rainMetric: string = additionalChartData.metric === 'AMERICA' ? ' in' : ' mm'
+    const windMetric: string = additionalChartData.metric === 'AMERICA' ? ' MPH' : ' KPH'
+    const barometricMetric: string = additionalChartData.metric === 'AMERICA' ? 'inHg' : 'kPa'
+
+    let dataLabels = [
+      {label: 'Solar', name: 'Solar Radiation', metric: ' W/m2'},
+      {label: 'RH', name: 'RH', metric: '%'},
+      {label: 'Temp', name: 'Air Temp', metric: tempMetric},
+      {label: 'rain_display', name: 'Rain', metric: rainMetric},
+      {label: 'wind_display', name: 'Wind Speed', metric: windMetric},
+      {label: 'gust_display', name: 'Wind Gust', metric: windMetric},
+    ]
+
+    if (additionalChartData.type === 'ATMOS') {
+      dataLabels.push(
+        {label: 'Barometric Pressure', name: 'Barometric Pressure', metric: barometricMetric},
+        {label: 'vaporPressure_display', name: 'Vapor Pressure', metric: barometricMetric}
+      )
+    } else {
+      dataLabels.push({label: 'LW', name: 'Leaf Wetness', metric: ''})
+    }
+
+    dataLabels.map((dataLabel) => {
+      let name = dataLabel.name
+
+      const series = chart.series.push(am5xy.LineSeries.new(root.current, {
         name: name,
         xAxis: xAxis,
         yAxis: yAxis,
@@ -93,32 +118,16 @@ export const createChart = (props: any, root: any, isMobile: any, fullDatesArray
         legendValueText: "{valueY}",
         tooltip: am5.Tooltip.new(root.current, {
           pointerOrientation: "horizontal",
-          labelText: name + ' - ' + "{percentValue} %"
+          labelText: name + ' - ' + "{value}" + dataLabel.metric
         })
       }));
 
-      count += 4
-
-      let data = createChartDataArray(i + 1)
+      let data = createChartDataArray(dataLabel.label)
 
       series.data.setAll(data)
 
       series.appear();
-    }
-    fullDatesArray.map((date: any) => {
-      let seriesRangeDataItem = xAxis.makeDataItem({
-        value: new Date(date).getTime()
-      });
-      series.createAxisRange(seriesRangeDataItem);
-      seriesRangeDataItem.get("grid").setAll({
-        strokeOpacity: 1,
-        visible: true,
-        stroke: am5.color(0x000000),
-        strokeDasharray: [2, 2],
-      });
-    });
-
-
+    })
 
 // Add cursor
     let cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
@@ -157,4 +166,4 @@ export const createChart = (props: any, root: any, isMobile: any, fullDatesArray
 
     chart.appear(1000, 100);
   }
-};
+}

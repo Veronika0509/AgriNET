@@ -1,4 +1,5 @@
 import axios from "axios";
+import {loadGoogleApi} from "../../../../functions/loadGoogleApiFunc";
 
 export const irrigationDatesRequest = async (setIsIrrigationDataIsLoading: any, setIsIrrigationButtons: any, userId: number, siteId: string, setIrrigationDates: any, setFullDatesArray: any): Promise<void> => {
   let datesArray: any = []
@@ -17,11 +18,10 @@ export const irrigationDatesRequest = async (setIsIrrigationDataIsLoading: any, 
         setIsIrrigationDataIsLoading(false)
         const idForIrrigationData = idForIrrigationDataRequest.data.valve.sensorId
         new Promise((resolve: any) => {
-          const response: any = axios.get('https://app.agrinet.us/api/valve/scheduler', {
+          const response: any = axios.get('https://app.agrinet.us/api/valve/scheduler?v=43', {
             params: {
               sensorId: idForIrrigationData,
               user: userId,
-              version: '42.2.1'
             },
           });
 
