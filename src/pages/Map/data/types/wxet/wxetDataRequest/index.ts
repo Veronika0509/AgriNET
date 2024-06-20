@@ -5,13 +5,15 @@ let wxetData: any = []
 let boundsArray: any = []
 let invalidChartData: any = []
 
-export const wxetDataRequest = async (propsSensorId: string,
-                                            bounds: any,
-                                            name: string,
-                                            userId: any,
-                                            setInvalidWxetChartDataContainer: any,
-                                            setWxetChartDataContainer: any,
-                                            wxetChartsAmount: any
+export const wxetDataRequest = async (
+  mainId: any,
+  propsSensorId: string,
+  bounds: any,
+  name: string,
+  userId: any,
+  setInvalidWxetChartDataContainer: any,
+  setWxetChartDataContainer: any,
+  wxetChartsAmount: any
 ) => {
   const response = await axios.get('https://app.agrinet.us/api/map/wx', {
     params: {
@@ -24,9 +26,10 @@ export const wxetDataRequest = async (propsSensorId: string,
   })
   id += 1
   const wxetDataItem = {
-    id: id,
-    name: name,
+    mainId,
+    id,
     sensorId: propsSensorId,
+    name: name,
     data: response.data,
     layerName: 'WXET'
   }

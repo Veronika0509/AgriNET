@@ -22,7 +22,6 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
       private bounds: google.maps.LatLngBounds;
       private isValidData: boolean;
       private data: any;
-      private overlaysToFit: any
       private setChartPageType: any
 
       private layerName: string
@@ -42,7 +41,6 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         bounds: google.maps.LatLngBounds,
         isValidData: boolean,
         data: any,
-        overlaysToFit: any,
         setChartPageType: any
       ) {
         super();
@@ -60,7 +58,6 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         this.isValidData = isValidData
         this.data = data
         this.layerName = data.layerName
-        this.overlaysToFit = overlaysToFit
         this.setChartPageType = setChartPageType
       }
 
@@ -150,7 +147,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       onAdd() {
-        const divId = `overlay-${this.data.sensorId}`;
+        const divId = `overlay-${this.data.mainId}`;
         this.div = document.getElementById(divId);
 
         if (!this.div) {
@@ -178,9 +175,8 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
           this.bounds,
           this.div,
           this.isAllCoordinatesOfMarkersAreReady,
-          this.data.sensorId,
-          this.overlappingPairs,
-          this.overlaysToFit
+          this.data.mainId,
+          this.overlappingPairs
         )
       }
 

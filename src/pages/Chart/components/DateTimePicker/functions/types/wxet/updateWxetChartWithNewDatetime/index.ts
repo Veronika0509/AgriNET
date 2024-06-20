@@ -1,7 +1,6 @@
-import {getWxetChartData} from "../../../../../../../Map/data/types/wxet/getWxetChartData";
 import axios from "axios";
 import {checkDateValidity} from "../../../checkDateValidity";
-import {updateWxetChart} from "../../../../../../functions/types/wxet/updateWxetChart";
+import {createWxetChart} from "../../../../../../functions/types/wxet/createWxetChart";
 
 export const updateWxetChartWithNewDatetime = (
   startDate: any,
@@ -31,7 +30,7 @@ export const updateWxetChartWithNewDatetime = (
       })
       resolve(response)
     }).then((response: any) => {
-      updateWxetChart(response.data.data, root, isMobile, additionalChartData)
+      createWxetChart(response.data.data, root, isMobile, additionalChartData)
       setCurrentChartData(response.data.data)
     })
   }

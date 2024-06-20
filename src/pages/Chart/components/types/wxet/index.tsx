@@ -1,11 +1,11 @@
 import s from './style.module.css'
 import {useEffect, useRef, useState} from "react";
-import {updateWxetChart} from "../../../functions/types/wxet/updateWxetChart";
 import {handleResize} from "../../../functions/handleResize";
 import {IonContent} from "@ionic/react";
 import TopSection from "../../TopSection";
 import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentTime";
 import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
+import {createWxetChart} from "../../../functions/types/wxet/createWxetChart";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -17,13 +17,13 @@ export const WxetChartPage = (props: any) => {
 
   useEffect(() => {
     setCurrentChartData(props.chartData)
-    updateWxetChart(props.chartData, root, props.isMobile, props.additionalChartData)
+    createWxetChart(props.chartData, root, props.isMobile, props.additionalChartData)
     handleResize(props.setIsMobile)
   }, []);
 
   useEffect(() => {
     if (currentChartData) {
-      updateWxetChart(currentChartData, root, props.isMobile, props.additionalChartData)
+      createWxetChart(currentChartData, root, props.isMobile, props.additionalChartData)
     }
   }, [props.isMobile, currentChartData]);
 

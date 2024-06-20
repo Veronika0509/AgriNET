@@ -34,12 +34,26 @@ const DateTimePicker = (props: any) => {
           <DatetimeCalendar title={'To'} date={props.endDate} setDate={props.setEndDate}/>
         </div>
 
-        {props.type === 'moistFuel' ? (
-          <IonButton onClick={() => updateChartWithNewDatetime(props.startDate, props.endDate, presentToast, props.sensorId, props.root, props.isMobile, props.fullDatesArray, props.setCurrentChartData, props.setDisableNextButton, props.setDisablePrevButton, props.additionalChartData)}>
+        {props.type === 'moist' ? (
+          <IonButton onClick={() => updateChartWithNewDatetime(
+            props.startDate,
+            props.endDate,
+            presentToast,
+            props.setCurrentDates
+          )}>
             <IonIcon icon={refreshOutline}></IonIcon>
           </IonButton>
         ) : props.type === 'wxet' && (
-          <IonButton onClick={() => updateWxetChartWithNewDatetime(props.startDate, props.endDate, presentToast, props.sensorId, props.root, props.isMobile, props.setCurrentChartData, props.additionalChartData)}>
+          <IonButton onClick={() => updateWxetChartWithNewDatetime(
+            props.startDate,
+            props.endDate,
+            presentToast,
+            props.sensorId,
+            props.root,
+            props.isMobile,
+            props.setCurrentChartData,
+            props.additionalChartData
+          )}>
             <IonIcon icon={refreshOutline}></IonIcon>
           </IonButton>
         )}

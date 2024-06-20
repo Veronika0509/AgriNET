@@ -1,5 +1,10 @@
-import axios from "axios";
 import {getDatetime} from "../../../../components/DateTimePicker/functions/getDatetime";
+import {moistDataBatteryRequest} from "../../../../data/types/moist/moistDataBatteryRequest";
+import {moistMainChartDataRequest} from "../../../../../Map/data/types/moist/moistMainChartDataRequest";
+import {createMoistMainChart} from "../createMoistMainChart";
+import {createMoistBatteryChart} from "../createMoistBatteryChart";
+import {moistSumChartDataRequest} from "../../../../data/types/moist/sumChartDataRequest";
+import {createMoistSumChart} from "../createMoistSumChart";
 
 export const onIrrigationButtonClick = async (
   buttonProps: number,
@@ -9,16 +14,9 @@ export const onIrrigationButtonClick = async (
   setDisablePrevButton: any,
   disableNextButton: any,
   disablePrevButton: any,
-  siteId: string,
-  userId: number,
-  setCurrentChartData: any,
-  updateMoistChart: any,
-  root: any,
-  isMobile: any,
-  fullDatesArray: any,
   setStartDate: any,
   setEndDate: any,
-  additionalChartData: any
+  setCurrentDates: any
 ) => {
   let currentDate: any
 
@@ -67,30 +65,12 @@ export const onIrrigationButtonClick = async (
     }
   }
 
-  try {
-    const response = await axios.get('https://app.agrinet.us/api/chart/m', {
-      params: {
-        sensorId: siteId,
-        days: 14,
-        endDate: findNearestDate(currentDate, irrigationDates),
-        user: userId,
-        v: 42
-      },
-    });
-    new Promise((resolve: any) => {
-      setCurrentChartData(response.data.data)
-      resolve()
-    }).then(() => {
-      updateMoistChart(response.data.data, root, isMobile, fullDatesArray, additionalChartData)
+  setCurrentDates([14, findNearestDate(currentDate, irrigationDates), formattedNearestDate, formattedNearestDate])
 
-      const endDateTimeDefault = new Date(findNearestDate(currentDate, irrigationDates))
-      const endDatetime = getDatetime(new Date(endDateTimeDefault.setDate(endDateTimeDefault.getDate() - 1)))
-      setEndDate(endDatetime)
+  const endDateTimeDefault = new Date(findNearestDate(currentDate, irrigationDates))
+  const endDatetime = getDatetime(new Date(endDateTimeDefault.setDate(endDateTimeDefault.getDate() - 1)))
+  setEndDate(endDatetime)
 
-      const startDatetime = new Date(endDatetime)
-      setStartDate(getDatetime(new Date(startDatetime.setDate(startDatetime.getDate() - 14))))
-    })
-  } catch (error) {
-    console.log(error);
-  }
+  const startDatetime = new Date(endDatetime)
+  setStartDate(getDatetime(new Date(startDatetime.setDate(startDatetime.getDate() - 14))))
 }

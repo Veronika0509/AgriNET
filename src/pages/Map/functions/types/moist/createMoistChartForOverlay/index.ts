@@ -2,7 +2,7 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
-export const createMarkerOverlay = (chartData: any, roots: any, moistOverlays: any) => {
+export const createMoistChartForOverlay = (chartData: any, roots: any, moistOverlays: any) => {
   let root = am5.Root.new(chartData.id.toString());
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);
@@ -10,13 +10,9 @@ export const createMarkerOverlay = (chartData: any, roots: any, moistOverlays: a
   const chart = root.container.children.push(am5xy.XYChart.new(root, {
     panX: false,
     panY: false,
-    background: am5.Rectangle.new(root, {
-      fill: am5.color(0x96fd66),
-      fillOpacity: 1,
-    }),
-    paddingTop: 5,
-    paddingLeft: 5,
-    paddingRight: 5,
+    paddingTop: 0,
+    paddingLeft: 0,
+    paddingRight: 0,
     paddingBottom: 0,
   }));
 
@@ -73,13 +69,11 @@ export const createMarkerOverlay = (chartData: any, roots: any, moistOverlays: a
     }),
   }));
 
-  const chartBackground = chart.plotContainer.get("background");
-  if (chartBackground !== undefined) {
-    chartBackground.setAll({
-      stroke: am5.color(0xCC0000),
-      strokeOpacity: 1,
+  const plotContainerBackground = chart.plotContainer.get("background");
+  if (plotContainerBackground !== undefined) {
+    plotContainerBackground.setAll({
       fill: am5.color(0x08f908),
-      fillOpacity: 1,
+      fillOpacity: 1
     });
   }
   chart.topAxesContainer.children.push(am5.Rectangle.new(root, {
@@ -112,8 +106,8 @@ export const createMarkerOverlay = (chartData: any, roots: any, moistOverlays: a
 
   moistOverlays.map((overlay: any) => {
     if (overlay.layerName === 'Moist') {
-      if (overlay.chartData.sensorId === chartData.sensorId) {
-        overlay.isChartDrawn = true
+      if (overlay.chartData.mainId === chartData.mainId) {
+        overlay.isMoistMarkerChartDrawn = true
         overlay.update();
       }
     }

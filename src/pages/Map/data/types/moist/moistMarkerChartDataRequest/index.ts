@@ -5,30 +5,33 @@ let moistChartData: any = []
 let boundsArray: any = []
 let invalidChartData: any = []
 
-export const moistChartDataRequest = async (propsSensorId: string,
-                                            bounds: any,
-                                            name: string,
-                                            userId: any,
-                                            setInvalidMoistChartDataContainer: any,
-                                            setMoistChartDataContainer: any,
-                                            moistFuelChartsAmount: any
+export const moistMarkerChartDataRequest = async (
+  mainId: any,
+  propsSensorId: string,
+  bounds: any,
+  name: string,
+  userId: any,
+  setInvalidMoistChartDataContainer: any,
+  setMoistChartDataContainer: any,
+  moistChartsAmount: any
 ) => {
-  console.log(123)
-  const response = await axios.get('https://app.agrinet.us/api/map/moist-fuel', {
+  console.log(boundsArray)
+  const response = await axios.get('https://app.agrinet.us/api/map/moist-fuel?v=43', {
     params: {
       sensorId: propsSensorId,
       cacheFirst: true,
       'do-not-catch-error': '',
       user: userId,
-      v: 43
     },
   })
   id += 1
+  console.log(name, response.data)
   const moistChartDataItem = {
-    id: id,
-    name: name,
-    battery: response.data.battery,
+    mainId,
+    id,
     sensorId: propsSensorId,
+    name,
+    battery: response.data.battery,
     data: response.data.data,
     topBudgetLine: response.data.budgetLines[1].value,
     bottomBudgetLine: response.data.budgetLines[4].value,
@@ -36,7 +39,7 @@ export const moistChartDataRequest = async (propsSensorId: string,
   }
   moistChartData.push(moistChartDataItem)
   boundsArray.push(bounds)
-  if (moistFuelChartsAmount.length === moistChartData.length) {
+  if (moistChartsAmount.length === moistChartData.length) {
     let updatedMoistChartData: any = []
     boundsArray.map((bounds: any, index: number) => {
       if (moistChartData[index].data.length !== 0 && moistChartData[index].data.length !== 1) {

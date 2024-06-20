@@ -2,28 +2,26 @@ import s from "../../../style.module.css";
 import {createRoot} from "react-dom/client";
 import React from "react";
 import {truncateText} from "../../../functions/truncateTextFunc";
-import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
+import {onTempSensorClick} from "../../../functions/types/temp/onTempSensorClick";
 import {moveOverlays} from "../../../functions/moveOverlays";
 
-export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
+export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
     return class CustomOverlayExport extends google.maps.OverlayView {
       private bounds: google.maps.LatLngBounds;
-      private invalidChartDataImage: any;
       private isValidChartData: boolean;
       private chartData: any;
       private isAllCoordinatesOfMarkersAreReady: any
       private overlappingPairs: any
-      // private sensorId: string
       private setChartData: any
       private setPage: any
       private setSiteId: any
       private setSiteName: any
       private history: any
-      private isMoistMarkerChartDrawn: boolean
+      private isTempMarkerChartDrawn: boolean
       private setAdditionalChartData: any
       private siteList: any
-      private setMoistOverlays: any
+      private setTempOverlays: any
       private setChartPageType: any
 
       private layerName: string
@@ -32,47 +30,43 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
 
       constructor(
         bounds: google.maps.LatLngBounds,
-        invalidChartDataImage: any,
         isValidChartData: boolean,
         chartData: any,
         isAllCoordinatesOfMarkersAreReady: any,
         overlappingPairs: any,
-        // sensorId: string,
         setChartData: any,
         setPage: any,
         setSiteId: any,
         setSiteName: any,
         history: any,
-        isMoistMarkerChartDrawn: boolean,
+        isTempMarkerChartDrawn: boolean,
         setAdditionalChartData: any,
         siteList: any,
-        setMoistOverlays: any,
+        setTempOverlays: any,
         setChartPageType: any
       ) {
         super();
 
         this.bounds = bounds;
-        this.invalidChartDataImage = invalidChartDataImage;
         this.isValidChartData = isValidChartData;
         this.chartData = chartData;
         this.isAllCoordinatesOfMarkersAreReady = isAllCoordinatesOfMarkersAreReady
         this.overlappingPairs = overlappingPairs
-        // this.sensorId = sensorId
         this.setChartData = setChartData
         this.setPage = setPage
         this.setSiteId = setSiteId
         this.setSiteName = setSiteName
         this.history = history
-        this.isMoistMarkerChartDrawn = isMoistMarkerChartDrawn
+        this.isTempMarkerChartDrawn = isTempMarkerChartDrawn
         this.setAdditionalChartData = setAdditionalChartData
         this.siteList = siteList
         this.layerName = chartData.layerName
-        this.setMoistOverlays = setMoistOverlays
+        this.setTempOverlays = setTempOverlays
         this.setChartPageType = setChartPageType
       }
 
       update() {
-        if (this.div && this.isMoistMarkerChartDrawn && this.root) {
+        if (this.div && this.isTempMarkerChartDrawn && this.root) {
           this.root.render(this.renderContent());
         }
 
@@ -83,10 +77,9 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         return (
           <div className={s.overlayContainer}>
             {this.isValidChartData ? (
-              <div className={s.mainContainer} onClick={() => onMoistSensorClick(
+              <div className={s.mainContainer} onClick={() => onTempSensorClick(
                 this.history,
                 this.chartData.sensorId,
-                this.chartData.mainId,
                 this.chartData.name,
                 this.setChartData,
                 this.setPage,
@@ -97,9 +90,9 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
                 this.setChartPageType
               )}>
                 <div className={s.chartContainer}>
-                  <div className={s.moistChartOverlay}>
-                    <div id={this.chartData.id.toString()} className={s.chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
-                    {this.isMoistMarkerChartDrawn ? null : (
+                  <div className={s.tempChartOverlay}>
+                    <div id={this.chartData.id} className={`${s.chart} ${s.tempChart}`} style={{ display: this.isTempMarkerChartDrawn ? 'block' : 'none' }}></div>
+                    {this.isTempMarkerChartDrawn ? null : (
                       <div className={s.loader}></div>
                     )}
                   </div>
@@ -107,18 +100,20 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
                 </div>
                 <div className={s.overlayInfo}>
                   <p className={s.chartName}>{this.chartData.name}</p>
-                  {this.chartData.battery && <p className={s.chartName}>{this.chartData.battery}</p>}
+                  {this.chartData.batteryPercentage && <p className={s.chartName}>Battery: {this.chartData.batteryPercentage}%</p>}
                   <p>{this.chartData.sensorId}</p>
                 </div>
               </div>
             ) : (
               <div className={`${s.overlayContainer} ${s.invalidOverlayContainer}`}>
-                <div className={s.invalidMoistChartDataImgContainer}>
-                  <img src={this.invalidChartDataImage} className={s.invalidChartDataImg} alt='Invalid Chart Data'/>
-                  <p className={s.underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
+                <div className={s.wxetNotValidData}>
+                  <div className={s.wxetNotValidDataRectangle}>
+                    <p className={s.wxetNotValidDataRectangleText}>no data</p>
+                  </div>
+                  <p className={`${s.wxetNotValidName} ${s.underInformationOverlayText}`}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlayInfo}>
-                  <p className={s.chartName}>{this.chartData.sensorId}</p>
+                  <p className={s.overlayText}>{this.chartData.sensorId}</p>
                 </div>
               </div>
             )}
@@ -138,12 +133,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
             this.div.style.borderWidth = "0px";
             this.div.style.position = "absolute";
 
-            if (this.chartData.battery !== null) {
-              if (!this.chartData.battery.toString().includes(" VDC")) {
-                this.chartData.battery = this.chartData.battery + ' VDC'
-              }
-            }
-
             const panes: any = this.getPanes();
             panes.floatPane.appendChild(this.div);
             if (!this.root) {
@@ -153,7 +142,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
           }
           resolve()
         }).then(() => {
-          this.setMoistOverlays((overlays: any) => [...overlays, this]);
+          this.setTempOverlays((overlays: any) => [...overlays, this]);
         })
       }
 

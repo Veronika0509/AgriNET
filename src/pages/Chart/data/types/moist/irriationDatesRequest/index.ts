@@ -1,14 +1,21 @@
 import axios from "axios";
-import {loadGoogleApi} from "../../../../functions/loadGoogleApiFunc";
+import {loadGoogleApi} from "../../../../../../functions/loadGoogleApiFunc";
 
-export const irrigationDatesRequest = async (setIsIrrigationDataIsLoading: any, setIsIrrigationButtons: any, userId: number, siteId: string, setIrrigationDates: any, setFullDatesArray: any): Promise<void> => {
+export const irrigationDatesRequest = async (
+  setIsIrrigationDataIsLoading: any,
+  setIsIrrigationButtons: any,
+  userId: number,
+  sensorId: string,
+  setIrrigationDates: any,
+  setFullDatesArray: any
+): Promise<void> => {
   let datesArray: any = []
   let fullDatesArrayNs: any = []
 
   try {
     new Promise((resolve: any) => {
       setIsIrrigationDataIsLoading(true)
-      const idForIrrigationDataRequest = axios.get(`https://app.agrinet.us/api/autowater/${siteId}`)
+      const idForIrrigationDataRequest = axios.get(`https://app.agrinet.us/api/autowater/${sensorId}`)
       resolve(idForIrrigationDataRequest)
     }).then((idForIrrigationDataRequest: any) => {
       if (idForIrrigationDataRequest.data === '') {

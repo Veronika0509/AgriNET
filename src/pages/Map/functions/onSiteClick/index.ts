@@ -1,32 +1,35 @@
 import {getSensorItems} from "../../data/getSensorItems";
-import {moistChartDataRequest} from "../../data/types/moisture/moistChartDataRequest";
-import {createMoistMarker} from "../types/moisture/createMoistMarker";
 import {pushAllCoordinates} from "../pushAllCoordinates";
+import {createMoistMarker} from "../types/moist/createMoistMarker";
 import {createWxetMarker} from "../types/wxet/createWxetMarker";
+import {createTempMarker} from "../types/temp/createTempMarker";
 
-export const onSiteClick = async (page: any,
-                                  moistFuelChartsAmount: any,
-                                  userId: any,
-                                  setInvalidMoistChartDataContainer: any,
-                                  setMoistChartDataContainer: any,
-                                  allCoordinatesOfMarkers: any,
-                                  setIsAllCoordinatesOfMarkersAreReady: any,
-                                  siteList: any,
-                                  map: any,
-                                  groupMarker: any,
-                                  sensorsGroupData: any,
-                                  setSecondMap: any,
-                                  wxetChartsAmount: any,
-                                  setInvalidWxetDataContainer: any,
-                                  setWxetDataContainer: any,
+export const onSiteClick = async (
+  page: any,
+  userId: any,
+  allCoordinatesOfMarkers: any,
+  setIsAllCoordinatesOfMarkersAreReady: any,
+  siteList: any,
+  groupMarker: any,
+  sensorsGroupData: any,
+  setSecondMap: any,
+  moistChartsAmount: any,
+  setInvalidMoistChartDataContainer: any,
+  setMoistChartDataContainer: any,
+  wxetChartsAmount: any,
+  setInvalidWxetDataContainer: any,
+  setWxetDataContainer: any,
+  tempChartsAmount: any,
+  setInvalidTempChartDataContainer: any,
+  setTempChartDataContainer: any
 ) => {
   setSecondMap(sensorsGroupData.name)
   await Promise.all(siteList.map(async () => {
     const sensorItems = getSensorItems(undefined, siteList)
-    sensorItems.map((sensorItem: any) =>  {
+    sensorItems.map((sensorItem: any) => {
       if (sensorItem.markerType === 'moist-fuel') {
         createMoistMarker(
-          moistFuelChartsAmount,
+          moistChartsAmount,
           sensorItem,
           page,
           userId,
@@ -41,6 +44,15 @@ export const onSiteClick = async (page: any,
           userId,
           setInvalidWxetDataContainer,
           setWxetDataContainer
+        )
+      } else if (sensorItem.markerType === 'temp-rh-v2') {
+        createTempMarker(
+          tempChartsAmount,
+          sensorItem,
+          page,
+          userId,
+          setInvalidTempChartDataContainer,
+          setTempChartDataContainer
         )
       } else {
         // createSensorsMarkers(sensorItem, map, setSensorName, setSensorId, setSensorType, setIsModalOpen, setIsChartDataIsLoading, setIsSelectDisabled, setChartData, existingMarkers)

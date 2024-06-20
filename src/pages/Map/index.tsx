@@ -12,10 +12,12 @@ import {initializeMoistCustomOverlay} from "./components/types/moist/MoistCustom
 import {setSiteListRequest} from "./data/siteListRequest";
 import {createMap} from "./functions/createMap";
 import {createSites} from "./functions/createSites";
-import {createMarkerOverlay} from "./functions/types/moisture/createChartForOverlay";
+import {createMoistChartForOverlay} from "./functions/types/moist/createMoistChartForOverlay";
 import { useHistory } from 'react-router-dom';
 import LayerList from "./components/LayerList";
 import {initializeWxetCustomOverlay} from "./components/types/wxet/WxetCustomOverlay";
+import {initializeTempCustomOverlay} from "./components/types/temp/TempCustomOverlay";
+import {createTempChartForOverlay} from "./functions/types/temp/createTempChartForOverlay";
 
 interface MainProps {
   page: any
@@ -39,24 +41,30 @@ const MapPage: React.FC<MainProps> = (props) => {
   // const [sensorChartType, setSensorType] = useState('')
   // const [isSelectDisabled, setIsSelectDisabled] = useState(false)
   // const [isChartDataIsLoading, setIsChartDataIsLoading] = useState(false)
-  const [isChartDrawn, setIsChartDrawn] = useState(false)
+
   // Moist type
+  let isMoistMarkerChartDrawn: boolean = false
   const [moistChartDataContainer, setMoistChartDataContainer] = useState<any>([])
   const [invalidMoistChartDataContainer, setInvalidMoistChartDataContainer] = useState([])
   const [moistOverlays, setMoistOverlays] = useState([])
-  const moistFuelChartsAmount: any = []
+  const moistChartsAmount: any = []
+
+  // Temp type
+  let isTempMarkerChartDrawn: boolean = false
+  const [tempChartDataContainer, setTempChartDataContainer] = useState<any>([])
+  const [invalidTempChartDataContainer, setInvalidTempChartDataContainer] = useState([])
+  const [tempOverlays, setTempOverlays] = useState([])
+  const tempChartsAmount: any = []
 
   // Wxet type
   const [wxetDataContainer, setWxetDataContainer] = useState<any>([])
   const [invalidWxetDataContainer, setInvalidWxetDataContainer] = useState([])
-  const [wxetOverlayIsReady, setWxetOverlayIsReady] = useState<any>([])
   const wxetChartsAmount: any = []
 
   // All Types
   let allCoordinatesOfMarkers: any = [];
   let overlaysToFit: any[] = [];
   const [overlays, setOverlays] = useState<any[]>([])
-  const [overlaysAreReady, setOverlaysAreReady] = useState<any>([])
   const [isAllCoordinatesOfMarkersAreReady, setIsAllCoordinatesOfMarkersAreReady] = useState([])
 
   // Map
@@ -81,16 +89,19 @@ const MapPage: React.FC<MainProps> = (props) => {
         props.siteList,
         markers,
         setMarkers,
-        moistFuelChartsAmount,
         props.userId,
-        setInvalidMoistChartDataContainer,
-        setMoistChartDataContainer,
         allCoordinatesOfMarkers,
         setIsAllCoordinatesOfMarkersAreReady,
         setSecondMap,
+        moistChartsAmount,
+        setInvalidMoistChartDataContainer,
+        setMoistChartDataContainer,
         wxetChartsAmount,
         setInvalidWxetDataContainer,
         setWxetDataContainer,
+        tempChartsAmount,
+        setInvalidTempChartDataContainer,
+        setTempChartDataContainer
       )
     }
   }, [map, props.siteList]);
@@ -114,10 +125,9 @@ const MapPage: React.FC<MainProps> = (props) => {
             props.setSiteId,
             props.setSiteName,
             history,
-            isChartDrawn,
+            isMoistMarkerChartDrawn,
             props.setAdditionalChartData,
             props.siteList,
-            overlaysToFit,
             setMoistOverlays,
             props.setChartPageType
           )
@@ -145,10 +155,9 @@ const MapPage: React.FC<MainProps> = (props) => {
           props.setSiteId,
           props.setSiteName,
           history,
-          isChartDrawn,
+          isMoistMarkerChartDrawn,
           props.setAdditionalChartData,
           props.siteList,
-          overlaysToFit,
           setMoistOverlays,
           props.setChartPageType
         )
@@ -161,7 +170,7 @@ const MapPage: React.FC<MainProps> = (props) => {
     if (moistOverlays.length !== 0) {
       const roots: any[] = [];
       moistChartDataContainer.map((chartData: any) => {
-        createMarkerOverlay(chartData[0], roots, moistOverlays)
+        createMoistChartForOverlay(chartData[0], roots, moistOverlays)
       })
 
       return () => {
@@ -189,7 +198,6 @@ const MapPage: React.FC<MainProps> = (props) => {
             data[1],
             true,
             data[0],
-            overlaysToFit,
             props.setChartPageType
           )
           setOverlays((prevOverlays) => [...prevOverlays, overlay]);
@@ -217,7 +225,6 @@ const MapPage: React.FC<MainProps> = (props) => {
             data[1],
             false,
             data[0],
-            overlaysToFit,
             props.setChartPageType
           )
           setOverlays((prevOverlays) => [...prevOverlays, overlay]);
@@ -238,6 +245,75 @@ const MapPage: React.FC<MainProps> = (props) => {
       map.fitBounds(bounds);
     }
   }, [overlays]);
+
+  // Temp Marker
+  useEffect(() => {
+    if (tempChartDataContainer.length !== 0) {
+      const addOverlay = (() => {
+        tempChartDataContainer.map((chartData: any) => {
+          const TempCustomOverlayExport: any = initializeTempCustomOverlay(props.isGoogleApiLoaded)
+          const overlay = new TempCustomOverlayExport(
+            chartData[1],
+            true,
+            chartData[0],
+            isAllCoordinatesOfMarkersAreReady,
+            overlappingPairs,
+            props.setChartData,
+            props.setPage,
+            props.setSiteId,
+            props.setSiteName,
+            history,
+            isTempMarkerChartDrawn,
+            props.setAdditionalChartData,
+            props.siteList,
+            setTempOverlays,
+            props.setChartPageType
+          )
+          setOverlays((prevOverlays) => [...prevOverlays, overlay]);
+          overlay.setMap(map)
+        })
+      })
+      addOverlay();
+    }
+  }, [tempChartDataContainer]);
+  useEffect(() => {
+    if (invalidTempChartDataContainer.length !== 0) {
+      invalidTempChartDataContainer.map((chartData: any) => {
+        const CustomOverlayExport: any = initializeTempCustomOverlay(props.isGoogleApiLoaded)
+        const overlay: any = new CustomOverlayExport(
+          chartData[1],
+          false,
+          chartData[0],
+          isAllCoordinatesOfMarkersAreReady,
+          overlappingPairs,
+          props.setChartData,
+          props.setPage,
+          props.setSiteId,
+          props.setSiteName,
+          history,
+          isTempMarkerChartDrawn,
+          props.setAdditionalChartData,
+          props.siteList,
+          setTempOverlays,
+          props.setChartPageType
+        )
+        setOverlays((prevOverlays) => [...prevOverlays, overlay]);
+        map && overlay.setMap(map)
+      })
+    }
+  }, [invalidTempChartDataContainer]);
+  useEffect(() => {
+    if (tempOverlays.length !== 0) {
+      const roots: any[] = [];
+      tempChartDataContainer.map((chartData: any) => {
+        createTempChartForOverlay(chartData[0], roots, tempOverlays)
+      })
+
+      return () => {
+        roots.forEach(root => root.dispose());
+      };
+    }
+  }, [tempOverlays]);
 
   return (
     <IonPage>

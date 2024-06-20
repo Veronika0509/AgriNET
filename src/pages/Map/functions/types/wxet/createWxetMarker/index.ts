@@ -1,13 +1,15 @@
 import {wxetDataRequest} from "../../../../data/types/wxet/wxetDataRequest";
+import login from "../../../../../Login";
 
-export const createWxetMarker = (wxetChartsAmount: any,
-                                  sensorItem: any,
-                                  page: any,
-                                  userId: any,
-                                  setInvalidWxetChartDataContainer: any,
-                                  setWxetChartDataContainer: any
+export const createWxetMarker = (
+  wxetChartsAmount: any,
+  sensorItem: any,
+  page: any,
+  userId: any,
+  setInvalidWxetChartDataContainer: any,
+  setWxetChartDataContainer: any
 ) => {
-  const exists = wxetChartsAmount.some((secondItemMoist: any) => secondItemMoist.sensorId === sensorItem.sensorId);
+  const exists = wxetChartsAmount.some((secondItemTemp: any) => secondItemTemp.id === sensorItem.id);
   if (!exists) {
     wxetChartsAmount.push(sensorItem);
     const bounds: any = new google.maps.LatLngBounds(
@@ -15,7 +17,9 @@ export const createWxetMarker = (wxetChartsAmount: any,
       new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
     )
     if (page === 1) {
-      wxetDataRequest(sensorItem.sensorId,
+      wxetDataRequest(
+        sensorItem.id,
+        sensorItem.sensorId,
         bounds,
         sensorItem.name,
         userId,

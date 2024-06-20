@@ -1,5 +1,5 @@
 import s from '../style.module.css'
-import {IonCheckbox, IonItem, IonList} from "@ionic/react";
+import {IonCheckbox, IonItem} from "@ionic/react";
 
 const LayerList = (props: any) => {
   let layers: string[] = []

@@ -5,6 +5,8 @@
 .topSection {
   max-width: 80vw;
   margin: 50px auto 0 auto;
+  display: flex;
+  align-items: center;
 }
 
 .backIcon {
@@ -21,10 +23,14 @@
   font-weight: 600;
 }
 
-.chart {
+.chart, .batteryChart {
   width: 100%;
   height: 300px;
   margin-top: 20px;
+}
+
+.batteryChart {
+  height: 200px;
 }
 
 .buttons {

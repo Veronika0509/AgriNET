@@ -1,20 +1,24 @@
 import {onSiteClick} from "../onSiteClick";
 
-export const createSites = (page: any,
-                            map: any,
-                            siteList: any,
-                            markers: any,
-                            setMarkers: any,
-                            moistFuelChartsAmount: any,
-                            userId: any,
-                            setInvalidMoistChartDataContainer: any,
-                            setMoistChartDataContainer: any,
-                            allCoordinatesOfMarkers: any,
-                            setIsAllCoordinatesOfMarkersAreReady: any,
-                            setSecondMap: any,
-                            wxetChartsAmount: any,
-                            setInvalidWxetDataContainer: any,
-                            setWxetDataContainer: any,
+export const createSites = (
+  page: any,
+  map: any,
+  siteList: any,
+  markers: any,
+  setMarkers: any,
+  userId: any,
+  allCoordinatesOfMarkers: any,
+  setIsAllCoordinatesOfMarkersAreReady: any,
+  setSecondMap: any,
+  moistChartsAmount: any,
+  setInvalidMoistChartDataContainer: any,
+  setMoistChartDataContainer: any,
+  wxetChartsAmount: any,
+  setInvalidWxetDataContainer: any,
+  setWxetDataContainer: any,
+  tempChartsAmount: any,
+  setInvalidTempChartDataContainer: any,
+  setTempChartDataContainer: any
 ) => {
   if (markers.length === 0) {
     const newMarkers = siteList.map((sensorsGroupData: any) => {
@@ -32,20 +36,22 @@ export const createSites = (page: any,
         setTimeout(() => {
           onSiteClick(
             page,
-            moistFuelChartsAmount,
             userId,
-            setInvalidMoistChartDataContainer,
-            setMoistChartDataContainer,
             allCoordinatesOfMarkers,
             setIsAllCoordinatesOfMarkersAreReady,
             siteList,
-            map,
             groupMarker,
             sensorsGroupData,
             setSecondMap,
+            moistChartsAmount,
+            setInvalidMoistChartDataContainer,
+            setMoistChartDataContainer,
             wxetChartsAmount,
             setInvalidWxetDataContainer,
             setWxetDataContainer,
+            tempChartsAmount,
+            setInvalidTempChartDataContainer,
+            setTempChartDataContainer
           )
         }, 2000)
       }
@@ -53,20 +59,22 @@ export const createSites = (page: any,
       groupMarker.addListener('click', async () => {
         onSiteClick(
           page,
-          moistFuelChartsAmount,
           userId,
-          setInvalidMoistChartDataContainer,
-          setMoistChartDataContainer,
           allCoordinatesOfMarkers,
           setIsAllCoordinatesOfMarkersAreReady,
           siteList,
-          map,
           groupMarker,
           sensorsGroupData,
           setSecondMap,
+          moistChartsAmount,
+          setInvalidMoistChartDataContainer,
+          setMoistChartDataContainer,
           wxetChartsAmount,
           setInvalidWxetDataContainer,
           setWxetDataContainer,
+          tempChartsAmount,
+          setInvalidTempChartDataContainer,
+          setTempChartDataContainer
         )
       })
     });

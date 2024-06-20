@@ -29,8 +29,8 @@ const Chart = (props: ChartProps) => {
     <IonPage className={s.page}>
       <Header setPage={props.setPage} siteName={props.siteName} siteId={props.siteId}/>
       {
-        props.chartPageType === 'moistFuel' ? (
-          <MoistChartPage chartData={props.chartData} additionalChartData={props.additionalChartData} userId={props.userId} siteId={props.siteId} isMobile={isMobile} setIsMobile={setIsMobile} />
+        props.chartPageType === 'moist' ? (
+          <MoistChartPage chartData={props.chartData} additionalChartData={props.additionalChartData} userId={props.userId} sensorId={props.siteId} isMobile={isMobile} setIsMobile={setIsMobile} />
         ) : props.chartPageType === 'wxet' && (
           <WxetChartPage chartData={props.chartData} sensorId={props.siteId} isMobile={isMobile} setIsMobile={setIsMobile} additionalChartData={props.additionalChartData} />
         )

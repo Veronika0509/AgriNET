@@ -1,4 +1,4 @@
-import {chartDataRequest} from "../../data/types/moisture/getMoistChartData";
+import {getMoistChartData} from "../../data/types/moist/moistMainChartDataRequest";
 
 const OFFSET = 0.0002;
 
@@ -29,7 +29,7 @@ export const createSensorsMarkers = (sensorItem: any, map: any, setSensorName: a
     setSensorType(sensorItem.markerType);
     setIsModalOpen(true);
     new Promise((resolve: any) => {
-      const response: any = chartDataRequest(sensorItem.sensorId)
+      const response: any = getMoistChartData(sensorItem.sensorId)
       setIsChartDataIsLoading(true)
       resolve(response)
     }).then((response: any) => {

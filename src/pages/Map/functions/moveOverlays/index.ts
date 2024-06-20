@@ -17,9 +17,8 @@ export const moveOverlays = (
   bounds: any,
   div: any,
   isAllCoordinatesOfMarkersAreReady: any,
-  sensorId: any,
+  mainId: any,
   overlappingPairs: any,
-  overlaysToFit: any,
 ) => {
   let overlaysToFitArray: any[] = isAllCoordinatesOfMarkersAreReady
   const sw: any = projection.fromLatLngToDivPixel(bounds.getSouthWest());
@@ -33,9 +32,9 @@ export const moveOverlays = (
   const overlays: any = isAllCoordinatesOfMarkersAreReady
   for (let i = 0; i < overlays.length; i++) {
     for (let j = i + 1; j < overlays.length; j++) {
-      if (sensorId === overlays[i].id) {
+      if (mainId === overlays[i].mainId) {
         overlays[i].div = div
-      } else if (sensorId === overlays[j].id) {
+      } else if (mainId === overlays[j].mainId) {
         overlays[j].div = div
       }
       if (overlays[i].div && overlays[j].div) {

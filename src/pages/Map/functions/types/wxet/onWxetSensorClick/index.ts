@@ -1,4 +1,4 @@
-import {getMoistChartData} from "../../../../data/types/moisture/getMoistChartData";
+import {getMoistChartData} from "../../../../data/types/moist/moistMainChartDataRequest";
 import {getSensorItems} from "../../../../data/getSensorItems";
 import {getWxetChartData} from "../../../../data/types/wxet/getWxetChartData";
 

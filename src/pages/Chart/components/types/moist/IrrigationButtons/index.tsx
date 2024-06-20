@@ -2,7 +2,6 @@ import React from 'react'
 import s from "../style.module.css";
 import {IonButton, IonText} from "@ionic/react";
 import {onIrrigationButtonClick} from "../../../../functions/types/moist/onIrrigationButtonClick";
-import {updateMoistChart} from "../../../../functions/types/moist/updateMoistChart";
 
 const IrrigationButtons = (props: any) => {
   return (
@@ -22,16 +21,9 @@ const IrrigationButtons = (props: any) => {
                            props.setDisablePrevButton,
                            props.disableNextButton,
                            props.disablePrevButton,
-                           props.siteId,
-                           props.userId,
-                           props.setCurrentChartData,
-                           updateMoistChart,
-                           props.root,
-                           props.isMobile,
-                           props.fullDatesArray,
                            props.setStartDate,
                            props.setEndDate,
-                           props.additionalChartData
+                           props.setCurrentDates
                          )}>Prev Irigation Event</IonButton>
               <IonButton disabled={props.disableNextButton}
                          onClick={() => onIrrigationButtonClick(
@@ -42,16 +34,9 @@ const IrrigationButtons = (props: any) => {
                            props.setDisablePrevButton,
                            props.disableNextButton,
                            props.disablePrevButton,
-                           props.siteId,
-                           props.userId,
-                           props.setCurrentChartData,
-                           updateMoistChart,
-                           props.root,
-                           props.isMobile,
-                           props.fullDatesArray,
                            props.setStartDate,
                            props.setEndDate,
-                           props.additionalChartData
+                           props.setCurrentDates
                          )}>Next Irigation Event</IonButton>
             </div>
           )}

@@ -18,7 +18,7 @@
   color: #000;
   padding: 5px;
   border-radius: 5px;
-  font-size: 11px;
+  font-size: 10px;
   margin-left: -5px;
 }
 
@@ -37,11 +37,13 @@
 }
 
 .chart {
-  height: 80px;
+  height: 70px;
   background: #fff;
   display: flex;
   align-items: center;
   justify-items: center;
+  z-index: 2;
+  border: 1px solid #000;
 }
 
 .chartContainer {
@@ -187,4 +189,15 @@
 
 .overlayText {
   text-align: center;
+}
+
+.moistChartOverlay {
+  background: #96fd66;
+  width: 58px;
+  height: 100%;
+  padding: 5px;
+}
+
+.tempChart {
+  height: 60px;
 }

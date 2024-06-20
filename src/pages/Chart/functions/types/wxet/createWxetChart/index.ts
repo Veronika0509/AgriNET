@@ -151,7 +151,7 @@ export const createWxetChart = (
 // Add legend
     let legend = chart.children.push(am5.Legend.new(root.current, {
       width: 200,
-      paddingLeft: isMobile ? -15 : 15,
+      paddingLeft: 15,
       height: am5.percent(100)
     }));
 
