@@ -14,9 +14,9 @@ export const createTempChartForOverlay = (chartData: any, roots: any, tempOverla
       fill: am5.color(0x96fd66),
       fillOpacity: 1,
     }),
-    paddingTop: 5,
-    paddingLeft: 5,
-    paddingRight: 5,
+    paddingTop: 0,
+    paddingLeft: 0,
+    paddingRight: 0,
     paddingBottom: 0,
   }));
 

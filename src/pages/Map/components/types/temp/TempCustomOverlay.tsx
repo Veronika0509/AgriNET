@@ -4,6 +4,7 @@ import React from "react";
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {onTempSensorClick} from "../../../functions/types/temp/onTempSensorClick";
 import {moveOverlays} from "../../../functions/moveOverlays";
+import {useIonToast} from "@ionic/react";
 
 export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
@@ -23,6 +24,8 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
       private siteList: any
       private setTempOverlays: any
       private setChartPageType: any
+      private userId: any
+      private present: any
 
       private layerName: string
       private root: any;
@@ -43,7 +46,9 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
         setAdditionalChartData: any,
         siteList: any,
         setTempOverlays: any,
-        setChartPageType: any
+        setChartPageType: any,
+        userId: any,
+        present: any
       ) {
         super();
 
@@ -63,6 +68,8 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
         this.layerName = chartData.layerName
         this.setTempOverlays = setTempOverlays
         this.setChartPageType = setChartPageType
+        this.userId = userId
+        this.present = present
       }
 
       update() {
@@ -75,7 +82,7 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
 
       renderContent() {
         return (
-          <div className={s.overlayContainer}>
+          <div className={s.overlayContainer} >
             {this.isValidChartData ? (
               <div className={s.mainContainer} onClick={() => onTempSensorClick(
                 this.history,
@@ -86,16 +93,15 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
                 this.setSiteId,
                 this.setSiteName,
                 this.setAdditionalChartData,
-                this.siteList,
-                this.setChartPageType
+                this.setChartPageType,
+                this.userId,
+                this.present
               )}>
                 <div className={s.chartContainer}>
-                  <div className={s.tempChartOverlay}>
-                    <div id={this.chartData.id} className={`${s.chart} ${s.tempChart}`} style={{ display: this.isTempMarkerChartDrawn ? 'block' : 'none' }}></div>
-                    {this.isTempMarkerChartDrawn ? null : (
-                      <div className={s.loader}></div>
-                    )}
-                  </div>
+                  <div id={this.chartData.id} className={s.chart} style={{ display: this.isTempMarkerChartDrawn ? 'block' : 'none' }}></div>
+                  {this.isTempMarkerChartDrawn ? null : (
+                    <div className={s.loader}></div>
+                  )}
                   <p className={s.underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlayInfo}>

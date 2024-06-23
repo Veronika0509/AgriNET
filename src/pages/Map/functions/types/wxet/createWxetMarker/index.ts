@@ -1,5 +1,4 @@
-import {wxetDataRequest} from "../../../../data/types/wxet/wxetDataRequest";
-import login from "../../../../../Login";
+import {wxetMarkerChartRequest} from "../../../../data/types/wxet/wxetMarkerChartRequest";
 
 export const createWxetMarker = (
   wxetChartsAmount: any,
@@ -17,7 +16,7 @@ export const createWxetMarker = (
       new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
     )
     if (page === 1) {
-      wxetDataRequest(
+      wxetMarkerChartRequest(
         sensorItem.id,
         sensorItem.sensorId,
         bounds,

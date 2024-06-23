@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import s from './style.module.css';
 import {
   IonPage,
-  IonContent
+  IonContent, useIonToast
 } from '@ionic/react';
 import {useRef} from 'react';
 import invalidChartDataImage from '../../assets/images/invalidChartData.png';
@@ -41,6 +41,7 @@ const MapPage: React.FC<MainProps> = (props) => {
   // const [sensorChartType, setSensorType] = useState('')
   // const [isSelectDisabled, setIsSelectDisabled] = useState(false)
   // const [isChartDataIsLoading, setIsChartDataIsLoading] = useState(false)
+  const present = useIonToast()
 
   // Moist type
   let isMoistMarkerChartDrawn: boolean = false
@@ -267,7 +268,9 @@ const MapPage: React.FC<MainProps> = (props) => {
             props.setAdditionalChartData,
             props.siteList,
             setTempOverlays,
-            props.setChartPageType
+            props.setChartPageType,
+            props.userId,
+            present
           )
           setOverlays((prevOverlays) => [...prevOverlays, overlay]);
           overlay.setMap(map)
@@ -295,7 +298,9 @@ const MapPage: React.FC<MainProps> = (props) => {
           props.setAdditionalChartData,
           props.siteList,
           setTempOverlays,
-          props.setChartPageType
+          props.setChartPageType,
+          props.userId,
+          present
         )
         setOverlays((prevOverlays) => [...prevOverlays, overlay]);
         map && overlay.setMap(map)

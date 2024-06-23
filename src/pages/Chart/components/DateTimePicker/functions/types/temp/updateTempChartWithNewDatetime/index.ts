@@ -1,9 +1,8 @@
-import axios from "axios";
 import {checkDateValidity} from "../../../checkDateValidity";
-import {createWxetChart} from "../../../../../../functions/types/wxet/createWxetChart";
-import {wxetMainChartDataRequest} from "../../../../../../../Map/data/types/wxet/wxetMainChartDataRequest";
+import {tempMainChartDataRequest} from "../../../../../../../Map/data/types/temp/tempMainChartDataRequest";
+import {createTempChart} from "../../../../../../functions/types/temp/createTempChart";
 
-export const updateWxetChartWithNewDatetime = async (
+export const updateTempChartWithNewDatetime = async (
   startDate: any,
   endDate: any,
   presentToast: any,
@@ -11,7 +10,9 @@ export const updateWxetChartWithNewDatetime = async (
   root: any,
   isMobile: any,
   setCurrentChartData: any,
-  additionalChartData: any
+  additionalChartData: any,
+  userId: any,
+  present: any
 ) => {
   if (checkDateValidity(startDate, endDate)) {
     presentToast()
@@ -20,8 +21,8 @@ export const updateWxetChartWithNewDatetime = async (
     const startDatetime = new Date(startDate).getTime()
     const endDatetime = new Date(endDate).getTime()
     const days = Math.round((endDatetime - startDatetime) / 86400000)
-    const newChartData = await wxetMainChartDataRequest(sensorId, days, endDateDays)
-    createWxetChart(newChartData.data.data, root, isMobile, additionalChartData)
+    const newChartData: any = await tempMainChartDataRequest(present, sensorId, userId, days, endDateDays)
+    createTempChart(newChartData.data.data, root, isMobile, additionalChartData)
     setCurrentChartData(newChartData.data.data)
   }
 }

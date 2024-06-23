@@ -96,8 +96,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
                   this.setSiteId,
                   this.setSiteName,
                   this.setAdditionalChartData,
-                  this.setChartPageType,
-                  this.userId,
+                  this.setChartPageType
                   )}>
                   <div className={s.wxetOverlayContainer}>
                     <div className={s.wxetOverlayInnerContainer} style={{backgroundColor: this.data.data.bgColor}}>

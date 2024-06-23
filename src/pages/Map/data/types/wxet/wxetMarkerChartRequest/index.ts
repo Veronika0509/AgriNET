@@ -5,7 +5,7 @@ let wxetData: any = []
 let boundsArray: any = []
 let invalidChartData: any = []
 
-export const wxetDataRequest = async (
+export const wxetMarkerChartRequest = async (
   mainId: any,
   propsSensorId: string,
   bounds: any,

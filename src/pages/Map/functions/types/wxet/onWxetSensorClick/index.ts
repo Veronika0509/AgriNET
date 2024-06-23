@@ -1,6 +1,4 @@
-import {getMoistChartData} from "../../../../data/types/moist/moistMainChartDataRequest";
-import {getSensorItems} from "../../../../data/getSensorItems";
-import {getWxetChartData} from "../../../../data/types/wxet/getWxetChartData";
+import {wxetMainChartDataRequest} from "../../../../data/types/wxet/wxetMainChartDataRequest";
 
 export const onWxetSensorClick = async (
   history: any,
@@ -11,19 +9,14 @@ export const onWxetSensorClick = async (
   setSiteId: any,
   setSiteName: any,
   setAdditionalChartData: any,
-  setChartPageType: any,
-  userId: any
+  setChartPageType: any
 ) => {
-  new Promise((resolve: any) => {
-    resolve(getWxetChartData(sensorId, userId))
-  }).then((response: any) => {
-    console.log(response)
-    setChartData(response.data.data)
-    setSiteId(sensorId)
-    setSiteName(name)
-    setChartPageType('wxet')
-    setPage(2)
-    setAdditionalChartData({metric: response.data.metric, type: response.data.type})
-    history.push('/AgriNET/chart');
-  })
+  const newChartData = await wxetMainChartDataRequest(sensorId)
+  setChartData(newChartData.data.data)
+  setSiteId(sensorId)
+  setSiteName(name)
+  setChartPageType('wxet')
+  setPage(2)
+  setAdditionalChartData({metric: newChartData.data.metric, type: newChartData.data.type})
+  history.push('/AgriNET/chart');
 }

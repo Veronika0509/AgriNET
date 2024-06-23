@@ -53,6 +53,7 @@ export const tempMarkerChartDataRequest = async (
     boundsArray.map((bounds: any, index: number) => {
       if (tempChartData[index].data !== undefined) {
         if (tempChartData[index].data.length !== 0 && tempChartData[index].data.length !== 1) {
+          console.log('pushedTempChartData')
           updatedTempChartData.push([tempChartData[index], bounds])
         } else {
           invalidChartData.push([tempChartData[index], bounds])

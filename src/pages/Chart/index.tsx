@@ -5,6 +5,7 @@ import {MoistChartPage} from "./components/types/moist";
 import {WxetChartPage} from "./components/types/wxet";
 import {handleResize} from "./functions/handleResize";
 import {useState} from "react";
+import {TempChartPage} from "./components/types/temp";
 
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -25,16 +26,49 @@ const Chart = (props: ChartProps) => {
     handleResize(setIsMobile)
   })
 
+  const renderChartPage = () => {
+    switch (props.chartPageType) {
+      case 'moist':
+        return (
+          <MoistChartPage
+            chartData={props.chartData}
+            additionalChartData={props.additionalChartData}
+            userId={props.userId}
+            sensorId={props.siteId}
+            isMobile={isMobile}
+            setIsMobile={setIsMobile}
+          />
+        );
+      case 'wxet':
+        return (
+          <WxetChartPage
+            chartData={props.chartData}
+            sensorId={props.siteId}
+            isMobile={isMobile}
+            setIsMobile={setIsMobile}
+            additionalChartData={props.additionalChartData}
+          />
+        );
+      case 'temp':
+        return (
+          <TempChartPage
+            chartData={props.chartData}
+            sensorId={props.siteId}
+            isMobile={isMobile}
+            setIsMobile={setIsMobile}
+            additionalChartData={props.additionalChartData}
+            userId={props.userId}
+          />
+        )
+      default:
+        return null;
+    }
+  };
+
   return (
     <IonPage className={s.page}>
       <Header setPage={props.setPage} siteName={props.siteName} siteId={props.siteId}/>
-      {
-        props.chartPageType === 'moist' ? (
-          <MoistChartPage chartData={props.chartData} additionalChartData={props.additionalChartData} userId={props.userId} sensorId={props.siteId} isMobile={isMobile} setIsMobile={setIsMobile} />
-        ) : props.chartPageType === 'wxet' && (
-          <WxetChartPage chartData={props.chartData} sensorId={props.siteId} isMobile={isMobile} setIsMobile={setIsMobile} additionalChartData={props.additionalChartData} />
-        )
-      }
+      {renderChartPage()}
     </IonPage>
   );
 }

@@ -47,6 +47,7 @@ const TopSection = (props: any) => {
         batteryRoot={props.batteryRoot}
         sumRoot={props.sumRoot}
         setCurrentDates={props.setCurrentDates}
+        userId={props.userId}
       />
       {props.type === 'moist' && (
         <IonButton

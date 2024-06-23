@@ -11,33 +11,39 @@
 }
 
 .overlayInfo {
-  width: 70px;
+  width: 68px;
   display: none;
   margin-top: 5px;
+  margin-left: -5px;
   background: #f1e279;
   color: #000;
-  padding: 5px;
   border-radius: 5px;
   font-size: 10px;
-  margin-left: -5px;
+  padding: 4px;
 }
 
 .overlayContainer {
   cursor: pointer;
+  width: 58px;
 }
 
 .overlayContainer:hover .overlayInfo {
   display: block;
 }
 
-.invalidChartDataImg {
-  display: block;
-  width: 50px;
-  margin: 0 auto 3px auto;
+.chartContainer {
+  background: #96fd66;
+  border: 1px solid #000;
+  border-radius: 6px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  padding: 5px;
+  height: 75px;
 }
 
 .chart {
-  height: 70px;
+  width: 45px;
+  height: 50px;
   background: #fff;
   display: flex;
   align-items: center;
@@ -46,12 +52,10 @@
   border: 1px solid #000;
 }
 
-.chartContainer {
-  width: 60px;
-  border: 1px solid #000;
-  border-radius: 6px;
-  overflow-x: hidden;
-  overflow-y: hidden;
+.invalidChartDataImg {
+  display: block;
+  width: 45px;
+  margin: 0 auto 3px auto;
 }
 
 .invalidOverlayContainer {
@@ -59,8 +63,6 @@
 }
 
 .invalidMoistChartDataImgContainer {
-  width: 60px;
-  height: 75px;
   background: #96fd66;
   border-radius: 6px;
   padding-top: 5px;
@@ -115,6 +117,7 @@
   text-align: center;
   color: #00ade3;
   font-weight: 500;
+  margin-top: 3px;
 }
 
 .layersCheckbox {
@@ -134,7 +137,7 @@
   border: 1px solid #000;
   border-radius: 6px;
   width: 130px;
-  height: 130px;
+  height: 131px;
   padding: 4px 4px 0 4px;
 }
 
@@ -189,15 +192,4 @@
 
 .overlayText {
   text-align: center;
-}
-
-.moistChartOverlay {
-  background: #96fd66;
-  width: 58px;
-  height: 100%;
-  padding: 5px;
-}
-
-.tempChart {
-  height: 60px;
 }

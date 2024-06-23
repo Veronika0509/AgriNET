@@ -1,7 +1,7 @@
 const overlaysOverlap = (overlayProjection: any, overlayA: any, overlayB: any) => {
   const positionA = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(overlayA.lat, overlayA.lng));
   const positionB = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(overlayB.lat, overlayB.lng));
-  return Math.abs(positionA.x - positionB.x) < 130 && Math.abs(positionA.y - positionB.y) < 130;
+  return Math.abs(positionA.x - positionB.x) < 50 && Math.abs(positionA.y - positionB.y) < 70;
 }
 
 function isPairExisting(overlappingPairs: any, newPair: any) {

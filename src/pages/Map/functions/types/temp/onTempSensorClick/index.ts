@@ -10,19 +10,16 @@ export const onTempSensorClick = async (
   setSiteId: any,
   setSiteName: any,
   setAdditionalChartData: any,
-  siteList: any,
-  setChartPageType: any
+  setChartPageType: any,
+  userId: any,
+  present: any
 ) => {
-  const newChartData = await tempMainChartDataRequest(sensorId)
-  // getSensorItems('moist-fuel', siteList).map((sensorItem: any) => {
-  //   if (sensorItem.sensorId === sensorId) {
-  //     setAdditionalChartData({linesCount: sensorItem.sensorCount})
-  //   }
-  // })
-  // setChartData(newChartData.data.data)
-  // setSiteId(sensorId)
-  // setSiteName(name)
-  // setChartPageType('moist')
-  // setPage(2)
-  // history.push('/AgriNET/chart');
+  const newChartData: any = await tempMainChartDataRequest(present, sensorId, userId)
+  setAdditionalChartData({metric: newChartData.data.metric})
+  setChartData(newChartData.data.data)
+  setSiteId(sensorId)
+  setSiteName(name)
+  setChartPageType('temp')
+  setPage(2)
+  history.push('/AgriNET/chart');
 }

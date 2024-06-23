@@ -75,8 +75,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         if (this.div && this.isMoistMarkerChartDrawn && this.root) {
           this.root.render(this.renderContent());
         }
-
-        this.draw()
       }
 
       renderContent() {
@@ -97,12 +95,10 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
                 this.setChartPageType
               )}>
                 <div className={s.chartContainer}>
-                  <div className={s.moistChartOverlay}>
-                    <div id={this.chartData.id.toString()} className={s.chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
-                    {this.isMoistMarkerChartDrawn ? null : (
-                      <div className={s.loader}></div>
-                    )}
-                  </div>
+                  <div id={this.chartData.id.toString()} className={s.chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
+                  {this.isMoistMarkerChartDrawn ? null : (
+                    <div className={s.loader}></div>
+                  )}
                   <p className={s.underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlayInfo}>

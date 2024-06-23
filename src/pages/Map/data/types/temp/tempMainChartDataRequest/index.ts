@@ -1,20 +1,33 @@
 import axios from "axios";
 
-export const tempMainChartDataRequest = async (sensorId: any, daysProp?: any, endDateProp?: any) => {
+export const tempMainChartDataRequest = async (present: any, sensorId: any, userId: any, daysProp?: any, endDateProp?: any) => {
+  const showErrorMessage = () => {
+    present({
+      message: 'Standby: Data is being re routed',
+      duration: 5000,
+      position: 'bottom',
+      color: "danger"
+    });
+  };
   if (daysProp && endDateProp) {
-    return await axios.get('https://app.agrinet.us/api/chart/temp?v=43', {
-      params: {
-        sensorId: sensorId,
-        days: daysProp,
-        endDate: endDateProp
-      },
-    });
+    try {
+      return await axios.get(`https://app.agrinet.us/api/chart/temp?sensorId=${sensorId}&days=${daysProp}&endDate=${endDateProp}`, {
+        headers: {
+          'accept': 'application/json, text/plain, */*',
+          'accept-language': 'en-US,en-GB;q=0.9,en;q=0.8,de;q=0.7,es;q=0.6,ru;q=0.5',
+          'user': userId
+        }
+      });
+    } catch (error) {
+      showErrorMessage()
+    }
   } else {
-    return await axios.get(`https://app.agrinet.us/api/map/temp-data-v2?v=43`, {
-      params: {
-        sensorId: sensorId,
-        days: 14
+    return await axios.get(`https://app.agrinet.us/api/chart/temp?sensorId=${sensorId}&days=14`, {
+      headers: {
+        'accept': 'application/json, text/plain, */*',
+        'accept-language': 'en-US,en-GB;q=0.9,en;q=0.8,de;q=0.7,es;q=0.6,ru;q=0.5',
+        'user': userId
       }
-    });
+    })
   }
 };

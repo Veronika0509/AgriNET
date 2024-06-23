@@ -42,14 +42,19 @@ export const createMoistChartForOverlay = (chartData: any, roots: any, moistOver
       timeUnit: "minute",
       count: 30
     },
-    renderer: am5xy.AxisRendererX.new(root, {
-      minorGridEnabled: true
-    }),
+    renderer: am5xy.AxisRendererX.new(root, {}),
     tooltip: am5.Tooltip.new(root, {})
   }));
+
+  const minimum = chartData.budgetLines[0].value > 0 ? chartData.budgetLines[0].value : undefined
+  const maximum = chartData.budgetLines[5].value > 0 ? chartData.budgetLines[5].value : undefined
   let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+    min: minimum,
+    max: maximum,
+    strictMinMax: true,
     renderer: am5xy.AxisRendererY.new(root, {
-      pan: "zoom"
+      pan: "zoom",
+      inversed: true
     })
   }));
   yAxis.set('visible', false)
@@ -64,9 +69,6 @@ export const createMoistChartForOverlay = (chartData: any, roots: any, moistOver
     valueYField: "value",
     valueXField: "date",
     stroke: am5.color(0x000000),
-    tooltip: am5.Tooltip.new(root, {
-      labelText: "{valueY}"
-    }),
   }));
 
   const plotContainerBackground = chart.plotContainer.get("background");
@@ -76,22 +78,29 @@ export const createMoistChartForOverlay = (chartData: any, roots: any, moistOver
       fillOpacity: 1
     });
   }
-  chart.topAxesContainer.children.push(am5.Rectangle.new(root, {
-    stroke: am5.color(0xCCCC00),
-    strokeOpacity: 1,
+
+// Regions
+  let topBudgetRegion: any = yAxis.makeDataItem({
+    value: chartData.budgetLines[1].value,
+    endValue: 100
+  });
+  series.createAxisRange(topBudgetRegion);
+  topBudgetRegion.get("axisFill").setAll({
     fill: am5.color(0x02c5fd),
     fillOpacity: 1,
-    width: am5.percent(100),
-    height: chartData.topBudgetLine,
-  }));
-  chart.bottomAxesContainer.children.push(am5.Rectangle.new(root, {
-    stroke: am5.color(0xCCCC00),
-    strokeOpacity: 1,
+    visible: true
+  });
+
+  let bottomBudgetRegion: any = yAxis.makeDataItem({
+    value: chartData.budgetLines[4].value,
+    endValue: 0
+  });
+  series.createAxisRange(bottomBudgetRegion);
+  bottomBudgetRegion.get("axisFill").setAll({
     fill: am5.color(0xf6363b),
     fillOpacity: 1,
-    width: am5.percent(100),
-    height: chartData.bottomBudgetLine,
-  }));
+    visible: true
+  });
 
   chart.zoomOutButton.set("forceHidden", true);
 
