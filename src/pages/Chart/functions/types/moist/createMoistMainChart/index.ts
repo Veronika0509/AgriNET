@@ -86,7 +86,7 @@ export const createMoistMainChart = (props: any, root: any, isMobile: any, fullD
         valueYField: "value",
         valueXField: "date",
         legendValueText: "{valueY}",
-        tension: 0.1,
+        tension: 0.5,
         tooltip: am5.Tooltip.new(root.current, {
           pointerOrientation: "horizontal",
           labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + " - {percentValue} %"
