@@ -40,7 +40,7 @@ export const createMoistChartForOverlay = (chartData: any, roots: any, moistOver
     maxDeviation: 0.2,
     baseInterval: {
       timeUnit: "minute",
-      count: 30
+      count: 20
     },
     renderer: am5xy.AxisRendererX.new(root, {}),
     tooltip: am5.Tooltip.new(root, {})
@@ -68,7 +68,7 @@ export const createMoistChartForOverlay = (chartData: any, roots: any, moistOver
     yAxis: yAxis,
     valueYField: "value",
     valueXField: "date",
-    tension: 0.1,
+    tension: 0.5,
     stroke: am5.color(0x000000),
   }));
 

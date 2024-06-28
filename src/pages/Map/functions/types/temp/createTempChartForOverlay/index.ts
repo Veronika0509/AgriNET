@@ -44,7 +44,7 @@ export const createTempChartForOverlay = (chartData: any, roots: any, tempOverla
     maxDeviation: 0.2,
     baseInterval: {
       timeUnit: "minute",
-      count: 30
+      count: 20
     },
     renderer: am5xy.AxisRendererX.new(root, {
       minorGridEnabled: true
@@ -78,7 +78,7 @@ export const createTempChartForOverlay = (chartData: any, roots: any, tempOverla
       valueYField: "value",
       valueXField: "date",
       stroke: am5.color(myColors[index]),
-      tension: 0.1,
+      tension: 0.5,
       tooltip: am5.Tooltip.new(root, {
         labelText: "{valueY}"
       }),

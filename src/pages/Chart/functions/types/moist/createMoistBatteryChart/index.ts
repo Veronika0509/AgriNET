@@ -46,7 +46,7 @@ export const createMoistBatteryChart = (chartData: any, root: any) => {
       maxDeviation: 0.2,
       baseInterval: {
         timeUnit: "minute",
-        count: 30
+        count: 20
       },
       renderer: am5xy.AxisRendererX.new(root.current, {
         opposite: true,
@@ -86,7 +86,7 @@ export const createMoistBatteryChart = (chartData: any, root: any) => {
       valueYField: "value",
       valueXField: "date",
       legendValueText: "{valueY}",
-      tension: 0.1,
+      tension: 0.5,
       tooltip: am5.Tooltip.new(root.current, {
         pointerOrientation: "horizontal",
         labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + 'Battery = ' + '{value}' + ' VDC'
