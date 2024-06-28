@@ -11,6 +11,7 @@ export const tempMainChartDataRequest = async (present: any, sensorId: any, user
   };
   if (daysProp && endDateProp) {
     try {
+      console.log(daysProp, endDateProp)
       return await axios.get(`https://app.agrinet.us/api/chart/temp?sensorId=${sensorId}&days=${daysProp}&endDate=${endDateProp}`, {
         headers: {
           'accept': 'application/json, text/plain, */*',

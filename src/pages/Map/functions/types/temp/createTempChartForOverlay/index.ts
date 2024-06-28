@@ -71,13 +71,14 @@ export const createTempChartForOverlay = (chartData: any, roots: any, tempOverla
   }
   let series: any
   lines.map((line: any, index: number) => {
-    series = chart.series.push(am5xy.LineSeries.new(root, {
+    series = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
       name: "Series",
       xAxis: xAxis,
       yAxis: yAxis,
       valueYField: "value",
       valueXField: "date",
       stroke: am5.color(myColors[index]),
+      tension: 0.1,
       tooltip: am5.Tooltip.new(root, {
         labelText: "{valueY}"
       }),

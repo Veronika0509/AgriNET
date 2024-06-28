@@ -51,8 +51,7 @@ export const createMoistBatteryChart = (chartData: any, root: any) => {
       renderer: am5xy.AxisRendererX.new(root.current, {
         opposite: true,
         minorGridEnabled: true
-      }),
-      tooltip: am5.Tooltip.new(root.current, {}),
+      })
     }));
 
     let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
@@ -80,16 +79,17 @@ export const createMoistBatteryChart = (chartData: any, root: any) => {
 
     let series: any
 
-    series = chart.series.push(am5xy.LineSeries.new(root.current, {
+    series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
       name: 'Battery',
       xAxis: xAxis,
       yAxis: yAxis,
       valueYField: "value",
       valueXField: "date",
       legendValueText: "{valueY}",
+      tension: 0.1,
       tooltip: am5.Tooltip.new(root.current, {
         pointerOrientation: "horizontal",
-        labelText: 'Battery = ' + '{value}' + ' VDC'
+        labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + 'Battery = ' + '{value}' + ' VDC'
       }),
       stroke: am5.color(0x000000)
     }));

@@ -57,8 +57,7 @@ export const createWxetChart = (
       renderer: am5xy.AxisRendererX.new(root.current, {
         opposite: true,
         minorGridEnabled: true
-      }),
-      tooltip: am5.Tooltip.new(root.current, {}),
+      })
     }));
 
     let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
@@ -109,16 +108,17 @@ export const createWxetChart = (
     dataLabels.map((dataLabel) => {
       let name = dataLabel.name
 
-      const series = chart.series.push(am5xy.LineSeries.new(root.current, {
+      const series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
         name: name,
         xAxis: xAxis,
         yAxis: yAxis,
         valueYField: "value",
         valueXField: "date",
         legendValueText: "{valueY}",
+        tension: 0.1,
         tooltip: am5.Tooltip.new(root.current, {
           pointerOrientation: "horizontal",
-          labelText: name + ' - ' + "{value}" + dataLabel.metric
+          labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + ' - ' + "{value}" + dataLabel.metric
         })
       }));
 

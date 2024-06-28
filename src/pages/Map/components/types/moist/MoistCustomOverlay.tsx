@@ -79,21 +79,21 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
 
       renderContent() {
         return (
-          <div className={s.overlayContainer}>
+          <div className={s.overlayContainer} onClick={() => onMoistSensorClick(
+            this.history,
+            this.chartData.sensorId,
+            this.chartData.mainId,
+            this.chartData.name,
+            this.setChartData,
+            this.setPage,
+            this.setSiteId,
+            this.setSiteName,
+            this.setAdditionalChartData,
+            this.siteList,
+            this.setChartPageType
+          )}>
             {this.isValidChartData ? (
-              <div className={s.mainContainer} onClick={() => onMoistSensorClick(
-                this.history,
-                this.chartData.sensorId,
-                this.chartData.mainId,
-                this.chartData.name,
-                this.setChartData,
-                this.setPage,
-                this.setSiteId,
-                this.setSiteName,
-                this.setAdditionalChartData,
-                this.siteList,
-                this.setChartPageType
-              )}>
+              <div className={s.mainContainer}>
                 <div className={s.chartContainer}>
                   <div id={this.chartData.id.toString()} className={s.chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
                   {this.isMoistMarkerChartDrawn ? null : (

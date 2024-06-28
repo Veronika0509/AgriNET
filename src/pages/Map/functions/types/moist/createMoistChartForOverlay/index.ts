@@ -62,12 +62,13 @@ export const createMoistChartForOverlay = (chartData: any, roots: any, moistOver
 
 // Add series
 // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-  let series = chart.series.push(am5xy.LineSeries.new(root, {
+  let series = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
     name: "Series",
     xAxis: xAxis,
     yAxis: yAxis,
     valueYField: "value",
     valueXField: "date",
+    tension: 0.1,
     stroke: am5.color(0x000000),
   }));
 

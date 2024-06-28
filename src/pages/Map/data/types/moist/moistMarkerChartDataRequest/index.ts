@@ -15,7 +15,7 @@ export const moistMarkerChartDataRequest = async (
   setMoistChartDataContainer: any,
   moistChartsAmount: any
 ) => {
-  console.log(bounds)
+  console.log('function is called')
   const response = await axios.get('https://app.agrinet.us/api/map/moist-fuel?v=43', {
     params: {
       sensorId: propsSensorId,

@@ -48,8 +48,7 @@ export const createMoistSumChart = (chartData: any, budgetLines: any, root: any)
       renderer: am5xy.AxisRendererX.new(root.current, {
         opposite: true,
         minorGridEnabled: true
-      }),
-      tooltip: am5.Tooltip.new(root.current, {}),
+      })
     }));
 
     let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
@@ -76,14 +75,15 @@ export const createMoistSumChart = (chartData: any, budgetLines: any, root: any)
 
     let series: any
     for (var i = 0; i < 1; i++) {
-      series = chart.series.push(am5xy.LineSeries.new(root.current, {
+      series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
         xAxis: xAxis,
         yAxis: yAxis,
         valueYField: "value",
         valueXField: "date",
+        tension: 0.1,
         tooltip: am5.Tooltip.new(root.current, {
           pointerOrientation: "horizontal",
-          labelText: "Sum Average = {value}%"
+          labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + "Sum Average = {value}%"
         })
       }));
 

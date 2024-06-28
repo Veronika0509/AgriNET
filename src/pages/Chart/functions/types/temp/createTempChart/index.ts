@@ -57,8 +57,7 @@ export const createTempChart = (
       renderer: am5xy.AxisRendererX.new(root.current, {
         opposite: true,
         minorGridEnabled: true
-      }),
-      tooltip: am5.Tooltip.new(root.current, {}),
+      })
     }));
 
     let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
@@ -97,16 +96,17 @@ export const createTempChart = (
     ]
 
     dataLabels.map((dataLabel) => {
-      const series = chart.series.push(am5xy.LineSeries.new(root.current, {
+      const series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
         name: dataLabel.name,
         xAxis: xAxis,
         yAxis: yAxis,
         valueYField: "value",
         valueXField: "date",
         legendValueText: "{valueY}",
+        tension: 0.1,
         tooltip: am5.Tooltip.new(root.current, {
           pointerOrientation: "horizontal",
-          labelText: dataLabel.tooltip + ' - ' + "{value}" + dataLabel.metric
+          labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + dataLabel.tooltip + ' - ' + "{value}" + dataLabel.metric
         })
       }));
 
