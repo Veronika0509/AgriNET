@@ -42,7 +42,7 @@ export const createMoistMainChart = (props: any, root: any, isMobile: any, fullD
       maxDeviation: 0.2,
       baseInterval: {
         timeUnit: "minute",
-        count: 30
+        count: 20
       },
       renderer: am5xy.AxisRendererX.new(root.current, {
         opposite: true,
