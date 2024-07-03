@@ -86,7 +86,7 @@ export const MoistChartPage = (props: any) => {
       createMoistSumChart(newSumChartData.data.data, newSumChartData.data.budgetLines, sumRoot)
     }
     updateCharts(currentDates[0], currentDates[1], currentDates[2], currentDates[3])
-  }, [currentDates]);
+  }, [currentDates,props.isMobile]);
 
   return (
     <IonContent className={s.container}>

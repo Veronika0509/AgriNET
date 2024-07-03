@@ -114,7 +114,8 @@ export const createMoistMainChart = (
         tooltip: am5.Tooltip.new(root.current, {
           pointerOrientation: "horizontal",
           labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + " - {percentValue} %"
-        })
+        }),
+        snapTooltip: true
       }));
 
       count += 4;
