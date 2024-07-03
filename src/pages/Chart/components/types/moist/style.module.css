@@ -67,6 +67,19 @@
   margin-bottom: 100px;
 }
 
+.moistTopSectionContainer {
+  display: flex;
+  align-items: center;
+}
+
+.datetimePickerTitle {
+  color: #000;
+}
+
+.batteryButton {
+  margin-left: 10px;
+}
+
 @media only screen and (max-width: 850px) {
   .chart {
     height: 450px;
@@ -82,8 +95,13 @@
   }
 }
 
-.datetimePickerTitle {
-  color: #000;
+@media only screen and (max-width: 640px) {
+  .topSection {
+    display: block;
+  }
+  .batteryButton {
+    margin-left: 0;
+  }
 }
 
 @media only screen and (max-width: 390px) {

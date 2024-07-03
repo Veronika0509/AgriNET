@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react'
 import s from "../types/moist/style.module.css";
 import DateTimePicker from "../DateTimePicker";
-import {IonButton} from "@ionic/react";
+import {IonButton, IonToggle} from "@ionic/react";
 import {moistDataBatteryRequest} from "../../data/types/moist/moistDataBatteryRequest";
 import {createMoistBatteryChart} from "../../functions/types/moist/createMoistBatteryChart";
 
@@ -50,10 +50,13 @@ const TopSection = (props: any) => {
         userId={props.userId}
       />
       {props.type === 'moist' && (
-        <IonButton
-          className='ion-margin-start'
-          onClick={onBatteryButtonClick}
-        >battery</IonButton>
+        <div className={s.moistTopSectionContainer}>
+          <IonButton
+            className={s.batteryButton}
+            onClick={onBatteryButtonClick}
+          >battery</IonButton>
+          <IonToggle className="ion-margin-start" checked={props.comparingMode} onIonChange={() => props.setComparingMode(!props.comparingMode)}>Comparing mode</IonToggle>
+        </div>
       )}
     </div>
   )

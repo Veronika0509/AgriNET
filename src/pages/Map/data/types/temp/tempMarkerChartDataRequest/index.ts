@@ -16,6 +16,7 @@ export const tempMarkerChartDataRequest = async (
   setInvalidTempChartDataContainer: any,
   setTempChartDataContainer: any
 ) => {
+  console.log(bounds)
   const response = await axios.get('https://app.agrinet.us/api/map/temp-data-v2?v=43', {
     params: {
       sensorId: propsSensorId,
