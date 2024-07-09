@@ -2,7 +2,7 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
-export const createMoistSumChart = (chartData: any, budgetLines: any, root: any) => {
+export const createMoistSumChart = (chartData: any, budgetLines: any, root: any, historicMode: boolean) => {
   if (root.current) {
     root.current.dispose();
     root.current = null;
@@ -63,39 +63,79 @@ export const createMoistSumChart = (chartData: any, budgetLines: any, root: any)
       };
     }
 
-    function createChartDataArray() {
+    function createChartDataArray(prefix: string) {
       let data: any = [];
       chartData.map((chartDataItem: any) => {
         const chartDate = new Date(chartDataItem.DateTime).getTime()
-        const chartData = createChartData(chartDate, chartDataItem['SumAve']);
+        const chartData = createChartData(chartDate, chartDataItem[prefix + 'SumAve']);
         data.push(chartData);
       });
       return data;
     }
 
     let series: any
-    for (var i = 0; i < 1; i++) {
+    let listOfSeries: any = [
+      {name: 'ordinarySeries', prefix: ''}
+    ]
+    if (historicMode) {
+      listOfSeries.push({name: 'historicSeries', prefix: 'H_'})
+      listOfSeries.push({name: 'futureSeries', prefix: 'P_'})
+    }
+
+    listOfSeries.map((seriesItem: any) => {
       series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
         xAxis: xAxis,
         yAxis: yAxis,
         valueYField: "value",
         valueXField: "date",
         tension: 0.5,
-        tooltip: am5.Tooltip.new(root.current, {
+        tooltip: seriesItem.name === 'ordinarySeries' ? am5.Tooltip.new(root.current, {
           pointerOrientation: "horizontal",
           labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + "Sum Average = {value}%"
-        })
+        }) : undefined,
+        snapTooltip: true,
+        stroke: am5.color(6779356)
       }));
 
-      let data = createChartDataArray()
+      if (seriesItem.name === 'historicSeries') {
+        series.strokes.template.setAll({
+          blur: 2
+        });
+      } else if (seriesItem.name === 'futureSeries') {
+        series.strokes.template.setAll({
+          blur: 5
+        });
+      }
 
+      let data = createChartDataArray(seriesItem.prefix)
       series.data.setAll(data)
 
       series.appear();
-    }
+    })
 
 // Inside
     // Lines
+    if (historicMode) {
+      let seriesRangeDataItem = xAxis.makeDataItem({
+        value: new Date().getTime()
+      });
+      series.createAxisRange(seriesRangeDataItem);
+      seriesRangeDataItem.get("grid").setAll({
+        visible: true,
+        stroke: am5.color(0xd445d2),
+        strokeWidth: 5,
+        strokeOpacity: 1,
+        strokeDasharray: [2, 2],
+      });
+      seriesRangeDataItem.get('label').setAll({
+        text: "NOW",
+        inside: true,
+        visible: true,
+        centerX: 0,
+        dy: 45,
+        fontSize: 13,
+      })
+    }
     if (budgetLines[2].value) {
       let seriesRangeDataItem = yAxis.makeDataItem({
         value: budgetLines[2].value

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import s from "../types/moist/style.module.css";
 import DateTimePicker from "../DateTimePicker";
 import {IonButton, IonToggle} from "@ionic/react";
@@ -6,6 +6,8 @@ import {moistDataBatteryRequest} from "../../data/types/moist/moistDataBatteryRe
 import {createMoistBatteryChart} from "../../functions/types/moist/createMoistBatteryChart";
 
 const TopSection = (props: any) => {
+  const [disabledComparingMode, setDisabledComparingMode] = useState(false)
+  const [disabledHistoricMode, setDisabledHistoricMode] = useState(false)
   const onBatteryButtonClick = () => {
     props.setBatteryChartShowed(!props.batteryChartShowed)
   }
@@ -27,6 +29,26 @@ const TopSection = (props: any) => {
 
     batteryHandler()
   }, [props.batteryChartShowed, props.currentDates]);
+
+  const onToggle = (event: any, mode: string) => {
+    if (mode === 'comparingMode') {
+      if (event.detail.checked) {
+        setDisabledHistoricMode(true)
+        props.setComparingMode(true)
+      } else {
+        setDisabledHistoricMode(false)
+        props.setComparingMode(false)
+      }
+    } else if (mode === 'historicMode') {
+      if (event.detail.checked) {
+        setDisabledComparingMode(true)
+        props.setHistoricMode(true)
+      } else {
+        setDisabledComparingMode(false)
+        props.setHistoricMode(false)
+      }
+    }
+  }
 
   return (
     <div className={s.topSection}>
@@ -55,7 +77,10 @@ const TopSection = (props: any) => {
             className={s.batteryButton}
             onClick={onBatteryButtonClick}
           >battery</IonButton>
-          <IonToggle className="ion-margin-start" checked={props.comparingMode} onIonChange={() => props.setComparingMode(!props.comparingMode)}>Comparing mode</IonToggle>
+          <div className={s.toggles}>
+            <IonToggle className={s.toggle} disabled={disabledComparingMode} onIonChange={(event: any) => onToggle(event, 'comparingMode')}>Comparing mode</IonToggle>
+            <IonToggle className={s.toggle} disabled={disabledHistoricMode} onIonChange={(event: any) => onToggle(event, 'historicMode')}>Historical Data Perennials Only</IonToggle>
+          </div>
         </div>
       )}
     </div>

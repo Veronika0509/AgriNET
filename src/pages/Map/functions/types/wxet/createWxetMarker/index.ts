@@ -1,5 +1,9 @@
 import {wxetMarkerChartRequest} from "../../../../data/types/wxet/wxetMarkerChartRequest";
 
+let id = 0
+let wxetData: any = []
+let boundsArray: any = []
+let invalidChartData: any = []
 export const createWxetMarker = (
   wxetChartsAmount: any,
   sensorItem: any,
@@ -10,6 +14,7 @@ export const createWxetMarker = (
 ) => {
   const exists = wxetChartsAmount.some((secondItemTemp: any) => secondItemTemp.id === sensorItem.id);
   if (!exists) {
+    id += 1
     wxetChartsAmount.push(sensorItem);
     const bounds: any = new google.maps.LatLngBounds(
       new google.maps.LatLng(sensorItem.lat, sensorItem.lng),
@@ -24,7 +29,11 @@ export const createWxetMarker = (
         userId,
         setInvalidWxetChartDataContainer,
         setWxetChartDataContainer,
-        wxetChartsAmount
+        wxetChartsAmount,
+        id,
+        wxetData,
+        boundsArray,
+        invalidChartData
       );
     }
   }

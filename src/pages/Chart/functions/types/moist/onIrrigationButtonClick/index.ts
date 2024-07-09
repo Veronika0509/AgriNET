@@ -3,7 +3,7 @@ import {moistDataBatteryRequest} from "../../../../data/types/moist/moistDataBat
 import {moistMainChartDataRequest} from "../../../../../Map/data/types/moist/moistMainChartDataRequest";
 import {createMoistMainChart} from "../createMoistMainChart";
 import {createMoistBatteryChart} from "../createMoistBatteryChart";
-import {moistSumChartDataRequest} from "../../../../data/types/moist/sumChartDataRequest";
+import {moistSumChartDataRequest} from "../../../../data/types/moist/moistSumChartDataRequest";
 import {createMoistSumChart} from "../createMoistSumChart";
 
 export const onIrrigationButtonClick = async (

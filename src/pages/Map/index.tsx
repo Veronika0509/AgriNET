@@ -171,6 +171,7 @@ const MapPage: React.FC<MainProps> = (props) => {
     if (moistOverlays.length !== 0) {
       const roots: any[] = [];
       moistChartDataContainer.map((chartData: any) => {
+        console.log(moistOverlays)
         createMoistChartForOverlay(chartData[0], roots, moistOverlays)
       })
 
@@ -311,6 +312,7 @@ const MapPage: React.FC<MainProps> = (props) => {
     if (tempOverlays.length !== 0) {
       const roots: any[] = [];
       tempChartDataContainer.map((chartData: any) => {
+        console.log(tempOverlays)
         createTempChartForOverlay(chartData[0], roots, tempOverlays)
       })
 

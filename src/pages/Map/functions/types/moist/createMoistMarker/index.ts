@@ -1,5 +1,9 @@
 import {moistMarkerChartDataRequest} from "../../../../data/types/moist/moistMarkerChartDataRequest";
 
+let id = 0
+let moistChartData: any = []
+let boundsArray: any = []
+let invalidChartData: any = []
 export const createMoistMarker = (
   moistChartsAmount: any,
   sensorItem: any,
@@ -10,6 +14,7 @@ export const createMoistMarker = (
 ) => {
   const exists = moistChartsAmount.some((secondItemMoist: any) => secondItemMoist.id === sensorItem.id);
   if (!exists) {
+    id += 1
     moistChartsAmount.push(sensorItem);
     const bounds: any = new google.maps.LatLngBounds(
       new google.maps.LatLng(sensorItem.lat, sensorItem.lng),
@@ -24,7 +29,11 @@ export const createMoistMarker = (
         userId,
         setInvalidMoistChartDataContainer,
         setMoistChartDataContainer,
-        moistChartsAmount
+        moistChartsAmount,
+        id,
+        moistChartData,
+        boundsArray,
+        invalidChartData
       );
     }
   }

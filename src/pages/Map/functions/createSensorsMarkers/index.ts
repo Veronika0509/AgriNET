@@ -29,7 +29,7 @@ export const createSensorsMarkers = (sensorItem: any, map: any, setSensorName: a
     setSensorType(sensorItem.markerType);
     setIsModalOpen(true);
     new Promise((resolve: any) => {
-      const response: any = moistMainChartDataRequest(sensorItem.sensorId)
+      const response: any = moistMainChartDataRequest(sensorItem.sensorId, false)
       setIsChartDataIsLoading(true)
       resolve(response)
     }).then((response: any) => {

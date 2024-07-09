@@ -1,11 +1,6 @@
 import axios from "axios";
 import login from "../../../../../Login";
 
-let id = 0
-let tempChartData: any = []
-let boundsArray: any = []
-let invalidChartData: any = []
-
 export const tempMarkerChartDataRequest = async (
   mainId: any,
   propsSensorId: string,
@@ -14,9 +9,12 @@ export const tempMarkerChartDataRequest = async (
   userId: any,
   tempChartsAmount: any,
   setInvalidTempChartDataContainer: any,
-  setTempChartDataContainer: any
+  setTempChartDataContainer: any,
+  id: number,
+  tempChartData: any,
+  boundsArray: any,
+  invalidChartData: any
 ) => {
-  console.log(bounds)
   const response = await axios.get('https://app.agrinet.us/api/map/temp-data-v2?v=43', {
     params: {
       sensorId: propsSensorId,
@@ -24,7 +22,6 @@ export const tempMarkerChartDataRequest = async (
       'do-not-catch-error': ''
     },
   })
-  id += 1
   const idLabel = 'temp_' + id
   let value: number = response.data.lines.length > 0 ? response.data[response.data.length - 1][response.data.lines[0]] : response.data.temp
   let label: string = response.data.lines.length > 0 ? response.data.linesLabels[0] : `${response.data!!.metric == "AMERICA" ? "F" : "C"}°`
@@ -54,7 +51,6 @@ export const tempMarkerChartDataRequest = async (
     boundsArray.map((bounds: any, index: number) => {
       if (tempChartData[index].data !== undefined) {
         if (tempChartData[index].data.length !== 0 && tempChartData[index].data.length !== 1) {
-          console.log('pushedTempChartData')
           updatedTempChartData.push([tempChartData[index], bounds])
         } else {
           invalidChartData.push([tempChartData[index], bounds])

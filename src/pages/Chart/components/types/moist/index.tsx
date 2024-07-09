@@ -4,7 +4,7 @@ import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentTime"
 import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import {handleResize} from "../../../functions/handleResize";
 import {irrigationDatesRequest} from "../../../data/types/moist/irriationDatesRequest";
-import {moistSumChartDataRequest} from "../../../data/types/moist/sumChartDataRequest";
+import {moistSumChartDataRequest} from "../../../data/types/moist/moistSumChartDataRequest";
 import {IonContent} from "@ionic/react";
 import TopSection from "../../TopSection";
 import IrrigationButtons from "./IrrigationButtons";
@@ -34,13 +34,16 @@ export const MoistChartPage = (props: any) => {
   const [batteryChartShowed, setBatteryChartShowed] = useState(false)
   // Sum Chart
   const sumRoot = useRef<any>(null);
+  // Historic Mode
+  const [historicMode, setHistoricMode] = useState(false)
+  const [showForecast, setShowForecast] = useState(true)
 
   useEffect(() => {
-    createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false)
+    createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
   }, [props.isMobile]);
   useEffect(() => {
     if (fullDatesArray) {
-      createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false)
+      createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
     }
   }, [fullDatesArray])
   useEffect(() => {
@@ -49,17 +52,45 @@ export const MoistChartPage = (props: any) => {
     handleResize(props.setIsMobile)
   }, []);
   useEffect(() => {
-    createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false)
+    createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
 
     if (currentChartData) {
-      createMoistMainChart(currentChartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false)
+      createMoistMainChart(currentChartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
     } else {
-      createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false)
+      createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
     }
   }, [comparingMode]);
+  useEffect(() => {
+    const getHistoricData = async () => {
+      const historicData = await moistMainChartDataRequest(props.sensorId, historicMode, currentDates[0], currentDates[1])
+      createMoistMainChart(historicData.data.data, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+    }
+    getHistoricData()
+
+    const moistHistoricData = async () => {
+      const historicData = await moistSumChartDataRequest(props.sensorId, historicMode, currentDates[0], currentDates[1])
+      createMoistSumChart(historicData.data.data, historicData.data.budgetLines, sumRoot, historicMode)
+    }
+
+    moistHistoricData()
+  }, [historicMode]);
 
   useEffect(() => {
     const updateCharts = async (days?: any, endDateDays?: any, startDatetime?: any, endDatetime?: any) => {
+      function compareDates(targetDateInMillis: any) {
+        const targetDate = new Date(targetDateInMillis);
+        const currentDate = new Date();
+
+        const targetDay = targetDate.getUTCDate();
+        const targetMonth = targetDate.getUTCMonth();
+        const targetYear = targetDate.getUTCFullYear();
+
+        const currentDay = currentDate.getUTCDate();
+        const currentMonth = currentDate.getUTCMonth();
+        const currentYear = currentDate.getUTCFullYear();
+
+        return targetDay === currentDay && targetMonth === currentMonth && targetYear === currentYear;
+      }
       if (startDatetime && endDatetime) {
         if (endDatetime < new Date(fullDatesArray[0]).getTime()) {
           setDisableNextButton(false)
@@ -75,18 +106,22 @@ export const MoistChartPage = (props: any) => {
         }
       }
 
-      const newMoistChartData = await moistMainChartDataRequest(props.sensorId, days, endDateDays)
-      createMoistMainChart(newMoistChartData.data.data, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, true)
+      if (endDatetime) {
+        setShowForecast(compareDates(endDatetime))
+      }
+
+      const newMoistChartData = await moistMainChartDataRequest(props.sensorId, historicMode, days, endDateDays)
+      createMoistMainChart(newMoistChartData.data.data, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, true, historicMode, compareDates(endDatetime))
       setCurrentChartData(newMoistChartData.data.data)
 
       const newBatteryData = await moistDataBatteryRequest(props.sensorId, days, endDateDays)
       createMoistBatteryChart(newBatteryData.data, batteryRoot)
 
-      const newSumChartData = await moistSumChartDataRequest(props.sensorId, days, endDateDays)
-      createMoistSumChart(newSumChartData.data.data, newSumChartData.data.budgetLines, sumRoot)
+      const newSumChartData = await moistSumChartDataRequest(props.sensorId, historicMode, days, endDateDays)
+      createMoistSumChart(newSumChartData.data.data, newSumChartData.data.budgetLines, sumRoot, historicMode)
     }
     updateCharts(currentDates[0], currentDates[1], currentDates[2], currentDates[3])
-  }, [currentDates,props.isMobile]);
+  }, [currentDates, props.isMobile]);
 
   return (
     <IonContent className={s.container}>
@@ -112,6 +147,8 @@ export const MoistChartPage = (props: any) => {
           currentDates={currentDates}
           comparingMode={comparingMode}
           setComparingMode={setComparingMode}
+          historicMode={historicMode}
+          setHistoricMode={setHistoricMode}
         />
         <div>
           <div className='ion-margin-top' style={{display: batteryChartShowed ? 'block' : 'none'}}>

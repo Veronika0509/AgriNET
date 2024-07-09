@@ -4,9 +4,7 @@
 
 .topSection {
   max-width: 80vw;
-  margin: 50px auto 0 auto;
-  display: flex;
-  align-items: center;
+  margin: 0 auto;
 }
 
 .backIcon {
@@ -25,8 +23,11 @@
 
 .chart, .batteryChart {
   width: 100%;
-  height: 300px;
   margin-top: 20px;
+}
+
+.chart {
+  height: 400px;
 }
 
 .batteryChart {
@@ -67,16 +68,16 @@
   margin-bottom: 100px;
 }
 
+.datetimePickerTitle {
+  color: #000;
+}
+
 .moistTopSectionContainer {
   display: flex;
   align-items: center;
 }
 
-.datetimePickerTitle {
-  color: #000;
-}
-
-.batteryButton {
+.toggle {
   margin-left: 10px;
 }
 
@@ -99,9 +100,6 @@
   .topSection {
     display: block;
   }
-  .batteryButton {
-    margin-left: 0;
-  }
 }
 
 @media only screen and (max-width: 390px) {
@@ -112,5 +110,11 @@
     margin-top: 10px;
     margin-left: 0;
     margin-bottom: 10px;
+  }
+  .moistTopSectionContainer {
+    display: block;
+  }
+  .toggle {
+    margin-left: 0;
   }
 }

@@ -91,7 +91,8 @@ export const createMoistBatteryChart = (chartData: any, root: any) => {
         pointerOrientation: "horizontal",
         labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + 'Battery = ' + '{value}' + ' VDC'
       }),
-      stroke: am5.color(0x000000)
+      stroke: am5.color(0x000000),
+      snapTooltip: true
     }));
 
     let data = createChartDataArray()

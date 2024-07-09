@@ -1,10 +1,5 @@
 import axios from "axios";
 
-let id = 0
-let wxetData: any = []
-let boundsArray: any = []
-let invalidChartData: any = []
-
 export const wxetMarkerChartRequest = async (
   mainId: any,
   propsSensorId: string,
@@ -13,7 +8,11 @@ export const wxetMarkerChartRequest = async (
   userId: any,
   setInvalidWxetChartDataContainer: any,
   setWxetChartDataContainer: any,
-  wxetChartsAmount: any
+  wxetChartsAmount: any,
+  id: number,
+  wxetData: any,
+  boundsArray: any,
+  invalidChartData: any
 ) => {
   const response = await axios.get('https://app.agrinet.us/api/map/wx', {
     params: {
@@ -24,7 +23,6 @@ export const wxetMarkerChartRequest = async (
       v: 43
     },
   })
-  id += 1
   const wxetDataItem = {
     mainId,
     id,

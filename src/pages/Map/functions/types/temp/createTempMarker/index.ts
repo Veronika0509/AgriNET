@@ -1,6 +1,9 @@
-// import {moistChartDataRequest} from "../../../../data/types/moist/moistChartDataRequest";
-
 import {tempMarkerChartDataRequest} from "../../../../data/types/temp/tempMarkerChartDataRequest";
+
+let id = 0
+let tempChartData: any = []
+let boundsArray: any = []
+let invalidChartData: any = []
 
 export const createTempMarker = (
   tempChartsAmount: any,
@@ -12,6 +15,7 @@ export const createTempMarker = (
 ) => {
   const exists = tempChartsAmount.some((secondItemTemp: any) => secondItemTemp.id === sensorItem.id);
   if (!exists) {
+    id += 1
     tempChartsAmount.push(sensorItem);
     const bounds: any = new google.maps.LatLngBounds(
       new google.maps.LatLng(sensorItem.lat, sensorItem.lng),
@@ -26,7 +30,11 @@ export const createTempMarker = (
         userId,
         tempChartsAmount,
         setInvalidTempChartDataContainer,
-        setTempChartDataContainer
+        setTempChartDataContainer,
+        id,
+        tempChartData,
+        boundsArray,
+        invalidChartData
       )
     }
   }

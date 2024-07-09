@@ -1,6 +1,7 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
+import login from "../../../../../Login";
 
 let startDateForZooming: any;
 let endDateForZooming: any;
@@ -12,7 +13,9 @@ export const createMoistMainChart = (
   fullDatesArray: any,
   additionalChartData: any,
   comparingMode: boolean,
-  isNewDates: boolean
+  isNewDates: boolean,
+  historicMode: boolean,
+  showForecast: boolean
 ): void => {
   const chartDataWrapper = props;
 
@@ -64,15 +67,6 @@ export const createMoistMainChart = (
       }),
     }));
 
-    if (!comparingMode) {
-      xAxis.onPrivate("selectionMin", function(value: any) {
-        startDateForZooming = new Date(value)
-      });
-      xAxis.onPrivate("selectionMax", function(value: any) {
-        endDateForZooming = new Date(value)
-      });
-    }
-
     let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
       renderer: am5xy.AxisRendererY.new(root.current, {})
     }));
@@ -87,45 +81,108 @@ export const createMoistMainChart = (
       };
     }
 
-    function createChartDataArray(count: number) {
+    function createChartDataArray(count: number, prefix: string) {
       let data: any = [];
       chartDataWrapper.map((chartDataItem: any) => {
-        const chartDate = new Date(chartDataItem.DateTime).getTime();
-        const chartData = createChartData(chartDate, chartDataItem['MS ' + count]);
-        data.push(chartData);
+        const chartDate = new Date(chartDataItem['DateTime']).getTime();
+        if (chartDate && chartDataItem[prefix + 'MS ' + count]) {
+          const chartData = createChartData(chartDate, chartDataItem[prefix + 'MS ' + count]);
+          data.push(chartData);
+        }
       });
       return data;
     }
 
-    let count = 4;
+
+    let listOfSeries = [
+      {name: 'ordinarySeries', prefix: ''}
+    ]
+    if (historicMode) {
+      listOfSeries.push({name: 'historicSeries', prefix: 'H_'})
+    }
+    if (showForecast) {
+      listOfSeries.push({name: 'futureSeries', prefix: 'P_'})
+    }
     let series: any;
-    let seriesArray = [];
+    let seriesArray: any[] = [];
+    let ordinarySeriesArray: any = []
+    let seriesColors: any = []
+    listOfSeries.map((seriesItem: any, index: number) => {
+      let count = 4;
+      for (var i = 0; i < additionalChartData.linesCount; i++) {
+        let name = count + ' inch';
+        series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
+          name: name,
+          xAxis: xAxis,
+          yAxis: yAxis,
+          valueYField: "value",
+          valueXField: "date",
+          legendValueText: "{valueY}",
+          tension: 0.5,
+          tooltip: seriesItem.name === 'ordinarySeries' ? am5.Tooltip.new(root.current, {
+            pointerOrientation: "horizontal",
+            labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + " - {percentValue} %",
+          }) : undefined,
+          snapTooltip: true,
+        }));
 
-    for (var i = 0; i < additionalChartData.linesCount; i++) {
-      let name = count + ' inch';
-      series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
-        name: name,
-        xAxis: xAxis,
-        yAxis: yAxis,
-        valueYField: "value",
-        valueXField: "date",
-        legendValueText: "{valueY}",
-        tension: 0.5,
-        tooltip: am5.Tooltip.new(root.current, {
-          pointerOrientation: "horizontal",
-          labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + " - {percentValue} %"
-        }),
-        snapTooltip: true
-      }));
+        if (series.get("tooltip")) {
+          series.get("tooltip").label.setAll({
+            fontSize: "15px",
+          });
+        }
 
-      count += 4;
+        if (seriesItem.name == 'ordinarySeries') {
+          ordinarySeriesArray.push(series)
+        }
 
-      let data = createChartDataArray(i + 1);
+        if (seriesItem.name === 'historicSeries') {
+          series.strokes.template.setAll({
+            blur: 2
+          });
+        } else if (seriesItem.name === 'futureSeries') {
+          series.strokes.template.setAll({
+            blur: 5
+          });
+        }
 
-      series.data.setAll(data);
+        if (index === 0) {
+          seriesColors.push(series.get('stroke'))
+        } else {
+          series.set('stroke', seriesColors[i])
+        }
 
-      series.appear();
-      seriesArray.push(series);
+        count += 4;
+
+        let data = createChartDataArray(i + 1, seriesItem.prefix)
+
+        series.data.setAll(data);
+
+        series.appear();
+        seriesArray.push(series);
+      }
+    })
+
+    if (historicMode) {
+      let seriesRangeDataItem = xAxis.makeDataItem({
+        value: new Date().getTime()
+      });
+      series.createAxisRange(seriesRangeDataItem);
+      seriesRangeDataItem.get("grid").setAll({
+        visible: true,
+        stroke: am5.color(0xd445d2),
+        strokeWidth: 5,
+        strokeOpacity: 1,
+        strokeDasharray: [2, 2],
+      });
+      seriesRangeDataItem.get('label').setAll({
+        text: "NOW",
+        inside: true,
+        visible: true,
+        centerX: 0,
+        dy: 45,
+        fontSize: 13,
+      })
     }
 
     fullDatesArray.map((date: any) => {
@@ -140,10 +197,6 @@ export const createMoistMainChart = (
         strokeDasharray: [2, 2],
       });
     });
-
-    if (comparingMode) {
-      chart.zoomOutButton.set("forceHidden", true);
-    }
 
     if (startDateForZooming && endDateForZooming && !isNewDates) {
       seriesArray.map((mappedSeries: any) => {
@@ -160,10 +213,6 @@ export const createMoistMainChart = (
       xAxis: xAxis
     }));
 
-    cursor.setAll({
-      alwaysShow: true
-    })
-
     cursor.selection.setAll({
       fill: comparingMode ? am5.color(0xfb6909) : am5.color(0xff0000),
       fillOpacity: 0.2,
@@ -176,6 +225,22 @@ export const createMoistMainChart = (
     });
 
     cursor.lineY.set("visible", false);
+
+// Comparing Mode
+    if (!comparingMode) {
+      xAxis.onPrivate("selectionMin", function(value: any) {
+        startDateForZooming = new Date(value)
+      });
+      xAxis.onPrivate("selectionMax", function(value: any) {
+        endDateForZooming = new Date(value)
+      });
+    }
+    if (comparingMode) {
+      cursor.setAll({
+        alwaysShow: true
+      })
+      chart.zoomOutButton.set("forceHidden", true);
+    }
     let tooltips: any = []
     let selectionLabel: any
     cursor.events.on('selectended', function (event: any) {
@@ -314,8 +379,7 @@ export const createMoistMainChart = (
       width: am5.p100,
       textAlign: "right"
     });
-
-    legend.data.setAll(chart.series.values);
+    legend.data.setAll(ordinarySeriesArray);
 
     chart.appear(1000, 100);
   }
