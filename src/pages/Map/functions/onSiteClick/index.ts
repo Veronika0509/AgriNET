@@ -24,6 +24,7 @@ export const onSiteClick = async (
   setTempChartDataContainer: any
 ) => {
   setSecondMap(sensorsGroupData.name)
+  let moistChartData: any = []
   await Promise.all(siteList.map(async () => {
     const sensorItems = getSensorItems(undefined, siteList)
     sensorItems.map((sensorItem: any) => {
@@ -34,7 +35,8 @@ export const onSiteClick = async (
           page,
           userId,
           setInvalidMoistChartDataContainer,
-          setMoistChartDataContainer
+          setMoistChartDataContainer,
+          moistChartData
         )
       } else if (sensorItem.markerType === 'wxet') {
         createWxetMarker(

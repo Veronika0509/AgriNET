@@ -95,7 +95,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
             {this.isValidChartData ? (
               <div className={s.mainContainer}>
                 <div className={s.chartContainer}>
-                  <div id={this.chartData.id.toString()} className={s.chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
+                  <div id={this.chartData.id} className={s.chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
                   {this.isMoistMarkerChartDrawn ? null : (
                     <div className={s.loader}></div>
                   )}

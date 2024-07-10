@@ -48,6 +48,7 @@ const MapPage: React.FC<MainProps> = (props) => {
   const [moistChartDataContainer, setMoistChartDataContainer] = useState<any>([])
   const [invalidMoistChartDataContainer, setInvalidMoistChartDataContainer] = useState([])
   const [moistOverlays, setMoistOverlays] = useState([])
+  let createdMoistCharts: any = []
   const moistChartsAmount: any = []
 
   // Temp type
@@ -55,6 +56,7 @@ const MapPage: React.FC<MainProps> = (props) => {
   const [tempChartDataContainer, setTempChartDataContainer] = useState<any>([])
   const [invalidTempChartDataContainer, setInvalidTempChartDataContainer] = useState([])
   const [tempOverlays, setTempOverlays] = useState([])
+  let createdTempCharts: any = []
   const tempChartsAmount: any = []
 
   // Wxet type
@@ -170,11 +172,12 @@ const MapPage: React.FC<MainProps> = (props) => {
   useEffect(() => {
     if (moistOverlays.length !== 0) {
       const roots: any[] = [];
-      moistChartDataContainer.map((chartData: any) => {
-        console.log(moistOverlays)
-        createMoistChartForOverlay(chartData[0], roots, moistOverlays)
+      moistOverlays.map((moistOverlay: any) => {
+        if (!createdMoistCharts.includes(moistOverlay.chartData.id)) {
+          createMoistChartForOverlay(moistOverlay.chartData, roots, moistOverlays)
+          createdMoistCharts.push(moistOverlay.chartData.id)
+        }
       })
-
       return () => {
         roots.forEach(root => root.dispose());
       };
@@ -236,17 +239,6 @@ const MapPage: React.FC<MainProps> = (props) => {
       addOverlay();
     }
   }, [invalidWxetDataContainer])
-  useEffect(() => {
-    if (overlays.length !== 0) {
-      const bounds = new google.maps.LatLngBounds();
-      overlays.map((overlayToBound: any) => {
-        overlayToBound.isAllCoordinatesOfMarkersAreReady.map((coordinateToBound: any) => {
-          bounds.extend({ lat: coordinateToBound.lat, lng: coordinateToBound.lng })
-        })
-      })
-      map.fitBounds(bounds);
-    }
-  }, [overlays]);
 
   // Temp Marker
   useEffect(() => {
@@ -311,9 +303,11 @@ const MapPage: React.FC<MainProps> = (props) => {
   useEffect(() => {
     if (tempOverlays.length !== 0) {
       const roots: any[] = [];
-      tempChartDataContainer.map((chartData: any) => {
-        console.log(tempOverlays)
-        createTempChartForOverlay(chartData[0], roots, tempOverlays)
+      tempOverlays.map((tempOverlay: any) => {
+        if (!createdTempCharts.includes(tempOverlay.chartData.id)) {
+          createTempChartForOverlay(tempOverlay.chartData, roots, tempOverlays)
+          createdTempCharts.push(tempOverlay.chartData.id)
+        }
       })
 
       return () => {
@@ -321,6 +315,18 @@ const MapPage: React.FC<MainProps> = (props) => {
       };
     }
   }, [tempOverlays]);
+
+  useEffect(() => {
+    if (overlays.length !== 0) {
+      const bounds = new google.maps.LatLngBounds();
+      overlays.map((overlayToBound: any) => {
+        overlayToBound.isAllCoordinatesOfMarkersAreReady.map((coordinateToBound: any) => {
+          bounds.extend({ lat: coordinateToBound.lat, lng: coordinateToBound.lng })
+        })
+      })
+      map.fitBounds(bounds);
+    }
+  }, [overlays]);
 
   return (
     <IonPage>
