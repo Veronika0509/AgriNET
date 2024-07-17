@@ -7,11 +7,7 @@ export const updateWxetChartWithNewDatetime = async (
   startDate: any,
   endDate: any,
   presentToast: any,
-  sensorId: any,
-  root: any,
-  isMobile: any,
-  setCurrentChartData: any,
-  additionalChartData: any
+  setCurrentDates: any
 ) => {
   if (checkDateValidity(startDate, endDate)) {
     presentToast()
@@ -20,8 +16,6 @@ export const updateWxetChartWithNewDatetime = async (
     const startDatetime = new Date(startDate).getTime()
     const endDatetime = new Date(endDate).getTime()
     const days = Math.round((endDatetime - startDatetime) / 86400000)
-    const newChartData = await wxetMainChartDataRequest(sensorId, days, endDateDays)
-    createWxetChart(newChartData.data.data, root, isMobile, additionalChartData)
-    setCurrentChartData(newChartData.data.data)
+    setCurrentDates([days, endDateDays, startDatetime, endDatetime])
   }
 }

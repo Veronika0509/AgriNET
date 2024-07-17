@@ -16,7 +16,7 @@ export const createMoistChartForOverlay = (chartData: any, roots: any, moistOver
     paddingBottom: 0,
   }));
 
-// Generate random date
+// Generate datф
   function createChartData(chartDate: any, chartDataValue: any) {
     return {
       date: chartDate,

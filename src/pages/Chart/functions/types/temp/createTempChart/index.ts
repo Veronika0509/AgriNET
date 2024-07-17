@@ -6,7 +6,8 @@ export const createTempChart = (
   chartData: any,
   root: any,
   isMobile: boolean,
-  additionalChartData: any
+  additionalChartData: any,
+  nwsForecastData: any,
 ) => {
   if (root.current) {
     root.current.dispose();
@@ -74,8 +75,9 @@ export const createTempChart = (
 
     function createChartDataArray(lineLabel: string) {
       let data: any = [];
-      chartData.map((chartDataItem: any) => {
-        const chartDate = new Date(chartDataItem.DateTime).getTime()
+      const dataArray = lineLabel === 'forecastTemp' ? nwsForecastData.data : chartData
+      dataArray.map((chartDataItem: any) => {
+        const chartDate = lineLabel === 'forecastTemp' ? new Date(chartDataItem.time).getTime() : new Date(chartDataItem.DateTime).getTime()
         const chartData = createChartData(chartDate, chartDataItem[lineLabel]);
         data.push(chartData);
       });
@@ -92,11 +94,16 @@ export const createTempChart = (
       {label: 'analog1', name: 'Analog 1', tooltip: 'Analog 1', metric: ''},
       {label: 'analog2', name: 'Analog 2', tooltip: 'Analog 2', metric: ''},
       {label: 'psi', name: 'PSI', tooltip: 'PSI', metric: ''},
-      {label: 'waterTemp', name: 'Water Temperature', tooltip: 'Water Temp', metric: "°F"},
+      {label: 'waterTemp', name: 'Water Temperature', tooltip: 'Water Temp', metric: "°F"}
     ]
 
+    if (nwsForecastData) {
+      dataLabels.push({label: 'forecastTemp', name: 'Forecast Temp', tooltip: 'Forecast Temp', metric: metricSign})
+    }
+
+    let series: any
     dataLabels.map((dataLabel) => {
-      const series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
+      series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
         name: dataLabel.name,
         xAxis: xAxis,
         yAxis: yAxis,
@@ -107,7 +114,8 @@ export const createTempChart = (
         tooltip: am5.Tooltip.new(root.current, {
           pointerOrientation: "horizontal",
           labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + dataLabel.tooltip + ' - ' + "{value}" + dataLabel.metric
-        })
+        }),
+        snapTooltip: true,
       }));
 
       let data = createChartDataArray(dataLabel.label)
@@ -116,6 +124,43 @@ export const createTempChart = (
 
       series.appear();
     })
+
+// Nws Forecast
+    if (nwsForecastData) {
+      let seriesRangeDataItem = xAxis.makeDataItem({
+        value: new Date(nwsForecastData.now).getTime()
+      });
+      series.createAxisRange(seriesRangeDataItem);
+      seriesRangeDataItem.get("grid").setAll({
+        visible: true,
+        stroke: am5.color(0xd445d2),
+        strokeWidth: 5,
+        strokeOpacity: 1,
+        strokeDasharray: [2, 2]
+      });
+      seriesRangeDataItem.get('label').setAll({
+        text: "NOW",
+        inside: true,
+        visible: true,
+        centerX: 0,
+        dy: 45,
+        fontSize: 13
+      })
+
+      let seriesRangeDataItemDate = xAxis.makeDataItem({
+        value: new Date(nwsForecastData.now).getTime(),
+        endValue: new Date(nwsForecastData.now).getTime() + 86400000 * 6
+      });
+      series.createAxisRange(seriesRangeDataItemDate);
+      seriesRangeDataItemDate.get("axisFill").setAll({
+        fill: am5.color(0xF7C815),
+        fillOpacity: 0.1,
+        visible: true
+      });
+
+      seriesRangeDataItem.get("grid").toFront();
+      seriesRangeDataItem.get("label").toFront();
+    }
 
 // Add cursor
     let cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {

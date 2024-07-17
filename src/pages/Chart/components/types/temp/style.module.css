@@ -1,13 +1,18 @@
 .chart {
-  width: 80%;
+  width: 100%;
   height: 300px;
   margin: 20px auto 0 auto;
+}
+
+.wrapper {
+  max-width: 80vw;
+  margin: 40px auto 0 auto;
 }
 
 @media only screen and (max-width: 850px) {
   .chart {
     width: 90%;
-    height: 500px;
+    height: 570px !important;
     margin: 20px 0 0 0;
   }
 }

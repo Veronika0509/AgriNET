@@ -1,7 +1,6 @@
 import {moistMarkerChartDataRequest} from "../../../../data/types/moist/moistMarkerChartDataRequest";
 
 let id = 0
-let boundsArray: any = []
 let invalidChartData: any = []
 export const createMoistMarker = (
   moistChartsAmount: any,
@@ -10,7 +9,8 @@ export const createMoistMarker = (
   userId: any,
   setInvalidMoistChartDataContainer: any,
   setMoistChartDataContainer: any,
-  moistChartData: any
+  moistChartData: any,
+  boundsArray: any
 ) => {
   const exists = moistChartsAmount.some((secondItemMoist: any) => secondItemMoist.id === sensorItem.id);
   if (!exists) {

@@ -108,6 +108,7 @@ export const MoistChartPage = (props: any) => {
 
       if (endDatetime) {
         setShowForecast(compareDates(endDatetime))
+        console.log(compareDates(endDatetime))
       }
 
       const newMoistChartData = await moistMainChartDataRequest(props.sensorId, historicMode, days, endDateDays)

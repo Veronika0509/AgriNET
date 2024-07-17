@@ -7,6 +7,11 @@
   margin: 0 auto;
 }
 
+.tempWxetTopSection {
+  display: flex;
+  align-items: center;
+}
+
 .backIcon {
   cursor: pointer;
 }
@@ -77,8 +82,23 @@
   align-items: center;
 }
 
-.toggle {
+.moistToggle, .tempWxetToggle {
   margin-left: 10px;
+}
+
+.nwsForecast {
+  display: flex;
+  align-items: center;
+}
+
+.tempWxetInput {
+  margin-left: 10px;
+  width: 100px;
+}
+
+.tempWxetToggle {
+  border-right: 1px solid #d2d2d2;
+  padding-right: 10px;
 }
 
 @media only screen and (max-width: 850px) {
@@ -100,6 +120,11 @@
   .topSection {
     display: block;
   }
+
+  .tempWxetToggle {
+    margin-left: 0;
+    margin-top: 10px;
+  }
 }
 
 @media only screen and (max-width: 390px) {
@@ -114,7 +139,7 @@
   .moistTopSectionContainer {
     display: block;
   }
-  .toggle {
+  .moistToggle {
     margin-left: 0;
   }
 }

@@ -45,11 +45,7 @@ const DateTimePicker = (props: any) => {
             props.startDate,
             props.endDate,
             presentToast,
-            props.sensorId,
-            props.root,
-            props.isMobile,
-            props.setCurrentChartData,
-            props.additionalChartData
+            props.setCurrentDates
           )}>
             <IonIcon icon={refreshOutline}></IonIcon>
           </IonButton>
@@ -60,13 +56,7 @@ const DateTimePicker = (props: any) => {
             props.startDate,
             props.endDate,
             presentToast,
-            props.sensorId,
-            props.root,
-            props.isMobile,
-            props.setCurrentChartData,
-            props.additionalChartData,
-            props.userId,
-            present
+            props.setCurrentDates
           )}>
             <IonIcon icon={refreshOutline}></IonIcon>
           </IonButton>

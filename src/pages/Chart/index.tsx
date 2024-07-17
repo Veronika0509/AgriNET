@@ -47,6 +47,7 @@ const Chart = (props: ChartProps) => {
             isMobile={isMobile}
             setIsMobile={setIsMobile}
             additionalChartData={props.additionalChartData}
+            userId={props.userId}
           />
         );
       case 'temp':

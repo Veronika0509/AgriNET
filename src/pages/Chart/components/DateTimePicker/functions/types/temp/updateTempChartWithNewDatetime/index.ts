@@ -6,13 +6,7 @@ export const updateTempChartWithNewDatetime = async (
   startDate: any,
   endDate: any,
   presentToast: any,
-  sensorId: any,
-  root: any,
-  isMobile: any,
-  setCurrentChartData: any,
-  additionalChartData: any,
-  userId: any,
-  present: any
+  setCurrentDates: any
 ) => {
   if (checkDateValidity(startDate, endDate)) {
     presentToast()
@@ -21,8 +15,6 @@ export const updateTempChartWithNewDatetime = async (
     const startDatetime = new Date(startDate).getTime()
     const endDatetime = new Date(endDate).getTime()
     const days = Math.round((endDatetime - startDatetime) / 86400000)
-    const newChartData: any = await tempMainChartDataRequest(present, sensorId, userId, days, endDateDays)
-    createTempChart(newChartData.data.data, root, isMobile, additionalChartData)
-    setCurrentChartData(newChartData.data.data)
+    setCurrentDates([days, endDateDays, startDatetime, endDatetime])
   }
 }

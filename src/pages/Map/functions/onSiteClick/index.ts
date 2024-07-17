@@ -27,6 +27,7 @@ export const onSiteClick = async (
   let moistChartData: any = []
   await Promise.all(siteList.map(async () => {
     const sensorItems = getSensorItems(undefined, siteList)
+    let moistBoundsArray: any = []
     sensorItems.map((sensorItem: any) => {
       if (sensorItem.markerType === 'moist-fuel') {
         createMoistMarker(
@@ -36,7 +37,8 @@ export const onSiteClick = async (
           userId,
           setInvalidMoistChartDataContainer,
           setMoistChartDataContainer,
-          moistChartData
+          moistChartData,
+          moistBoundsArray
         )
       } else if (sensorItem.markerType === 'wxet') {
         createWxetMarker(
