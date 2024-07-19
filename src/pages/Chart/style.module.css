@@ -1,0 +1,160 @@
+.topSection {
+  max-width: 80vw;
+  margin: 0 auto;
+}
+
+.configurations {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tempWxetTopSection {
+  display: flex;
+  align-items: center;
+}
+
+.backIcon {
+  cursor: pointer;
+}
+
+.daysText {
+  font-size: 25px;
+  font-weight: 600;
+}
+
+.buttons {
+  text-align: center;
+}
+
+.datetimePickerWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.datetimePickerContainer {
+  display: flex;
+  align-items: center;
+}
+
+.datetimePicker {
+  margin-left: 10px;
+}
+
+.datetimePickerContainer:nth-child(2) {
+  margin-left: 10px;
+  margin-right: 20px;
+}
+
+.datetimePickerWrapperContainer {
+  display: flex;
+  align-items: center;
+}
+
+.datetimePickerTitle {
+  color: #000;
+}
+
+.moistTopSectionContainer {
+  display: flex;
+  align-items: center;
+}
+
+.moistToggle, .tempWxetToggle {
+  margin-left: 10px;
+}
+
+.nwsForecast {
+  display: flex;
+  align-items: center;
+}
+
+.tempWxetInput {
+  margin-left: 10px;
+  width: 100px;
+}
+
+.tempWxetToggle {
+  border-right: 1px solid #d2d2d2;
+  padding-right: 10px;
+}
+
+.alarmContainer {
+  width: 450px;
+  margin: 0 auto;
+}
+
+.alarmTextTitle {
+  display: block;
+  text-align: center;
+  margin-top: 50px;
+  color: #858585;
+}
+
+.alarmItemContainer {
+  width: 100%;
+  margin: 0 auto 0 auto;
+  --padding-start: 0;
+}
+
+.alarmItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.alarmSetContainer {
+  display: flex;
+  align-items: center;
+}
+
+.alarmItemContent {
+  margin-right: 15px;
+  color: #858585;
+}
+
+.alarmItemContent.active {
+  color: #000;
+}
+
+.alarmActionInput {
+  padding-top: 0 !important;
+}
+
+@media only screen and (max-width: 850px) {
+  .buttons {
+    margin-top: -127px;
+  }
+  .topSection {
+    max-width: 98vw;
+  }
+}
+
+@media only screen and (max-width: 640px) {
+  .topSection {
+    display: block;
+  }
+
+  .tempWxetToggle {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+}
+
+@media only screen and (max-width: 390px) {
+  .datetimePickerWrapperContainer {
+    display: block;
+  }
+  .datetimePickerContainer:nth-child(2) {
+    margin-top: 10px;
+    margin-left: 0;
+    margin-bottom: 10px;
+  }
+  .moistTopSectionContainer {
+    display: block;
+  }
+  .moistToggle {
+    margin-left: 0;
+  }
+}

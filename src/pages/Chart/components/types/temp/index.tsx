@@ -14,6 +14,7 @@ import {moistSumChartDataRequest} from "../../../data/types/moist/moistSumChartD
 import {createMoistSumChart} from "../../../functions/types/moist/createMoistSumChart";
 import {tempMainChartDataRequest} from "../../../../Map/data/types/temp/tempMainChartDataRequest";
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
+import {Alarm} from "../../Alarm";
 
 export const TempChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -103,6 +104,7 @@ export const TempChartPage = (props: any) => {
           setNwsForecast={setNwsForecast}
           nwsForecastDays={nwsForecastDays}
           setNwsForecastDays={setNwsForecastDays}
+          setAlarm={props.setAlarm}
         />
         <div id='tempChartDiv' className={s.chart}></div>
       </div>

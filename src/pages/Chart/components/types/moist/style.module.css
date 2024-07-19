@@ -2,28 +2,9 @@
   --background: #fff;
 }
 
-.topSection {
-  max-width: 80vw;
-  margin: 0 auto;
-}
-
-.tempWxetTopSection {
-  display: flex;
-  align-items: center;
-}
-
-.backIcon {
-  cursor: pointer;
-}
-
 .wrapper {
   max-width: 80vw;
   margin: 40px auto 0 auto;
-}
-
-.daysText {
-  font-size: 25px;
-  font-weight: 600;
 }
 
 .chart, .batteryChart {
@@ -39,107 +20,33 @@
   height: 200px;
 }
 
-.buttons {
-  text-align: center;
-}
-
-.datetimePickerWrapper {
-  display: flex;
-  align-items: center;
-}
-
-.datetimePickerContainer {
-  display: flex;
-  align-items: center;
-}
-
-.datetimePicker {
-  margin-left: 10px;
-}
-
-.datetimePickerContainer:nth-child(2) {
-  margin-left: 10px;
-  margin-right: 20px;
-}
-
-.datetimePickerWrapperContainer {
-  display: flex;
-  align-items: center;
-}
-
 .sumChart {
   width: 100%;
   height: 300px;
   margin-bottom: 100px;
 }
 
-.datetimePickerTitle {
-  color: #000;
+.alarmPage {
+  --width: 100vw !important;
+  --height: 100vh !important;
+  position: fixed;
+  z-index: 10;
+  transition: opacity 0.3s ease;
 }
 
-.moistTopSectionContainer {
-  display: flex;
-  align-items: center;
+.alarmPage.active {
+  opacity: 1;
 }
 
-.moistToggle, .tempWxetToggle {
-  margin-left: 10px;
-}
-
-.nwsForecast {
-  display: flex;
-  align-items: center;
-}
-
-.tempWxetInput {
-  margin-left: 10px;
-  width: 100px;
-}
-
-.tempWxetToggle {
-  border-right: 1px solid #d2d2d2;
-  padding-right: 10px;
+.alarmPage.hidden {
+  opacity: 0;
 }
 
 @media only screen and (max-width: 850px) {
   .chart {
     height: 450px;
   }
-  .buttons {
-    margin-top: -127px;
-  }
   .wrapper {
     max-width: 100vw;
-  }
-  .topSection {
-    max-width: 98vw;
-  }
-}
-
-@media only screen and (max-width: 640px) {
-  .topSection {
-    display: block;
-  }
-
-  .tempWxetToggle {
-    margin-left: 0;
-    margin-top: 10px;
-  }
-}
-
-@media only screen and (max-width: 390px) {
-  .datetimePickerWrapperContainer {
-    display: block;
-  }
-  .datetimePickerContainer:nth-child(2) {
-    margin-top: 10px;
-    margin-left: 0;
-    margin-bottom: 10px;
-  }
-  .moistTopSectionContainer {
-    display: block;
-  }
-  .moistToggle {
-    margin-left: 0;
   }
 }

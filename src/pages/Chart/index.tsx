@@ -1,11 +1,13 @@
 import s from './components/types/moist/style.module.css';
-import {IonPage} from "@ionic/react";
+import {IonContent, IonModal, IonPage} from "@ionic/react";
 import Header from "./components/Header";
 import {MoistChartPage} from "./components/types/moist";
 import {WxetChartPage} from "./components/types/wxet";
 import {handleResize} from "./functions/handleResize";
-import {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {TempChartPage} from "./components/types/temp";
+import {Alarm} from "./components/Alarm";
+import {getAlarmData} from "./data/getAlarmData";
 
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -21,6 +23,17 @@ interface ChartProps {
 
 const Chart = (props: ChartProps) => {
   const [isMobile, setIsMobile] = useState(false)
+  const [alarm, setAlarm] = useState(false)
+  const [alarmData, setAlarmData] = useState()
+
+  useEffect(() => {
+    const alarmDataRequest = async () => {
+      const alarmDataResponse = await getAlarmData(props.siteId)
+      setAlarmData(alarmDataResponse.data)
+    }
+
+    alarmDataRequest()
+  }, []);
 
   window.addEventListener('resize', () => {
     handleResize(setIsMobile)
@@ -37,6 +50,8 @@ const Chart = (props: ChartProps) => {
             sensorId={props.siteId}
             isMobile={isMobile}
             setIsMobile={setIsMobile}
+            alarm={alarm}
+            setAlarm={setAlarm}
           />
         );
       case 'wxet':
@@ -48,6 +63,8 @@ const Chart = (props: ChartProps) => {
             setIsMobile={setIsMobile}
             additionalChartData={props.additionalChartData}
             userId={props.userId}
+            alarm={alarm}
+            setAlarm={setAlarm}
           />
         );
       case 'temp':
@@ -59,6 +76,8 @@ const Chart = (props: ChartProps) => {
             setIsMobile={setIsMobile}
             additionalChartData={props.additionalChartData}
             userId={props.userId}
+            alarm={alarm}
+            setAlarm={setAlarm}
           />
         )
       default:
@@ -68,8 +87,12 @@ const Chart = (props: ChartProps) => {
 
   return (
     <IonPage className={s.page}>
-      <Header setPage={props.setPage} siteName={props.siteName} siteId={props.siteId}/>
+      <Header type='chartPage' setPage={props.setPage} siteName={props.siteName} siteId={props.siteId}/>
       {renderChartPage()}
+      <IonModal isOpen={alarm} className={s.alarmPage}>
+        <Header type='alarmPage' setAlarm={setAlarm}/>
+        <Alarm alarm={alarm} setAlarm={setAlarm} sensorId={props.siteId} alarmData={alarmData}></Alarm>
+      </IonModal>
     </IonPage>
   );
 }

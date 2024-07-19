@@ -1,24 +1,36 @@
 import React from 'react'
 import {IonHeader, IonIcon, IonTitle, IonToolbar} from "@ionic/react";
 import {back} from "../../functions/back";
-import s from "../types/moist/style.module.css";
+import s from "../../style.module.css";
 import {arrowBackOutline} from "ionicons/icons";
 import {useHistory} from "react-router-dom";
 
 const Header = (props: any) => {
   const history = useHistory();
 
+  const onBackClick = () => {
+    if (props.type === 'chartPage') {
+      back(props.setPage, history)
+    } else {
+      props.setAlarm(false)
+    }
+  }
+
   return (
     <IonHeader>
       <IonToolbar>
         <IonIcon
-          onClick={() => back(props.setPage, history)}
+          onClick={onBackClick}
           className={`${s.backIcon} ${'ion-margin-start'}`}
           slot='start'
           size='large'
           icon={arrowBackOutline}
         ></IonIcon>
-        <IonTitle>{props.siteName} / {props.siteId}</IonTitle>
+        <IonTitle>{props.type === 'chartPage' ? (
+          <>{props.siteName} / {props.siteId}</>
+        ) : (
+          <>Alarm Configuration</>
+        )}</IonTitle>
       </IonToolbar>
     </IonHeader>
   )

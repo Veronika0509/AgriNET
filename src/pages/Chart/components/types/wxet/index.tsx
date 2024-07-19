@@ -10,6 +10,7 @@ import {tempMainChartDataRequest} from "../../../../Map/data/types/temp/tempMain
 import {createTempChart} from "../../../functions/types/temp/createTempChart";
 import {wxetMainChartDataRequest} from "../../../../Map/data/types/wxet/wxetMainChartDataRequest";
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
+import {Alarm} from "../../Alarm";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -97,6 +98,7 @@ export const WxetChartPage = (props: any) => {
           setNwsForecast={setNwsForecast}
           nwsForecastDays={nwsForecastDays}
           setNwsForecastDays={setNwsForecastDays}
+          setAlarm={props.setAlarm}
         />
         <div id='wxetChartDiv' className={s.chart}></div>
       </div>

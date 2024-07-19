@@ -13,6 +13,7 @@ import {createMoistSumChart} from "../../../functions/types/moist/createMoistSum
 import {moistMainChartDataRequest} from "../../../../Map/data/types/moist/moistMainChartDataRequest";
 import {moistDataBatteryRequest} from "../../../data/types/moist/moistDataBatteryRequest";
 import {createMoistBatteryChart} from "../../../functions/types/moist/createMoistBatteryChart";
+import {Alarm} from "../../Alarm";
 
 export const MoistChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -150,6 +151,7 @@ export const MoistChartPage = (props: any) => {
           setComparingMode={setComparingMode}
           historicMode={historicMode}
           setHistoricMode={setHistoricMode}
+          setAlarm={props.setAlarm}
         />
         <div>
           <div className='ion-margin-top' style={{display: batteryChartShowed ? 'block' : 'none'}}>
@@ -182,7 +184,7 @@ export const MoistChartPage = (props: any) => {
             setCurrentDates={setCurrentDates}
           />
         </div>
-        <div className={s.sumChart}>
+        <div>
           <h2 className='ion-text-center ion-margin-top'>Sum of Soil Moisture</h2>
           <div id='moistSumChartDiv' className={s.sumChart}></div>
         </div>

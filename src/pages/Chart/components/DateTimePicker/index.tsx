@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react'
-import s from "../types/moist/style.module.css";
+import s from "../../style.module.css";
 import {IonButton, IonIcon, useIonToast} from "@ionic/react";
 import {refreshOutline} from "ionicons/icons";
 import DatetimeCalendar from "./components/DatetimeCalendar";
