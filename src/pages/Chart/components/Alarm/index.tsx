@@ -9,37 +9,62 @@ import {AlarmItemSetpoints} from "./components/AlarmItemSetpoints";
 import {getFieldLabels} from "./data/getFieldLabels";
 
 export const Alarm = (props: any) => {
-  const [fieldLabelsData, setFieldLabelsData] = useState()
-  useEffect(() => {
-    const getFieldLabelsData = async () => {
-      const data = await getFieldLabels(props.sensorId)
-      setFieldLabelsData(data.data)
-    }
-
-    getFieldLabelsData()
-  }, []);
-
   return (
     <IonContent>
       <div className={s.alarmContainer}>
         <IonText className={s.alarmTextTitle}>Email/SMS</IonText>
-        <AlarmItemTelOrEmail name={1} data={props.alarmData.emailsAndPhoneNumbers[0]}></AlarmItemTelOrEmail>
-        <AlarmItemTelOrEmail name={2} data={props.alarmData.emailsAndPhoneNumbers[1]}></AlarmItemTelOrEmail>
-        <AlarmItemTelOrEmail name={3} data={props.alarmData.emailsAndPhoneNumbers[2]}></AlarmItemTelOrEmail>
+        <AlarmItemTelOrEmail
+          name={1}
+          sensorId={props.sensorId}
+          emailOrTel={props.emailOrTel1}
+          setEmailOrTel={props.setEmailOrTel1}
+          setIsLowSetpointEnabled={props.setIsLowSetpointEnabled}
+          setIsHighSetpointEnabled={props.setIsHighSetpointEnabled}
+        ></AlarmItemTelOrEmail>
+        <AlarmItemTelOrEmail
+          name={2}
+          sensorId={props.sensorId}
+          emailOrTel={props.emailOrTel2}
+          setEmailOrTel={props.setEmailOrTel2}
+          setIsLowSetpointEnabled={props.setIsLowSetpointEnabled}
+          setIsHighSetpointEnabled={props.setIsHighSetpointEnabled}
+        ></AlarmItemTelOrEmail>
+        <AlarmItemTelOrEmail
+          name={3}
+          sensorId={props.sensorId}
+          emailOrTel={props.emailOrTel3}
+          setEmailOrTel={props.setEmailOrTel3}
+          setIsLowSetpointEnabled={props.setIsLowSetpointEnabled}
+          setIsHighSetpointEnabled={props.setIsHighSetpointEnabled}
+        ></AlarmItemTelOrEmail>
         <IonText className={s.alarmTextTitle}>Setpoints</IonText>
-        {fieldLabelsData && (
+        {props.fieldsLabelsData && (
           <>
             <AlarmItemSetpoints
               name='Low'
-              fieldLabelsData={fieldLabelsData}
+              fieldsLabelsData={props.fieldsLabelsData}
               field={props.alarmData.lowField}
-              setpoint={props.alarmData.lowSetpoint}
+              sensorId={props.sensorId}
+              setpoint={props.lowSetpoint}
+              setSetpoint={props.setLowSetpoint}
+              selectedSensor={props.lowSelectedSensor}
+              setSelectedSensor={props.setLowSelectedSensor}
+              isSetpointEnabled={props.isLowSetpointEnabled}
+              setIsSetpointEnabled={props.setIsLowSetpointEnabled}
+              setEmailOrTel={props.setEmailOrTel1}
             ></AlarmItemSetpoints>
             <AlarmItemSetpoints
               name='High'
-              fieldLabelsData={fieldLabelsData}
+              fieldsLabelsData={props.fieldsLabelsData}
               field={props.alarmData.highField}
-              setpoint={props.alarmData.highSetpoint}
+              sensorId={props.sensorId}
+              setpoint={props.highSetpoint}
+              setSetpoint={props.setHighSetpoint}
+              selectedSensor={props.highSelectedSensor}
+              setSelectedSensor={props.setHighSelectedSensor}
+              isSetpointEnabled={props.isHighSetpointEnabled}
+              setIsSetpointEnabled={props.setIsHighSetpointEnabled}
+              setEmailOrTel={props.setEmailOrTel1}
             ></AlarmItemSetpoints>
           </>
         )}

@@ -128,7 +128,9 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
                   </div>
                 </div>
               ) : (
-                <div className={`${s.overlayContainer} ${s.invalidOverlayContainer}`}>
+                <div
+                  className={`${s.overlayContainer} ${s.invalidOverlayContainer}`}
+                >
                   <div className={s.wxetNotValidData}>
                     <div className={s.wxetNotValidDataRectangle}>
                       <p className={s.wxetNotValidDataRectangleText}>no data</p>

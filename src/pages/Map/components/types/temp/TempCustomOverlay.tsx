@@ -81,8 +81,9 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       renderContent() {
+        console.log(this.chartData.id)
         return (
-          <div className={s.overlayContainer} >
+          <div className={s.overlayContainer}>
             {this.isValidChartData ? (
               <div className={s.mainContainer} onClick={() => onTempSensorClick(
                 this.history,
@@ -148,7 +149,9 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
           }
           resolve()
         }).then(() => {
-          this.setTempOverlays((overlays: any) => [...overlays, this]);
+          if (this.isValidChartData) {
+            this.setTempOverlays((overlays: any) => [...overlays, this]);
+          }
         })
       }
 

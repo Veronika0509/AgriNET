@@ -149,7 +149,9 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
           }
           resolve()
         }).then(() => {
-          this.setMoistOverlays((overlays: any) => [...overlays, this]);
+          if (this.isValidChartData) {
+            this.setMoistOverlays((overlays: any) => [...overlays, this]);
+          }
         })
       }
 

@@ -8,6 +8,8 @@ import React, {useEffect, useState} from "react";
 import {TempChartPage} from "./components/types/temp";
 import {Alarm} from "./components/Alarm";
 import {getAlarmData} from "./data/getAlarmData";
+import {getFieldLabels} from "./components/Alarm/data/getFieldLabels";
+import {alarmDataProcessing} from "./functions/alarmDataProcessing";
 
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -25,14 +27,32 @@ const Chart = (props: ChartProps) => {
   const [isMobile, setIsMobile] = useState(false)
   const [alarm, setAlarm] = useState(false)
   const [alarmData, setAlarmData] = useState()
+  const [alarmEmailOrTel1, setAlarmEmailOrTel1] = useState('Unset')
+  const [alarmEmailOrTel2, setAlarmEmailOrTel2] = useState('Unset')
+  const [alarmEmailOrTel3, setAlarmEmailOrTel3] = useState('Unset')
+  const [alarmLowSetpoint, setAlarmLowSetpoint] = useState('Unset')
+  const [alarmHighSetpoint, setAlarmHighSetpoint] = useState('Unset')
+  const [alarmLowSelectedSensor, setAlarmLowSelectedSensor] = useState()
+  const [alarmHighSelectedSensor, setAlarmHighSelectedSensor] = useState()
+  const [alarmFieldLabelsData, setAlarmFieldLabelsData] = useState()
+  const [isAlarmLowSetpointEnabled, setIsAlarmLowSetpointEnabled] = useState()
+  const [isAlarmHighSetpointEnabled, setIsAlarmHighSetpointEnabled] = useState()
 
   useEffect(() => {
-    const alarmDataRequest = async () => {
-      const alarmDataResponse = await getAlarmData(props.siteId)
-      setAlarmData(alarmDataResponse.data)
-    }
-
-    alarmDataRequest()
+    alarmDataProcessing(
+      props.siteId,
+      setAlarmData,
+      setAlarmEmailOrTel1,
+      setAlarmEmailOrTel2,
+      setAlarmEmailOrTel3,
+      setAlarmLowSetpoint,
+      setAlarmHighSetpoint,
+      setAlarmFieldLabelsData,
+      setAlarmLowSelectedSensor,
+      setAlarmHighSelectedSensor,
+      setIsAlarmLowSetpointEnabled,
+      setIsAlarmHighSetpointEnabled
+    )
   }, []);
 
   window.addEventListener('resize', () => {
@@ -91,7 +111,31 @@ const Chart = (props: ChartProps) => {
       {renderChartPage()}
       <IonModal isOpen={alarm} className={s.alarmPage}>
         <Header type='alarmPage' setAlarm={setAlarm}/>
-        <Alarm alarm={alarm} setAlarm={setAlarm} sensorId={props.siteId} alarmData={alarmData}></Alarm>
+        <Alarm
+          alarm={alarm}
+          setAlarm={setAlarm}
+          sensorId={props.siteId}
+          alarmData={alarmData}
+          emailOrTel1={alarmEmailOrTel1}
+          setEmailOrTel1={setAlarmEmailOrTel1}
+          emailOrTel2={alarmEmailOrTel2}
+          setEmailOrTel2={setAlarmEmailOrTel2}
+          emailOrTel3={alarmEmailOrTel3}
+          setEmailOrTel3={setAlarmEmailOrTel3}
+          lowSetpoint={alarmLowSetpoint}
+          setLowSetpoint={setAlarmLowSetpoint}
+          highSetpoint={alarmHighSetpoint}
+          setHighSetpoint={setAlarmHighSetpoint}
+          fieldsLabelsData={alarmFieldLabelsData}
+          lowSelectedSensor={alarmLowSelectedSensor}
+          setLowSelectedSensor={setAlarmLowSelectedSensor}
+          highSelectedSensor={alarmHighSelectedSensor}
+          setHighSelectedSensor={setAlarmHighSelectedSensor}
+          isLowSetpointEnabled={isAlarmLowSetpointEnabled}
+          isHighSetpointEnabled={isAlarmHighSetpointEnabled}
+          setIsLowSetpointEnabled={setIsAlarmLowSetpointEnabled}
+          setIsHighSetpointEnabled={setIsAlarmHighSetpointEnabled}
+        ></Alarm>
       </IonModal>
     </IonPage>
   );

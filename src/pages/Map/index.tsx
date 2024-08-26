@@ -43,7 +43,6 @@ const MapPage: React.FC<MainProps> = (props) => {
   // const [isSelectDisabled, setIsSelectDisabled] = useState(false)
   // const [isChartDataIsLoading, setIsChartDataIsLoading] = useState(false)
   const present = useIonToast()
-  let allOverlays: any = []
 
   // Moist type
   let isMoistMarkerChartDrawn: boolean = false
@@ -138,10 +137,6 @@ const MapPage: React.FC<MainProps> = (props) => {
           )
           setOverlays((prevOverlays) => [...prevOverlays, overlay]);
           overlay.setMap(map)
-          allOverlays.push({
-            type: 'moist valid',
-            overlay: overlay
-          })
         })
       })
       addOverlay();
@@ -172,10 +167,6 @@ const MapPage: React.FC<MainProps> = (props) => {
         )
         setOverlays((prevOverlays) => [...prevOverlays, overlay]);
         map && overlay.setMap(map)
-        allOverlays.push({
-          type: 'moist INvalid',
-          overlay: overlay
-        })
       })
     }
   }, [invalidMoistChartDataContainer]);
@@ -217,10 +208,6 @@ const MapPage: React.FC<MainProps> = (props) => {
           )
           setOverlays((prevOverlays) => [...prevOverlays, overlay]);
           overlay.setMap(map)
-          allOverlays.push({
-            type: 'wxet valid',
-            overlay: overlay
-          })
         })
       })
       addOverlay();
@@ -248,10 +235,6 @@ const MapPage: React.FC<MainProps> = (props) => {
           )
           setOverlays((prevOverlays) => [...prevOverlays, overlay]);
           overlay.setMap(map)
-          allOverlays.push({
-            type: 'wxet INvalid',
-            overlay: overlay
-          })
         })
       })
       addOverlay();
@@ -285,10 +268,6 @@ const MapPage: React.FC<MainProps> = (props) => {
           )
           setOverlays((prevOverlays) => [...prevOverlays, overlay]);
           overlay.setMap(map)
-          allOverlays.push({
-            type: 'temp valid',
-            overlay: overlay
-          })
         })
       })
       addOverlay();
@@ -319,10 +298,6 @@ const MapPage: React.FC<MainProps> = (props) => {
         )
         setOverlays((prevOverlays) => [...prevOverlays, overlay]);
         map && overlay.setMap(map)
-        allOverlays.push({
-          type: 'temp INvalid',
-          overlay: overlay
-        })
       })
     }
   }, [invalidTempChartDataContainer]);
@@ -330,6 +305,7 @@ const MapPage: React.FC<MainProps> = (props) => {
     if (tempOverlays.length !== 0) {
       const roots: any[] = [];
       tempOverlays.map((tempOverlay: any) => {
+        console.log(tempOverlay)
         if (!createdTempCharts.includes(tempOverlay.chartData.id)) {
           createTempChartForOverlay(tempOverlay.chartData, roots, tempOverlays)
           createdTempCharts.push(tempOverlay.chartData.id)
@@ -353,10 +329,6 @@ const MapPage: React.FC<MainProps> = (props) => {
       map.fitBounds(bounds);
     }
   }, [overlays]);
-
-  useEffect(() => {
-    console.log(allOverlays)
-  }, [allOverlays]);
 
   return (
     <IonPage>
