@@ -142,6 +142,12 @@
   }
 }
 
+@media only screen and (max-width: 475px) {
+  .alarmContainer {
+    width: 290px;
+  }
+}
+
 @media only screen and (max-width: 390px) {
   .datetimePickerWrapperContainer {
     display: block;
