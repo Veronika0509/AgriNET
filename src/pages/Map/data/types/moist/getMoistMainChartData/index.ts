@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const moistMainChartDataRequest = async (sensorId: any, isHistoricData: boolean, daysProp?: any, endDateProp?: any) => {
+export const getMoistMainChartData = async (sensorId: any, isHistoricData: boolean, daysProp?: any, endDateProp?: any) => {
   if (daysProp && endDateProp) {
     return await axios.get('https://app.agrinet.us/api/chart/m?v=43', {
       params: {

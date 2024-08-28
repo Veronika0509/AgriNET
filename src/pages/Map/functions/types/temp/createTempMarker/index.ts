@@ -1,4 +1,4 @@
-import {tempMarkerChartDataRequest} from "../../../../data/types/temp/tempMarkerChartDataRequest";
+import {getTempMarkerChartData} from "../../../../data/types/temp/getTempMarkerChartData";
 
 let id = 0
 let tempChartData: any = []
@@ -22,7 +22,7 @@ export const createTempMarker = (
       new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
     )
     if (page === 1) {
-      tempMarkerChartDataRequest(
+      getTempMarkerChartData(
         sensorItem.id,
         sensorItem.sensorId,
         bounds,

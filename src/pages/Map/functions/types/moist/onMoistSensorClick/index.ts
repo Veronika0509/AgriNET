@@ -1,4 +1,4 @@
-import {moistMainChartDataRequest} from "../../../../data/types/moist/moistMainChartDataRequest";
+import {getMoistMainChartData} from "../../../../data/types/moist/getMoistMainChartData";
 import {getSensorItems} from "../../../../data/getSensorItems";
 
 export const onMoistSensorClick = async (
@@ -15,7 +15,7 @@ export const onMoistSensorClick = async (
   setChartPageType: any
 ) => {
   // if (sensorId !== id) {
-  const newMoistChartData = await moistMainChartDataRequest(sensorId, false)
+  const newMoistChartData = await getMoistMainChartData(sensorId, false)
   getSensorItems('moist-fuel', siteList).map((sensorItem: any) => {
     if (sensorItem.id === mainId) {
       setAdditionalChartData({linesCount: sensorItem.sensorCount})

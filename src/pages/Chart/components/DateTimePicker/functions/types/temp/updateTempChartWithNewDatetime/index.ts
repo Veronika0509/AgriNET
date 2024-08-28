@@ -1,6 +1,4 @@
 import {checkDateValidity} from "../../../checkDateValidity";
-import {tempMainChartDataRequest} from "../../../../../../../Map/data/types/temp/tempMainChartDataRequest";
-import {createTempChart} from "../../../../../../functions/types/temp/createTempChart";
 
 export const updateTempChartWithNewDatetime = async (
   startDate: any,

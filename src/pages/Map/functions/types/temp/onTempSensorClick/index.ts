@@ -1,5 +1,4 @@
-import {getSensorItems} from "../../../../data/getSensorItems";
-import {tempMainChartDataRequest} from "../../../../data/types/temp/tempMainChartDataRequest";
+import {getTempMainChartData} from "../../../../data/types/temp/getTempMainChartData";
 
 export const onTempSensorClick = async (
   history: any,
@@ -14,7 +13,7 @@ export const onTempSensorClick = async (
   userId: any,
   present: any
 ) => {
-  const newChartData: any = await tempMainChartDataRequest(present, sensorId, userId)
+  const newChartData: any = await getTempMainChartData(present, sensorId, userId)
   setAdditionalChartData({metric: newChartData.data.metric})
   setChartData(newChartData.data.data)
   setSiteId(sensorId)

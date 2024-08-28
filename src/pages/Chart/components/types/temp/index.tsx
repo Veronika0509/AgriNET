@@ -6,15 +6,8 @@ import s from "./style.module.css";
 import {IonContent, useIonToast} from "@ionic/react";
 import {createTempChart} from "../../../functions/types/temp/createTempChart";
 import {handleResize} from "../../../functions/handleResize";
-import {moistMainChartDataRequest} from "../../../../Map/data/types/moist/moistMainChartDataRequest";
-import {createMoistMainChart} from "../../../functions/types/moist/createMoistMainChart";
-import {moistDataBatteryRequest} from "../../../data/types/moist/moistDataBatteryRequest";
-import {createMoistBatteryChart} from "../../../functions/types/moist/createMoistBatteryChart";
-import {moistSumChartDataRequest} from "../../../data/types/moist/moistSumChartDataRequest";
-import {createMoistSumChart} from "../../../functions/types/moist/createMoistSumChart";
-import {tempMainChartDataRequest} from "../../../../Map/data/types/temp/tempMainChartDataRequest";
+import {getTempMainChartData} from "../../../../Map/data/types/temp/getTempMainChartData";
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
-import {Alarm} from "../../Alarm";
 
 export const TempChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -57,7 +50,7 @@ export const TempChartPage = (props: any) => {
         }
       }
 
-      const newChartData: any = await tempMainChartDataRequest(present, props.sensorId, props.userId, days, endDateDays)
+      const newChartData: any = await getTempMainChartData(present, props.sensorId, props.userId, days, endDateDays)
       createTempChart(newChartData.data.data, root, props.isMobile, props.additionalChartData, nwsForecastData)
       setCurrentChartData(newChartData.data.data)
     }

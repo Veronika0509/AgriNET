@@ -1,12 +1,12 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
-import login from "../../../../../Login";
+import s from "../../../../components/types/moist/style.module.css";
 
 let startDateForZooming: any;
 let endDateForZooming: any;
 
-export const createMoistMainChart = (
+export const createMainChart = (
   props: any,
   root: any,
   isMobile: any,
@@ -25,7 +25,7 @@ export const createMoistMainChart = (
   }
 
   if (!root.current) {
-    root.current = am5.Root.new("moistChartDiv");
+    root.current = am5.Root.new("mainChart");
 
     const myTheme = am5.Theme.new(root.current);
 
@@ -103,6 +103,7 @@ export const createMoistMainChart = (
     if (showForecast) {
       listOfSeries.push({name: 'futureSeries', prefix: 'P_'})
     }
+
     let series: any;
     let seriesArray: any[] = [];
     let ordinarySeriesArray: any = []
@@ -368,10 +369,20 @@ export const createMoistMainChart = (
     })
 
 // Legend
+    let legendHeight: number
+    if (additionalChartData.linesCount <= 3) {
+      legendHeight = 80
+    } else if (additionalChartData.linesCount > 3 && additionalChartData.linesCount <= 6) {
+      legendHeight = 160
+    } else if (additionalChartData.linesCount > 6 && additionalChartData.linesCount <= 9) {
+      legendHeight = 260
+    } else {
+      legendHeight = 350
+    }
     let legend = chart.children.push(am5.Legend.new(root.current, {
       width: 200,
       paddingLeft: isMobile ? -15 : 15,
-      height: am5.percent(100)
+      height: legendHeight
     }));
 
     legend.itemContainers.template.set("width", am5.p100);

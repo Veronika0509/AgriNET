@@ -3,15 +3,15 @@
   margin: 0 auto;
 }
 
+.topSectionWrapper {
+  display: flex;
+  align-items: center;
+}
+
 .configurations {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-}
-
-.tempWxetTopSection {
-  display: flex;
-  align-items: center;
 }
 
 .backIcon {
@@ -53,15 +53,6 @@
 
 .datetimePickerTitle {
   color: #000;
-}
-
-.moistTopSectionContainer {
-  display: flex;
-  align-items: center;
-}
-
-.moistToggle, .tempWxetToggle {
-  margin-left: 10px;
 }
 
 .nwsForecast {
@@ -122,12 +113,22 @@
   padding-top: 0 !important;
 }
 
+.moistTopSectionItem {
+  --padding-start: 0;
+  width: 500px;
+}
+
+.chartsButtonsContainer {
+  display: flex;
+  margin-top: 5px;
+}
+
 @media only screen and (max-width: 850px) {
   .buttons {
     margin-top: -127px;
   }
   .topSection {
-    max-width: 98vw;
+    max-width: 95vw;
   }
 }
 
@@ -142,13 +143,19 @@
   }
 }
 
+@media only screen and (max-width: 515px) {
+  .moistTopSectionItem {
+    width: 300px;
+  }
+  .topSectionWrapper {
+    display: block;
+  }
+}
+
 @media only screen and (max-width: 475px) {
   .alarmContainer {
     width: 290px;
   }
-}
-
-@media only screen and (max-width: 390px) {
   .datetimePickerWrapperContainer {
     display: block;
   }
@@ -159,8 +166,5 @@
   }
   .moistTopSectionContainer {
     display: block;
-  }
-  .moistToggle {
-    margin-left: 0;
   }
 }

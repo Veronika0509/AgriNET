@@ -1,7 +1,7 @@
 import axios from "axios";
 import login from "../../../../../Login";
 
-export const tempMarkerChartDataRequest = async (
+export const getTempMarkerChartData = async (
   mainId: any,
   propsSensorId: string,
   bounds: any,

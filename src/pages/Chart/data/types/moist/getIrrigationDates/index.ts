@@ -1,7 +1,7 @@
 import axios from "axios";
 import {loadGoogleApi} from "../../../../../../functions/loadGoogleApiFunc";
 
-export const irrigationDatesRequest = async (
+export const getIrrigationDates = async (
   setIsIrrigationDataIsLoading: any,
   setIsIrrigationButtons: any,
   userId: number,

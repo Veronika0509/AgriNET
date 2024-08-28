@@ -7,9 +7,8 @@ import {
 import {useRef} from 'react';
 import invalidChartDataImage from '../../assets/images/invalidChartData.png';
 import Header from "./components/Header";
-import ModalWindow from "./components/ModalWindow";
 import {initializeMoistCustomOverlay} from "./components/types/moist/MoistCustomOverlay";
-import {setSiteListRequest} from "./data/siteListRequest";
+import {getSiteList} from "./data/getSiteList";
 import {createMap} from "./functions/createMap";
 import {createSites} from "./functions/createSites";
 import {createMoistChartForOverlay} from "./functions/types/moist/createMoistChartForOverlay";
@@ -18,7 +17,6 @@ import LayerList from "./components/LayerList";
 import {initializeWxetCustomOverlay} from "./components/types/wxet/WxetCustomOverlay";
 import {initializeTempCustomOverlay} from "./components/types/temp/TempCustomOverlay";
 import {createTempChartForOverlay} from "./functions/types/temp/createTempChartForOverlay";
-import {all} from "axios";
 
 interface MainProps {
   page: any
@@ -81,7 +79,7 @@ const MapPage: React.FC<MainProps> = (props) => {
 
   useEffect(() => {
     if (props.page === 1) {
-      setSiteListRequest(props.userId, props.setSiteList)
+      getSiteList(props.userId, props.setSiteList)
       createMap(map, setMap, mapRef)
     }
   }, [props.page])
@@ -173,6 +171,7 @@ const MapPage: React.FC<MainProps> = (props) => {
   useEffect(() => {
     if (moistOverlays.length !== 0) {
       const roots: any[] = [];
+      console.log(moistOverlays)
       moistOverlays.map((moistOverlay: any) => {
         if (!createdMoistCharts.includes(moistOverlay.chartData.id)) {
           createMoistChartForOverlay(moistOverlay.chartData, roots, moistOverlays)

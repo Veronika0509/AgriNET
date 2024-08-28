@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const moistMarkerChartDataRequest = async (
+export const getMoistMarkerChartData = async (
   mainId: any,
   propsSensorId: string,
   bounds: any,

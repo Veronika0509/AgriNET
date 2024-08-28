@@ -3,17 +3,15 @@ import {useEffect, useRef, useState} from "react";
 import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentTime";
 import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import {handleResize} from "../../../functions/handleResize";
-import {irrigationDatesRequest} from "../../../data/types/moist/irriationDatesRequest";
-import {moistSumChartDataRequest} from "../../../data/types/moist/moistSumChartDataRequest";
+import {getIrrigationDates} from "../../../data/types/moist/getIrrigationDates";
+import {getSumChartData} from "../../../data/types/moist/getSumChartData";
 import {IonContent} from "@ionic/react";
 import TopSection from "../../TopSection";
 import IrrigationButtons from "./IrrigationButtons";
-import {createMoistMainChart} from "../../../functions/types/moist/createMoistMainChart";
-import {createMoistSumChart} from "../../../functions/types/moist/createMoistSumChart";
-import {moistMainChartDataRequest} from "../../../../Map/data/types/moist/moistMainChartDataRequest";
-import {moistDataBatteryRequest} from "../../../data/types/moist/moistDataBatteryRequest";
-import {createMoistBatteryChart} from "../../../functions/types/moist/createMoistBatteryChart";
-import {Alarm} from "../../Alarm";
+import {createMainChart} from "../../../functions/types/moist/createMainChart";
+import {getMoistMainChartData} from "../../../../Map/data/types/moist/getMoistMainChartData";
+import {getBatteryChartData} from "../../../data/types/moist/getBatteryChartData";
+import {createAdditionalChart} from "../../../functions/types/moist/createAdditionalChart";
 
 export const MoistChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -33,6 +31,9 @@ export const MoistChartPage = (props: any) => {
   // Battery Chart
   const batteryRoot = useRef<any>(null);
   const [batteryChartShowed, setBatteryChartShowed] = useState(false)
+  // Soil Temperature Chart
+  const soilTempRoot = useRef<any>(null);
+  const [soilTempChartShowed, setSoilTempChartShowed] = useState(false)
   // Sum Chart
   const sumRoot = useRef<any>(null);
   // Historic Mode
@@ -40,37 +41,37 @@ export const MoistChartPage = (props: any) => {
   const [showForecast, setShowForecast] = useState(true)
 
   useEffect(() => {
-    createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+    createMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
   }, [props.isMobile]);
   useEffect(() => {
     if (fullDatesArray) {
-      createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+      createMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
     }
   }, [fullDatesArray])
   useEffect(() => {
     setCurrentChartData(props.chartData)
-    irrigationDatesRequest(setIsIrrigationDataIsLoading, setIsIrrigationButtons, props.userId, props.sensorId, setIrrigationDates, setFullDatesArray)
+    getIrrigationDates(setIsIrrigationDataIsLoading, setIsIrrigationButtons, props.userId, props.sensorId, setIrrigationDates, setFullDatesArray)
     handleResize(props.setIsMobile)
   }, []);
   useEffect(() => {
-    createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+    createMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
 
     if (currentChartData) {
-      createMoistMainChart(currentChartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+      createMainChart(currentChartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
     } else {
-      createMoistMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+      createMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
     }
   }, [comparingMode]);
   useEffect(() => {
     const getHistoricData = async () => {
-      const historicData = await moistMainChartDataRequest(props.sensorId, historicMode, currentDates[0], currentDates[1])
-      createMoistMainChart(historicData.data.data, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+      const historicData = await getMoistMainChartData(props.sensorId, historicMode, currentDates[0], currentDates[1])
+      createMainChart(historicData.data.data, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
     }
     getHistoricData()
 
     const moistHistoricData = async () => {
-      const historicData = await moistSumChartDataRequest(props.sensorId, historicMode, currentDates[0], currentDates[1])
-      createMoistSumChart(historicData.data.data, historicData.data.budgetLines, sumRoot, historicMode)
+      const historicData = await getSumChartData(props.sensorId, historicMode, currentDates[0], currentDates[1])
+      createAdditionalChart('sum', historicData.data.data, sumRoot, historicData.data.budgetLines, historicMode)
     }
 
     moistHistoricData()
@@ -109,21 +110,32 @@ export const MoistChartPage = (props: any) => {
 
       if (endDatetime) {
         setShowForecast(compareDates(endDatetime))
-        console.log(compareDates(endDatetime))
       }
 
-      const newMoistChartData = await moistMainChartDataRequest(props.sensorId, historicMode, days, endDateDays)
-      createMoistMainChart(newMoistChartData.data.data, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, true, historicMode, compareDates(endDatetime))
+      const newMoistChartData = await getMoistMainChartData(props.sensorId, historicMode, days, endDateDays)
+      createMainChart(newMoistChartData.data.data, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, true, historicMode, compareDates(endDatetime))
       setCurrentChartData(newMoistChartData.data.data)
 
-      const newBatteryData = await moistDataBatteryRequest(props.sensorId, days, endDateDays)
-      createMoistBatteryChart(newBatteryData.data, batteryRoot)
+      const newBatteryData = await getBatteryChartData(props.sensorId, days, endDateDays)
+      createAdditionalChart('battery', newBatteryData.data, batteryRoot)
 
-      const newSumChartData = await moistSumChartDataRequest(props.sensorId, historicMode, days, endDateDays)
-      createMoistSumChart(newSumChartData.data.data, newSumChartData.data.budgetLines, sumRoot, historicMode)
+      const newSumChartData = await getSumChartData(props.sensorId, historicMode, days, endDateDays)
+      createAdditionalChart('sum', newSumChartData.data.data, sumRoot, newSumChartData.data.budgetLines, historicMode)
     }
     updateCharts(currentDates[0], currentDates[1], currentDates[2], currentDates[3])
   }, [currentDates, props.isMobile]);
+
+  let chartAdditionalClass: any
+
+  if (props.isMobile) {
+    if (props.additionalChartData.linesCount > 3 && props.additionalChartData.linesCount <= 6) {
+      chartAdditionalClass = s.chartLinesSix
+    } else if (props.additionalChartData.linesCount > 6 && props.additionalChartData.linesCount <= 9) {
+      chartAdditionalClass = s.chartLinesNine
+    } else if (props.additionalChartData.linesCount > 9) {
+      chartAdditionalClass = s.chartLinesMoreThanNine
+    }
+  }
 
   return (
     <IonContent className={s.container}>
@@ -152,15 +164,22 @@ export const MoistChartPage = (props: any) => {
           historicMode={historicMode}
           setHistoricMode={setHistoricMode}
           setAlarm={props.setAlarm}
+          setSoilTempChartShowed={setSoilTempChartShowed}
+          soilTempChartShowed={soilTempChartShowed}
+          soilTempRoot={soilTempRoot}
         />
         <div>
+          <div className='ion-margin-top' style={{display: soilTempChartShowed ? 'block' : 'none'}}>
+            <h2 className='ion-text-center'>Soil Temperature</h2>
+            <div className={s.additionalChart} id='soilTempChart'></div>
+          </div>
           <div className='ion-margin-top' style={{display: batteryChartShowed ? 'block' : 'none'}}>
             <h2 className='ion-text-center'>Battery Volts</h2>
-            <div className={s.batteryChart} id='batteryChart'></div>
+            <div className={s.additionalChart} id='batteryChart'></div>
           </div>
           <div className='ion-margin-top'>
             <h2 className='ion-text-center'>Soil Moisture</h2>
-            <div className={s.chart} id='moistChartDiv'></div>
+            <div className={`${s.chart} ${chartAdditionalClass}`} id='mainChart'></div>
           </div>
           <IrrigationButtons
             isIrrigationDataIsLoading={isIrrigationDataIsLoading}
@@ -186,7 +205,7 @@ export const MoistChartPage = (props: any) => {
         </div>
         <div>
           <h2 className='ion-text-center ion-margin-top'>Sum of Soil Moisture</h2>
-          <div id='moistSumChartDiv' className={s.sumChart}></div>
+          <div id='sumChart' className={s.sumChart}></div>
         </div>
       </div>
     </IonContent>

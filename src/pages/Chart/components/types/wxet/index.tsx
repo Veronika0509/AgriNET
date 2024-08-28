@@ -6,11 +6,8 @@ import TopSection from "../../TopSection";
 import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentTime";
 import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import {createWxetChart} from "../../../functions/types/wxet/createWxetChart";
-import {tempMainChartDataRequest} from "../../../../Map/data/types/temp/tempMainChartDataRequest";
-import {createTempChart} from "../../../functions/types/temp/createTempChart";
-import {wxetMainChartDataRequest} from "../../../../Map/data/types/wxet/wxetMainChartDataRequest";
+import {getWxetMainChartData} from "../../../../Map/data/types/wxet/getWxetMainChartData";
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
-import {Alarm} from "../../Alarm";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -52,7 +49,7 @@ export const WxetChartPage = (props: any) => {
         }
       }
 
-      const newChartData = await wxetMainChartDataRequest(props.sensorId, days, endDateDays)
+      const newChartData = await getWxetMainChartData(props.sensorId, days, endDateDays)
       createWxetChart(newChartData.data.data, root, props.isMobile, props.additionalChartData, nwsForecastData)
       setCurrentChartData(newChartData.data.data)
     }

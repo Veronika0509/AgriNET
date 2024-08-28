@@ -1,4 +1,4 @@
-import {moistMarkerChartDataRequest} from "../../../../data/types/moist/moistMarkerChartDataRequest";
+import {getMoistMarkerChartData} from "../../../../data/types/moist/getMoistMarkerChartData";
 
 let id = 0
 let invalidChartData: any = []
@@ -21,7 +21,7 @@ export const createMoistMarker = (
       new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
     )
     if (page === 1) {
-      moistMarkerChartDataRequest(
+      getMoistMarkerChartData(
         sensorItem.id,
         sensorItem.sensorId,
         bounds,

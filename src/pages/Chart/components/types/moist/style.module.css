@@ -7,7 +7,7 @@
   margin: 40px auto 0 auto;
 }
 
-.chart, .batteryChart {
+.chart, .additionalChart {
   width: 100%;
   margin-top: 20px;
 }
@@ -16,8 +16,8 @@
   height: 400px;
 }
 
-.batteryChart {
-  height: 200px;
+.additionalChart {
+  height: 300px;
 }
 
 .sumChart {
@@ -42,9 +42,19 @@
   opacity: 0;
 }
 
+.buttons {
+  text-align: center;
+}
+
 @media only screen and (max-width: 850px) {
-  .chart {
-    height: 450px;
+  .chartLinesSix {
+    height: 480px;
+  }
+  .chartLinesNine {
+    height: 580px;
+  }
+  .chartLinesMoreThanNine {
+    height: 670px;
   }
   .wrapper {
     max-width: 100vw;

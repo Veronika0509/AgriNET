@@ -1,10 +1,4 @@
 import {getDatetime} from "../../../../components/DateTimePicker/functions/getDatetime";
-import {moistDataBatteryRequest} from "../../../../data/types/moist/moistDataBatteryRequest";
-import {moistMainChartDataRequest} from "../../../../../Map/data/types/moist/moistMainChartDataRequest";
-import {createMoistMainChart} from "../createMoistMainChart";
-import {createMoistBatteryChart} from "../createMoistBatteryChart";
-import {moistSumChartDataRequest} from "../../../../data/types/moist/moistSumChartDataRequest";
-import {createMoistSumChart} from "../createMoistSumChart";
 
 export const onIrrigationButtonClick = async (
   buttonProps: number,

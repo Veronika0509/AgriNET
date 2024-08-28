@@ -1,7 +1,4 @@
-import axios from "axios";
 import {checkDateValidity} from "../../../checkDateValidity";
-import {createWxetChart} from "../../../../../../functions/types/wxet/createWxetChart";
-import {wxetMainChartDataRequest} from "../../../../../../../Map/data/types/wxet/wxetMainChartDataRequest";
 
 export const updateWxetChartWithNewDatetime = async (
   startDate: any,

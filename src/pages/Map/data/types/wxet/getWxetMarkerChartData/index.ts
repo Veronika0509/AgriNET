@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const wxetMarkerChartRequest = async (
+export const getWxetMarkerChartData = async (
   mainId: any,
   propsSensorId: string,
   bounds: any,

@@ -1,4 +1,4 @@
-import {wxetMainChartDataRequest} from "../../../../data/types/wxet/wxetMainChartDataRequest";
+import {getWxetMainChartData} from "../../../../data/types/wxet/getWxetMainChartData";
 
 export const onWxetSensorClick = async (
   history: any,
@@ -11,7 +11,7 @@ export const onWxetSensorClick = async (
   setAdditionalChartData: any,
   setChartPageType: any
 ) => {
-  const newChartData = await wxetMainChartDataRequest(sensorId)
+  const newChartData = await getWxetMainChartData(sensorId)
   setChartData(newChartData.data.data)
   setSiteId(sensorId)
   setSiteName(name)
