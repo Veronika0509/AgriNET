@@ -9,9 +9,11 @@ export const createAdditionalChart = (
 // sum
   budgetLines?: any,
   historicMode?: boolean,
+  setSumColor?: any,
 // soilTemp
   linesCount?: number,
   metric?: string,
+  setSoilTempColor?: any,
 ) => {
   if (root.current) {
     root.current.dispose();
@@ -100,7 +102,7 @@ export const createAdditionalChart = (
         listOfSeries.push({name: 'futureSeries', prefix: 'P_'})
       }
 
-      listOfSeries.map((seriesItem: any) => {
+      listOfSeries.map((seriesItem: any, index: number) => {
         series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
           xAxis: xAxis,
           yAxis: yAxis,
@@ -123,6 +125,10 @@ export const createAdditionalChart = (
           series.strokes.template.setAll({
             blur: 5
           });
+        }
+
+        if (index === 0 && setSumColor) {
+          setSumColor([series.get('stroke').r, series.get('stroke').g, series.get('stroke').b])
         }
 
         let data = createSumChartDataArray(seriesItem.prefix)
@@ -149,6 +155,7 @@ export const createAdditionalChart = (
       }
 
       let count: number = 4
+      let seriesColors: any = []
       if (linesCount) {
         for (var i = 0; i < linesCount; i++) {
           let name = count + ' inch';
@@ -171,12 +178,14 @@ export const createAdditionalChart = (
           count += 4;
 
           let data = createSoilTempChartDataArray(i)
-
           series.data.setAll(data);
+
+          seriesColors.push(series.get('stroke'))
 
           series.appear();
         }
       }
+      setSoilTempColor(seriesColors)
     } else {
       function createChartData(chartDate: any, chartCount: number) {
         return {

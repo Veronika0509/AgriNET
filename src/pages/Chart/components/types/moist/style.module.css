@@ -46,6 +46,54 @@
   text-align: center;
 }
 
+.tabularButton {
+  display: block;
+  width: 158px;
+  margin: 15px auto 0 auto;
+}
+
+.tabularDataSpinner {
+  display: block;
+  width: 50px;
+  height: 50px;
+  margin: 10px auto 0 auto;
+}
+
+.mainTabularDataTable {
+  margin: 15px auto 0 auto;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 12px;
+}
+
+.mainTabularDataTableTh, .mainTabularDataTableTd {
+  border: 1px solid black;
+  text-align: center;
+  padding: 4px;
+}
+
+.mainTabularDataTableTh {
+  font-weight: 400;
+}
+
+.mainTabularDataTableThead {
+  color: white;
+}
+
+.mainTabularDataTableThLarge {
+  width: 138px;
+  color: #000;
+}
+
+.mainWxetTabularDataTableTh {
+  color: #000;
+}
+
+.mainTempWxetTabularDataTableTd {
+  border: 1px solid #000;
+  text-align: center;
+}
+
 @media only screen and (max-width: 850px) {
   .chartLinesSix {
     height: 480px;
@@ -58,5 +106,88 @@
   }
   .wrapper {
     max-width: 100vw;
+  }
+}
+
+@media (max-width: 750px) {
+  .mainTempWxetTabularDataTable,
+  .mainTempWxetTabularDataTable tbody,
+  .mainTempWxetTabularDataTable tr,
+  .mainTempWxetTabularDataTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .mainTempWxetTabularDataTable thead {
+    display: none;
+  }
+
+  .mainTempWxetTabularDataTableTr {
+    margin-bottom: 10px;
+    border: 1px solid #000;
+  }
+
+  .mainTempWxetTabularDataTableTd {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    position: relative;
+    text-align: right;
+    color: #fff;
+  }
+
+  .wxetBlackText {
+    color: #000;
+  }
+
+  .mainTempWxetTabularDataTableTdBlack {
+    color: #000;
+  }
+
+  .mainTempWxetTabularDataTableTd::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    font-weight: bold;
+    text-align: left;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 425px) {
+  .mainMoistSoilTempTabularDataTable,
+  .mainMoistSoilTempTabularDataTable tbody,
+  .mainMoistSoilTempTabularDataTable tr,
+  .mainMoistSoilTempTabularDataTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .mainMoistSoilTempTabularDataTable thead {
+    display: none;
+  }
+
+  .mainMoistSoilTempTabularDataTableTr {
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+  }
+
+  .mainMoistSoilTempTabularDataTableTd {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+    text-align: right;
+    color: #fff;
+  }
+
+  .mainMoistSoilTempTabularDataTableTd::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    font-weight: bold;
+    text-align: left;
+    white-space: nowrap;
   }
 }

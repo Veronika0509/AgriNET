@@ -1,5 +1,5 @@
 import s from './style.module.css'
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {handleResize} from "../../../functions/handleResize";
 import {IonContent, useIonToast} from "@ionic/react";
 import TopSection from "../../TopSection";
@@ -8,6 +8,7 @@ import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import {createWxetChart} from "../../../functions/types/wxet/createWxetChart";
 import {getWxetMainChartData} from "../../../../Map/data/types/wxet/getWxetMainChartData";
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
+import {TabularData} from "../../TabularData";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -97,6 +98,8 @@ export const WxetChartPage = (props: any) => {
           setNwsForecastDays={setNwsForecastDays}
           setAlarm={props.setAlarm}
         />
+        <h2 className='ion-text-center'>Weather Station</h2>
+        <TabularData type={'wxet'} sensorId={props.sensorId} />
         <div id='wxetChartDiv' className={s.chart}></div>
       </div>
     </IonContent>

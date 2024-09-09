@@ -1,5 +1,5 @@
 import s from './style.module.css'
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentTime";
 import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import {handleResize} from "../../../functions/handleResize";
@@ -10,8 +10,8 @@ import TopSection from "../../TopSection";
 import IrrigationButtons from "./IrrigationButtons";
 import {createMainChart} from "../../../functions/types/moist/createMainChart";
 import {getMoistMainChartData} from "../../../../Map/data/types/moist/getMoistMainChartData";
-import {getBatteryChartData} from "../../../data/types/moist/getBatteryChartData";
 import {createAdditionalChart} from "../../../functions/types/moist/createAdditionalChart";
+import {TabularData} from "../../TabularData";
 
 export const MoistChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -39,9 +39,13 @@ export const MoistChartPage = (props: any) => {
   // Historic Mode
   const [historicMode, setHistoricMode] = useState(false)
   const [showForecast, setShowForecast] = useState(true)
+  // Tabular Data Colors
+  const [moistMainTabularDataColors, setMoistMainTabularDataColors] = useState<any>([])
+  const [moistSumTabularDataColors, setMoistSumTabularDataColors] = useState<any>([])
+  const [moistSoilTempTabularDataColors, setMoistSoilTempTabularDataColors] = useState<any>([])
 
   useEffect(() => {
-    createMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+    createMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast, setMoistMainTabularDataColors)
   }, [props.isMobile]);
   useEffect(() => {
     if (fullDatesArray) {
@@ -116,11 +120,8 @@ export const MoistChartPage = (props: any) => {
       createMainChart(newMoistChartData.data.data, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, true, historicMode, compareDates(endDatetime))
       setCurrentChartData(newMoistChartData.data.data)
 
-      const newBatteryData = await getBatteryChartData(props.sensorId, days, endDateDays)
-      createAdditionalChart('battery', newBatteryData.data, batteryRoot)
-
       const newSumChartData = await getSumChartData(props.sensorId, historicMode, days, endDateDays)
-      createAdditionalChart('sum', newSumChartData.data.data, sumRoot, newSumChartData.data.budgetLines, historicMode)
+      createAdditionalChart('sum', newSumChartData.data.data, sumRoot, newSumChartData.data.budgetLines, historicMode, setMoistSumTabularDataColors)
     }
     updateCharts(currentDates[0], currentDates[1], currentDates[2], currentDates[3])
   }, [currentDates, props.isMobile]);
@@ -167,10 +168,12 @@ export const MoistChartPage = (props: any) => {
           setSoilTempChartShowed={setSoilTempChartShowed}
           soilTempChartShowed={soilTempChartShowed}
           soilTempRoot={soilTempRoot}
+          setMoistSoilTempTabularDataColors={setMoistSoilTempTabularDataColors}
         />
         <div>
           <div className='ion-margin-top' style={{display: soilTempChartShowed ? 'block' : 'none'}}>
             <h2 className='ion-text-center'>Soil Temperature</h2>
+            <TabularData type='moistSoilTemp' sensorId={props.sensorId} colors={moistSoilTempTabularDataColors}/>
             <div className={s.additionalChart} id='soilTempChart'></div>
           </div>
           <div className='ion-margin-top' style={{display: batteryChartShowed ? 'block' : 'none'}}>
@@ -179,6 +182,7 @@ export const MoistChartPage = (props: any) => {
           </div>
           <div className='ion-margin-top'>
             <h2 className='ion-text-center'>Soil Moisture</h2>
+            <TabularData type='moistMain' sensorId={props.sensorId} colors={moistMainTabularDataColors}/>
             <div className={`${s.chart} ${chartAdditionalClass}`} id='mainChart'></div>
           </div>
           <IrrigationButtons
@@ -205,6 +209,7 @@ export const MoistChartPage = (props: any) => {
         </div>
         <div>
           <h2 className='ion-text-center ion-margin-top'>Sum of Soil Moisture</h2>
+          <TabularData type='moistSum' sensorId={props.sensorId} colors={moistSumTabularDataColors}/>
           <div id='sumChart' className={s.sumChart}></div>
         </div>
       </div>

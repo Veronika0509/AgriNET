@@ -15,7 +15,8 @@ export const createMainChart = (
   comparingMode: boolean,
   isNewDates: boolean,
   historicMode: boolean,
-  showForecast: boolean
+  showForecast: boolean,
+  setMainTabularDataColors?: any
 ): void => {
   const chartDataWrapper = props;
 
@@ -163,6 +164,14 @@ export const createMainChart = (
         seriesArray.push(series);
       }
     })
+
+    if (setMainTabularDataColors) {
+      let colors: any[] = []
+      seriesColors.map((seriesColor: any) => {
+        colors.push([seriesColor.r, seriesColor.g, seriesColor.b])
+      })
+      setMainTabularDataColors(colors)
+    }
 
     if (historicMode) {
       let seriesRangeDataItem = xAxis.makeDataItem({

@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentTime";
 import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import TopSection from "../../TopSection";
@@ -8,6 +8,7 @@ import {createTempChart} from "../../../functions/types/temp/createTempChart";
 import {handleResize} from "../../../functions/handleResize";
 import {getTempMainChartData} from "../../../../Map/data/types/temp/getTempMainChartData";
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
+import {TabularData} from "../../TabularData";
 
 export const TempChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -20,11 +21,12 @@ export const TempChartPage = (props: any) => {
   const [nwsForecast, setNwsForecast] = useState(false)
   const [nwsForecastDays, setNwsForecastDays] = useState(1)
   const [nwsForecastData, setNwsForecastData] = useState(undefined)
+  const [tabularDataColors, setTabularDataColors] = useState()
   const [present] = useIonToast();
 
   useEffect(() => {
     setCurrentChartData(props.chartData)
-    createTempChart(props.chartData, root, props.isMobile, props.additionalChartData, nwsForecastData)
+    createTempChart(props.chartData, root, props.isMobile, props.additionalChartData, nwsForecastData, setTabularDataColors)
     handleResize(props.setIsMobile)
   }, []);
   useEffect(() => {
@@ -99,6 +101,8 @@ export const TempChartPage = (props: any) => {
           setNwsForecastDays={setNwsForecastDays}
           setAlarm={props.setAlarm}
         />
+        <h2 className='ion-text-center'>Temperature RH</h2>
+        <TabularData type={'temp'} sensorId={props.sensorId} colors={tabularDataColors} />
         <div id='tempChartDiv' className={s.chart}></div>
       </div>
     </IonContent>

@@ -8,6 +8,7 @@ export const createTempChart = (
   isMobile: boolean,
   additionalChartData: any,
   nwsForecastData: any,
+  setTabularDataColors?: any
 ) => {
   if (root.current) {
     root.current.dispose();
@@ -102,6 +103,7 @@ export const createTempChart = (
     }
 
     let series: any
+    let seriesColors: any = []
     dataLabels.map((dataLabel) => {
       series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
         name: dataLabel.name,
@@ -119,11 +121,16 @@ export const createTempChart = (
       }));
 
       let data = createChartDataArray(dataLabel.label)
-
       series.data.setAll(data)
+
+      seriesColors.push(series.get('stroke'))
 
       series.appear();
     })
+
+    if (setTabularDataColors) {
+      setTabularDataColors(seriesColors)
+    }
 
 // Nws Forecast
     if (nwsForecastData) {

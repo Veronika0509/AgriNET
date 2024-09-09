@@ -153,6 +153,7 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
             this.setTempOverlays((overlays: any) => [...overlays, this]);
           }
         })
+        this.update()
       }
 
       draw() {

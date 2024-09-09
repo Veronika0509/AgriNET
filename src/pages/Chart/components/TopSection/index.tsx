@@ -3,10 +3,8 @@ import s from "../../style.module.css";
 import DateTimePicker from "../DateTimePicker";
 import {IonButton, IonIcon, IonInput, IonItem, IonLabel, IonText, IonToggle} from "@ionic/react";
 import {getBatteryChartData} from "../../data/types/moist/getBatteryChartData";
-import {createBatteryChart} from "../../functions/types/moist/createBatteryChart";
 import { alarmOutline } from 'ionicons/icons';
 import {getSoilTempChartData} from "../../data/types/moist/getSoilTempChartData";
-import {createSoilTempChart} from "../../functions/types/moist/createSoilTempChart";
 import {createAdditionalChart} from "../../functions/types/moist/createAdditionalChart";
 
 const TopSection = (props: any) => {
@@ -30,6 +28,8 @@ const TopSection = (props: any) => {
     batteryHandler()
   }, [props.batteryChartShowed, props.currentDates]);
 
+
+
   // Soil Temperature Chart
   useEffect( () => {
     const soilTempHandler = async () => {
@@ -42,8 +42,10 @@ const TopSection = (props: any) => {
             props.soilTempRoot,
             undefined,
             undefined,
+            undefined,
             props.additionalChartData.linesCount,
-            newSoilTempChartData.data.metric
+            newSoilTempChartData.data.metric,
+            props.setMoistSoilTempTabularDataColors
           )
         } else {
           const newSoilTempChartData = await getSoilTempChartData(props.sensorId)
@@ -53,8 +55,10 @@ const TopSection = (props: any) => {
             props.soilTempRoot,
             undefined,
             undefined,
+            undefined,
             props.additionalChartData.linesCount,
-            newSoilTempChartData.data.metric
+            newSoilTempChartData.data.metric,
+            props.setMoistSoilTempTabularDataColors
           )
         }
       }
