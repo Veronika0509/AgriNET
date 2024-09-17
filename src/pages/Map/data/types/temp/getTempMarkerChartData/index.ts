@@ -6,30 +6,21 @@ export const getTempMarkerChartData = async (
   propsSensorId: string,
   bounds: any,
   name: string,
-  userId: any,
   tempChartsAmount: any,
   setInvalidTempChartDataContainer: any,
   setTempChartDataContainer: any,
-  id: number,
+  id: any,
   tempChartData: any,
   boundsArray: any,
-  invalidChartData: any
+  invalidChartData: any,
+  response: any
 ) => {
-  const response = await axios.get('https://app.agrinet.us/api/map/temp-data-v2?v=43', {
-    params: {
-      sensorId: propsSensorId,
-      userId: userId,
-      'do-not-catch-error': ''
-    },
-  })
-  const idLabel = 'temp_' + id
   let value: number = response.data.lines.length > 0 ? response.data[response.data.length - 1][response.data.lines[0]] : response.data.temp
   let label: string = response.data.lines.length > 0 ? response.data.linesLabels[0] : `${response.data!!.metric == "AMERICA" ? "F" : "C"}°`
-  value = Math.round(value*10)/10
+  value = Math.round(value*10) / 10
   const valueAndValue: string = value.toString() + label
-
   const tempChartDataItem = {
-    id: idLabel,
+    id: 'temp_' + id.value,
     mainId,
     sensorId: propsSensorId,
     name: name,

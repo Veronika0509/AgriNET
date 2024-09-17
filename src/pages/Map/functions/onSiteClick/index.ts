@@ -24,10 +24,23 @@ export const onSiteClick = async (
   setTempChartDataContainer: any
 ) => {
   setSecondMap(sensorsGroupData.name)
-  let moistChartData: any = []
   await Promise.all(siteList.map(async () => {
     const sensorItems = getSensorItems(undefined, siteList)
+    // moist props
+    let moistId: any = { value: 0 }
+    let moistInvalidChartData: any = []
     let moistBoundsArray: any = []
+    let moistChartData: any = []
+    // temp props
+    let tempId: any = { value: 0 };
+    let tempChartData: any = []
+    let tempBoundsArray: any = []
+    let tempInvalidChartData: any = []
+    // wxet props
+    let wxetId: any = { value: 0 };
+    let wxetData: any = []
+    let wxetBoundsArray: any = []
+    let wxetInvalidChartData: any = []
     sensorItems.map((sensorItem: any) => {
       if (sensorItem.markerType === 'moist-fuel') {
         createMoistMarker(
@@ -37,6 +50,8 @@ export const onSiteClick = async (
           userId,
           setInvalidMoistChartDataContainer,
           setMoistChartDataContainer,
+          moistId,
+          moistInvalidChartData,
           moistChartData,
           moistBoundsArray
         )
@@ -47,7 +62,11 @@ export const onSiteClick = async (
           page,
           userId,
           setInvalidWxetDataContainer,
-          setWxetDataContainer
+          setWxetDataContainer,
+          wxetId,
+          wxetData,
+          wxetBoundsArray,
+          wxetInvalidChartData
         )
       } else if (sensorItem.markerType === 'temp-rh-v2') {
         createTempMarker(
@@ -56,7 +75,11 @@ export const onSiteClick = async (
           page,
           userId,
           setInvalidTempChartDataContainer,
-          setTempChartDataContainer
+          setTempChartDataContainer,
+          tempId,
+          tempChartData,
+          tempBoundsArray,
+          tempInvalidChartData
         )
       } else {
         // createSensorsMarkers(sensorItem, map, setSensorName, setSensorId, setSensorType, setIsModalOpen, setIsChartDataIsLoading, setIsSelectDisabled, setChartData, existingMarkers)

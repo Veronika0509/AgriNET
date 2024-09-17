@@ -9,6 +9,7 @@ import {createWxetChart} from "../../../functions/types/wxet/createWxetChart";
 import {getWxetMainChartData} from "../../../../Map/data/types/wxet/getWxetMainChartData";
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
 import {TabularData} from "../../TabularData";
+import {Export} from "../../Export";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -99,7 +100,10 @@ export const WxetChartPage = (props: any) => {
           setAlarm={props.setAlarm}
         />
         <h2 className='ion-text-center'>Weather Station</h2>
-        <TabularData type={'wxet'} sensorId={props.sensorId} />
+        <div className={s.additionalButtons}>
+          <TabularData type={'wxet'} sensorId={props.sensorId} />
+          <Export type='wxet' sensorId={props.sensorId} userId={props.userId} />
+        </div>
         <div id='wxetChartDiv' className={s.chart}></div>
       </div>
     </IonContent>

@@ -12,6 +12,7 @@ import {createMainChart} from "../../../functions/types/moist/createMainChart";
 import {getMoistMainChartData} from "../../../../Map/data/types/moist/getMoistMainChartData";
 import {createAdditionalChart} from "../../../functions/types/moist/createAdditionalChart";
 import {TabularData} from "../../TabularData";
+import {Export} from "../../Export";
 
 export const MoistChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -182,7 +183,10 @@ export const MoistChartPage = (props: any) => {
           </div>
           <div className='ion-margin-top'>
             <h2 className='ion-text-center'>Soil Moisture</h2>
-            <TabularData type='moistMain' sensorId={props.sensorId} colors={moistMainTabularDataColors}/>
+            <div className={s.additionalButtons}>
+              <TabularData type='moistMain' sensorId={props.sensorId} colors={moistMainTabularDataColors}/>
+              <Export type='moist' sensorId={props.sensorId} userId={props.userId} />
+            </div>
             <div className={`${s.chart} ${chartAdditionalClass}`} id='mainChart'></div>
           </div>
           <IrrigationButtons

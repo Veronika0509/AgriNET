@@ -1,4 +1,4 @@
-import s from "../../../types/moist/style.module.css";
+import s from "../../../../../types/moist/style.module.css";
 import React, {useEffect, useState} from "react";
 
 interface TempTableProps {

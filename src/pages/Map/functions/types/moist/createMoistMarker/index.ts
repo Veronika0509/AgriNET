@@ -1,20 +1,29 @@
 import {getMoistMarkerChartData} from "../../../../data/types/moist/getMoistMarkerChartData";
+import axios from "axios";
 
-let id = 0
-let invalidChartData: any = []
-export const createMoistMarker = (
+export const createMoistMarker = async (
   moistChartsAmount: any,
   sensorItem: any,
   page: any,
   userId: any,
   setInvalidMoistChartDataContainer: any,
   setMoistChartDataContainer: any,
+  moistId: any,
+  moistInvalidChartData: any,
   moistChartData: any,
   boundsArray: any
 ) => {
   const exists = moistChartsAmount.some((secondItemMoist: any) => secondItemMoist.id === sensorItem.id);
   if (!exists) {
-    id += 1
+    const response = await axios.get('https://app.agrinet.us/api/map/moist-fuel?v=43', {
+      params: {
+        sensorId: sensorItem.sensorId,
+        cacheFirst: true,
+        'do-not-catch-error': '',
+        user: userId,
+      },
+    })
+    moistId.value++;
     moistChartsAmount.push(sensorItem);
     const bounds: any = new google.maps.LatLngBounds(
       new google.maps.LatLng(sensorItem.lat, sensorItem.lng),
@@ -26,14 +35,14 @@ export const createMoistMarker = (
         sensorItem.sensorId,
         bounds,
         sensorItem.name,
-        userId,
         setInvalidMoistChartDataContainer,
         setMoistChartDataContainer,
         moistChartsAmount,
-        id,
+        moistId,
         moistChartData,
         boundsArray,
-        invalidChartData
+        moistInvalidChartData,
+        response
       );
     }
   }

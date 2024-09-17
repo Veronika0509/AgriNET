@@ -3,6 +3,7 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
 export const createMoistChartForOverlay = (chartData: any, roots: any, moistOverlays: any) => {
+  console.log(chartData.id)
   let root = am5.Root.new(chartData.id);
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);

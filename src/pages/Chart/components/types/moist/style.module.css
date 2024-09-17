@@ -49,7 +49,8 @@
 .tabularButton {
   display: block;
   width: 158px;
-  margin: 15px auto 0 auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .tabularDataSpinner {
@@ -92,6 +93,11 @@
 .mainTempWxetTabularDataTableTd {
   border: 1px solid #000;
   text-align: center;
+}
+
+.additionalButtons {
+  display: flex;
+  justify-content: center;
 }
 
 @media only screen and (max-width: 850px) {

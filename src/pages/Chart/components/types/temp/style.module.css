@@ -9,6 +9,11 @@
   margin: 40px auto 0 auto;
 }
 
+.additionalButtons {
+  display: flex;
+  justify-content: center;
+}
+
 @media only screen and (max-width: 850px) {
   .chart {
     width: 90%;

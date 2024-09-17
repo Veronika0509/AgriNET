@@ -1,21 +1,28 @@
 import {getTempMarkerChartData} from "../../../../data/types/temp/getTempMarkerChartData";
+import axios from "axios";
 
-let id = 0
-let tempChartData: any = []
-let boundsArray: any = []
-let invalidChartData: any = []
-
-export const createTempMarker = (
+export const createTempMarker = async (
   tempChartsAmount: any,
   sensorItem: any,
   page: any,
   userId: any,
   setInvalidTempChartDataContainer: any,
-  setTempChartDataContainer: any
+  setTempChartDataContainer: any,
+  tempId: any,
+  tempChartData: any,
+  tempBoundsArray: any,
+  tempInvalidChartData: any
 ) => {
   const exists = tempChartsAmount.some((secondItemTemp: any) => secondItemTemp.id === sensorItem.id);
   if (!exists) {
-    id += 1
+    const response = await axios.get('https://app.agrinet.us/api/map/temp-data-v2?v=43', {
+      params: {
+        sensorId: sensorItem.sensorId,
+        userId: userId,
+        'do-not-catch-error': ''
+      },
+    })
+    tempId.value++;
     tempChartsAmount.push(sensorItem);
     const bounds: any = new google.maps.LatLngBounds(
       new google.maps.LatLng(sensorItem.lat, sensorItem.lng),
@@ -27,14 +34,14 @@ export const createTempMarker = (
         sensorItem.sensorId,
         bounds,
         sensorItem.name,
-        userId,
         tempChartsAmount,
         setInvalidTempChartDataContainer,
         setTempChartDataContainer,
-        id,
+        tempId,
         tempChartData,
-        boundsArray,
-        invalidChartData
+        tempBoundsArray,
+        tempInvalidChartData,
+        response
       )
     }
   }

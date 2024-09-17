@@ -9,6 +9,7 @@ import {handleResize} from "../../../functions/handleResize";
 import {getTempMainChartData} from "../../../../Map/data/types/temp/getTempMainChartData";
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
 import {TabularData} from "../../TabularData";
+import {Export} from "../../Export";
 
 export const TempChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -102,7 +103,10 @@ export const TempChartPage = (props: any) => {
           setAlarm={props.setAlarm}
         />
         <h2 className='ion-text-center'>Temperature RH</h2>
-        <TabularData type={'temp'} sensorId={props.sensorId} colors={tabularDataColors} />
+        <div className={s.additionalButtons}>
+          <TabularData type={'temp'} sensorId={props.sensorId} colors={tabularDataColors} />
+          <Export type='temp' sensorId={props.sensorId} userId={props.userId} />
+        </div>
         <div id='tempChartDiv' className={s.chart}></div>
       </div>
     </IonContent>

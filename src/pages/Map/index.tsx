@@ -171,9 +171,9 @@ const MapPage: React.FC<MainProps> = (props) => {
   useEffect(() => {
     if (moistOverlays.length !== 0) {
       const roots: any[] = [];
-      console.log(moistOverlays)
       moistOverlays.map((moistOverlay: any) => {
         if (!createdMoistCharts.includes(moistOverlay.chartData.id)) {
+          console.log(moistOverlay)
           createMoistChartForOverlay(moistOverlay.chartData, roots, moistOverlays)
           createdMoistCharts.push(moistOverlay.chartData.id)
         }
@@ -304,7 +304,6 @@ const MapPage: React.FC<MainProps> = (props) => {
     if (tempOverlays.length !== 0) {
       const roots: any[] = [];
       tempOverlays.map((tempOverlay: any) => {
-        console.log(tempOverlay)
         if (!createdTempCharts.includes(tempOverlay.chartData.id)) {
           createTempChartForOverlay(tempOverlay.chartData, roots, tempOverlays)
           createdTempCharts.push(tempOverlay.chartData.id)

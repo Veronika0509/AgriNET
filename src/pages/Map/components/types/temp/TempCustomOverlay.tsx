@@ -81,7 +81,6 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       renderContent() {
-        console.log(this.chartData.id)
         return (
           <div className={s.overlayContainer}>
             {this.isValidChartData ? (
