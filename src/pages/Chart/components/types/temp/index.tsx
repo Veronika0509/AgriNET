@@ -10,6 +10,7 @@ import {getTempMainChartData} from "../../../../Map/data/types/temp/getTempMainC
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
 import {TabularData} from "../../TabularData";
 import {Export} from "../../Export";
+import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
 
 export const TempChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -24,6 +25,9 @@ export const TempChartPage = (props: any) => {
   const [nwsForecastData, setNwsForecastData] = useState(undefined)
   const [tabularDataColors, setTabularDataColors] = useState()
   const [present] = useIonToast();
+  const [tempTabularData, setTempTabularData] = useState<any>(null)
+  const [isTempTabularDataLoading, setIsTempTabularDataLoading] = useState(false)
+  const chartCode: string = 'tempRh'
 
   useEffect(() => {
     setCurrentChartData(props.chartData)
@@ -104,9 +108,19 @@ export const TempChartPage = (props: any) => {
         />
         <h2 className='ion-text-center'>Temperature RH</h2>
         <div className={s.additionalButtons}>
-          <TabularData type={'temp'} sensorId={props.sensorId} colors={tabularDataColors} />
-          <Export type='temp' sensorId={props.sensorId} userId={props.userId} />
+          <ButtonAndSpinner data={tempTabularData} setData={setTempTabularData} setIsLoading={setIsTempTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode} isLoading={isTempTabularDataLoading} />
+          <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId} />
         </div>
+        <TabularData
+          type={'temp'}
+          sensorId={props.sensorId}
+          colors={tabularDataColors}
+          data={tempTabularData}
+          setData={setTempTabularData}
+          isLoading={isTempTabularDataLoading}
+          setIsLoading={setIsTempTabularDataLoading}
+          chartCode={chartCode}
+        />
         <div id='tempChartDiv' className={s.chart}></div>
       </div>
     </IonContent>

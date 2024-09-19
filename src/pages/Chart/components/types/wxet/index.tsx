@@ -10,6 +10,7 @@ import {getWxetMainChartData} from "../../../../Map/data/types/wxet/getWxetMainC
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
 import {TabularData} from "../../TabularData";
 import {Export} from "../../Export";
+import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -22,6 +23,9 @@ export const WxetChartPage = (props: any) => {
   const [nwsForecast, setNwsForecast] = useState(false)
   const [nwsForecastDays, setNwsForecastDays] = useState(1)
   const [nwsForecastData, setNwsForecastData] = useState(undefined)
+  const [wxetTabularData, setWxetTabularData] = useState<any>(null)
+  const [isWxetTabularDataLoading, setIsWxetTabularDataLoading] = useState(false)
+  const chartCode: string = 'weather_leaf'
 
   useEffect(() => {
     setCurrentChartData(props.chartData)
@@ -101,9 +105,18 @@ export const WxetChartPage = (props: any) => {
         />
         <h2 className='ion-text-center'>Weather Station</h2>
         <div className={s.additionalButtons}>
-          <TabularData type={'wxet'} sensorId={props.sensorId} />
-          <Export type='wxet' sensorId={props.sensorId} userId={props.userId} />
+          <ButtonAndSpinner data={wxetTabularData} setData={setWxetTabularData} setIsLoading={setIsWxetTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode} isLoading={isWxetTabularDataLoading} />
+          <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId} />
         </div>
+        <TabularData
+          type={'wxet'}
+          sensorId={props.sensorId}
+          data={wxetTabularData}
+          setData={setWxetTabularData}
+          isLoading={isWxetTabularDataLoading}
+          setIsLoading={setIsWxetTabularDataLoading}
+          chartCode={chartCode}
+        />
         <div id='wxetChartDiv' className={s.chart}></div>
       </div>
     </IonContent>

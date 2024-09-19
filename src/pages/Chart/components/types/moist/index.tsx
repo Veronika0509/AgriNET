@@ -13,6 +13,7 @@ import {getMoistMainChartData} from "../../../../Map/data/types/moist/getMoistMa
 import {createAdditionalChart} from "../../../functions/types/moist/createAdditionalChart";
 import {TabularData} from "../../TabularData";
 import {Export} from "../../Export";
+import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
 
 export const MoistChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -40,10 +41,24 @@ export const MoistChartPage = (props: any) => {
   // Historic Mode
   const [historicMode, setHistoricMode] = useState(false)
   const [showForecast, setShowForecast] = useState(true)
-  // Tabular Data Colors
+  // Tabular Data
+  // Moist Main
+  const [moistMainTabularData, setMoistMainTabularData] = useState<any>(null)
+  const [isMoistMainTabularDataLoading, setIsMoistMainTabularDataLoading] = useState(false)
   const [moistMainTabularDataColors, setMoistMainTabularDataColors] = useState<any>([])
+  // Moist Sum
+  const [moistSumTabularData, setMoistSumTabularData] = useState<any>(null)
+  const [isMoistSumTabularDataLoading, setIsMoistSumTabularDataLoading] = useState(false)
   const [moistSumTabularDataColors, setMoistSumTabularDataColors] = useState<any>([])
+  // Moist SoilTemp
+  const [moistSoilTempTabularData, setMoistSoilTempTabularData] = useState<any>(null)
+  const [isMoistSoilTempTabularDataLoading, setIsMoistSoilTempTabularDataLoading] = useState(false)
   const [moistSoilTempTabularDataColors, setMoistSoilTempTabularDataColors] = useState<any>([])
+
+  // Chart Code
+  const mainChartCode: string = 'm'
+  const soilTempChartCode: string = 'mst'
+  const sumChartCode: string = 'mSum'
 
   useEffect(() => {
     createMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast, setMoistMainTabularDataColors)
@@ -174,7 +189,20 @@ export const MoistChartPage = (props: any) => {
         <div>
           <div className='ion-margin-top' style={{display: soilTempChartShowed ? 'block' : 'none'}}>
             <h2 className='ion-text-center'>Soil Temperature</h2>
-            <TabularData type='moistSoilTemp' sensorId={props.sensorId} colors={moistSoilTempTabularDataColors}/>
+            <div className={s.additionalButtons}>
+              <ButtonAndSpinner data={moistSoilTempTabularData} setData={setMoistSoilTempTabularData} setIsLoading={setIsMoistSoilTempTabularDataLoading} sensorId={props.sensorId} chartCode={soilTempChartCode} isLoading={isMoistSoilTempTabularDataLoading} />
+              <Export chartCode={soilTempChartCode} sensorId={props.sensorId} userId={props.userId} />
+              <TabularData
+                type='moistSoilTemp'
+                sensorId={props.sensorId}
+                colors={moistSoilTempTabularDataColors}
+                data={moistSoilTempTabularData}
+                setData={setMoistSoilTempTabularData}
+                chartCode={soilTempChartCode}
+                isLoading={isMoistSoilTempTabularDataLoading}
+                setIsLoading={setIsMoistSoilTempTabularDataLoading}
+              />
+            </div>
             <div className={s.additionalChart} id='soilTempChart'></div>
           </div>
           <div className='ion-margin-top' style={{display: batteryChartShowed ? 'block' : 'none'}}>
@@ -184,9 +212,19 @@ export const MoistChartPage = (props: any) => {
           <div className='ion-margin-top'>
             <h2 className='ion-text-center'>Soil Moisture</h2>
             <div className={s.additionalButtons}>
-              <TabularData type='moistMain' sensorId={props.sensorId} colors={moistMainTabularDataColors}/>
-              <Export type='moist' sensorId={props.sensorId} userId={props.userId} />
+              <ButtonAndSpinner data={moistMainTabularData} setData={setMoistMainTabularData} setIsLoading={setIsMoistMainTabularDataLoading} sensorId={props.sensorId} chartCode={mainChartCode} isLoading={isMoistMainTabularDataLoading} />
+              <Export chartCode={mainChartCode} sensorId={props.sensorId} userId={props.userId} />
             </div>
+            <TabularData
+              type='moistMain'
+              sensorId={props.sensorId}
+              colors={moistMainTabularDataColors}
+              data={moistMainTabularData}
+              setData={setMoistMainTabularData}
+              chartCode={mainChartCode}
+              isLoading={isMoistMainTabularDataLoading}
+              setIsLoading={setIsMoistMainTabularDataLoading}
+            />
             <div className={`${s.chart} ${chartAdditionalClass}`} id='mainChart'></div>
           </div>
           <IrrigationButtons
@@ -213,7 +251,20 @@ export const MoistChartPage = (props: any) => {
         </div>
         <div>
           <h2 className='ion-text-center ion-margin-top'>Sum of Soil Moisture</h2>
-          <TabularData type='moistSum' sensorId={props.sensorId} colors={moistSumTabularDataColors}/>
+          <div className={s.additionalButtons}>
+            <ButtonAndSpinner data={moistSumTabularData} setData={setMoistSumTabularData} setIsLoading={setIsMoistSumTabularDataLoading} sensorId={props.sensorId} chartCode={sumChartCode} isLoading={isMoistSumTabularDataLoading} />
+            <Export chartCode={sumChartCode} sensorId={props.sensorId} userId={props.userId} />
+          </div>
+          <TabularData
+            type='moistSum'
+            sensorId={props.sensorId}
+            colors={moistSumTabularDataColors}
+            data={moistSumTabularData}
+            setData={setMoistSumTabularData}
+            chartCode={sumChartCode}
+            isLoading={isMoistSumTabularDataLoading}
+            setIsLoading={setIsMoistSumTabularDataLoading}
+          />
           <div id='sumChart' className={s.sumChart}></div>
         </div>
       </div>
