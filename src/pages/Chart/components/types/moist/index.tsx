@@ -192,17 +192,17 @@ export const MoistChartPage = (props: any) => {
             <div className={s.additionalButtons}>
               <ButtonAndSpinner data={moistSoilTempTabularData} setData={setMoistSoilTempTabularData} setIsLoading={setIsMoistSoilTempTabularDataLoading} sensorId={props.sensorId} chartCode={soilTempChartCode} isLoading={isMoistSoilTempTabularDataLoading} />
               <Export chartCode={soilTempChartCode} sensorId={props.sensorId} userId={props.userId} />
-              <TabularData
-                type='moistSoilTemp'
-                sensorId={props.sensorId}
-                colors={moistSoilTempTabularDataColors}
-                data={moistSoilTempTabularData}
-                setData={setMoistSoilTempTabularData}
-                chartCode={soilTempChartCode}
-                isLoading={isMoistSoilTempTabularDataLoading}
-                setIsLoading={setIsMoistSoilTempTabularDataLoading}
-              />
             </div>
+            <TabularData
+              type='moistSoilTemp'
+              sensorId={props.sensorId}
+              colors={moistSoilTempTabularDataColors}
+              data={moistSoilTempTabularData}
+              setData={setMoistSoilTempTabularData}
+              chartCode={soilTempChartCode}
+              isLoading={isMoistSoilTempTabularDataLoading}
+              setIsLoading={setIsMoistSoilTempTabularDataLoading}
+            />
             <div className={s.additionalChart} id='soilTempChart'></div>
           </div>
           <div className='ion-margin-top' style={{display: batteryChartShowed ? 'block' : 'none'}}>
