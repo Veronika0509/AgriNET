@@ -21,9 +21,11 @@ export const onSiteClick = async (
   setWxetDataContainer: any,
   tempChartsAmount: any,
   setInvalidTempChartDataContainer: any,
-  setTempChartDataContainer: any
+  setTempChartDataContainer: any,
+  setOverlappingSensorItems: any
 ) => {
   setSecondMap(sensorsGroupData.name)
+  const sensorItemsByCoords: any = {};
   await Promise.all(siteList.map(async () => {
     const sensorItems = getSensorItems(undefined, siteList)
     // moist props
@@ -42,6 +44,15 @@ export const onSiteClick = async (
     let wxetBoundsArray: any = []
     let wxetInvalidChartData: any = []
     sensorItems.map((sensorItem: any) => {
+      // Собираем координаты сенсоров
+      const { lat, lng } = sensorItem;
+      const coordKey = `${lat}-${lng}`;
+
+      // Проверяем, есть ли уже сенсоры с такими координатами
+      if (!sensorItemsByCoords[coordKey]) {
+        sensorItemsByCoords[coordKey] = [];
+      }
+      sensorItemsByCoords[coordKey].push(sensorItem);
       if (sensorItem.markerType === 'moist-fuel') {
         createMoistMarker(
           moistChartsAmount,
@@ -92,5 +103,14 @@ export const onSiteClick = async (
       )
     })
   }))
+  // Находим сенсоры с одинаковыми координатами
+  const overlappingSensorItems = Object.values(sensorItemsByCoords).filter(
+    (items: any) => items.length > 1
+  );
+
+  // Передаем эти сенсоры через setOverlappingSensorItems
+  setOverlappingSensorItems(overlappingSensorItems);
+
+
   groupMarker.setMap(null)
 }

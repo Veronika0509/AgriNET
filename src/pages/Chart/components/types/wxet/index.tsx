@@ -11,6 +11,8 @@ import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastDa
 import {TabularData} from "../../TabularData";
 import {Export} from "../../Export";
 import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
+import {AddCommentButton} from "../../AddComment/components/AddCommentButton";
+import {AddCommentMessage} from "../../AddComment/components/AddCommentMessage";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -26,6 +28,7 @@ export const WxetChartPage = (props: any) => {
   const [wxetTabularData, setWxetTabularData] = useState<any>(null)
   const [isWxetTabularDataLoading, setIsWxetTabularDataLoading] = useState(false)
   const chartCode: string = 'weather_leaf'
+  const [wxetAddCommentItemShowed, setWxetAddCommentItemShowed] = useState(false)
 
   useEffect(() => {
     setCurrentChartData(props.chartData)
@@ -107,7 +110,9 @@ export const WxetChartPage = (props: any) => {
         <div className={s.additionalButtons}>
           <ButtonAndSpinner data={wxetTabularData} setData={setWxetTabularData} setIsLoading={setIsWxetTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode} isLoading={isWxetTabularDataLoading} />
           <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId} />
+          {/*<AddCommentButton addCommentItemShowed={wxetAddCommentItemShowed} setAddCommentItemShowed={setWxetAddCommentItemShowed} />*/}
         </div>
+        {/*<AddCommentMessage addCommentItemShowed={wxetAddCommentItemShowed}></AddCommentMessage>*/}
         <TabularData
           type={'wxet'}
           sensorId={props.sensorId}

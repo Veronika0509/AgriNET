@@ -129,7 +129,7 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
 
       onAdd() {
         new Promise((resolve: any) => {
-          const divId = `overlay-${this.chartData.mainId}`;
+          const divId = `overlay-${this.chartData.id}`;
           this.div = document.getElementById(divId);
 
           if (!this.div) {
@@ -149,7 +149,16 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
           resolve()
         }).then(() => {
           if (this.isValidChartData) {
-            this.setTempOverlays((overlays: any) => [...overlays, this]);
+            this.setTempOverlays((overlays: any[]) => {
+              const newOverlayId = this.chartData.id;
+              const overlayExists = overlays.some(overlay => overlay.chartData.id === newOverlayId);
+
+              if (!overlayExists) {
+                return [...overlays, this];
+              }
+
+              return overlays;
+            });
           }
         })
         this.update()

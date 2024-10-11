@@ -120,6 +120,10 @@
 }
 
 @media (max-width: 750px) {
+  .additionalButtons {
+    flex-wrap: wrap;
+  }
+
   .mainTempWxetTabularDataTable,
   .mainTempWxetTabularDataTable tbody,
   .mainTempWxetTabularDataTable tr,

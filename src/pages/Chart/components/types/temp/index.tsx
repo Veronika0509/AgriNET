@@ -11,6 +11,8 @@ import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastDa
 import {TabularData} from "../../TabularData";
 import {Export} from "../../Export";
 import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
+import {AddCommentButton} from "../../AddComment/components/AddCommentButton";
+import {AddCommentMessage} from "../../AddComment/components/AddCommentMessage";
 
 export const TempChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -28,6 +30,8 @@ export const TempChartPage = (props: any) => {
   const [tempTabularData, setTempTabularData] = useState<any>(null)
   const [isTempTabularDataLoading, setIsTempTabularDataLoading] = useState(false)
   const chartCode: string = 'tempRh'
+  const [tempAddCommentItemShowed, setTempAddCommentItemShowed] = useState(false)
+
 
   useEffect(() => {
     setCurrentChartData(props.chartData)
@@ -110,7 +114,9 @@ export const TempChartPage = (props: any) => {
         <div className={s.additionalButtons}>
           <ButtonAndSpinner data={tempTabularData} setData={setTempTabularData} setIsLoading={setIsTempTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode} isLoading={isTempTabularDataLoading} />
           <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId} />
+          {/*<AddCommentButton addCommentItemShowed={tempAddCommentItemShowed} setAddCommentItemShowed={setTempAddCommentItemShowed} />*/}
         </div>
+        {/*<AddCommentMessage addCommentItemShowed={tempAddCommentItemShowed}></AddCommentMessage>*/}
         <TabularData
           type={'temp'}
           sensorId={props.sensorId}

@@ -14,6 +14,10 @@ import {createAdditionalChart} from "../../../functions/types/moist/createAdditi
 import {TabularData} from "../../TabularData";
 import {Export} from "../../Export";
 import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
+import {AddCommentButton} from "../../AddComment/components/AddCommentButton";
+import {AddCommentMessage} from "../../AddComment/components/AddCommentMessage";
+import AddCommentModal from "../../AddComment/components/AddCommentModal";
+import {getComments} from "../../AddComment/data/getComments";
 
 export const MoistChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -54,6 +58,12 @@ export const MoistChartPage = (props: any) => {
   const [moistSoilTempTabularData, setMoistSoilTempTabularData] = useState<any>(null)
   const [isMoistSoilTempTabularDataLoading, setIsMoistSoilTempTabularDataLoading] = useState(false)
   const [moistSoilTempTabularDataColors, setMoistSoilTempTabularDataColors] = useState<any>([])
+  // Add Comment
+  const [moistMainAddCommentItemShowed, setMoistMainAddCommentItemShowed] = useState(false)
+  const [moistSumAddCommentItemShowed, setMoistSumAddCommentItemShowed] = useState(false)
+  const [moistSoilTempAddCommentItemShowed, setMoistSoilTempAddCommentItemShowed] = useState(false)
+  const [moistAddCommentModal, setMoistAddCommentModal] = useState(false)
+  const [moistMainComments, setMoistMainComments] = useState();
 
   // Chart Code
   const mainChartCode: string = 'm'
@@ -61,31 +71,68 @@ export const MoistChartPage = (props: any) => {
   const sumChartCode: string = 'mSum'
 
   useEffect(() => {
-    createMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast, setMoistMainTabularDataColors)
+    createMainChart(
+      props.chartData, root, props.isMobile,
+      fullDatesArray, props.additionalChartData, comparingMode,
+      false, historicMode, showForecast,
+      setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments,
+      setMoistMainTabularDataColors
+    )
   }, [props.isMobile]);
   useEffect(() => {
     if (fullDatesArray) {
-      createMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+      createMainChart(
+        props.chartData, root, props.isMobile,
+        fullDatesArray, props.additionalChartData, comparingMode,
+        false, historicMode, showForecast,
+        setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments
+      )
     }
   }, [fullDatesArray])
   useEffect(() => {
     setCurrentChartData(props.chartData)
     getIrrigationDates(setIsIrrigationDataIsLoading, setIsIrrigationButtons, props.userId, props.sensorId, setIrrigationDates, setFullDatesArray)
     handleResize(props.setIsMobile)
+    const getCommentsFunc = async () => {
+      const comments: any = await getComments('M', props.sensorId)
+      setMoistMainComments(comments.data)
+    }
+
+    getCommentsFunc()
   }, []);
   useEffect(() => {
-    createMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+    createMainChart(
+      props.chartData, root, props.isMobile,
+      fullDatesArray, props.additionalChartData, comparingMode,
+      false, historicMode, showForecast,
+      setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments
+    )
 
     if (currentChartData) {
-      createMainChart(currentChartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+      createMainChart(
+        currentChartData, root, props.isMobile,
+        fullDatesArray, props.additionalChartData, comparingMode,
+        false, historicMode, showForecast,
+        setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments
+      )
     } else {
-      createMainChart(props.chartData, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+      createMainChart(
+        props.chartData, root, props.isMobile,
+        fullDatesArray, props.additionalChartData, comparingMode,
+        false, historicMode, showForecast,
+        setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments
+      )
     }
   }, [comparingMode]);
   useEffect(() => {
     const getHistoricData = async () => {
       const historicData = await getMoistMainChartData(props.sensorId, historicMode, currentDates[0], currentDates[1])
-      createMainChart(historicData.data.data, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, false, historicMode, showForecast)
+      createMainChart(
+        historicData.data.data, root, props.isMobile,
+        fullDatesArray, props.additionalChartData, comparingMode,
+        false, historicMode, showForecast,
+        setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments
+      )
     }
     getHistoricData()
 
@@ -113,6 +160,7 @@ export const MoistChartPage = (props: any) => {
 
         return targetDay === currentDay && targetMonth === currentMonth && targetYear === currentYear;
       }
+
       if (startDatetime && endDatetime) {
         if (endDatetime < new Date(fullDatesArray[0]).getTime()) {
           setDisableNextButton(false)
@@ -133,7 +181,12 @@ export const MoistChartPage = (props: any) => {
       }
 
       const newMoistChartData = await getMoistMainChartData(props.sensorId, historicMode, days, endDateDays)
-      createMainChart(newMoistChartData.data.data, root, props.isMobile, fullDatesArray, props.additionalChartData, comparingMode, true, historicMode, compareDates(endDatetime))
+      createMainChart(
+        newMoistChartData.data.data, root, props.isMobile,
+        fullDatesArray, props.additionalChartData, comparingMode,
+        true, historicMode, compareDates(endDatetime),
+        setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments
+      )
       setCurrentChartData(newMoistChartData.data.data)
 
       const newSumChartData = await getSumChartData(props.sensorId, historicMode, days, endDateDays)
@@ -141,6 +194,15 @@ export const MoistChartPage = (props: any) => {
     }
     updateCharts(currentDates[0], currentDates[1], currentDates[2], currentDates[3])
   }, [currentDates, props.isMobile]);
+
+  useEffect(() => {
+    createMainChart(
+      currentChartData, root, props.isMobile,
+      fullDatesArray, props.additionalChartData, comparingMode,
+      false, historicMode, showForecast,
+      setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments
+    )
+  }, [moistMainComments, moistMainAddCommentItemShowed]);
 
   let chartAdditionalClass: any
 
@@ -190,9 +252,21 @@ export const MoistChartPage = (props: any) => {
           <div className='ion-margin-top' style={{display: soilTempChartShowed ? 'block' : 'none'}}>
             <h2 className='ion-text-center'>Soil Temperature</h2>
             <div className={s.additionalButtons}>
-              <ButtonAndSpinner data={moistSoilTempTabularData} setData={setMoistSoilTempTabularData} setIsLoading={setIsMoistSoilTempTabularDataLoading} sensorId={props.sensorId} chartCode={soilTempChartCode} isLoading={isMoistSoilTempTabularDataLoading} />
-              <Export chartCode={soilTempChartCode} sensorId={props.sensorId} userId={props.userId} />
+              <ButtonAndSpinner data={moistSoilTempTabularData} setData={setMoistSoilTempTabularData}
+                                setIsLoading={setIsMoistSoilTempTabularDataLoading} sensorId={props.sensorId}
+                                chartCode={soilTempChartCode} isLoading={isMoistSoilTempTabularDataLoading}/>
+              <Export chartCode={soilTempChartCode} sensorId={props.sensorId} userId={props.userId}/>
+              {/*<AddCommentButton addCommentItemShowed={moistSoilTempAddCommentItemShowed}*/}
+              {/*                  setAddCommentItemShowed={setMoistSoilTempAddCommentItemShowed}/>*/}
             </div>
+            {/*<AddCommentMessage addCommentItemShowed={moistSoilTempAddCommentItemShowed} setMoistAddCommentModal={setMoistAddCommentModal} />*/}
+            {moistAddCommentModal && <AddCommentModal
+              userId={props.userId}
+              sensorId={props.sensorId}
+              moistAddCommentModal={moistAddCommentModal}
+              setMoistAddCommentModal={setMoistAddCommentModal}
+              setMoistMainComments={setMoistMainComments}
+            />}
             <TabularData
               type='moistSoilTemp'
               sensorId={props.sensorId}
@@ -212,9 +286,14 @@ export const MoistChartPage = (props: any) => {
           <div className='ion-margin-top'>
             <h2 className='ion-text-center'>Soil Moisture</h2>
             <div className={s.additionalButtons}>
-              <ButtonAndSpinner data={moistMainTabularData} setData={setMoistMainTabularData} setIsLoading={setIsMoistMainTabularDataLoading} sensorId={props.sensorId} chartCode={mainChartCode} isLoading={isMoistMainTabularDataLoading} />
-              <Export chartCode={mainChartCode} sensorId={props.sensorId} userId={props.userId} />
+              <ButtonAndSpinner data={moistMainTabularData} setData={setMoistMainTabularData}
+                                setIsLoading={setIsMoistMainTabularDataLoading} sensorId={props.sensorId}
+                                chartCode={mainChartCode} isLoading={isMoistMainTabularDataLoading}/>
+              <Export chartCode={mainChartCode} sensorId={props.sensorId} userId={props.userId}/>
+              {/*<AddCommentButton addCommentItemShowed={moistMainAddCommentItemShowed}*/}
+              {/*                  setAddCommentItemShowed={setMoistMainAddCommentItemShowed}/>*/}
             </div>
+            {/*<AddCommentMessage addCommentItemShowed={moistMainAddCommentItemShowed} setMoistAddCommentModal={setMoistAddCommentModal}></AddCommentMessage>*/}
             <TabularData
               type='moistMain'
               sensorId={props.sensorId}
@@ -252,9 +331,14 @@ export const MoistChartPage = (props: any) => {
         <div>
           <h2 className='ion-text-center ion-margin-top'>Sum of Soil Moisture</h2>
           <div className={s.additionalButtons}>
-            <ButtonAndSpinner data={moistSumTabularData} setData={setMoistSumTabularData} setIsLoading={setIsMoistSumTabularDataLoading} sensorId={props.sensorId} chartCode={sumChartCode} isLoading={isMoistSumTabularDataLoading} />
-            <Export chartCode={sumChartCode} sensorId={props.sensorId} userId={props.userId} />
+            <ButtonAndSpinner data={moistSumTabularData} setData={setMoistSumTabularData}
+                              setIsLoading={setIsMoistSumTabularDataLoading} sensorId={props.sensorId}
+                              chartCode={sumChartCode} isLoading={isMoistSumTabularDataLoading}/>
+            <Export chartCode={sumChartCode} sensorId={props.sensorId} userId={props.userId}/>
+            {/*<AddCommentButton addCommentItemShowed={moistSumAddCommentItemShowed}*/}
+            {/*                  setAddCommentItemShowed={setMoistSumAddCommentItemShowed}/>*/}
           </div>
+          {/*<AddCommentMessage addCommentItemShowed={moistSumAddCommentItemShowed} setMoistAddCommentModal={setMoistAddCommentModal}></AddCommentMessage>*/}
           <TabularData
             type='moistSum'
             sensorId={props.sensorId}

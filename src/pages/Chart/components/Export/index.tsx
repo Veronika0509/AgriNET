@@ -19,7 +19,6 @@ import {ExportDateTime} from "./components/ExportDateTime";
 import s from './style.module.css'
 import {validateDates} from "./functions/validateDates";
 import {formatDateToISO} from "./functions/formatDate";
-import {getExport} from "./data/getExport";
 
 interface ExportProps {
   chartCode: string,

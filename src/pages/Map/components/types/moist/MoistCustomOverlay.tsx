@@ -124,7 +124,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
 
       onAdd() {
         new Promise((resolve: any) => {
-          const divId = `overlay-${this.chartData.mainId}`;
+          const divId = `overlay-${this.chartData.id}`;
           this.div = document.getElementById(divId);
 
           if (!this.div) {
@@ -150,7 +150,16 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
           resolve()
         }).then(() => {
           if (this.isValidChartData) {
-            this.setMoistOverlays((overlays: any) => [...overlays, this]);
+            this.setMoistOverlays((overlays: any[]) => {
+              const newOverlayId = this.chartData.id;
+              const overlayExists = overlays.some(overlay => overlay.chartData.id === newOverlayId);
+
+              if (!overlayExists) {
+                return [...overlays, this];
+              }
+
+              return overlays;
+            });
           }
         })
       }

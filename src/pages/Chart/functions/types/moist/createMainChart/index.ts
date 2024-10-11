@@ -1,10 +1,27 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
-import s from "../../../../components/types/moist/style.module.css";
+import {addChart} from "../../../addChart";
+import login from "../../../../../Login";
+import {logoFacebook} from "ionicons/icons";
+import {p100} from "@amcharts/amcharts5";
 
 let startDateForZooming: any;
 let endDateForZooming: any;
+
+function debounce(func: Function, wait: number) {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  return function executedFunction(...args: any[]) {
+    const later = () => {
+      timeout = null;
+      func(...args);
+    };
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(later, wait);
+  };
+}
 
 export const createMainChart = (
   props: any,
@@ -16,6 +33,9 @@ export const createMainChart = (
   isNewDates: boolean,
   historicMode: boolean,
   showForecast: boolean,
+  setMoistAddCommentModal: any,
+  moistMainAddCommentItemShowed: any,
+  moistMainComments: any,
   setMainTabularDataColors?: any
 ): void => {
   const chartDataWrapper = props;
@@ -50,7 +70,7 @@ export const createMainChart = (
     let chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
       wheelY: comparingMode ? undefined : "zoomX",
       layout: isMobile ? root.current.verticalLayout : root.current.horizontalLayout,
-      maxTooltipDistance: comparingMode ? undefined : 0
+      maxTooltipDistance: comparingMode ? undefined : 0,
     }));
 
     let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root.current, {
@@ -210,16 +230,23 @@ export const createMainChart = (
 
     if (startDateForZooming && endDateForZooming && !isNewDates) {
       seriesArray.map((mappedSeries: any) => {
-        mappedSeries.events.once("datavalidated", function(event: any) {
+        mappedSeries.events.once("datavalidated", function (event: any) {
           event.target.get("xAxis").zoomToDates(startDateForZooming, endDateForZooming, 0);
         });
       })
     }
 
 // Cursor
-
+    let cursorBehavior: any
+    if (comparingMode) {
+      cursorBehavior = 'selectX'
+    } else if (moistMainAddCommentItemShowed) {
+      cursorBehavior = 'zoomX'
+    } else {
+      cursorBehavior = 'zoomX'
+    }
     let cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
-      behavior: comparingMode ? "selectX" : "zoomX",
+      behavior: cursorBehavior,
       xAxis: xAxis
     }));
 
@@ -236,12 +263,124 @@ export const createMainChart = (
 
     cursor.lineY.set("visible", false);
 
+// Add Comments
+//     if (moistMainAddCommentItemShowed) {
+//       chart.events.on("click", (ev: any) => {
+//         let xAxis = chart.xAxes.getIndex(0);
+//
+//         let xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width());
+//
+//         let clickDate = xAxis.positionToDate(xPosition);
+//
+//         addChart(clickDate, setMoistAddCommentModal)
+//       });
+//     }
+//
+//     if (moistMainComments) {
+//       const colors: any = {
+//         'Advisory': 'F08080',
+//         'Plant Health': '90EE90',
+//         'Weather': 'ADD8E6',
+//         'Irrigation': 'F0F8FF',
+//         'Growth Stage': 'A9A9A9',
+//         'Chemical App': '8FBC8F',
+//         'Pest': 'DB7093',
+//         'Foliage': '9370DB',
+//         'Soil Type': '778899',
+//         'Other': '20B2AA',
+//         'Percolation': 'F0F8FF',
+//         'Root Uptake': '9F7D4C',
+//         'Hands-on': 'C05339',
+//         'Pressure Bomb': 'F0A6B4',
+//         'AutoWATER': '04F3FC',
+//         'Installation': 'FFFFFF',
+//       }
+//
+//       moistMainComments.map((moistMainComment: any) => {
+//         const commentColor: string = `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}`;
+//         const commentRangeDataItem = xAxis.makeDataItem({
+//           value: new Date(moistMainComment.key).getTime()
+//         });
+//         series.createAxisRange(commentRangeDataItem);
+//         commentRangeDataItem.get("grid").setAll({
+//           strokeOpacity: 1,
+//           visible: true,
+//           stroke: am5.color(commentColor),
+//           strokeWidth: 6,
+//           location: 0,
+//         });
+//
+//         const label = commentRangeDataItem.get("label");
+//
+//         let labelContainer = am5.Container.new(root.current, {
+//           layout: root.current.horizontalLayout, // или verticalLayout, в зависимости от того, как нужно
+//           paddingLeft: -10,  // Добавляем отступы
+//           paddingRight: 10, // Опционально добавляем справа
+//           paddingTop: -5,    // Опционально сверху
+//           paddingBottom: 5  // Опционально снизу
+//         });
+//
+//         labelContainer.children.push(am5.Label.new(root.current, {
+//           text: `${moistMainComment.key}\n${Object.keys(colors)[moistMainComment.color_id - 1]}\n${moistMainComment.text}`,
+//           fill: am5.color(0x000000),
+//           fontSize: 12
+//         }));
+//
+//         label.setAll({
+//           location: 1,
+//           visible: true,
+//           height: 60,
+//           width: 150,
+//           background: am5.RoundedRectangle.new(root.current, {
+//             fill: am5.color(commentColor)
+//           })
+//         });
+//
+//         label.children.push(labelContainer);
+//         let buttonsContainer = label.children.push(am5.Container.new(root.current, {
+//           paddingTop: -5,
+//           paddingRight: -10,
+//           layout: root.current.horizontalLayout,
+//           centerX: am5.p100,
+//           x: am5.p100,
+//         }));
+//         let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+//           layer: 40,
+//           x: p100,
+//           icon: am5.Picture.new(root.current, {
+//             interactive: true,
+//             src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
+//             width: 15,
+//             height: 15,
+//             cursorOverStyle: "pointer"
+//           })
+//         }));
+//         closeButton.get("background").setAll({
+//           forceHidden: true
+//         });
+//         let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+//           layer: 40,
+//           marginRight: -5,
+//           icon: am5.Picture.new(root.current, {
+//             interactive: true,
+//             src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
+//             width: 15,
+//             height: 15,
+//             cursorOverStyle: "pointer"
+//           })
+//         }));
+//         dragButton.get("background").setAll({
+//           forceHidden: true
+//         });
+//       })
+//     }
+
 // Comparing Mode
     if (!comparingMode) {
-      xAxis.onPrivate("selectionMin", function(value: any) {
+      xAxis.onPrivate("selectionMin", function (value: any) {
         startDateForZooming = new Date(value)
       });
-      xAxis.onPrivate("selectionMax", function(value: any) {
+      xAxis.onPrivate("selectionMax", function (value: any) {
         endDateForZooming = new Date(value)
       });
     }
@@ -307,8 +446,8 @@ export const createMainChart = (
         let x1 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(selection.getPrivate("downPositionX"))).getTime();
         let x2 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(selection.getPrivate("positionX"))).getTime();
 
-        chart.series.each(function(series: any) {
-          let dataItemStart = series.dataItems.find(function(dataItem: any) {
+        chart.series.each(function (series: any) {
+          let dataItemStart = series.dataItems.find(function (dataItem: any) {
             if (x1 < x2) {
               return dataItem.get("valueX") >= x1;
             } else {
@@ -316,7 +455,7 @@ export const createMainChart = (
             }
           });
 
-          let dataItemEnd = series.dataItems.find(function(dataItem: any) {
+          let dataItemEnd = series.dataItems.find(function (dataItem: any) {
             if (x1 < x2) {
               return dataItem.get("valueX") >= x2;
             } else {

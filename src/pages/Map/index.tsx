@@ -17,6 +17,7 @@ import LayerList from "./components/LayerList";
 import {initializeWxetCustomOverlay} from "./components/types/wxet/WxetCustomOverlay";
 import {initializeTempCustomOverlay} from "./components/types/temp/TempCustomOverlay";
 import {createTempChartForOverlay} from "./functions/types/temp/createTempChartForOverlay";
+import * as am5 from "@amcharts/amcharts5";
 
 interface MainProps {
   page: any
@@ -76,6 +77,7 @@ const MapPage: React.FC<MainProps> = (props) => {
   const mapRef = useRef(null);
   let overlappingPairs: any[] = []
   const history = useHistory();
+  const [overlappingSensorItems, setOverlappingSensorItems] = useState<any>()
 
   useEffect(() => {
     if (props.page === 1) {
@@ -103,7 +105,8 @@ const MapPage: React.FC<MainProps> = (props) => {
         setWxetDataContainer,
         tempChartsAmount,
         setInvalidTempChartDataContainer,
-        setTempChartDataContainer
+        setTempChartDataContainer,
+        setOverlappingSensorItems
       )
     }
   }, [map, props.siteList]);
@@ -173,7 +176,6 @@ const MapPage: React.FC<MainProps> = (props) => {
       const roots: any[] = [];
       moistOverlays.map((moistOverlay: any) => {
         if (!createdMoistCharts.includes(moistOverlay.chartData.id)) {
-          console.log(moistOverlay)
           createMoistChartForOverlay(moistOverlay.chartData, roots, moistOverlays)
           createdMoistCharts.push(moistOverlay.chartData.id)
         }
@@ -305,8 +307,18 @@ const MapPage: React.FC<MainProps> = (props) => {
       const roots: any[] = [];
       tempOverlays.map((tempOverlay: any) => {
         if (!createdTempCharts.includes(tempOverlay.chartData.id)) {
-          createTempChartForOverlay(tempOverlay.chartData, roots, tempOverlays)
-          createdTempCharts.push(tempOverlay.chartData.id)
+          if (tempOverlay.chartData.id) {
+            console.log(tempOverlay.chartData.id)
+            const root = am5.Root.new(tempOverlay.chartData.id)
+            if (root) {
+              createTempChartForOverlay(tempOverlay.chartData, roots, tempOverlays, root)
+              createdTempCharts.push(tempOverlay.chartData.id)
+            } else {
+              console.log('not found overlay', tempOverlay)
+            }
+          } else {
+            console.log('no id', tempOverlay)
+          }
         }
       })
 
