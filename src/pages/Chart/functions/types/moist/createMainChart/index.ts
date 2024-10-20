@@ -325,14 +325,14 @@ export const createMainChart = (
 
         if (label && label.children) {
           label.children.push(am5.Label.new(root.current, {
-          text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
-          fill: am5.color(0x000000),
-          maxWidth: 150,
-          oversizedBehavior: "wrap",
-          fontSize: 12,
-        }));
+            text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
+            fill: am5.color(0x000000),
+            maxWidth: 150,
+            oversizedBehavior: "wrap",
+            fontSize: 12,
+          }));
 
-        let buttonsContainer;
+          let buttonsContainer;
         if (label && label.children) {
           buttonsContainer = label.children.push(am5.Container.new(root.current, {
             layout: root.current.horizontalLayout,
@@ -345,46 +345,50 @@ export const createMainChart = (
         }
 
         let closeButton;
-        if (buttonsContainer && buttonsContainer.children) {
-          closeButton = buttonsContainer.children.push(
-          am5.Button.new(root.current, {
-            width: 30,
-            height: 30,
-            cursorOverStyle: "pointer",
-            background: am5.Rectangle.new(root.current, {
-              fill: am5.color(0xffffff),
-              fillOpacity: 0,
-            }),
-          })
-        );
+          if (buttonsContainer && buttonsContainer.children) {
+            let closeButton = buttonsContainer.children.push(
+              am5.Button.new(root.current, {
+                width: 30,
+                height: 30,
+                cursorOverStyle: "pointer",
+                background: am5.Rectangle.new(root.current, {
+                  fill: am5.color(0xffffff),
+                  fillOpacity: 0,
+                }),
+              })
+            );
 
-        if (closeButton && closeButton.children) {
-          closeButton.children.push(
-          am5.Picture.new(root.current, {
-            src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
-            cursorOverStyle: "pointer",
-            width: 15,
-            height: 15,
-            centerX: am5.p50,
-            centerY: am5.p50
-          })
-        );
+            if (closeButton && closeButton.children) {
+              closeButton.children.push(
+                am5.Picture.new(root.current, {
+                  src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
+                  cursorOverStyle: "pointer",
+                  width: 15,
+                  height: 15,
+                  centerX: am5.p50,
+                  centerY: am5.p50
+                })
+              );
+            }
 
-        if (buttonsContainer && buttonsContainer.children) {
-          let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
-          icon: am5.Picture.new(root.current, {
-            src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
-            width: 15,
-            height: 15,
-            cursorOverStyle: "pointer"
-          }),
-          background: am5.Rectangle.new(root.current, {
-            forceHidden: true
-          }),
-        }));
+            buttonsContainer.children.push(am5.Button.new(root.current, {
+              icon: am5.Picture.new(root.current, {
+                src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
+                width: 15,
+                height: 15,
+                cursorOverStyle: "pointer"
+              }),
+              background: am5.Rectangle.new(root.current, {
+                forceHidden: true
+              }),
+            }));
+          }
 
-        // Привязываем метку к дате на оси X
-        xAxis.createAxisRange(commentRangeDataItem).contents.push(label);
+          // Привязываем метку к дате на оси X
+          if (xAxis && xAxis.createAxisRange && commentRangeDataItem) {
+            xAxis.createAxisRange(commentRangeDataItem).contents.push(label);
+          }
+        }
       });
 
       function positionLabels() {
