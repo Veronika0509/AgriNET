@@ -301,11 +301,8 @@ export const createMainChart = (
           strokeWidth: 6,
           location: 0,
         });
-        const xPos = xAxis.valueToPosition(commentDate);
 
         let label = labelsContainer.children.push(am5.Container.new(root.current, {
-          x: xPos * chart.plotContainer.width(),
-          y: 0,
           width: 150,
           layout: root.current.verticalLayout,
           background: am5.RoundedRectangle.new(root.current, {
@@ -361,10 +358,21 @@ export const createMainChart = (
             forceHidden: true
           }),
         }));
+
+        // Привязываем метку к дате на оси X
+        xAxis.createAxisRange(commentRangeDataItem).contents.push(label);
       });
 
       function positionLabels() {
         let labels = labelsContainer.children;
+        labels.each((label: any) => {
+          let dataItem = label.dataItem;
+          if (dataItem) {
+            let position = xAxis.valueToPosition(dataItem.get("value"));
+            label.set("x", xAxis.positionToCoordinate(position));
+          }
+        });
+
         labels.values.sort((a: any, b: any) => a.x() - b.x());
 
         for (let i = 1; i < labels.length; i++) {
@@ -379,7 +387,7 @@ export const createMainChart = (
         }
       }
 
-      root.current.events.on("frameended", positionLabels);
+      xAxis.events.on("endchanged", positionLabels);
     }
 
 
