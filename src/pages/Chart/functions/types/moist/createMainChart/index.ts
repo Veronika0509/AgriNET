@@ -365,7 +365,8 @@ export const createMainChart = (
             cursorOverStyle: "pointer"
           }),
           background: am5.Rectangle.new(root.current, {
-            forceHidden: true
+            fill: am5.color(0xffffff),
+            fillOpacity: 0,
           }),
         }));
       })
