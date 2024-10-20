@@ -2,26 +2,10 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import {addChart} from "../../../addChart";
-import login from "../../../../../Login";
-import {logoFacebook} from "ionicons/icons";
 import {p100} from "@amcharts/amcharts5";
 
 let startDateForZooming: any;
 let endDateForZooming: any;
-
-function debounce(func: Function, wait: number) {
-  let timeout: ReturnType<typeof setTimeout> | null = null;
-  return function executedFunction(...args: any[]) {
-    const later = () => {
-      timeout = null;
-      func(...args);
-    };
-    if (timeout) {
-      clearTimeout(timeout);
-    }
-    timeout = setTimeout(later, wait);
-  };
-}
 
 export const createMainChart = (
   props: any,
@@ -245,6 +229,7 @@ export const createMainChart = (
     } else {
       cursorBehavior = 'zoomX'
     }
+
     let cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
       behavior: cursorBehavior,
       xAxis: xAxis
@@ -264,116 +249,164 @@ export const createMainChart = (
     cursor.lineY.set("visible", false);
 
 // Add Comments
-//     if (moistMainAddCommentItemShowed) {
-//       chart.events.on("click", (ev: any) => {
-//         let xAxis = chart.xAxes.getIndex(0);
-//
-//         let xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width());
-//
-//         let clickDate = xAxis.positionToDate(xPosition);
-//
-//         addChart(clickDate, setMoistAddCommentModal)
-//       });
-//     }
-//
-//     if (moistMainComments) {
-//       const colors: any = {
-//         'Advisory': 'F08080',
-//         'Plant Health': '90EE90',
-//         'Weather': 'ADD8E6',
-//         'Irrigation': 'F0F8FF',
-//         'Growth Stage': 'A9A9A9',
-//         'Chemical App': '8FBC8F',
-//         'Pest': 'DB7093',
-//         'Foliage': '9370DB',
-//         'Soil Type': '778899',
-//         'Other': '20B2AA',
-//         'Percolation': 'F0F8FF',
-//         'Root Uptake': '9F7D4C',
-//         'Hands-on': 'C05339',
-//         'Pressure Bomb': 'F0A6B4',
-//         'AutoWATER': '04F3FC',
-//         'Installation': 'FFFFFF',
-//       }
-//
-//       moistMainComments.map((moistMainComment: any) => {
-//         const commentColor: string = `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}`;
-//         const commentRangeDataItem = xAxis.makeDataItem({
-//           value: new Date(moistMainComment.key).getTime()
-//         });
-//         series.createAxisRange(commentRangeDataItem);
-//         commentRangeDataItem.get("grid").setAll({
-//           strokeOpacity: 1,
-//           visible: true,
-//           stroke: am5.color(commentColor),
-//           strokeWidth: 6,
-//           location: 0,
-//         });
-//
-//         const label = commentRangeDataItem.get("label");
-//
-//         let labelContainer = am5.Container.new(root.current, {
-//           layout: root.current.horizontalLayout, // или verticalLayout, в зависимости от того, как нужно
-//           paddingLeft: -10,  // Добавляем отступы
-//           paddingRight: 10, // Опционально добавляем справа
-//           paddingTop: -5,    // Опционально сверху
-//           paddingBottom: 5  // Опционально снизу
-//         });
-//
-//         labelContainer.children.push(am5.Label.new(root.current, {
-//           text: `${moistMainComment.key}\n${Object.keys(colors)[moistMainComment.color_id - 1]}\n${moistMainComment.text}`,
-//           fill: am5.color(0x000000),
-//           fontSize: 12
-//         }));
-//
-//         label.setAll({
-//           location: 1,
-//           visible: true,
-//           height: 60,
-//           width: 150,
-//           background: am5.RoundedRectangle.new(root.current, {
-//             fill: am5.color(commentColor)
-//           })
-//         });
-//
-//         label.children.push(labelContainer);
-//         let buttonsContainer = label.children.push(am5.Container.new(root.current, {
-//           paddingTop: -5,
-//           paddingRight: -10,
-//           layout: root.current.horizontalLayout,
-//           centerX: am5.p100,
-//           x: am5.p100,
-//         }));
-//         let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
-//           layer: 40,
-//           x: p100,
-//           icon: am5.Picture.new(root.current, {
-//             interactive: true,
-//             src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
-//             width: 15,
-//             height: 15,
-//             cursorOverStyle: "pointer"
-//           })
-//         }));
-//         closeButton.get("background").setAll({
-//           forceHidden: true
-//         });
-//         let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
-//           layer: 40,
-//           marginRight: -5,
-//           icon: am5.Picture.new(root.current, {
-//             interactive: true,
-//             src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
-//             width: 15,
-//             height: 15,
-//             cursorOverStyle: "pointer"
-//           })
-//         }));
-//         dragButton.get("background").setAll({
-//           forceHidden: true
-//         });
-//       })
-//     }
+    if (moistMainAddCommentItemShowed) {
+      chart.events.on("click", (ev: any) => {
+        let xAxis = chart.xAxes.getIndex(0);
+
+        let xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width());
+
+        let clickDate = xAxis.positionToDate(xPosition);
+
+        addChart(clickDate, setMoistAddCommentModal)
+      });
+    }
+
+    if (moistMainComments) {
+      const colors: any = {
+        'Advisory': 'F08080',
+        'Plant Health': '90EE90',
+        'Weather': 'ADD8E6',
+        'Irrigation': 'F0F8FF',
+        'Growth Stage': 'A9A9A9',
+        'Chemical App': '8FBC8F',
+        'Pest': 'DB7093',
+        'Foliage': '9370DB',
+        'Soil Type': '778899',
+        'Other': '20B2AA',
+        'Percolation': 'F0F8FF',
+        'Root Uptake': '9F7D4C',
+        'Hands-on': 'C05339',
+        'Pressure Bomb': 'F0A6B4',
+        'AutoWATER': '04F3FC',
+        'Installation': 'FFFFFF',
+      }
+      let labels: am5.Label[] = [];
+      moistMainComments.map((moistMainComment: any, index: number) => {
+        const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`
+        const commentRangeDataItem = xAxis.makeDataItem({
+          value: new Date(moistMainComment.key).getTime()
+        });
+        series.createAxisRange(commentRangeDataItem);
+        commentRangeDataItem.get("grid").setAll({
+          strokeOpacity: 1,
+          visible: true,
+          stroke: am5.color(commentColor),
+          strokeWidth: 6,
+          location: 0,
+        });
+
+        const label = commentRangeDataItem.get("label");
+        label.setAll({
+          location: 1,
+          visible: true,
+          width: 150,
+          wrap: true,
+          inside: true,
+          centerY: am5.p0,
+          layer: 1,
+          background: am5.RoundedRectangle.new(root.current, {
+            fill: am5.color(commentColor)
+          })
+        });
+        let labelContainer = am5.Container.new(root.current, {
+          layout: root.current.horizontalLayout,
+          paddingLeft: -10,
+          paddingRight: 10,
+          paddingTop: -5,
+          paddingBottom: 0
+        });
+        labelContainer.children.push(am5.Label.new(root.current, {
+          text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
+          fill: am5.color(0x000000),
+          maxWidth: 150,
+          oversizedBehavior: "wrap",
+          fontSize: 12,
+        }));
+        labels.push(label);
+        label.children.push(labelContainer);
+
+        let buttonsContainer = label.children.push(am5.Container.new(root.current, {
+          paddingTop: -5,
+          paddingRight: -10,
+          layout: root.current.horizontalLayout,
+          centerX: am5.p100,
+          x: am5.p100,
+        }));
+        const closeButton = buttonsContainer.children.push(
+          am5.Button.new(root.current, {
+            x: p100,
+            y: 3,
+            dx: -4,
+            width: 30,
+            height: 30,
+            cursorOverStyle: "pointer",
+            background: am5.Rectangle.new(root.current, {
+              fill: am5.color(0xffffff),
+              fillOpacity: 0,
+            }),
+          })
+        );
+        closeButton.children.push(
+          am5.Picture.new(root.current, {
+            src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
+            cursorOverStyle: "pointer",
+            width: 15,
+            height: 15,
+            centerX: am5.p50,
+            centerY: am5.p50
+          })
+        );
+        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+          marginRight: -5,
+          icon: am5.Picture.new(root.current, {
+            src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
+            width: 15,
+            height: 15,
+            cursorOverStyle: "pointer"
+          }),
+          background: am5.Rectangle.new(root.current, {
+            forceHidden: true
+          }),
+        }));
+      })
+      function checkOverlap(label1: am5.Label, label2: am5.Label) {
+        const bounds1 = label1.globalBounds();
+        const bounds2 = label2.globalBounds();
+        return !(bounds1.right < bounds2.left ||
+          bounds1.left > bounds2.right ||
+          bounds1.bottom < bounds2.top ||
+          bounds1.top > bounds2.bottom);
+      }
+
+      function positionLabels() {
+        labels.sort((a, b) => {
+          const aX = a.get("x");
+          const bX = b.get("x");
+          return (typeof aX === "number" && typeof bX === "number") ? aX - bX : 0;
+        });
+
+        for (let i = 1; i < labels.length; i++) {
+          let currentLabel = labels[i];
+          let prevLabel = labels[i - 1];
+
+          if (checkOverlap(prevLabel, currentLabel)) {
+            const prevY = prevLabel.get("y");
+            const prevHeight = prevLabel.height();
+            if (typeof prevY === "number") {
+              let newY = prevY + prevHeight + 5;
+              currentLabel.set("y", newY);
+
+              const buttonsContainer = currentLabel.children.values.find(child => child instanceof am5.Container);
+              if (buttonsContainer) {
+                buttonsContainer.set("y", 0);
+              }
+            }
+          }
+        }
+      }
+
+      root.current.events.on("frameended", positionLabels);
+    }
 
 // Comparing Mode
     if (!comparingMode) {
