@@ -346,58 +346,28 @@ export const createMainChart = (
             }),
           })
         );
-        closeButton.set("cursorOverStyle", "pointer");
         closeButton.children.push(
           am5.Picture.new(root.current, {
             src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
+            cursorOverStyle: "pointer",
             width: 15,
             height: 15,
             centerX: am5.p50,
             centerY: am5.p50
           })
         );
-        closeButton.events.on("pointerover", function() {
-          closeButton.set("scale", 1.1);
-          closeButton.get("background").set("fill", am5.color(0x000000));
-          closeButton.get("background").set("fillOpacity", 0.2);
-        });
-        closeButton.events.on("pointerout", function() {
-          closeButton.set("scale", 1);
-          closeButton.get("background").set("fillOpacity", 0);
-        });
-
         let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           marginRight: -5,
           icon: am5.Picture.new(root.current, {
             src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
             width: 15,
             height: 15,
+            cursorOverStyle: "pointer"
           }),
           background: am5.Rectangle.new(root.current, {
-            fill: am5.color(0xffffff),
-            fillOpacity: 0,
+            forceHidden: true
           }),
         }));
-        dragButton.set("cursorOverStyle", "pointer");
-        dragButton.events.on("pointerover", function() {
-          dragButton.set("scale", 1.1);
-          dragButton.get("background").set("fill", am5.color(0x000000));
-          dragButton.get("background").set("fillOpacity", 0.2);
-        });
-        dragButton.events.on("pointerout", function() {
-          dragButton.set("scale", 1);
-          dragButton.get("background").set("fillOpacity", 0);
-        });
-
-        // Add hover effects to the entire label container
-        label.events.on("pointerover", function() {
-          closeButton.set("opacity", 1);
-          dragButton.set("opacity", 1);
-        });
-        label.events.on("pointerout", function() {
-          closeButton.set("opacity", 1);
-          dragButton.set("opacity", 1);
-        });
       })
       function checkOverlap(label1: am5.Label, label2: am5.Label) {
         const bounds1 = label1.globalBounds();
