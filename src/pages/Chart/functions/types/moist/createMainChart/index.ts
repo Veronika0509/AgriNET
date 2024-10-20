@@ -382,6 +382,16 @@ export const createMainChart = (
         dragButton.events.on("pointerout", function() {
           dragButton.set("scale", 1);
         });
+
+        // Add hover effects to the entire label container
+        label.events.on("pointerover", function() {
+          closeButton.set("opacity", 1);
+          dragButton.set("opacity", 1);
+        });
+        label.events.on("pointerout", function() {
+          closeButton.set("opacity", 0.5);
+          dragButton.set("opacity", 0.5);
+        });
       })
       function checkOverlap(label1: am5.Label, label2: am5.Label) {
         const bounds1 = label1.globalBounds();
