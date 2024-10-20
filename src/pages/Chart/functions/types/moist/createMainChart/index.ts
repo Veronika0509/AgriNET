@@ -358,9 +358,12 @@ export const createMainChart = (
         );
         closeButton.events.on("pointerover", function() {
           closeButton.set("scale", 1.1);
+          closeButton.get("background").set("fill", am5.color(0x000000));
+          closeButton.get("background").set("fillOpacity", 0.2);
         });
         closeButton.events.on("pointerout", function() {
           closeButton.set("scale", 1);
+          closeButton.get("background").set("fillOpacity", 0);
         });
 
         let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
@@ -378,9 +381,12 @@ export const createMainChart = (
         dragButton.set("cursorOverStyle", "pointer");
         dragButton.events.on("pointerover", function() {
           dragButton.set("scale", 1.1);
+          dragButton.get("background").set("fill", am5.color(0x000000));
+          dragButton.get("background").set("fillOpacity", 0.2);
         });
         dragButton.events.on("pointerout", function() {
           dragButton.set("scale", 1);
+          dragButton.get("background").set("fillOpacity", 0);
         });
 
         // Add hover effects to the entire label container
@@ -389,8 +395,8 @@ export const createMainChart = (
           dragButton.set("opacity", 1);
         });
         label.events.on("pointerout", function() {
-          closeButton.set("opacity", 0.5);
-          dragButton.set("opacity", 0.5);
+          closeButton.set("opacity", 1);
+          dragButton.set("opacity", 1);
         });
       })
       function checkOverlap(label1: am5.Label, label2: am5.Label) {
