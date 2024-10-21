@@ -329,42 +329,47 @@ export const createMainChart = (
         let buttonsContainer = label.children.push(am5.Container.new(root.current, {
           layout: root.current.horizontalLayout,
           x: am5.p100,
+          y: 0,
           centerX: am5.p100,
+          paddingTop: 5,
+          paddingRight: 5,
         }));
 
-        const closeButton = buttonsContainer.children.push(
-          am5.Button.new(root.current, {
-            width: 30,
-            height: 30,
-            cursorOverStyle: "pointer",
-            background: am5.Rectangle.new(root.current, {
-              fill: am5.color(0xffffff),
-              fillOpacity: 0,
-            }),
-          })
-        );
+        let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+          width: 20,
+          height: 20,
+          cursorOverStyle: "pointer",
+          background: am5.Rectangle.new(root.current, {
+            fill: am5.color(0xffffff),
+            fillOpacity: 0.5,
+          }),
+        }));
 
-        closeButton.children.push(
-          am5.Picture.new(root.current, {
-            src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
-            cursorOverStyle: "pointer",
-            width: 15,
-            height: 15,
-            centerX: am5.p50,
-            centerY: am5.p50
-          })
-        );
+        closeButton.children.push(am5.Picture.new(root.current, {
+          src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
+          width: 12,
+          height: 12,
+          centerX: am5.p50,
+          centerY: am5.p50
+        }));
 
         let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
-          icon: am5.Picture.new(root.current, {
-            src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
-            width: 15,
-            height: 15,
-            cursorOverStyle: "pointer"
-          }),
+          width: 20,
+          height: 20,
+          marginLeft: 5,
+          cursorOverStyle: "pointer",
           background: am5.Rectangle.new(root.current, {
-            forceHidden: true
+            fill: am5.color(0xffffff),
+            fillOpacity: 0.5,
           }),
+        }));
+
+        dragButton.children.push(am5.Picture.new(root.current, {
+          src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
+          width: 12,
+          height: 12,
+          centerX: am5.p50,
+          centerY: am5.p50
         }));
       });
 
