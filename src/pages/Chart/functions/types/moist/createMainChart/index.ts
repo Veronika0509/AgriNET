@@ -303,15 +303,20 @@ export const createMainChart = (
         });
         const xPos = xAxis.valueToPosition(commentDate);
 
-        let label = labelsContainer.children.push(am5.Container.new(root.current, {
-          x: xPos * chart.plotContainer.width(),
+        const rangeLabel = commentRangeDataItem.get("label")
+        rangeLabel.setAll({
+          visible: true,
+          x: xPos,
           y: 0,
+          dy: -350,
           width: 150,
           layout: root.current.verticalLayout,
           background: am5.RoundedRectangle.new(root.current, {
             fill: am5.color(commentColor)
           })
-        }));
+        })
+
+        let label = labelsContainer.children.push(rangeLabel)
 
         label.children.push(am5.Label.new(root.current, {
           text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
