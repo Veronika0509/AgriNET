@@ -341,7 +341,7 @@ export const createMainChart = (
           cursorOverStyle: "pointer",
           background: am5.Rectangle.new(root.current, {
             fill: am5.color(0xffffff),
-            fillOpacity: 0.5,
+            fillOpacity: 0,
           }),
         }));
 
@@ -360,7 +360,7 @@ export const createMainChart = (
           cursorOverStyle: "pointer",
           background: am5.Rectangle.new(root.current, {
             fill: am5.color(0xffffff),
-            fillOpacity: 0.5,
+            fillOpacity: 0,
           }),
         }));
 
