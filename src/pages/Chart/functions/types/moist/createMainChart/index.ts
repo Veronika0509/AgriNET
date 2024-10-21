@@ -335,7 +335,7 @@ export const createMainChart = (
           paddingRight: 5,
         }));
 
-        let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
           cursorOverStyle: "pointer",
@@ -345,15 +345,15 @@ export const createMainChart = (
           }),
         }));
 
-        closeButton.children.push(am5.Picture.new(root.current, {
-          src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
+        dragButton.children.push(am5.Picture.new(root.current, {
+          src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
           width: 12,
           height: 12,
           centerX: am5.p50,
           centerY: am5.p50
         }));
 
-        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
           marginLeft: 5,
@@ -364,8 +364,8 @@ export const createMainChart = (
           }),
         }));
 
-        dragButton.children.push(am5.Picture.new(root.current, {
-          src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
+        closeButton.children.push(am5.Picture.new(root.current, {
+          src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
           width: 12,
           height: 12,
           centerX: am5.p50,
