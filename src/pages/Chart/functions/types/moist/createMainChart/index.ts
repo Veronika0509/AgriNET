@@ -332,7 +332,7 @@ export const createMainChart = (
           y: 0,
           centerX: am5.p100,
           paddingTop: 5,
-          paddingRight: 5,
+          paddingRight: 10,
         }));
 
         let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
