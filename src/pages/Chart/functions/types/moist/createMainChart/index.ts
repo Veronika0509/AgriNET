@@ -331,8 +331,8 @@ export const createMainChart = (
           x: am5.p100,
           y: 0,
           centerX: am5.p100,
-          paddingTop: 5,
-          paddingRight: 10,
+          paddingTop: 8,
+          paddingRight: 3,
         }));
 
         let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
@@ -345,7 +345,7 @@ export const createMainChart = (
           }),
           x: am5.p100,
           centerX: am5.p100,
-          marginRight: 5,
+          // marginRight: 5,
         }));
 
         dragButton.children.push(am5.Picture.new(root.current, {
@@ -359,7 +359,7 @@ export const createMainChart = (
         let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
-          marginLeft: 5,
+          // marginLeft: 5,
           cursorOverStyle: "pointer",
           background: am5.Rectangle.new(root.current, {
             fill: am5.color(0xffffff),
