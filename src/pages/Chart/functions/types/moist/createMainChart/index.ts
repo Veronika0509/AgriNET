@@ -1,5 +1,4 @@
 import * as am5 from "@amcharts/amcharts5";
-type AM5Namespace = typeof am5;
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import {addChart} from "../../../addChart";
@@ -282,20 +281,13 @@ export const createMainChart = (
         'Installation': 'FFFFFF',
       }
 
-      let labelsContainer;
-      if (chart.plotContainer && chart.plotContainer.children) {
-        labelsContainer = chart.plotContainer.children.push(am5.Container.new(root.current, {
-          width: am5.percent(100),
-          height: am5.percent(100),
-          layer: 30
-        }));
-      } else {
-        console.error("chart.plotContainer or chart.plotContainer.children is undefined");
-        return;
-      }
+      let labelsContainer = chart.plotContainer.children.push(am5.Container.new(root.current, {
+        width: am5.percent(100),
+        height: am5.percent(100),
+        layer: 30
+      }));
 
-      if (moistMainComments && Array.isArray(moistMainComments)) {
-        moistMainComments.forEach((moistMainComment: any, index: number) => {
+      moistMainComments.forEach((moistMainComment: any, index: number) => {
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
         const commentDate = new Date(moistMainComment.key).getTime();
         const commentRangeDataItem = xAxis.makeDataItem({
@@ -309,99 +301,70 @@ export const createMainChart = (
           strokeWidth: 6,
           location: 0,
         });
+        const xPos = xAxis.valueToPosition(commentDate);
 
-        let label;
-        if (labelsContainer && labelsContainer.children) {
-          label = labelsContainer.children.push(am5.Container.new(root.current, {
-            width: 150,
-            layout: root.current.verticalLayout,
-            background: am5.RoundedRectangle.new(root.current, {
-              fill: am5.color(commentColor)
-            })
-          }));
-        } else {
-          console.error("labelsContainer or labelsContainer.children is undefined");
-          return;
-        }
+        let label = labelsContainer.children.push(am5.Container.new(root.current, {
+          x: xPos * chart.plotContainer.width(),
+          y: 0,
+          width: 150,
+          layout: root.current.verticalLayout,
+          background: am5.RoundedRectangle.new(root.current, {
+            fill: am5.color(commentColor)
+          })
+        }));
 
-        if (label && label.children) {
-          label.children.push(am5.Label.new(root.current, {
-            text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
-            fill: am5.color(0x000000),
-            maxWidth: 150,
-            oversizedBehavior: "wrap",
-            fontSize: 12,
-          }));
+        label.children.push(am5.Label.new(root.current, {
+          text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
+          fill: am5.color(0x000000),
+          maxWidth: 150,
+          oversizedBehavior: "wrap",
+          fontSize: 12,
+        }));
 
-          let buttonsContainer;
-        if (label && label.children) {
-          buttonsContainer = label.children.push(am5.Container.new(root.current, {
-            layout: root.current.horizontalLayout,
-            x: am5.p100,
-            centerX: am5.p100,
-          }));
-        } else {
-          console.error("label or label.children is undefined");
-          return;
-        }
+        let buttonsContainer = label.children.push(am5.Container.new(root.current, {
+          layout: root.current.horizontalLayout,
+          x: am5.p100,
+          centerX: am5.p100,
+        }));
 
-        let closeButton;
-          if (buttonsContainer && buttonsContainer.children) {
-            let closeButton = buttonsContainer.children.push(
-              am5.Button.new(root.current, {
-                width: 30,
-                height: 30,
-                cursorOverStyle: "pointer",
-                background: am5.Rectangle.new(root.current, {
-                  fill: am5.color(0xffffff),
-                  fillOpacity: 0,
-                }),
-              })
-            );
+        const closeButton = buttonsContainer.children.push(
+          am5.Button.new(root.current, {
+            width: 30,
+            height: 30,
+            cursorOverStyle: "pointer",
+            background: am5.Rectangle.new(root.current, {
+              fill: am5.color(0xffffff),
+              fillOpacity: 0,
+            }),
+          })
+        );
 
-            if (closeButton && closeButton.children) {
-              closeButton.children.push(
-                am5.Picture.new(root.current, {
-                  src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
-                  cursorOverStyle: "pointer",
-                  width: 15,
-                  height: 15,
-                  centerX: am5.p50,
-                  centerY: am5.p50
-                })
-              );
-            }
+        closeButton.children.push(
+          am5.Picture.new(root.current, {
+            src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
+            cursorOverStyle: "pointer",
+            width: 15,
+            height: 15,
+            centerX: am5.p50,
+            centerY: am5.p50
+          })
+        );
 
-            buttonsContainer.children.push(am5.Button.new(root.current, {
-              icon: am5.Picture.new(root.current, {
-                src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
-                width: 15,
-                height: 15,
-                cursorOverStyle: "pointer"
-              }),
-              background: am5.Rectangle.new(root.current, {
-                forceHidden: true
-              }),
-            }));
-          }
-
-          // Привязываем метку к дате на оси X
-          if (xAxis && xAxis.createAxisRange && commentRangeDataItem) {
-            xAxis.createAxisRange(commentRangeDataItem).contents.push(label);
-          }
-        }
+        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+          icon: am5.Picture.new(root.current, {
+            src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
+            width: 15,
+            height: 15,
+            cursorOverStyle: "pointer"
+          }),
+          background: am5.Rectangle.new(root.current, {
+            forceHidden: true
+          }),
+        }));
       });
 
       function positionLabels() {
         let labels = labelsContainer.children;
-        labels.each((label: any) => {
-          let dataItem = label.dataItem;
-          if (dataItem) {
-            let position = xAxis.valueToPosition(dataItem.get("value"));
-            label.set("x", xAxis.positionToCoordinate(position));
-          }
-        });
-
         labels.values.sort((a: any, b: any) => a.x() - b.x());
 
         for (let i = 1; i < labels.length; i++) {
@@ -416,7 +379,7 @@ export const createMainChart = (
         }
       }
 
-      xAxis.events.on("endchanged", positionLabels);
+      root.current.events.on("frameended", positionLabels);
     }
 
 
