@@ -310,7 +310,6 @@ export const createMainChart = (
           y: 0,
           dy: -350,
           width: 150,
-          height: 60,
           layout: root.current.verticalLayout,
           background: am5.RoundedRectangle.new(root.current, {
             fill: am5.color(commentColor)
@@ -325,6 +324,10 @@ export const createMainChart = (
           maxWidth: 150,
           oversizedBehavior: "wrap",
           fontSize: 12,
+          paddingTop: 5,
+          paddingBottom: 5,
+          paddingLeft: 5,
+          paddingRight: 5
         }));
 
         let buttonsContainer = label.children.push(am5.Container.new(root.current, {
