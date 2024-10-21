@@ -343,6 +343,9 @@ export const createMainChart = (
             fill: am5.color(0xffffff),
             fillOpacity: 0,
           }),
+          x: am5.p100,
+          centerX: am5.p100,
+          marginRight: 5,
         }));
 
         dragButton.children.push(am5.Picture.new(root.current, {
