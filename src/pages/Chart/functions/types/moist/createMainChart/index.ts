@@ -374,6 +374,10 @@ export const createMainChart = (
           centerX: am5.p50,
           centerY: am5.p50
         }));
+
+        closeButton.events.on('click', () => {
+          console.log(123)
+        })
       });
 
       function positionLabels() {
