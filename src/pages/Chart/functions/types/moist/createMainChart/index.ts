@@ -310,6 +310,7 @@ export const createMainChart = (
           y: 0,
           dy: -350,
           width: 150,
+          height: 100, // TODO сделай так, чтобы высота подстраивалась под количество текста, а не задавать вручную
           layout: root.current.verticalLayout,
           background: am5.RoundedRectangle.new(root.current, {
             fill: am5.color(commentColor)
