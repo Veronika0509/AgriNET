@@ -310,13 +310,22 @@ export const createMainChart = (
           y: 0,
           dy: -350,
           width: 150,
-          height: 100, // TODO: Implement dynamic height calculation based on text content length instead of fixed value
+          height: am5.percent(100),
           layout: root.current.verticalLayout,
           background: am5.RoundedRectangle.new(root.current, {
             fill: am5.color(commentColor)
           })
         })
 
+        // Calculate approximate height based on text content
+        const textLength = moistMainComment.text.length;
+        const lineLength = 20; // Approximate characters per line
+        const lineHeight = 20; // Height per line in pixels
+        const padding = 30; // Additional padding
+        const estimatedHeight = Math.ceil(textLength / lineLength) * lineHeight + padding;
+        
+        rangeLabel.set("height", estimatedHeight);
+        
         let label = labelsContainer.children.push(rangeLabel)
 
         label.children.push(am5.Label.new(root.current, {
