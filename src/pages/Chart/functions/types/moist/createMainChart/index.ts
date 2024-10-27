@@ -318,18 +318,18 @@ export const createMainChart = (
         })
 
         // Calculate approximate height based on text content
-        const textLength = moistMainComment.text.length;
+        const text1 = 'Calculate approximate height based on text content Calculate approximate height based on text content Calculate approximate height based on text content Calculate approximate height based on text content Calculate approximate height based on text content'
+        const textLength = text1.length;
         const lineLength = 20; // Approximate characters per line
         const lineHeight = 20; // Height per line in pixels
-        const padding = 30; // Additional padding
-        const estimatedHeight = Math.ceil(textLength / lineLength) * lineHeight + padding;
+        const estimatedHeight = Math.ceil(textLength / lineLength) * lineHeight;
         
         rangeLabel.set("height", estimatedHeight);
         
         let label = labelsContainer.children.push(rangeLabel)
 
         label.children.push(am5.Label.new(root.current, {
-          text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
+          text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${text1}`,
           fill: am5.color(0x000000),
           maxWidth: 150,
           oversizedBehavior: "wrap",
