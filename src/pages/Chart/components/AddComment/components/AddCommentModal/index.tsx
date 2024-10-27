@@ -50,6 +50,7 @@ const AddCommentModal = (props: any) => {
         const comments = await getComments('M', props.sensorId)
         if (comments.status === 200) {
           props.setMoistMainComments(comments.data)
+          // TODO setAddCommentItemShowed false
         }
         onCancel()
       }
