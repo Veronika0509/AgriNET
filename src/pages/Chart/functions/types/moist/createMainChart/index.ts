@@ -310,21 +310,11 @@ export const createMainChart = (
           y: 0,
           dy: -350,
           width: 150,
-          height: am5.percent(100),
           layout: root.current.verticalLayout,
           background: am5.RoundedRectangle.new(root.current, {
             fill: am5.color(commentColor)
           })
         })
-
-        // Calculate approximate height based on text content
-        const text1 = 'Calculate approximate height based on text content Calculate approximate height based on text content Calculate approximate height based on text content Calculate approximate height based on text content Calculate approximate height based on text content'
-        const textLength = text1.length;
-        const lineLength = 20; // Approximate characters per line
-        const lineHeight = 20; // Height per line in pixels
-        const estimatedHeight = Math.ceil(textLength / lineLength) * lineHeight;
-        
-        rangeLabel.set("height", estimatedHeight);
         
         let label = labelsContainer.children.push(rangeLabel)
 
