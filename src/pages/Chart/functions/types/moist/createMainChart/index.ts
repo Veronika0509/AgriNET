@@ -382,9 +382,11 @@ export const createMainChart = (
         }));
 
         closeButton.events.on('click', () => {
-          removeComment(moistMainComment.id, userId)
-          rangeLabel.dispose()
-          commentRangeDataItem.dispose()
+          if (window.confirm('Вы уверены, что хотите удалить этот комментарий?')) {
+            removeComment(moistMainComment.id, userId)
+            rangeLabel.dispose()
+            commentRangeDataItem.dispose()
+          }
         })
       });
 
