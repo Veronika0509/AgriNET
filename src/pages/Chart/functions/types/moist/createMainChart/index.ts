@@ -382,7 +382,7 @@ export const createMainChart = (
         }));
 
         closeButton.events.on('click', () => {
-          if (window.confirm('Вы уверены, что хотите удалить этот комментарий?')) {
+          if (window.confirm('Are you sure want to delete this message?')) {
             removeComment(moistMainComment.id, userId)
             rangeLabel.dispose()
             commentRangeDataItem.dispose()
