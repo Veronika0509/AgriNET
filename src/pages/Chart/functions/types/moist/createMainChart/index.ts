@@ -283,11 +283,13 @@ export const createMainChart = (
         'Installation': 'FFFFFF',
       }
 
-      let labelsContainer = chart.plotContainer.children.push(am5.Container.new(root.current, {
-        width: am5.percent(100),
-        height: am5.percent(100),
-        layer: 30
-      }));
+      // let labelsContainer = chart.plotContainer.children.push(am5.Container.new(root.current, {
+      //   width: am5.percent(100),
+      //   height: am5.percent(100),
+      //   layer: 30
+      // }));
+
+      let labelsArray: any[] = []
 
       moistMainComments.forEach((moistMainComment: any, index: number) => {
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
@@ -296,6 +298,22 @@ export const createMainChart = (
           value: commentDate,
         });
         series.createAxisRange(commentRangeDataItem);
+        let container = xAxis.topGridContainer.children.push(am5.Container.new(root.current, {
+          width: am5.percent(100),
+          height: am5.percent(100),
+          layer: 30,
+          draggable: true
+        }))
+        container.adapters.add("y", function() {
+          return 0;
+        });
+        container.adapters.add("x", function(x: any) {
+          return Math.max(0, Math.min(chart.plotContainer.width(), x));
+        });
+        container.events.on("dragged", function() {
+          updateLabel();
+        });
+
         commentRangeDataItem.get("grid").setAll({
           strokeOpacity: 1,
           visible: true,
@@ -318,7 +336,7 @@ export const createMainChart = (
           }),
         })
         
-        let label = labelsContainer.children.push(rangeLabel)
+        let label = container.children.push(rangeLabel)
         label.children.push(am5.Label.new(root.current, {
           text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
           fill: am5.color(0x000000),
@@ -384,15 +402,27 @@ export const createMainChart = (
             commentRangeDataItem.dispose()
           }
         })
+
+        function updateLabel(value: any) {
+          let x = container.x();
+          let position = xAxis.toAxisPosition(x / chart.plotContainer.width());
+
+          if(value == null){
+            value = xAxis.positionToValue(position);
+          }
+
+          commentRangeDataItem.set("value", value);
+        }
+        labelsArray.push(label)
       });
 
       function positionLabels() {
-        let labels = labelsContainer.children;
-        labels.values.sort((a: any, b: any) => a.x() - b.x());
+        let labels: any = labelsArray
+        labels.sort((a: any, b: any) => a.x() - b.x());
 
         for (let i = 1; i < labels.length; i++) {
-          let currentLabel = labels.getIndex(i);
-          let prevLabel = labels.getIndex(i - 1);
+          let currentLabel = labels[i];
+          let prevLabel = labels[i - 1];
 
           if (currentLabel.x() - prevLabel.x() < prevLabel.width()) {
             currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5);
