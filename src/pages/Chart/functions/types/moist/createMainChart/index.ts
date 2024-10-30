@@ -293,7 +293,7 @@ export const createMainChart = (
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
         const commentDate = new Date(moistMainComment.key).getTime();
         const commentRangeDataItem = xAxis.makeDataItem({
-          value: commentDate
+          value: commentDate,
         });
         series.createAxisRange(commentRangeDataItem);
         commentRangeDataItem.get("grid").setAll({
@@ -301,7 +301,7 @@ export const createMainChart = (
           visible: true,
           stroke: am5.color(commentColor),
           strokeWidth: 6,
-          location: 0,
+          location: 0
         });
         const xPos = xAxis.valueToPosition(commentDate);
 
@@ -315,11 +315,10 @@ export const createMainChart = (
           layout: root.current.verticalLayout,
           background: am5.RoundedRectangle.new(root.current, {
             fill: am5.color(commentColor)
-          })
+          }),
         })
         
         let label = labelsContainer.children.push(rangeLabel)
-
         label.children.push(am5.Label.new(root.current, {
           text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
           fill: am5.color(0x000000),
@@ -329,7 +328,7 @@ export const createMainChart = (
           paddingTop: 5,
           paddingBottom: -20,
           paddingLeft: 5,
-          paddingRight: 5
+          paddingRight: 5,
         }));
 
         let buttonsContainer = label.children.push(am5.Container.new(root.current, {
@@ -344,7 +343,7 @@ export const createMainChart = (
         let dragButton = buttonsContainer.children.push(am5.Button.new(root.current,  {
           width: 20,
           height: 20,
-          cursorOverStyle: "pointer",
+          cursorOverStyle: "ew-resize",
           background: am5.Rectangle.new(root.current, {
             fill: am5.color(0xffffff),
             fillOpacity: 0,
@@ -353,7 +352,6 @@ export const createMainChart = (
           centerX: am5.p100,
           marginRight: 5,
         }));
-
         dragButton.children.push(am5.Picture.new(root.current, {
           src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
           width: 12,
@@ -372,7 +370,6 @@ export const createMainChart = (
             fillOpacity: 0,
           }),
         }));
-
         closeButton.children.push(am5.Picture.new(root.current, {
           src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
           width: 12,
@@ -380,7 +377,6 @@ export const createMainChart = (
           centerX: am5.p50,
           centerY: am5.p50
         }));
-
         closeButton.events.on('click', () => {
           if (window.confirm('Are you sure want to delete this message?')) {
             removeComment(moistMainComment.id, userId)
