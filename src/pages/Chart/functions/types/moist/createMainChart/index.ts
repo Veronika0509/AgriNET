@@ -3,12 +3,14 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import {addChart} from "../../../addChart";
 import {p100} from "@amcharts/amcharts5";
+import {removeComment} from "../../../../components/AddComment/data/removeComment";
 
 let startDateForZooming: any;
 let endDateForZooming: any;
 
 export const createMainChart = (
   props: any,
+  userId: any,
   root: any,
   isMobile: any,
   fullDatesArray: any,
@@ -319,13 +321,13 @@ export const createMainChart = (
         let label = labelsContainer.children.push(rangeLabel)
 
         label.children.push(am5.Label.new(root.current, {
-          text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${text1}`,
+          text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
           fill: am5.color(0x000000),
           maxWidth: 150,
           oversizedBehavior: "wrap",
           fontSize: 12,
           paddingTop: 5,
-          paddingBottom: 5,
+          paddingBottom: -20,
           paddingLeft: 5,
           paddingRight: 5
         }));
@@ -339,7 +341,7 @@ export const createMainChart = (
           paddingRight: 3,
         }));
 
-        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current,  {
           width: 20,
           height: 20,
           cursorOverStyle: "pointer",
@@ -349,7 +351,7 @@ export const createMainChart = (
           }),
           x: am5.p100,
           centerX: am5.p100,
-          // marginRight: 5,
+          marginRight: 5,
         }));
 
         dragButton.children.push(am5.Picture.new(root.current, {
@@ -363,7 +365,7 @@ export const createMainChart = (
         let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
-          // marginLeft: 5,
+          marginLeft: 5,
           cursorOverStyle: "pointer",
           background: am5.Rectangle.new(root.current, {
             fill: am5.color(0xffffff),
@@ -380,7 +382,9 @@ export const createMainChart = (
         }));
 
         closeButton.events.on('click', () => {
-          console.log(123)
+          removeComment(moistMainComment.id, userId)
+          rangeLabel.dispose()
+          commentRangeDataItem.dispose()
         })
       });
 
