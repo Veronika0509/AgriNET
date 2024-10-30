@@ -403,7 +403,7 @@ export const createMainChart = (
           }
         })
 
-        function updateLabel(value: any) {
+        function updateLabel(value?: any) {
           let x = container.x();
           let position = xAxis.toAxisPosition(x / chart.plotContainer.width());
 
