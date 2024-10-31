@@ -303,6 +303,7 @@ export const createMainChart = (
           // width: am5.p100,
           height: am5.percent(100),
           centerX: am5.p50,
+          dx: 300,
           layer: 30,
           draggable: true
         }))
@@ -406,7 +407,6 @@ export const createMainChart = (
 
         function updateLabel(value?: any) {
           let x = container.x();
-          const move = container.children._values[0]._settings.x
           // console.log(move)
           let position = xAxis.toAxisPosition(x / chart.plotContainer.width());
 
@@ -414,6 +414,7 @@ export const createMainChart = (
             value = xAxis.positionToValue(position);
           }
 
+          container._settings.dx = '0'
           commentRangeDataItem.set("value", value);
         }
         labelsArray.push(label)
