@@ -298,16 +298,19 @@ export const createMainChart = (
           value: commentDate,
         });
         series.createAxisRange(commentRangeDataItem);
+        const xPos = xAxis.valueToPosition(commentDate);
         let container = xAxis.topGridContainer.children.push(am5.Container.new(root.current, {
-          width: am5.percent(100),
+          // width: am5.p100,
           height: am5.percent(100),
+          centerX: am5.p50,
           layer: 30,
           draggable: true
         }))
-        container.adapters.add("y", function() {
-          return 0;
-        });
-        container.adapters.add("x", function(x: any) {
+        container.adapters.add("y", function () { return 0; });
+
+// Restrict dragging to inside plot area
+        container.adapters.add("x", function (x) {
+          console.log(x)
           return Math.max(0, Math.min(chart.plotContainer.width(), x));
         });
         container.events.on("dragged", function() {
@@ -321,7 +324,6 @@ export const createMainChart = (
           strokeWidth: 6,
           location: 0
         });
-        const xPos = xAxis.valueToPosition(commentDate);
 
         const rangeLabel = commentRangeDataItem.get("label")
         rangeLabel.setAll({
@@ -405,6 +407,8 @@ export const createMainChart = (
 
         function updateLabel(value?: any) {
           let x = container.x();
+          const move = container.children._values[0]._settings.x
+          // console.log(move)
           let position = xAxis.toAxisPosition(x / chart.plotContainer.width());
 
           if(value == null){
