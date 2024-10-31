@@ -306,7 +306,7 @@ export const createMainChart = (
           layer: 30,
           draggable: true
         }))
-        container.adapters.add("y", function () { return 0; });
+        container.adapters.add("y", function () { return 1; });
 
 // Restrict dragging to inside plot area
         container.adapters.add("x", function (x) {
