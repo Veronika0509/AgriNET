@@ -309,8 +309,7 @@ export const createMainChart = (
         container.adapters.add("y", function () { return 1; });
 
 // Restrict dragging to inside plot area
-        container.adapters.add("x", function (x) {
-          console.log(x)
+        container.adapters.add("x", function (x: any) {
           return Math.max(0, Math.min(chart.plotContainer.width(), x));
         });
         container.events.on("dragged", function() {
