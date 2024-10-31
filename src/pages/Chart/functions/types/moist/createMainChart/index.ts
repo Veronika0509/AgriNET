@@ -299,18 +299,14 @@ export const createMainChart = (
         });
         series.createAxisRange(commentRangeDataItem);
         const xPos = xAxis.valueToPosition(commentDate);
-        console.log(xAxis.valueToPosition(commentDate) * chart.plotContainer.width())
         let container = xAxis.topGridContainer.children.push(am5.Container.new(root.current, {
-          // width: am5.p100,
+          // width: am5.percent(100),
           height: am5.percent(100),
           centerX: am5.p50,
-          dx: 300,
           layer: 30,
           draggable: true
         }))
         container.adapters.add("y", function () { return 1; });
-
-// Restrict dragging to inside plot area
         container.adapters.add("x", function (x: any) {
           return Math.max(0, Math.min(chart.plotContainer.width(), x));
         });
@@ -431,9 +427,10 @@ export const createMainChart = (
 
           if (currentLabel.x() - prevLabel.x() < prevLabel.width()) {
             currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5);
-          } else {
-            currentLabel.set("y", 0);
           }
+          //else {
+          //             currentLabel.set("y", 0);
+          //           }
         }
       }
 
