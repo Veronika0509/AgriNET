@@ -304,6 +304,7 @@ export const createMainChart = (
           height: am5.percent(100),
           centerX: am5.p50,
           layer: 30,
+          dx: 100,
           draggable: true
         }))
         container.adapters.add("y", function () { return 1; });
