@@ -299,6 +299,7 @@ export const createMainChart = (
         });
         series.createAxisRange(commentRangeDataItem);
         const xPos = xAxis.valueToPosition(commentDate);
+        console.log(xAxis.valueToPosition(commentDate) * chart.plotContainer.width())
         let container = xAxis.topGridContainer.children.push(am5.Container.new(root.current, {
           // width: am5.p100,
           height: am5.percent(100),
