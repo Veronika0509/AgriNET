@@ -4,6 +4,7 @@ import * as am5xy from "@amcharts/amcharts5/xy";
 import {addChart} from "../../../addChart";
 import {p100} from "@amcharts/amcharts5";
 import {removeComment} from "../../../../components/AddComment/data/removeComment";
+import login from "../../../../../Login";
 
 let startDateForZooming: any;
 let endDateForZooming: any;
@@ -293,27 +294,48 @@ export const createMainChart = (
 
       moistMainComments.forEach((moistMainComment: any, index: number) => {
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
-        const commentDate = new Date(moistMainComment.key).getTime();
+        const commentDate = new Date(moistMainComment.key)
         const commentRangeDataItem = xAxis.makeDataItem({
-          value: commentDate,
+          value: commentDate.getTime(),
         });
         series.createAxisRange(commentRangeDataItem);
-        const xPos = xAxis.valueToPosition(commentDate);
+
         let container = xAxis.topGridContainer.children.push(am5.Container.new(root.current, {
-          // width: am5.percent(100),
           height: am5.percent(100),
           centerX: am5.p50,
           layer: 30,
-          dx: 100,
           draggable: true
-        }))
-        container.adapters.add("y", function () { return 1; });
-        container.adapters.add("x", function (x: any) {
-          return Math.max(0, Math.min(chart.plotContainer.width(), x));
+        }));
+
+        container.adapters.add("y", function() {
+          return 1;
         });
+        container.adapters.add("x", function(x: any) {
+          const maxX = chart.plotContainer.width();
+          return Math.max(0, Math.min(maxX, x));
+        });
+
         container.events.on("dragged", function() {
-          updateLabel();
+          const x = container.x();
+          const position = xAxis.toAxisPosition(x / chart.plotContainer.width());
+          const value = xAxis.positionToValue(position);
+          commentRangeDataItem.set("value", value);
         });
+
+        chart.plotContainer.events.on("sizechanged", function() {
+          const currentValue = commentRangeDataItem.get("value");
+          if (currentValue) {
+            const newXPos = xAxis.valueToPosition(currentValue);
+            const newContainerX = newXPos * chart.plotContainer.width();
+            container.set("x", newContainerX);
+          }
+        });
+
+        setTimeout(() => {
+          const newXPos = xAxis.valueToPosition(commentDate.getTime());
+          const newContainerX = newXPos * chart.plotContainer.width();
+          container.set("x", newContainerX);
+        }, 100);
 
         commentRangeDataItem.get("grid").setAll({
           strokeOpacity: 1,
@@ -324,6 +346,7 @@ export const createMainChart = (
         });
 
         const rangeLabel = commentRangeDataItem.get("label")
+        const xPos = xAxis.valueToPosition(commentDate);
         rangeLabel.setAll({
           visible: true,
           x: xPos,
@@ -335,7 +358,7 @@ export const createMainChart = (
             fill: am5.color(commentColor)
           }),
         })
-        
+
         let label = container.children.push(rangeLabel)
         label.children.push(am5.Label.new(root.current, {
           text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
@@ -357,8 +380,7 @@ export const createMainChart = (
           paddingTop: 8,
           paddingRight: 3,
         }));
-
-        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current,  {
+        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
           cursorOverStyle: "ew-resize",
@@ -377,7 +399,6 @@ export const createMainChart = (
           centerX: am5.p50,
           centerY: am5.p50
         }));
-
         let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
@@ -403,25 +424,32 @@ export const createMainChart = (
           }
         })
 
-        function updateLabel(value?: any) {
-          let x = container.x();
-          // console.log(move)
-          let position = xAxis.toAxisPosition(x / chart.plotContainer.width());
-
-          if(value == null){
-            value = xAxis.positionToValue(position);
-          }
-
-          container._settings.dx = '0'
-          commentRangeDataItem.set("value", value);
-        }
+        // function updateLabel(value?: any) {
+        //   let x = container.x();
+        //   let position = xAxis.toAxisPosition(x / chart.plotContainer.width());
+        //
+        //   if (value == null) {
+        //     value = xAxis.positionToValue(position);
+        //   }
+        //
+        //   commentRangeDataItem.set("value", value);
+        // }
+        //
         labelsArray.push(label)
+        // root.current.events.on("frameended", function () {
+        //   const newXPos = xAxis.valueToPosition(commentDate.getTime());
+        //   const newContainerX = newXPos * chart.plotContainer.width();
+        //   container.set("x", newContainerX);
+        //   let x = container.x();
+        //   let position = xAxis.toAxisPosition(x / chart.plotContainer.width());
+        //   const value = xAxis.positionToValue(position);
+        //   commentRangeDataItem.set("value", value);
+        // });
       });
 
       function positionLabels() {
         let labels: any = labelsArray
         labels.sort((a: any, b: any) => a.x() - b.x());
-
         for (let i = 1; i < labels.length; i++) {
           let currentLabel = labels[i];
           let prevLabel = labels[i - 1];
