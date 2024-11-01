@@ -301,7 +301,16 @@ export const createMainChart = (
         series.createAxisRange(commentRangeDataItem);
 
         const axisRange = xAxis.createAxisRange(commentRangeDataItem);
-        const container = axisRange.get("grid").get("parent");
+        const grid = axisRange.get("grid");
+        if (!grid) {
+          console.error("Grid not found for axis range");
+          return;
+        }
+        const container = grid.get("parent");
+        if (!container) {
+          console.error("Container not found for grid");
+          return;
+        }
 
         commentRangeDataItem.get("grid").setAll({
           strokeOpacity: 1,
