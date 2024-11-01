@@ -335,31 +335,30 @@ export const createMainChart = (
           dragMode: "x"
         });
 
-        const initialY = rangeLabel.y();
+        let startX: number;
+        let startValue: number;
+
+        rangeLabel.events.on("dragstart", function(e: any) {
+          startX = rangeLabel.x();
+          startValue = commentRangeDataItem.get("value");
+        });
+
         rangeLabel.events.on("dragged", function(e: any) {
-          // Получаем границы контейнера графика
-          const containerBounds = chart.plotContainer.globalBounds();
-          const labelBounds = rangeLabel.globalBounds();
+          const dx = rangeLabel.x() - startX;
+          const availableWidth = chart.plotContainer.width();
+          const valueRange = xAxis.getPrivate("max") - xAxis.getPrivate("min");
+          const valueDelta = (dx / availableWidth) * valueRange;
           
-          // Получаем текущую позицию X метки
-          let currentX = rangeLabel.x();
+          let newValue = startValue + valueDelta;
           
-          // Ограничиваем движение меткой границами графика
-          const minX = 0;
-          const maxX = containerBounds.right - containerBounds.left - labelBounds.width;
+          // Ограничиваем значение в пределах оси
+          newValue = Math.max(xAxis.getPrivate("min"), Math.min(newValue, xAxis.getPrivate("max")));
           
-          currentX = Math.max(minX, Math.min(currentX, maxX));
+          commentRangeDataItem.set("value", newValue);
           
-          // Фиксируем позицию Y
-          rangeLabel.set("y", initialY);
-          
-          // Обновляем позицию метки на оси
-          const position = xAxis.toAxisPosition(currentX / chart.plotContainer.width());
-          const value = xAxis.positionToValue(position);
-          commentRangeDataItem.set("value", value);
-          
-          // Устанавливаем X позицию с ограничениями
-          rangeLabel.set("x", currentX);
+          // Обновляем startX и startValue для следующего события dragged
+          startX = rangeLabel.x();
+          startValue = newValue;
         });
         let label = container.children.push(rangeLabel)
         label.children.push(am5.Label.new(root.current, {
