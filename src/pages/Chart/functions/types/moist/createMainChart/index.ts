@@ -450,8 +450,7 @@ export const createMainChart = (
           let prevLabel = labels[i - 1];
 
           if (currentLabel.x() - prevLabel.x() < prevLabel.width()) {
-            currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5);
-            console.log('label position changed to ' + prevLabel.y() + prevLabel.height() + 5)
+            currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5)
           }
           //else {
           //             currentLabel.set("y", 0);
