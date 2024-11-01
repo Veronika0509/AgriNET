@@ -361,10 +361,17 @@ export const createMainChart = (
           // Ограничиваем значение в пределах оси
           newValue = Math.max(xAxis.getPrivate("min"), Math.min(newValue, xAxis.getPrivate("max")));
 
+          // Обновляем позицию и grid линии и label
           commentRangeDataItem.set("value", newValue);
+          
+          // Ограничиваем позицию label в пределах контейнера
+          const labelWidth = rangeLabel.width();
+          const containerWidth = chart.plotContainer.width();
+          const newX = Math.max(0, Math.min(containerWidth - labelWidth, rangeLabel.x()));
+          rangeLabel.set("x", newX);
 
           // Обновляем startX и startValue для следующего события dragged
-          startX = rangeLabel.x();
+          startX = newX;
           startValue = newValue;
         });
         let label = container.children.push(rangeLabel)
