@@ -5,6 +5,7 @@ import {addChart} from "../../../addChart";
 import {p100} from "@amcharts/amcharts5";
 import {removeComment} from "../../../../components/AddComment/data/removeComment";
 import login from "../../../../../Login";
+import {range} from "@amcharts/amcharts5/.internal/core/util/Animation";
 
 let startDateForZooming: any;
 let endDateForZooming: any;
@@ -327,16 +328,18 @@ export const createMainChart = (
           visible: true,
           dy: -350,
           width: 150,
+          y: 350,
+          centerY: am5.percent(50),
           layout: root.current.verticalLayout,
           background: am5.RoundedRectangle.new(root.current, {
             fill: am5.color(commentColor)
           }),
-          draggable: true,
-          dragMode: "x"
+          draggable: true
         });
         rangeLabel.adapters.add("y", function() {
           return 1;
-        });
+        })
+        console.log(rangeLabel)
         // rangeLabel.adapters.add("x", function(x: any) {
         //   const maxX = chart.plotContainer.width();
         //   return Math.max(0, Math.min(maxX, x));
