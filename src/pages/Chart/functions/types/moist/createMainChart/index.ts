@@ -334,6 +334,13 @@ export const createMainChart = (
           draggable: true,
           dragMode: "x"
         });
+        // rangeLabel.adapters.add("y", function() {
+        //   return 1;
+        // });
+        // rangeLabel.adapters.add("x", function(x: any) {
+        //   const maxX = chart.plotContainer.width();
+        //   return Math.max(0, Math.min(maxX, x));
+        // });
 
         let startX: number;
         let startValue: number;
@@ -348,14 +355,14 @@ export const createMainChart = (
           const availableWidth = chart.plotContainer.width();
           const valueRange = xAxis.getPrivate("max") - xAxis.getPrivate("min");
           const valueDelta = (dx / availableWidth) * valueRange;
-          
+
           let newValue = startValue + valueDelta;
-          
+
           // Ограничиваем значение в пределах оси
           newValue = Math.max(xAxis.getPrivate("min"), Math.min(newValue, xAxis.getPrivate("max")));
-          
+
           commentRangeDataItem.set("value", newValue);
-          
+
           // Обновляем startX и startValue для следующего события dragged
           startX = rangeLabel.x();
           startValue = newValue;
@@ -448,23 +455,23 @@ export const createMainChart = (
         // });
       });
 
-      function positionLabels() {
-        let labels: any = labelsArray
-        labels.sort((a: any, b: any) => a.x() - b.x());
-        for (let i = 1; i < labels.length; i++) {
-          let currentLabel = labels[i];
-          let prevLabel = labels[i - 1];
-
-          if (currentLabel.x() - prevLabel.x() < prevLabel.width()) {
-            currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5)
-          }
-          //else {
-          //             currentLabel.set("y", 0);
-          //           }
-        }
-      }
-
-      root.current.events.on("frameended", positionLabels);
+      // function positionLabels() {
+      //   let labels: any = labelsArray
+      //   labels.sort((a: any, b: any) => a.x() - b.x());
+      //   for (let i = 1; i < labels.length; i++) {
+      //     let currentLabel = labels[i];
+      //     let prevLabel = labels[i - 1];
+      //
+      //     if (currentLabel.x() - prevLabel.x() < prevLabel.width()) {
+      //       currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5)
+      //     }
+      //     //else {
+      //     //             currentLabel.set("y", 0);
+      //     //           }
+      //   }
+      // }
+      //
+      // root.current.events.on("frameended", positionLabels);
     }
 
 
