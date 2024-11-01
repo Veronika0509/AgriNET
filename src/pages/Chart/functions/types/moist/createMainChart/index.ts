@@ -314,12 +314,6 @@ export const createMainChart = (
 
         // Get container after grid is configured
         const container = chart.plotContainer;
-        if (!container) {
-          console.error("Plot container not found");
-          return;
-        }
-
-        // Configure the range data item grid
         commentRangeDataItem.get("grid").setAll({
           strokeOpacity: 1,
           visible: true,
@@ -331,8 +325,8 @@ export const createMainChart = (
         const rangeLabel = commentRangeDataItem.get("label");
         rangeLabel.setAll({
           visible: true,
-          centerX: am5.p50,
-          centerY: am5.p100,
+          // centerX: am5.p50,
+          // centerY: am5.p100,
           dy: -350,
           width: 150,
           layout: root.current.verticalLayout,
@@ -348,7 +342,6 @@ export const createMainChart = (
           const value = xAxis.positionToValue(position);
           commentRangeDataItem.set("value", value);
         });
-
         let label = container.children.push(rangeLabel)
         label.children.push(am5.Label.new(root.current, {
           text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
