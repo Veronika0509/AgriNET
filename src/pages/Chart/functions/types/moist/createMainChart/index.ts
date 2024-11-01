@@ -300,42 +300,8 @@ export const createMainChart = (
         });
         series.createAxisRange(commentRangeDataItem);
 
-        let container = xAxis.topGridContainer.children.push(am5.Container.new(root.current, {
-          height: am5.percent(100),
-          centerX: am5.p50,
-          layer: 30,
-          draggable: true
-        }));
-
-        container.adapters.add("y", function() {
-          return 1;
-        });
-        container.adapters.add("x", function(x: any) {
-          const maxX = chart.plotContainer.width();
-          return Math.max(0, Math.min(maxX, x));
-        });
-
-        container.events.on("dragged", function() {
-          const x = container.x();
-          const position = xAxis.toAxisPosition(x / chart.plotContainer.width());
-          const value = xAxis.positionToValue(position);
-          commentRangeDataItem.set("value", value);
-        });
-
-        chart.plotContainer.events.on("sizechanged", function() {
-          const currentValue = commentRangeDataItem.get("value");
-          if (currentValue) {
-            const newXPos = xAxis.valueToPosition(currentValue);
-            const newContainerX = newXPos * chart.plotContainer.width();
-            container.set("x", newContainerX);
-          }
-        });
-
-        setTimeout(() => {
-          const newXPos = xAxis.valueToPosition(commentDate.getTime());
-          const newContainerX = newXPos * chart.plotContainer.width();
-          container.set("x", newContainerX);
-        }, 100);
+        const axisRange = xAxis.createAxisRange(commentRangeDataItem);
+        const container = axisRange.get("grid").get("parent");
 
         commentRangeDataItem.get("grid").setAll({
           strokeOpacity: 1,
@@ -345,19 +311,26 @@ export const createMainChart = (
           location: 0
         });
 
-        const rangeLabel = commentRangeDataItem.get("label")
-        const xPos = xAxis.valueToPosition(commentDate);
+        const rangeLabel = commentRangeDataItem.get("label");
         rangeLabel.setAll({
           visible: true,
-          x: xPos,
-          y: 0,
+          centerX: am5.p50,
+          centerY: am5.p100,
           dy: -350,
           width: 150,
           layout: root.current.verticalLayout,
           background: am5.RoundedRectangle.new(root.current, {
             fill: am5.color(commentColor)
           }),
-        })
+          draggable: true
+        });
+
+        rangeLabel.events.on("dragged", function() {
+          const x = rangeLabel.x();
+          const position = xAxis.toAxisPosition(x / chart.plotContainer.width());
+          const value = xAxis.positionToValue(position);
+          commentRangeDataItem.set("value", value);
+        });
 
         let label = container.children.push(rangeLabel)
         label.children.push(am5.Label.new(root.current, {
