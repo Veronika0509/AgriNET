@@ -339,19 +339,26 @@ export const createMainChart = (
         rangeLabel.events.on("dragged", function(e: any) {
           // Получаем границы контейнера графика
           const containerBounds = chart.plotContainer.globalBounds();
-
+          const labelBounds = rangeLabel.globalBounds();
+          
           // Получаем текущую позицию X метки
-          const currentX = rangeLabel.x();
+          let currentX = rangeLabel.x();
+          
+          // Ограничиваем движение меткой границами графика
+          const minX = 0;
+          const maxX = containerBounds.right - containerBounds.left - labelBounds.width;
+          
+          currentX = Math.max(minX, Math.min(currentX, maxX));
           
           // Фиксируем позицию Y
           rangeLabel.set("y", initialY);
           
-          // Обновляем позицию метки на оси без ограничений
+          // Обновляем позицию метки на оси
           const position = xAxis.toAxisPosition(currentX / chart.plotContainer.width());
           const value = xAxis.positionToValue(position);
           commentRangeDataItem.set("value", value);
           
-          // Устанавливаем X позицию без ограничений
+          // Устанавливаем X позицию с ограничениями
           rangeLabel.set("x", currentX);
         });
         let label = container.children.push(rangeLabel)
