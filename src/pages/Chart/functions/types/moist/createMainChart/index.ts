@@ -325,22 +325,36 @@ export const createMainChart = (
         const rangeLabel = commentRangeDataItem.get("label");
         rangeLabel.setAll({
           visible: true,
-          // centerX: am5.p50,
-          // centerY: am5.p100,
           dy: -350,
           width: 150,
           layout: root.current.verticalLayout,
           background: am5.RoundedRectangle.new(root.current, {
             fill: am5.color(commentColor)
           }),
-          draggable: true
+          draggable: true,
+          dragMode: "x"
         });
 
-        rangeLabel.events.on("dragged", function() {
-          const x = rangeLabel.x();
+        // Установка начальной позиции Y
+        const initialY = rangeLabel.y();
+
+        rangeLabel.events.on("dragged", function(e) {
+          // Получаем границы контейнера графика
+          const containerBounds = chart.plotContainer.globalBounds();
+          
+          // Ограничиваем движение по X в пределах графика
+          const x = Math.max(0, Math.min(rangeLabel.x(), containerBounds.right - rangeLabel.width()));
+          
+          // Фиксируем позицию Y
+          rangeLabel.set("y", initialY);
+          
+          // Обновляем позицию метки на оси
           const position = xAxis.toAxisPosition(x / chart.plotContainer.width());
           const value = xAxis.positionToValue(position);
           commentRangeDataItem.set("value", value);
+          
+          // Принудительно устанавливаем позицию X
+          rangeLabel.set("x", x);
         });
         let label = container.children.push(rangeLabel)
         label.children.push(am5.Label.new(root.current, {
