@@ -334,9 +334,9 @@ export const createMainChart = (
           draggable: true,
           dragMode: "x"
         });
-        // rangeLabel.adapters.add("y", function() {
-        //   return 1;
-        // });
+        rangeLabel.adapters.add("y", function() {
+          return 1;
+        });
         // rangeLabel.adapters.add("x", function(x: any) {
         //   const maxX = chart.plotContainer.width();
         //   return Math.max(0, Math.min(maxX, x));
@@ -366,7 +366,7 @@ export const createMainChart = (
           
           // Ограничиваем позицию label в пределах контейнера
           const labelWidth = rangeLabel.width();
-          const containerWidth = chart.plotContainer.width();
+          const containerWidth = chart.plotContainer.width() + 150;
           const newX = Math.max(0, Math.min(containerWidth - labelWidth, rangeLabel.x()));
           rangeLabel.set("x", newX);
 
