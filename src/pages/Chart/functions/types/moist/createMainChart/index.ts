@@ -340,19 +340,19 @@ export const createMainChart = (
           // Получаем границы контейнера графика
           const containerBounds = chart.plotContainer.globalBounds();
 
-          // Ограничиваем движение по X в пределах графика
-          const x = Math.max(0, Math.min(rangeLabel.x(), containerBounds.right - rangeLabel.width()));
-
+          // Получаем текущую позицию X метки
+          const currentX = rangeLabel.x();
+          
           // Фиксируем позицию Y
           rangeLabel.set("y", initialY);
           
-          // Обновляем позицию метки на оси
-          const position = xAxis.toAxisPosition(x / chart.plotContainer.width());
+          // Обновляем позицию метки на оси без ограничений
+          const position = xAxis.toAxisPosition(currentX / chart.plotContainer.width());
           const value = xAxis.positionToValue(position);
           commentRangeDataItem.set("value", value);
           
-          // Принудительно устанавливаем позицию X
-          rangeLabel.set("x", x);
+          // Устанавливаем X позицию без ограничений
+          rangeLabel.set("x", currentX);
         });
         let label = container.children.push(rangeLabel)
         label.children.push(am5.Label.new(root.current, {
