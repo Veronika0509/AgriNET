@@ -335,16 +335,14 @@ export const createMainChart = (
           dragMode: "x"
         });
 
-        // Установка начальной позиции Y
         const initialY = rangeLabel.y();
-
-        rangeLabel.events.on("dragged", function(e) {
+        rangeLabel.events.on("dragged", function(e: any) {
           // Получаем границы контейнера графика
           const containerBounds = chart.plotContainer.globalBounds();
-          
+
           // Ограничиваем движение по X в пределах графика
           const x = Math.max(0, Math.min(rangeLabel.x(), containerBounds.right - rangeLabel.width()));
-          
+
           // Фиксируем позицию Y
           rangeLabel.set("y", initialY);
           
@@ -453,6 +451,7 @@ export const createMainChart = (
 
           if (currentLabel.x() - prevLabel.x() < prevLabel.width()) {
             currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5);
+            console.log('label position changed to ' + prevLabel.y() + prevLabel.height() + 5)
           }
           //else {
           //             currentLabel.set("y", 0);
