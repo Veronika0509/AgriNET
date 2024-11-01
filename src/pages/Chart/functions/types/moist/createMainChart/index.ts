@@ -301,17 +301,25 @@ export const createMainChart = (
         series.createAxisRange(commentRangeDataItem);
 
         const axisRange = xAxis.createAxisRange(commentRangeDataItem);
+        
+        // Create and configure the grid first
         const grid = axisRange.get("grid");
-        if (!grid) {
-          console.error("Grid not found for axis range");
-          return;
-        }
-        const container = grid.get("parent");
+        grid.setAll({
+          strokeOpacity: 1,
+          visible: true,
+          stroke: am5.color(commentColor),
+          strokeWidth: 6,
+          location: 0
+        });
+
+        // Get container after grid is configured
+        const container = chart.plotContainer;
         if (!container) {
-          console.error("Container not found for grid");
+          console.error("Plot container not found");
           return;
         }
 
+        // Configure the range data item grid
         commentRangeDataItem.get("grid").setAll({
           strokeOpacity: 1,
           visible: true,
