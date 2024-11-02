@@ -376,9 +376,14 @@ export const createMainChart = (
           // Устанавливаем draggable в true
           container.set('draggable', true);
         });
-        // dragButton.events.on('pointerup', () => {
-        //   container.set('draggable', false)
-        // })
+
+        root.current.container.setAll({
+          interactive: true
+        });
+        
+        root.current.container.events.on('pointerup', () => {
+          container.set('draggable', false);
+        });
         let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
