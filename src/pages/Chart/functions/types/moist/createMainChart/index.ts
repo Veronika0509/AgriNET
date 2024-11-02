@@ -357,6 +357,32 @@ export const createMainChart = (
           }),
           dx: -20
         }));
+
+        dragButton.events.on("pointerdown", function(ev) {
+          const originalX = container.x();
+          const originalPointerX = ev.point.x;
+
+          dragButton.events.once("pointerup", function() {
+            root.current.setStates("default");
+            container.children.each((child) => {
+              child.set("forceHidden", false);
+            });
+          });
+
+          root.current.setStates("dimmed");
+          
+          root.current.container.children.each((child) => {
+            if (child !== chart) {
+              child.set("forceHidden", true);
+            }
+          });
+
+          root.current.events.on("pointermove", function(ev) {
+            const deltaX = ev.point.x - originalPointerX;
+            container.set("x", originalX + deltaX);
+            updateLabel();
+          });
+        });
         dragButton.children.push(am5.Picture.new(root.current, {
           src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
           width: 12,
