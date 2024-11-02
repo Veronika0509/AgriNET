@@ -292,9 +292,10 @@ export const createMainChart = (
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
         const rangeDataItem = xAxis.makeDataItem({})
         xAxis.createAxisRange(rangeDataItem)
+        // let isDraggable: boolean = false
         const container = am5.Container.new(root.current, {
           centerX: am5.p50,
-          // draggable: false,
+          draggable: false,
           layout: root.verticalLayout,
         })
         container.adapters.add("y", function () {
@@ -365,7 +366,8 @@ export const createMainChart = (
           centerY: am5.p50
         }));
         dragButton.events.on('pointerdown', () => {
-          container.set('draggable', true)
+          container.set('draggable', true);
+          console.log(container._settings.draggable)
         })
         // dragButton.events.on('pointerup', () => {
         //   container.set('draggable', false)
@@ -434,7 +436,7 @@ export const createMainChart = (
 
               for (let j = 0; j < i; j++) {
                 let otherLabel = labels[j];
-                  
+
                 if (doLabelsOverlap(currentLabel, otherLabel)) {
                   overlap = true;
                   yOffset = Math.max(
@@ -443,7 +445,7 @@ export const createMainChart = (
                   );
                 }
               }
-                
+
               if (overlap) {
                 currentLabel.set("y", yOffset);
               }
@@ -465,7 +467,7 @@ export const createMainChart = (
           const h1 = label1.height();
           const h2 = label2.height();
 
-          return !(x1 + w1 < x2 || x2 + w2 < x1 || 
+          return !(x1 + w1 < x2 || x2 + w2 < x1 ||
                   y1 + h1 < y2 || y2 + h2 < y1);
         }
 
