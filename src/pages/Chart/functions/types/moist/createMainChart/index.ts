@@ -411,13 +411,28 @@ export const createMainChart = (
       });
 
       function positionLabels() {
-        let labels: any = labelsArray
-        labels.sort((a: any, b: any) => a.x() - b.x());
+        let labels: any = labelsArray;
+        
+        // Получаем актуальные позиции меток относительно графика
+        const getLabelPosition = (label: any) => {
+          const parent = label.parent;
+          if (!parent) return 0;
+          return parent.x();
+        };
+
+        // Сортируем метки по их реальным позициям
+        labels.sort((a: any, b: any) => getLabelPosition(a) - getLabelPosition(b));
+
         for (let i = 1; i < labels.length; i++) {
           let currentLabel = labels[i];
           let prevLabel = labels[i - 1];
-          if (currentLabel.x() - prevLabel.x() < prevLabel.width()) {
-            currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5)
+          
+          const currentX = getLabelPosition(currentLabel);
+          const prevX = getLabelPosition(prevLabel);
+          
+          // Проверяем перекрытие меток только если позиции валидны
+          if (currentX !== 0 && prevX !== 0 && currentX - prevX < prevLabel.width()) {
+            currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5);
           } else {
             currentLabel.set("y", 0);
           }
