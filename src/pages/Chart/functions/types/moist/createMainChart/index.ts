@@ -365,10 +365,17 @@ export const createMainChart = (
           centerX: am5.p50,
           centerY: am5.p50
         }));
-        dragButton.events.on('pointerdown', () => {
+        let isDragging = false;
+        dragButton.events.on('pointerdown', (ev) => {
+          // Предотвращаем обработку события по умолчанию
+          ev.stopPropagation();
+
+          // Устанавливаем флаг перетаскивания
+          isDragging = true;
+
+          // Устанавливаем draggable в true
           container.set('draggable', true);
-          console.log(container._settings.draggable)
-        })
+        });
         // dragButton.events.on('pointerup', () => {
         //   container.set('draggable', false)
         // })
