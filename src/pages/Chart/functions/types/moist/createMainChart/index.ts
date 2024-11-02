@@ -405,30 +405,67 @@ export const createMainChart = (
           rangeDataItem.set("value", value)
         }
         function positionLabels() {
-          let labels: any = labelsArray;
+          let labels = labelsArray;
+            
+          // Сортируем метки по X-координате
+          labels.sort((a: any, b: any) => {
+            const aParent = a.parent;
+            const bParent = b.parent;
+            if (!aParent || !bParent) return 0;
+            return aParent.x() - bParent.x();
+          });
 
-          // Получаем актуальные позиции меток относительно графика
-          const getLabelPosition = (label: any) => {
-            const parent = label.parent;
-            if (!parent) return 0;
-            return parent.x();
-          };
+          // Сбрасываем все Y-позиции
+          labels.forEach((label: any) => {
+            label.set("y", 0);
+          });
 
-          labels.sort((a: any, b: any) => getLabelPosition(a) - getLabelPosition(b));
-
-          for (let i = 1; i < labels.length; i++) {
+          // Проверяем перекрытия и корректируем позиции
+          for (let i = 0; i < labels.length; i++) {
             let currentLabel = labels[i];
-            let prevLabel = labels[i - 1];
+            let yOffset = 0;
+            let overlap = true;
 
-            const currentX = getLabelPosition(currentLabel);
-            const prevX = getLabelPosition(prevLabel);
-
-            if (currentX !== 0 && prevX !== 0 && currentX - prevX < prevLabel.width()) {
-              currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5);
-            } else {
-              currentLabel.set("y", 0);
+            while (overlap) {
+              overlap = false;
+                
+              // Проверяем перекрытие с предыдущими метками
+              for (let j = 0; j < i; j++) {
+                let otherLabel = labels[j];
+                  
+                if (doLabelsOverlap(currentLabel, otherLabel)) {
+                  overlap = true;
+                  yOffset = Math.max(
+                    yOffset,
+                    otherLabel.y() + otherLabel.height() + 5
+                  );
+                }
+              }
+                
+              if (overlap) {
+                currentLabel.set("y", yOffset);
+              }
             }
           }
+        }
+
+        // Функция проверки перекрытия меток
+        function doLabelsOverlap(label1: any, label2: any) {
+          const parent1 = label1.parent;
+          const parent2 = label2.parent;
+          if (!parent1 || !parent2) return false;
+
+          const x1 = parent1.x();
+          const x2 = parent2.x();
+          const y1 = label1.y();
+          const y2 = label2.y();
+          const w1 = label1.width();
+          const w2 = label2.width();
+          const h1 = label1.height();
+          const h2 = label2.height();
+
+          return !(x1 + w1 < x2 || x2 + w2 < x1 || 
+                  y1 + h1 < y2 || y2 + h2 < y1);
         }
 
         root.current.events.on("frameended", positionLabels)
