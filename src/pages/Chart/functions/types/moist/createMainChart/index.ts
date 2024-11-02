@@ -24,6 +24,7 @@ export const createMainChart = (
   setMoistAddCommentModal: any,
   moistMainAddCommentItemShowed: any,
   moistMainComments: any,
+  updateCommentsArray: any,
   setMainTabularDataColors?: any
 ): void => {
   const chartDataWrapper = props;
@@ -285,117 +286,62 @@ export const createMainChart = (
         'Installation': 'FFFFFF',
       }
 
-      // let labelsContainer = chart.plotContainer.children.push(am5.Container.new(root.current, {
-      //   width: am5.percent(100),
-      //   height: am5.percent(100),
-      //   layer: 30
-      // }));
-
       let labelsArray: any[] = []
 
       moistMainComments.forEach((moistMainComment: any, index: number) => {
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
-        const commentDate = new Date(moistMainComment.key)
-        const commentRangeDataItem = xAxis.makeDataItem({
-          value: commentDate.getTime(),
-        });
-        series.createAxisRange(commentRangeDataItem);
-
-        const axisRange = xAxis.createAxisRange(commentRangeDataItem);
-        
-        // Create and configure the grid first
-        const grid = axisRange.get("grid");
-        grid.setAll({
-          strokeOpacity: 1,
-          visible: true,
-          stroke: am5.color(commentColor),
-          strokeWidth: 6,
-          location: 0
-        });
-
-        // Get container after grid is configured
-        const container = chart.plotContainer;
-        commentRangeDataItem.get("grid").setAll({
-          strokeOpacity: 1,
-          visible: true,
-          stroke: am5.color(commentColor),
-          strokeWidth: 6,
-          location: 0
-        });
-
-        const rangeLabel = commentRangeDataItem.get("label");
-        rangeLabel.setAll({
-          visible: true,
-          dy: -350,
-          width: 150,
-          y: 350,
-          centerY: am5.percent(50),
-          layout: root.current.verticalLayout,
-          background: am5.RoundedRectangle.new(root.current, {
-            fill: am5.color(commentColor)
-          }),
-          draggable: true
-        });
-        rangeLabel.adapters.add("y", function() {
-          return 1;
+        const rangeDataItem = xAxis.makeDataItem({})
+        xAxis.createAxisRange(rangeDataItem)
+        const container = am5.Container.new(root.current, {
+          centerX: am5.p50,
+          draggable: true,
+          layout: root.verticalLayout,
         })
-        console.log(rangeLabel)
-        // rangeLabel.adapters.add("x", function(x: any) {
-        //   const maxX = chart.plotContainer.width();
-        //   return Math.max(0, Math.min(maxX, x));
-        // });
-
-        let startX: number;
-        let startValue: number;
-
-        rangeLabel.events.on("dragstart", function(e: any) {
-          startX = rangeLabel.x();
-          startValue = commentRangeDataItem.get("value");
-        });
-
-        rangeLabel.events.on("dragged", function(e: any) {
-          const dx = rangeLabel.x() - startX;
-          const availableWidth = chart.plotContainer.width();
-          const valueRange = xAxis.getPrivate("max") - xAxis.getPrivate("min");
-          const valueDelta = (dx / availableWidth) * valueRange;
-
-          let newValue = startValue + valueDelta;
-
-          // Ограничиваем значение в пределах оси
-          newValue = Math.max(xAxis.getPrivate("min"), Math.min(newValue, xAxis.getPrivate("max")));
-
-          // Обновляем позицию и grid линии и label
-          commentRangeDataItem.set("value", newValue);
-          
-          // Ограничиваем позицию label в пределах контейнера
-          const labelWidth = rangeLabel.width();
-          const containerWidth = chart.plotContainer.width() + 150;
-          const newX = Math.max(0, Math.min(containerWidth - labelWidth, rangeLabel.x()));
-          rangeLabel.set("x", newX);
-
-          // Обновляем startX и startValue для следующего события dragged
-          startX = newX;
-          startValue = newValue;
-        });
-        let label = container.children.push(rangeLabel)
-        label.children.push(am5.Label.new(root.current, {
-          text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
-          fill: am5.color(0x000000),
-          maxWidth: 150,
-          oversizedBehavior: "wrap",
-          fontSize: 12,
-          paddingTop: 5,
-          paddingBottom: -20,
-          paddingLeft: 5,
-          paddingRight: 5,
-        }));
-
+        container.adapters.add("y", function () {
+          return 0
+        })
+        container.adapters.add("x", function (x: any) {
+          return Math.max(0, Math.min(chart.plotContainer.width(), x))
+        })
+        container.events.on("dragged", function () {
+          updateLabel()
+        })
+        xAxis.topGridContainer.children.push(container)
+        rangeDataItem.set(
+          "bullet",
+          am5xy.AxisBullet.new(root.current, {
+            sprite: container,
+          })
+        )
+        rangeDataItem.get("grid").setAll({
+          strokeOpacity: 1,
+          visible: true,
+          stroke: am5.color(commentColor),
+          strokeWidth: 6,
+          location: 0
+        })
+        container.set("background", am5.RoundedRectangle.new(root.current, {fill: am5.color(commentColor)}))
+        const label = container.children.push(
+          am5.Label.new(root.current, {
+            text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
+            fill: am5.color(0x000000),
+            maxWidth: 150,
+            minHeight: moistMainComment.color_id ? 60 : 45,
+            oversizedBehavior: "wrap",
+            fontSize: 12,
+            paddingTop: 5,
+            paddingBottom: -20,
+            paddingLeft: 5,
+            paddingRight: 5,
+            centerX: am5.p50,
+          })
+        )
         let buttonsContainer = label.children.push(am5.Container.new(root.current, {
           layout: root.current.horizontalLayout,
           x: am5.p100,
           y: 0,
           centerX: am5.p100,
-          paddingTop: 8,
+          paddingTop: 3,
           paddingRight: 3,
         }));
         let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
@@ -406,9 +352,7 @@ export const createMainChart = (
             fill: am5.color(0xffffff),
             fillOpacity: 0,
           }),
-          x: am5.p100,
-          centerX: am5.p100,
-          marginRight: 5,
+          dx: -20,
         }));
         dragButton.children.push(am5.Picture.new(root.current, {
           src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
@@ -420,7 +364,6 @@ export const createMainChart = (
         let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
-          marginLeft: 5,
           cursorOverStyle: "pointer",
           background: am5.Rectangle.new(root.current, {
             fill: am5.color(0xffffff),
@@ -436,52 +379,52 @@ export const createMainChart = (
         }));
         closeButton.events.on('click', () => {
           if (window.confirm('Are you sure want to delete this message?')) {
-            removeComment(moistMainComment.id, userId)
-            rangeLabel.dispose()
-            commentRangeDataItem.dispose()
+            new Promise((resolve: any) => {
+              removeComment(moistMainComment.id, userId, resolve)
+            }).then(() => {
+              updateCommentsArray()
+              label.dispose()
+              rangeDataItem.dispose()
+            })
           }
         })
 
-        // function updateLabel(value?: any) {
-        //   let x = container.x();
-        //   let position = xAxis.toAxisPosition(x / chart.plotContainer.width());
-        //
-        //   if (value == null) {
-        //     value = xAxis.positionToValue(position);
-        //   }
-        //
-        //   commentRangeDataItem.set("value", value);
-        // }
-        //
+        function updateLabel(value?: any) {
+          const x = container.x()
+          const position = xAxis.toAxisPosition(x / chart.plotContainer.width())
+
+          if (value == null) {
+            value = xAxis.positionToValue(position)
+          }
+
+          // label.set("text", root.current.dateFormatter.format(new Date(value), "yyyy-MM-dd") + "\nStop loss")
+
+          rangeDataItem.set("value", value)
+        }
+
+        series.events.on("datavalidated", () => {
+          const commentDate = new Date(moistMainComment.key).getTime()
+          rangeDataItem.set("value", commentDate)
+          updateLabel(commentDate)
+        })
         labelsArray.push(label)
-        // root.current.events.on("frameended", function () {
-        //   const newXPos = xAxis.valueToPosition(commentDate.getTime());
-        //   const newContainerX = newXPos * chart.plotContainer.width();
-        //   container.set("x", newContainerX);
-        //   let x = container.x();
-        //   let position = xAxis.toAxisPosition(x / chart.plotContainer.width());
-        //   const value = xAxis.positionToValue(position);
-        //   commentRangeDataItem.set("value", value);
-        // });
       });
 
-      // function positionLabels() {
-      //   let labels: any = labelsArray
-      //   labels.sort((a: any, b: any) => a.x() - b.x());
-      //   for (let i = 1; i < labels.length; i++) {
-      //     let currentLabel = labels[i];
-      //     let prevLabel = labels[i - 1];
-      //
-      //     if (currentLabel.x() - prevLabel.x() < prevLabel.width()) {
-      //       currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5)
-      //     }
-      //     //else {
-      //     //             currentLabel.set("y", 0);
-      //     //           }
-      //   }
-      // }
-      //
-      // root.current.events.on("frameended", positionLabels);
+      function positionLabels() {
+        let labels: any = labelsArray
+        labels.sort((a: any, b: any) => a.x() - b.x());
+        for (let i = 1; i < labels.length; i++) {
+          let currentLabel = labels[i];
+          let prevLabel = labels[i - 1];
+          if (currentLabel.x() - prevLabel.x() < prevLabel.width()) {
+            currentLabel.set("y", prevLabel.y() + prevLabel.height() + 5)
+          } else {
+            currentLabel.set("y", 0);
+          }
+        }
+      }
+
+      root.current.events.on("frameended", positionLabels);
     }
 
 
