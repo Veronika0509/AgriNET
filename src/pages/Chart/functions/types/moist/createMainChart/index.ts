@@ -292,10 +292,9 @@ export const createMainChart = (
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
         const rangeDataItem = xAxis.makeDataItem({})
         xAxis.createAxisRange(rangeDataItem)
-        // let isDraggable: boolean = false
         const container = am5.Container.new(root.current, {
           centerX: am5.p50,
-          draggable: false,
+          draggable: true,
           layout: root.verticalLayout,
         })
         container.adapters.add("y", function () {
@@ -356,7 +355,7 @@ export const createMainChart = (
             fill: am5.color(0xffffff),
             fillOpacity: 0,
           }),
-          dx: -20,
+          dx: -20
         }));
         dragButton.children.push(am5.Picture.new(root.current, {
           src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
@@ -365,24 +364,20 @@ export const createMainChart = (
           centerX: am5.p50,
           centerY: am5.p50
         }));
-        let isDragging = false;
-        dragButton.events.on('pointerdown', (ev) => {
-          // Предотвращаем обработку события по умолчанию
-          ev.stopPropagation();
+        dragButton.events.on("dragmove", (event) => {
+          // Получаем позицию курсора на графике
+          const pointerPosition = event.point.x;
+          const chartWidth = chart.plotContainer.width();
 
-          // Устанавливаем флаг перетаскивания
-          isDragging = true;
+          // Рассчитываем относительную позицию на оси X
+          const relativePosition = pointerPosition / chartWidth;
 
-          // Устанавливаем draggable в true
-          container.set('draggable', true);
-        });
+          // Перемещаем container, используя рассчитанную позицию
+          container.set("x", chartWidth * relativePosition);
 
-        root.current.container.setAll({
-          interactive: true
-        });
-        
-        root.current.container.events.on('pointerup', () => {
-          container.set('draggable', false);
+          // Обновляем позицию метки на оси времени
+          const positionDate = xAxis.positionToDate(relativePosition);
+          rangeDataItem.set("value", positionDate.getTime());
         });
         let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
