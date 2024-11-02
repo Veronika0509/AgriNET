@@ -294,7 +294,7 @@ export const createMainChart = (
         xAxis.createAxisRange(rangeDataItem)
         const container = am5.Container.new(root.current, {
           centerX: am5.p50,
-          draggable: true,
+          // draggable: false,
           layout: root.verticalLayout,
         })
         container.adapters.add("y", function () {
@@ -364,6 +364,12 @@ export const createMainChart = (
           centerX: am5.p50,
           centerY: am5.p50
         }));
+        dragButton.events.on('pointerdown', () => {
+          container.set('draggable', true)
+        })
+        // dragButton.events.on('pointerup', () => {
+        //   container.set('draggable', false)
+        // })
         let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
