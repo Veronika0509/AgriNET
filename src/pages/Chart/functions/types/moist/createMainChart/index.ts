@@ -406,8 +406,7 @@ export const createMainChart = (
         }
         function positionLabels() {
           let labels = labelsArray;
-            
-          // Сортируем метки по X-координате
+
           labels.sort((a: any, b: any) => {
             const aParent = a.parent;
             const bParent = b.parent;
@@ -415,12 +414,10 @@ export const createMainChart = (
             return aParent.x() - bParent.x();
           });
 
-          // Сбрасываем все Y-позиции
           labels.forEach((label: any) => {
             label.set("y", 0);
           });
 
-          // Проверяем перекрытия и корректируем позиции
           for (let i = 0; i < labels.length; i++) {
             let currentLabel = labels[i];
             let yOffset = 0;
@@ -428,8 +425,7 @@ export const createMainChart = (
 
             while (overlap) {
               overlap = false;
-                
-              // Проверяем перекрытие с предыдущими метками
+
               for (let j = 0; j < i; j++) {
                 let otherLabel = labels[j];
                   
@@ -449,7 +445,6 @@ export const createMainChart = (
           }
         }
 
-        // Функция проверки перекрытия меток
         function doLabelsOverlap(label1: any, label2: any) {
           const parent1 = label1.parent;
           const parent2 = label2.parent;
