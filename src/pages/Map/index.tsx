@@ -48,7 +48,7 @@ const MapPage: React.FC<MainProps> = (props) => {
   const [moistChartDataContainer, setMoistChartDataContainer] = useState<any>([])
   const [invalidMoistChartDataContainer, setInvalidMoistChartDataContainer] = useState([])
   const [moistOverlays, setMoistOverlays] = useState([])
-  let createdMoistCharts: any = []
+  const [createdMoistCharts, setCreatedMoistCharts] = useState<any>([]);
   const moistChartsAmount: any = []
 
   // Temp type
@@ -185,6 +185,10 @@ const MapPage: React.FC<MainProps> = (props) => {
       };
     }
   }, [moistOverlays]);
+  useEffect(() => {
+    console.log(createdMoistCharts)
+  }, [createdMoistCharts]);
+
 
   // Wxet Marker
   useEffect(() => {
