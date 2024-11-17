@@ -1,10 +1,5 @@
-import React from 'react'
-import s from "../style.module.css";
-import {IonHeader, IonIcon, IonTitle, IonToolbar} from "@ionic/react";
-import {arrowBackOutline} from "ionicons/icons";
-import { useHistory } from 'react-router-dom';
-
-const Header = (props: any) => {
+import { Header } from '../../../components/Header';
+export default Header;
   const history = useHistory();
   const back = () => {
     history.push('/AgriNET/');
