@@ -1,15 +1,15 @@
 import {IonButton, IonItem, IonText} from "@ionic/react";
 import s from '../../style.module.css'
-import {addChart} from "../../../../functions/addChart";
 
 interface AddCommentMessageProps {
+  type: string,
   addCommentItemShowed: boolean,
-  setMoistAddCommentModal: any
+  setAddCommentModal: any
 }
 
-export const AddCommentMessage: React.FC<AddCommentMessageProps> = ({addCommentItemShowed, setMoistAddCommentModal}) => {
+export const AddCommentMessage: React.FC<AddCommentMessageProps> = ({type, addCommentItemShowed, setAddCommentModal}) => {
   const onNowClick = () => {
-    addChart(new Date(), setMoistAddCommentModal)
+    setAddCommentModal({date: new Date(), type})
   }
   return (
     <IonItem style={addCommentItemShowed ? {display: 'block'} : {display: 'none'}} className={s.addCommentMessageContainer}>

@@ -1,11 +1,21 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
+import {updateCommentDate} from "../../../../components/AddComment/data/updateCommentDate";
+import {removeComment} from "../../../../components/AddComment/data/removeComment";
+import login from "../../../../../Login";
 
 export const createAdditionalChart = (
   chartType: string,
   chartData: any,
   root: any,
+  setMoistAddCommentModal: any,
+  updateCommentsArray: any,
+  moistAddCommentItemShowed: any,
+  moistComments: any,
+  userId: any,
+  updateChart: any,
+  isMoistCommentsShowed: any,
 // sum
   budgetLines?: any,
   historicMode?: boolean,
@@ -21,12 +31,16 @@ export const createAdditionalChart = (
   }
   if (!root.current) {
     let divId: string
+    let chartCode: string
     if (chartType === 'sum') {
       divId = 'sumChart'
+      chartCode = 'MSum'
     } else if (chartType === 'soilTemp') {
       divId = 'soilTempChart'
+      chartCode = 'MST'
     } else {
       divId = 'batteryChart'
+      chartCode = 'MBattery'
     }
     root.current = am5.Root.new(divId);
 
@@ -205,7 +219,7 @@ export const createAdditionalChart = (
         return data;
       }
 
-      let series: any = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
+      series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
         name: 'Battery',
         xAxis: xAxis,
         yAxis: yAxis,
@@ -445,6 +459,241 @@ export const createAdditionalChart = (
     });
 
     cursor.lineY.set("visible", false);
+
+    // Add Comments
+    if (moistAddCommentItemShowed) {
+      chart.events.on("click", (ev: any) => {
+        let xAxis = chart.xAxes.getIndex(0);
+
+        let xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width());
+
+        let clickDate = xAxis.positionToDate(xPosition);
+        setMoistAddCommentModal({date: clickDate, type: chartType})
+      });
+    }
+    if (moistComments && isMoistCommentsShowed) {
+      const colors: any = {
+        'Advisory': 'F08080',
+        'Plant Health': '90EE90',
+        'Weather': 'ADD8E6',
+        'Irrigation': 'F0F8FF',
+        'Growth Stage': 'A9A9A9',
+        'Chemical App': '8FBC8F',
+        'Pest': 'DB7093',
+        'Foliage': '9370DB',
+        'Soil Type': '778899',
+        'Other': '20B2AA',
+        'Percolation': 'F0F8FF',
+        'Root Uptake': '9F7D4C',
+        'Hands-on': 'C05339',
+        'Pressure Bomb': 'F0A6B4',
+        'AutoWATER': '04F3FC',
+        'Installation': 'FFFFFF',
+      }
+
+      let labelsArray: any[] = []
+      moistComments.forEach((moistMainComment: any) => {
+        const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
+        const rangeDataItem = xAxis.makeDataItem({})
+        xAxis.createAxisRange(rangeDataItem)
+        let isContainerDragging: boolean = false
+        const container = am5.Container.new(root.current, {
+          centerX: am5.p50,
+          draggable: true,
+          layout: root.verticalLayout,
+          dy: 4,
+        })
+        container.adapters.add("y", function () {
+          return 0
+        })
+        container.adapters.add("x", function (x: any) {
+          return Math.max(0, Math.min(chart.plotContainer.width(), x))
+        })
+        container.events.on("pointerdown", function () {
+          container.set('draggable', isContainerDragging)
+        })
+        container.events.on("dragged", function () {
+          updateLabel()
+          cursor.set('behavior', 'none')
+        })
+        container.events.on("dragstop", function () {
+          isContainerDragging = false
+          cursor.set('behavior', 'zoomX')
+          const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
+          const newDate = root.current.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
+          new Promise((resolve: any) => {
+            updateCommentDate(moistMainComment.id, newDate, userId, resolve)
+          }).then(() => {
+            updateCommentsArray(chartCode)
+          })
+        })
+        xAxis.topGridContainer.children.push(container)
+        rangeDataItem.set(
+          "bullet",
+          am5xy.AxisBullet.new(root.current, {
+            sprite: container,
+          })
+        )
+        rangeDataItem.get("grid").setAll({
+          strokeOpacity: 1,
+          visible: true,
+          stroke: am5.color(commentColor),
+          strokeWidth: 6,
+          location: 0,
+        })
+        container.set("background", am5.RoundedRectangle.new(root.current, {fill: am5.color(commentColor)}))
+        const label = container.children.push(
+          am5.Label.new(root.current, {
+            text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
+            fill: am5.color(0x000000),
+            maxWidth: 150,
+            // minHeight: moistMainComment.color_id ? 60 : 45,
+            oversizedBehavior: "wrap",
+            fontSize: 12,
+            paddingTop: 4,
+            paddingLeft: 5,
+            paddingRight: 5,
+            centerX: am5.p50
+          })
+        );
+
+        labelsArray.push(label);
+        let buttonsContainer = label.children.push(am5.Container.new(root.current, {
+          layout: root.current.horizontalLayout,
+          x: am5.p100,
+          y: 0,
+          centerX: am5.p100,
+          paddingTop: 3,
+          paddingRight: 3,
+        }));
+        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+          width: 20,
+          height: 20,
+          cursorOverStyle: "ew-resize",
+          background: am5.Rectangle.new(root.current, {
+            fill: am5.color(0xffffff),
+            fillOpacity: 0,
+          }),
+          dx: -20
+        }));
+        dragButton.children.push(am5.Picture.new(root.current, {
+          src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
+          width: 12,
+          height: 12,
+          centerX: am5.p50,
+          centerY: am5.p50
+        }));
+        dragButton.events.on('pointerdown', () => {
+          isContainerDragging = true
+        })
+        let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+          width: 20,
+          height: 20,
+          cursorOverStyle: "pointer",
+          background: am5.Rectangle.new(root.current, {
+            fill: am5.color(0xffffff),
+            fillOpacity: 0,
+          }),
+        }));
+        closeButton.children.push(am5.Picture.new(root.current, {
+          src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
+          width: 12,
+          height: 12,
+          centerX: am5.p50,
+          centerY: am5.p50
+        }));
+        closeButton.events.on('click', () => {
+          if (window.confirm('Are you sure want to delete this message?')) {
+            new Promise((resolve: any) => {
+              removeComment(moistMainComment.id, userId, resolve)
+            }).then(() => {
+              updateCommentsArray(chartCode)
+              updateChart(chartType, 'comments')
+              label.dispose()
+              rangeDataItem.dispose()
+            })
+          }
+        })
+
+        function updateLabel(value?: any) {
+          const x = container.x()
+          const position = xAxis.toAxisPosition(x / chart.plotContainer.width())
+
+          if (value == null) {
+            value = xAxis.positionToValue(position)
+          }
+
+          label.set("text", `${root.current.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`)
+
+          rangeDataItem.set("value", value)
+        }
+        function positionLabels() {
+          let labels = labelsArray;
+
+          labels.sort((a: any, b: any) => {
+            const aParent = a.parent;
+            const bParent = b.parent;
+            if (!aParent || !bParent) return 0;
+            return aParent.x() - bParent.x();
+          });
+
+          labels.forEach((label: any) => {
+            label.set("y", 0);
+          });
+
+          for (let i = 0; i < labels.length; i++) {
+            let currentLabel = labels[i];
+            let yOffset = 0;
+            let overlap = true;
+
+            while (overlap) {
+              overlap = false;
+
+              for (let j = 0; j < i; j++) {
+                let otherLabel = labels[j];
+
+                if (doLabelsOverlap(currentLabel, otherLabel)) {
+                  overlap = true;
+                  yOffset = Math.max(
+                    yOffset,
+                    otherLabel.y() + otherLabel.height() + 5
+                  );
+                }
+              }
+
+              if (overlap) {
+                currentLabel.set("y", yOffset);
+              }
+            }
+          }
+        }
+
+        function doLabelsOverlap(label1: any, label2: any) {
+          const parent1 = label1.parent;
+          const parent2 = label2.parent;
+          if (!parent1 || !parent2) return false;
+
+          const x1 = parent1.x();
+          const x2 = parent2.x();
+          const y1 = label1.y();
+          const y2 = label2.y();
+          const w1 = label1.width();
+          const w2 = label2.width();
+          const h1 = label1.height();
+          const h2 = label2.height();
+
+          return !(x1 + w1 < x2 || x2 + w2 < x1 ||
+            y1 + h1 < y2 || y2 + h2 < y1);
+        }
+
+        root.current.events.on("frameended", positionLabels)
+        series.events.on("datavalidated", () => {
+          const commentDate = new Date(moistMainComment.key).getTime()
+          rangeDataItem.set("value", commentDate)
+          updateLabel(commentDate)
+        })
+      });
+    }
 
     chart.appear(1000, 100);
   }

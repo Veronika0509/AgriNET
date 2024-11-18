@@ -4,7 +4,7 @@ import React from "react";
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
 import {moveOverlays} from "../../../functions/moveOverlays";
-
+import {adjustOverlayPosition} from "../../../functions/adjustOverlayPosition";
 export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
     return class CustomOverlayExport extends google.maps.OverlayView {
@@ -29,6 +29,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
       private layerName: string
       private root: any;
       private div?: any;
+      private offset: google.maps.Point;
 
       constructor(
         bounds: google.maps.LatLngBounds,
@@ -50,7 +51,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         setChartPageType: any
       ) {
         super();
-
+        this.offset = new google.maps.Point(0, 0);
         this.bounds = bounds;
         this.invalidChartDataImage = invalidChartDataImage;
         this.isValidChartData = isValidChartData;
@@ -95,7 +96,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
             {this.isValidChartData ? (
               <div className={s.mainContainer}>
                 <div className={s.chartContainer}>
-                  <div id={this.chartData.id} className={s.chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
+                  <div id={`${this.chartData.id}123`} className={s.chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
                   {this.isMoistMarkerChartDrawn ? null : (
                     <div className={s.loader}></div>
                   )}
@@ -166,14 +167,40 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
 
       draw() {
         const projection = this.getProjection()
-        moveOverlays(
-          projection,
-          this.bounds,
-          this.div,
-          this.isAllCoordinatesOfMarkersAreReady,
-          this.chartData.mainId,
-          this.overlappingPairs
-        )
+        const sw: any = projection.fromLatLngToDivPixel(this.bounds.getSouthWest());
+        const ne: any = projection.fromLatLngToDivPixel(this.bounds.getNorthEast());
+
+        if (this.div) {
+          this.div.style.left = sw.x + "px";
+          this.div.style.top = ne.y + "px";
+        }
+        // const projection = this.getProjection();
+        // const map: any = this.getMap();
+        // if (!projection || !map) return;
+        //
+        // const offset = adjustOverlayPosition(
+        //   projection,
+        //   this,
+        //   this.isAllCoordinatesOfMarkersAreReady,
+        //   this.bounds,
+        //   map
+        // );
+        //
+        // const position = this.bounds.getCenter();
+        // const pixel: any = projection.fromLatLngToDivPixel(position);
+        //
+        // if (this.div && offset) {
+        //   this.div.style.left = (pixel.x + offset.x) + "px";
+        //   this.div.style.top = (pixel.y + offset.y) + "px";
+        // }
+        // moveOverlays(
+        //   projection,
+        //   this.bounds,
+        //   this.div,
+        //   this.isAllCoordinatesOfMarkersAreReady,
+        //   this.chartData.mainId,
+        //   this.overlappingPairs
+        // )
       }
 
       onRemove() {

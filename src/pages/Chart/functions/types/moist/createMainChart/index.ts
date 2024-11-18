@@ -1,11 +1,8 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
-import {addChart} from "../../../addChart";
-import {p100} from "@amcharts/amcharts5";
 import {removeComment} from "../../../../components/AddComment/data/removeComment";
-import login from "../../../../../Login";
-import {range} from "@amcharts/amcharts5/.internal/core/util/Animation";
+import {updateCommentDate} from "../../../../components/AddComment/data/updateCommentDate";
 
 let startDateForZooming: any;
 let endDateForZooming: any;
@@ -25,6 +22,8 @@ export const createMainChart = (
   moistMainAddCommentItemShowed: any,
   moistMainComments: any,
   updateCommentsArray: any,
+  updateChart: any,
+  isMoistCommentsShowed: any,
   setMainTabularDataColors?: any
 ): void => {
   const chartDataWrapper = props;
@@ -262,11 +261,10 @@ export const createMainChart = (
 
         let clickDate = xAxis.positionToDate(xPosition);
 
-        addChart(clickDate, setMoistAddCommentModal)
+        setMoistAddCommentModal({date: clickDate, type: 'main'})
       });
     }
-
-    if (moistMainComments) {
+    if (moistMainComments && isMoistCommentsShowed) {
       const colors: any = {
         'Advisory': 'F08080',
         'Plant Health': '90EE90',
@@ -288,14 +286,16 @@ export const createMainChart = (
 
       let labelsArray: any[] = []
 
-      moistMainComments.forEach((moistMainComment: any, index: number) => {
+      moistMainComments.forEach((moistMainComment: any) => {
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
         const rangeDataItem = xAxis.makeDataItem({})
         xAxis.createAxisRange(rangeDataItem)
+        let isContainerDragging: boolean = false
         const container = am5.Container.new(root.current, {
           centerX: am5.p50,
           draggable: true,
           layout: root.verticalLayout,
+          dy: 4,
         })
         container.adapters.add("y", function () {
           return 0
@@ -303,8 +303,23 @@ export const createMainChart = (
         container.adapters.add("x", function (x: any) {
           return Math.max(0, Math.min(chart.plotContainer.width(), x))
         })
+        container.events.on("pointerdown", function () {
+          container.set('draggable', isContainerDragging)
+        })
         container.events.on("dragged", function () {
           updateLabel()
+          cursor.set('behavior', 'none')
+        })
+        container.events.on("dragstop", function () {
+          isContainerDragging = false
+          cursor.set('behavior', 'zoomX')
+          const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
+          const newDate = root.current.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
+          new Promise((resolve: any) => {
+            updateCommentDate(moistMainComment.id, newDate, userId, resolve)
+          }).then(() => {
+            updateCommentsArray('M')
+          })
         })
         xAxis.topGridContainer.children.push(container)
         rangeDataItem.set(
@@ -318,7 +333,7 @@ export const createMainChart = (
           visible: true,
           stroke: am5.color(commentColor),
           strokeWidth: 6,
-          location: 0
+          location: 0,
         })
         container.set("background", am5.RoundedRectangle.new(root.current, {fill: am5.color(commentColor)}))
 
@@ -327,14 +342,13 @@ export const createMainChart = (
             text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
             fill: am5.color(0x000000),
             maxWidth: 150,
-            minHeight: moistMainComment.color_id ? 60 : 45,
+            // minHeight: moistMainComment.color_id ? 60 : 45,
             oversizedBehavior: "wrap",
             fontSize: 12,
-            paddingTop: 5,
-            paddingBottom: -20,
+            paddingTop: 4,
             paddingLeft: 5,
             paddingRight: 5,
-            centerX: am5.p50,
+            centerX: am5.p50
           })
         );
 
@@ -357,32 +371,6 @@ export const createMainChart = (
           }),
           dx: -20
         }));
-
-        dragButton.events.on("pointerdown", function(ev) {
-          const originalX = container.x();
-          const originalPointerX = ev.point.x;
-
-          dragButton.events.once("pointerup", function() {
-            root.current.setStates("default");
-            container.children.each((child) => {
-              child.set("forceHidden", false);
-            });
-          });
-
-          root.current.setStates("dimmed");
-          
-          root.current.container.children.each((child) => {
-            if (child !== chart) {
-              child.set("forceHidden", true);
-            }
-          });
-
-          root.current.events.on("pointermove", function(ev) {
-            const deltaX = ev.point.x - originalPointerX;
-            container.set("x", originalX + deltaX);
-            updateLabel();
-          });
-        });
         dragButton.children.push(am5.Picture.new(root.current, {
           src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
           width: 12,
@@ -390,21 +378,9 @@ export const createMainChart = (
           centerX: am5.p50,
           centerY: am5.p50
         }));
-        dragButton.events.on("dragmove", (event) => {
-          // Получаем позицию курсора на графике
-          const pointerPosition = event.point.x;
-          const chartWidth = chart.plotContainer.width();
-
-          // Рассчитываем относительную позицию на оси X
-          const relativePosition = pointerPosition / chartWidth;
-
-          // Перемещаем container, используя рассчитанную позицию
-          container.set("x", chartWidth * relativePosition);
-
-          // Обновляем позицию метки на оси времени
-          const positionDate = xAxis.positionToDate(relativePosition);
-          rangeDataItem.set("value", positionDate.getTime());
-        });
+        dragButton.events.on('pointerdown', () => {
+          isContainerDragging = true
+        })
         let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
@@ -426,7 +402,8 @@ export const createMainChart = (
             new Promise((resolve: any) => {
               removeComment(moistMainComment.id, userId, resolve)
             }).then(() => {
-              updateCommentsArray()
+              updateCommentsArray('M')
+              updateChart('comments')
               label.dispose()
               rangeDataItem.dispose()
             })
@@ -441,7 +418,7 @@ export const createMainChart = (
             value = xAxis.positionToValue(position)
           }
 
-          // label.set("text", root.current.dateFormatter.format(new Date(value), "yyyy-MM-dd") + "\nStop loss")
+          label.set("text", `${root.current.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`)
 
           rangeDataItem.set("value", value)
         }
@@ -513,7 +490,6 @@ export const createMainChart = (
         })
       });
     }
-
 
 // Comparing Mode
     if (!comparingMode) {

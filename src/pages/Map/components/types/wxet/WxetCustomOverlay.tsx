@@ -6,6 +6,7 @@ import wxetOverlaySun from '../../../../../assets/images/icons/wxetOverlaySun.sv
 import {moveOverlays} from "../../../functions/moveOverlays";
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {onWxetSensorClick} from "../../../functions/types/wxet/onWxetSensorClick";
+import {adjustOverlayPosition} from "../../../functions/adjustOverlayPosition";
 
 export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
@@ -21,7 +22,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
       private userId: any
       private bounds: google.maps.LatLngBounds;
       private isValidData: boolean;
-      private data: any;
+      private chartData: any;
       private setChartPageType: any
 
       private layerName: string
@@ -56,7 +57,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         this.userId = userId
         this.bounds = bounds
         this.isValidData = isValidData
-        this.data = data
+        this.chartData = data
         this.layerName = data.layerName
         this.setChartPageType = setChartPageType
       }
@@ -69,11 +70,11 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       renderContent() {
-        const tempMetric: string = this.data.data.metric === 'AMERICA' ? "°F" : "°C"
-        const rainMetric: string = this.data.data.metric === 'AMERICA' ? "inch" : "mm"
-        const windMetric: string = this.data.data.metric === 'AMERICA' ? "MPH" : "KPH"
+        const tempMetric: string = this.chartData.data.metric === 'AMERICA' ? "°F" : "°C"
+        const rainMetric: string = this.chartData.data.metric === 'AMERICA' ? "inch" : "mm"
+        const windMetric: string = this.chartData.data.metric === 'AMERICA' ? "MPH" : "KPH"
         let termRendArrow = "";
-        switch (this.data.data.tempTrend) {
+        switch (this.chartData.data.tempTrend) {
           case "up":
             termRendArrow = "⇧";
             break;
@@ -81,16 +82,16 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
             termRendArrow = "⇩";
             break;
         }
-        const isBattery: boolean = this.data.data.battery !== undefined && this.data.data.battery !== null
-        const isBatteryPercentage: boolean = this.data.data.batteryPercentage !== undefined && this.data.data.batteryPercentage !== null
+        const isBattery: boolean = this.chartData.data.battery !== undefined && this.chartData.data.battery !== null
+        const isBatteryPercentage: boolean = this.chartData.data.batteryPercentage !== undefined && this.chartData.data.batteryPercentage !== null
         return (
           <div className={s.overlayContainer}>
             {
               this.isValidData ? (
                 <div onClick={() => onWxetSensorClick(
                   this.history,
-                  this.data.sensorId,
-                  this.data.name,
+                  this.chartData.sensorId,
+                  this.chartData.name,
                   this.setChartData,
                   this.setPage,
                   this.setSiteId,
@@ -99,32 +100,32 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
                   this.setChartPageType
                   )}>
                   <div className={s.wxetOverlayContainer}>
-                    <div className={s.wxetOverlayInnerContainer} style={{backgroundColor: this.data.data.bgColor}}>
-                      <img src={this.data.data.solar ? wxetOverlaySun : wxetOverlayMoon} className={s.wxetOverlayImage}
+                    <div className={s.wxetOverlayInnerContainer} style={{backgroundColor: this.chartData.data.bgColor}}>
+                      <img src={this.chartData.data.solar ? wxetOverlaySun : wxetOverlayMoon} className={s.wxetOverlayImage}
                            alt=""/>
                       <div className={s.wxetOverlayData}>
-                        <p className={s.wxetOverlayDataText}>Temp: {this.data.data.temp} {tempMetric} {termRendArrow}</p>
-                        <p className={s.wxetOverlayDataText}>Hi: {this.data.data.tempHi} {tempMetric}</p>
-                        <p className={s.wxetOverlayDataText}>Lo: {this.data.data.tempLo} {tempMetric}</p>
-                        <p className={s.wxetOverlayDataText}>RH: {this.data.data.rh} %</p>
-                        <p className={s.wxetOverlayDataText}>Rain: {this.data.data.totalRain} {rainMetric}</p>
+                        <p className={s.wxetOverlayDataText}>Temp: {this.chartData.data.temp} {tempMetric} {termRendArrow}</p>
+                        <p className={s.wxetOverlayDataText}>Hi: {this.chartData.data.tempHi} {tempMetric}</p>
+                        <p className={s.wxetOverlayDataText}>Lo: {this.chartData.data.tempLo} {tempMetric}</p>
+                        <p className={s.wxetOverlayDataText}>RH: {this.chartData.data.rh} %</p>
+                        <p className={s.wxetOverlayDataText}>Rain: {this.chartData.data.totalRain} {rainMetric}</p>
                         <p
-                          className={s.wxetOverlayDataText}>Wind: {this.data.data.wind} {windMetric} {this.data.data.windDirection}</p>
-                        <p className={s.wxetOverlayDataText}>Solar rad: {this.data.data.solar} W/m2</p>
+                          className={s.wxetOverlayDataText}>Wind: {this.chartData.data.wind} {windMetric} {this.chartData.data.windDirection}</p>
+                        <p className={s.wxetOverlayDataText}>Solar rad: {this.chartData.data.solar} W/m2</p>
                       </div>
                     </div>
-                    <p className={s.underInformationOverlayText}>{this.data.name}</p>
+                    <p className={s.underInformationOverlayText}>{this.chartData.name}</p>
                   </div>
                   <div className={`${s.overlayInfo} ${s.validWxetOverlayInfo}`}>
                     {isBattery && (
                       <div>
                         {isBatteryPercentage && (
-                          <p className={s.overlayText}>{this.data.data.batteryPercentage}%</p>
+                          <p className={s.overlayText}>{this.chartData.data.batteryPercentage}%</p>
                         )}
-                        <p className={s.overlayText}>{this.data.data.battery} VDC</p>
+                        <p className={s.overlayText}>{this.chartData.data.battery} VDC</p>
                       </div>
                     )}
-                    <p className={s.overlayText}>{this.data.sensorId}</p>
+                    <p className={s.overlayText}>{this.chartData.sensorId}</p>
                   </div>
                 </div>
               ) : (
@@ -135,10 +136,10 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
                     <div className={s.wxetNotValidDataRectangle}>
                       <p className={s.wxetNotValidDataRectangleText}>no data</p>
                     </div>
-                    <p className={`${s.wxetNotValidName} ${s.underInformationOverlayText}`}>{truncateText(this.data.name)}</p>
+                    <p className={`${s.wxetNotValidName} ${s.underInformationOverlayText}`}>{truncateText(this.chartData.name)}</p>
                   </div>
                   <div className={s.overlayInfo}>
-                    <p className={s.overlayText}>{this.data.sensorId}</p>
+                    <p className={s.overlayText}>{this.chartData.sensorId}</p>
                   </div>
                 </div>
               )
@@ -148,7 +149,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       onAdd() {
-        const divId = `overlay-${this.data.mainId}`;
+        const divId = `overlay-${this.chartData.mainId}`;
         this.div = document.getElementById(divId);
 
         if (!this.div) {
@@ -171,14 +172,40 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
 
       draw() {
         const projection = this.getProjection()
-        moveOverlays(
-          projection,
-          this.bounds,
-          this.div,
-          this.isAllCoordinatesOfMarkersAreReady,
-          this.data.mainId,
-          this.overlappingPairs
-        )
+        const sw: any = projection.fromLatLngToDivPixel(this.bounds.getSouthWest());
+        const ne: any = projection.fromLatLngToDivPixel(this.bounds.getNorthEast());
+
+        if (this.div) {
+          this.div.style.left = sw.x + "px";
+          this.div.style.top = ne.y + "px";
+        }
+        // const projection = this.getProjection();
+        // const map: any = this.getMap();
+        // if (!projection || !map) return;
+        //
+        // const offset = adjustOverlayPosition(
+        //   projection,
+        //   this,
+        //   this.isAllCoordinatesOfMarkersAreReady,
+        //   this.bounds,
+        //   map
+        // );
+        //
+        // const position = this.bounds.getCenter();
+        // const pixel: any = projection.fromLatLngToDivPixel(position);
+        //
+        // if (this.div && offset) {
+        //   this.div.style.left = (pixel.x + offset.x) + "px";
+        //   this.div.style.top = (pixel.y + offset.y) + "px";
+        // }
+        // moveOverlays(
+        //   projection,
+        //   this.bounds,
+        //   this.div,
+        //   this.isAllCoordinatesOfMarkersAreReady,
+        //   this.data.mainId,
+        //   this.overlappingPairs
+        // )
       }
 
       onRemove() {

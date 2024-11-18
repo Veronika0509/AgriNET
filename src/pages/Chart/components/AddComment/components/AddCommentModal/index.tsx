@@ -14,6 +14,7 @@ import s from '../../style.module.css'
 import login from "../../../../../Login";
 import {postComment} from "../../data/postComment";
 import {getComments} from "../../data/getComments";
+import chart from "../../../../index";
 
 const AddCommentModal = (props: any) => {
   const [timeString, setTimeString] = useState<any>()
@@ -22,11 +23,11 @@ const AddCommentModal = (props: any) => {
   const modalRef = useRef<HTMLIonModalElement>(null);
 
   useEffect(() => {
-    const year = props.moistAddCommentModal.getFullYear()
-    let month = props.moistAddCommentModal.getMonth() + 1
-    const days = props.moistAddCommentModal.getDate().toString().length === 1 ? `0${props.moistAddCommentModal.getDate()}` : props.moistAddCommentModal.getDate()
-    const hours = props.moistAddCommentModal.getHours().toString().length === 1 ? `0${props.moistAddCommentModal.getHours()}` : props.moistAddCommentModal.getHours()
-    const minutes = props.moistAddCommentModal.getMinutes().toString().length === 1 ? `0${props.moistAddCommentModal.getMinutes()}` : props.moistAddCommentModal.getMinutes()
+    const year = props.addCommentModal.getFullYear()
+    let month = props.addCommentModal.getMonth() + 1
+    const days = props.addCommentModal.getDate().toString().length === 1 ? `0${props.addCommentModal.getDate()}` : props.addCommentModal.getDate()
+    const hours = props.addCommentModal.getHours().toString().length === 1 ? `0${props.addCommentModal.getHours()}` : props.addCommentModal.getHours()
+    const minutes = props.addCommentModal.getMinutes().toString().length === 1 ? `0${props.addCommentModal.getMinutes()}` : props.addCommentModal.getMinutes()
 
     if (month.toString().length === 1) {
       month = `0${month}`
@@ -38,20 +39,28 @@ const AddCommentModal = (props: any) => {
   const onCancel = () => {
     modalRef.current?.dismiss()
     setTimeout(() => {
-      props.setMoistAddCommentModal(false)
+      props.setAddCommentModal(false)
     }, 200)
   }
 
   const onSubmit = () => {
     new Promise(async (resolve: any) => {
-      const response = await postComment('M', props.sensorId, timeString, selectValue, messageValue, props.userId, resolve)
+      let chartType: string
+      if (props.type === 'main') {
+        chartType = 'M'
+      } else if (props.type === 'soilTemp') {
+        chartType = 'MST'
+      } else if (props.type === 'sum') {
+        chartType = 'MSum'
+      } else if (props.type === 'temp') {
+        chartType = 'T'
+      } else {
+        chartType = 'MBattery'
+      }
+      await postComment(chartType, props.sensorId, timeString, selectValue, messageValue, props.userId, resolve)
     }).then( async (response: any) => {
       if (response.status === 200) {
-        const comments = await getComments('M', props.sensorId)
-        if (comments.status === 200) {
-          props.setMoistMainComments(comments.data)
-          // TODO setAddCommentItemShowed false
-        }
+        props.setAddCommentItemShowed('comments')
         onCancel()
       }
     })

@@ -2,7 +2,8 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
-export const createTempChartForOverlay = (chartData: any, roots: any, tempOverlays: any, root: any) => {
+export const createTempChartForOverlay = (chartData: any, roots: any, tempOverlays: any) => {
+  const root = am5.Root.new(chartData.id)
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);
 

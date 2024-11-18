@@ -18,8 +18,7 @@ export const createSites = (
   setWxetDataContainer: any,
   tempChartsAmount: any,
   setInvalidTempChartDataContainer: any,
-  setTempChartDataContainer: any,
-  setOverlappingSensorItems: any
+  setTempChartDataContainer: any
 ) => {
   if (markers.length === 0) {
     const newMarkers = siteList.map((sensorsGroupData: any) => {
@@ -52,8 +51,7 @@ export const createSites = (
             setWxetDataContainer,
             tempChartsAmount,
             setInvalidTempChartDataContainer,
-            setTempChartDataContainer,
-            setOverlappingSensorItems
+            setTempChartDataContainer
           )
         }, 2000)
       }
@@ -76,8 +74,7 @@ export const createSites = (
           setWxetDataContainer,
           tempChartsAmount,
           setInvalidTempChartDataContainer,
-          setTempChartDataContainer,
-          setOverlappingSensorItems
+          setTempChartDataContainer
         )
       })
     });

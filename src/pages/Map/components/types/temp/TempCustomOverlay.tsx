@@ -5,6 +5,7 @@ import {truncateText} from "../../../functions/truncateTextFunc";
 import {onTempSensorClick} from "../../../functions/types/temp/onTempSensorClick";
 import {moveOverlays} from "../../../functions/moveOverlays";
 import {useIonToast} from "@ionic/react";
+import {adjustOverlayPosition} from "../../../functions/adjustOverlayPosition";
 
 export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
@@ -166,14 +167,40 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
 
       draw() {
         const projection = this.getProjection()
-        moveOverlays(
-          projection,
-          this.bounds,
-          this.div,
-          this.isAllCoordinatesOfMarkersAreReady,
-          this.chartData.mainId,
-          this.overlappingPairs
-        )
+        const sw: any = projection.fromLatLngToDivPixel(this.bounds.getSouthWest());
+        const ne: any = projection.fromLatLngToDivPixel(this.bounds.getNorthEast());
+
+        if (this.div) {
+          this.div.style.left = sw.x + "px";
+          this.div.style.top = ne.y + "px";
+        }
+        // const projection = this.getProjection();
+        // const map: any = this.getMap();
+        // if (!projection || !map) return;
+        //
+        // const offset = adjustOverlayPosition(
+        //   projection,
+        //   this,
+        //   this.isAllCoordinatesOfMarkersAreReady,
+        //   this.bounds,
+        //   map
+        // );
+        //
+        // const position = this.bounds.getCenter();
+        // const pixel: any = projection.fromLatLngToDivPixel(position);
+        //
+        // if (this.div && offset) {
+        //   this.div.style.left = (pixel.x + offset.x) + "px";
+        //   this.div.style.top = (pixel.y + offset.y) + "px";
+        // }
+        // moveOverlays(
+        //   projection,
+        //   this.bounds,
+        //   this.div,
+        //   this.isAllCoordinatesOfMarkersAreReady,
+        //   this.chartData.mainId,
+        //   this.overlappingPairs
+        // )
       }
 
       onRemove() {

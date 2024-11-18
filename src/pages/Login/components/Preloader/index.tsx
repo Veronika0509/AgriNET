@@ -1,8 +1,8 @@
 import {IonPage} from '@ionic/react';
-import '../../theme/variables.css';
+import '../../../../theme/variables.css';
 import {useEffect, useState} from "react";
 import s from './style.module.css'
-import preloaderLogo from '../../assets/images/logo.png'
+import preloaderLogo from '../../../../assets/images/logo.png'
 
 const Preloader = () => {
   const [hidden, setHidden] = useState(false);

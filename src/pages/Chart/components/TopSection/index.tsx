@@ -6,6 +6,7 @@ import {getBatteryChartData} from "../../data/types/moist/getBatteryChartData";
 import { alarmOutline } from 'ionicons/icons';
 import {getSoilTempChartData} from "../../data/types/moist/getSoilTempChartData";
 import {createAdditionalChart} from "../../functions/types/moist/createAdditionalChart";
+import {getComments} from "../AddComment/data/getComments";
 
 const TopSection = (props: any) => {
   const [disabledComparingMode, setDisabledComparingMode] = useState(false)
@@ -15,13 +16,7 @@ const TopSection = (props: any) => {
   useEffect( () => {
     const batteryHandler = async () => {
       if (props.batteryChartShowed) {
-        if (props.currentDates !== 0) {
-          const newBatteryChartData = await getBatteryChartData(props.sensorId, props.currentDates[0], props.currentDates[1])
-          createAdditionalChart('battery', newBatteryChartData.data, props.batteryRoot)
-        } else {
-          const newBatteryChartData = await getBatteryChartData(props.sensorId)
-          createAdditionalChart('battery', newBatteryChartData.data, props.batteryRoot)
-        }
+        props.updateChart('battery', 'comments')
       }
     }
 
@@ -32,40 +27,10 @@ const TopSection = (props: any) => {
 
   // Soil Temperature Chart
   useEffect( () => {
-    const soilTempHandler = async () => {
-      if (props.soilTempChartShowed) {
-        if (props.currentDates !== 0) {
-          const newSoilTempChartData = await getSoilTempChartData(props.sensorId, props.currentDates[0], props.currentDates[1])
-          createAdditionalChart(
-            'soilTemp',
-            newSoilTempChartData.data.data,
-            props.soilTempRoot,
-            undefined,
-            undefined,
-            undefined,
-            props.additionalChartData.linesCount,
-            newSoilTempChartData.data.metric,
-            props.setMoistSoilTempTabularDataColors
-          )
-        } else {
-          const newSoilTempChartData = await getSoilTempChartData(props.sensorId)
-          createAdditionalChart(
-            'soilTemp',
-            newSoilTempChartData.data.data,
-            props.soilTempRoot,
-            undefined,
-            undefined,
-            undefined,
-            props.additionalChartData.linesCount,
-            newSoilTempChartData.data.metric,
-            props.setMoistSoilTempTabularDataColors
-          )
-        }
-      }
+    if (props.soilTempChartShowed) {
+      props.updateChart('soilTemp', 'comments')
     }
-
-    soilTempHandler()
-  }, [props.soilTempChartShowed, props.currentDates]);
+  }, [props.soilTempChartShowed]);
 
   // Moist Toggle
   const onMoistToggle = (event: any, mode: string) => {
@@ -141,6 +106,7 @@ const TopSection = (props: any) => {
                 <div className={s.toggles}>
                   <IonToggle className={s.moistToggle} disabled={disabledComparingMode} onIonChange={(event: any) => onMoistToggle(event, 'comparingMode')}>Comparing mode</IonToggle>
                   <IonToggle className={s.moistToggle} disabled={disabledHistoricMode} onIonChange={(event: any) => onMoistToggle(event, 'historicMode')}>Historical Data Perennials Only</IonToggle>
+                  <IonToggle className={s.tempWxetToggle} checked={props.isCommentsShowed} onIonChange={(event: any) => props.setIsCommentsShowed(event.detail.checked)}>Comments</IonToggle>
                 </div>
               </IonLabel>
             </IonItem>
@@ -149,6 +115,7 @@ const TopSection = (props: any) => {
         {(props.type === 'temp' || props.type === 'wxet') && (
           <div className={s.nwsForecast}>
             <IonToggle className={s.tempWxetToggle} onIonChange={(event: any) => props.setNwsForecast(event.detail.checked)}>NWS Forecast</IonToggle>
+            <IonToggle className={`${s.tempWxetToggle} ${s.tempWxetToggleLeft}`} checked={props.isCommentsShowed} onIonChange={(event: any) => props.setIsCommentsShowed(event.detail.checked)}>Comments</IonToggle>
             <IonInput className={s.tempWxetInput} min={1} max={6} label="Days" type="number" value={props.nwsForecastDays} onIonChange={(event) => props.setNwsForecastDays(event.detail.value)}></IonInput>
           </div>
         )}

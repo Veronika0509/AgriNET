@@ -1,5 +1,11 @@
-import { Header } from '../../../../components/Header';
-export default Header;
+import React from 'react'
+import {IonHeader, IonIcon, IonTitle, IonToolbar} from "@ionic/react";
+import {back} from "../../functions/back";
+import s from "../../style.module.css";
+import {arrowBackOutline} from "ionicons/icons";
+import {useHistory} from "react-router-dom";
+
+const Header = (props: any) => {
   const history = useHistory();
 
   const onBackClick = () => {

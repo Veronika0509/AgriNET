@@ -33,7 +33,7 @@ import '@ionic/react/css/display.css';
 // import '../../theme/variables.css';
 
 import React, {useEffect, useState} from "react";
-import Preloader from "./components/Preloader";
+import Preloader from "./pages/Login/components/Preloader";
 import Login from "./pages/Login";
 import Info from "./pages/Info";
 import Map from "./pages/Map";
