@@ -77,7 +77,13 @@ const MapPage: React.FC<MainProps> = (props) => {
   const mapRef = useRef(null);
   let overlappingPairs: any[] = []
   const history = useHistory();
-  const collisionResolver = new CollisionResolver(map);
+  const [collisionResolver] = useState(() => new CollisionResolver(map));
+  
+  useEffect(() => {
+    if (map) {
+      collisionResolver.setMap(map);
+    }
+  }, [map]);
 
   useEffect(() => {
     if (props.page === 1) {

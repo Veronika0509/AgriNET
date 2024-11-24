@@ -2,8 +2,12 @@ export class CollisionResolver {
   private overlays: any;
   private map: google.maps.Map;
 
-  constructor(map: google.maps.Map) {
+  constructor(map: google.maps.Map | null) {
     this.overlays = [];
+    this.map = map || null;
+  }
+
+  setMap(map: google.maps.Map) {
     this.map = map;
   }
 
