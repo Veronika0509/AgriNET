@@ -29,7 +29,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
       private layerName: string
       private root: any;
       private div?: any;
-      private offset: google.maps.Point;
 
       constructor(
         bounds: google.maps.LatLngBounds,
@@ -51,7 +50,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         setChartPageType: any
       ) {
         super();
-        this.offset = new google.maps.Point(0, 0);
         this.bounds = bounds;
         this.invalidChartDataImage = invalidChartDataImage;
         this.isValidChartData = isValidChartData;
@@ -80,7 +78,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
 
       renderContent() {
         return (
-          <div className={s.overlayContainer} onClick={() => onMoistSensorClick(
+          <div className={s.overlay_container} onClick={() => onMoistSensorClick(
             this.history,
             this.chartData.sensorId,
             this.chartData.mainId,
@@ -95,26 +93,26 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
           )}>
             {this.isValidChartData ? (
               <div className={s.mainContainer}>
-                <div className={s.chartContainer}>
-                  <div id={`${this.chartData.id}123`} className={s.chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
+                <div className={s.overlay_chartContainer}>
+                  <div id={`${this.chartData.id}123`} className={s.overlay_chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
                   {this.isMoistMarkerChartDrawn ? null : (
-                    <div className={s.loader}></div>
+                    <div className={s.overlay_loader}></div>
                   )}
-                  <p className={s.underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
+                  <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>
-                <div className={s.overlayInfo}>
+                <div className={s.overlay_info}>
                   <p className={s.chartName}>{this.chartData.name}</p>
                   {this.chartData.battery && <p className={s.chartName}>{this.chartData.battery}</p>}
                   <p>{this.chartData.sensorId}</p>
                 </div>
               </div>
             ) : (
-              <div className={`${s.overlayContainer} ${s.invalidOverlayContainer}`}>
-                <div className={s.invalidMoistChartDataImgContainer}>
-                  <img src={this.invalidChartDataImage} className={s.invalidChartDataImg} alt='Invalid Chart Data'/>
-                  <p className={s.underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
+              <div className={`${s.overlay_container} ${s.overlay_invalidOverlayContainer}`}>
+                <div className={s.overlay_invalidMoistChartDataImgContainer}>
+                  <img src={this.invalidChartDataImage} className={s.overlay_invalidChartDataImg} alt='Invalid Chart Data'/>
+                  <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>
-                <div className={s.overlayInfo}>
+                <div className={s.overlay_info}>
                   <p className={s.chartName}>{this.chartData.sensorId}</p>
                 </div>
               </div>

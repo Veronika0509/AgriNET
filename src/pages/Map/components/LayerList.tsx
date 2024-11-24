@@ -29,7 +29,7 @@ const LayerList = (props: any) => {
 
   return (
     <div className={s.layersListWrapper}>
-      <div className={s.layersCheckbox}>
+      <div className={s.layers_checkbox}>
         {
           layers.map((layer: string) => (
             <IonItem key={layer}>

@@ -16,7 +16,7 @@ import {
 import {download, logoFacebook} from "ionicons/icons";
 import React, {useEffect, useRef, useState} from "react";
 import {ExportDateTime} from "./components/ExportDateTime";
-import s from './style.module.css'
+import s from '../../style.module.css'
 import {validateDates} from "./functions/validateDates";
 import {formatDateToISO} from "./functions/formatDate";
 
@@ -82,38 +82,38 @@ export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => 
         Export
       </IonButton>
       <IonModal trigger={chartCode} ref={modalRefs[chartCode]}>
-        <IonContent className={s.modalContent}>
-          <div className={s.modalWrapper}>
-            <div className={s.modalHeader}>
+        <IonContent className={s.export_modalContent}>
+          <div className={s.mixed_modalWrapper}>
+            <div className={s.export_modalHeader}>
               <IonHeader>
                 <IonToolbar>
                   <IonTitle>Export Chart Data</IonTitle>
                 </IonToolbar>
               </IonHeader>
             </div>
-            <div className={s.modalBody}>
-              <IonItem className={s.item}>
+            <div className={s.export_modalBody}>
+              <IonItem className={s.export_item}>
                 <ExportDateTime type={'from'} value={fromDate} setValue={setFromDate}/>
                 <ExportDateTime type={'to'} value={toDate} setValue={setToDate}/>
               </IonItem>
-              <div className={s.container}>
+              <div className={s.export_container}>
                 <IonText color='light'>Format</IonText>
                 <IonSelect aria-label="Format" value={format} onIonChange={(e) => setFormat(e.detail.value)}
-                           className={s.select}>
+                           className={s.export_select}>
                   <IonSelectOption value="Comma-separated">Comma-separated</IonSelectOption>
                   <IonSelectOption value="Tab-separated">Tab-separated</IonSelectOption>
                 </IonSelect>
               </div>
-              <div className={`${s.container} ${s.reportDuration}`}>
+              <div className={`${s.export_container} ${s.export_reportDuration}`}>
                 <IonText>Report Duration: {reportDuration} days</IonText>
               </div>
-              <div className={s.container}>
+              <div className={s.export_container}>
                 {validationResult && <IonText color='danger'>Validation Error: {validationResult}</IonText>}
               </div>
             </div>
-            <div className={s.modalFooter}>
-              <IonFooter className={s.footer}>
-                <IonToolbar className={s.bottomButtons}>
+            <div className={s.mixed_modalFooter}>
+              <IonFooter className={s.mixed_footer}>
+                <IonToolbar className={s.mixed_bottomButtons}>
                   <IonButtons slot='end'>
                     <IonButton onClick={() => modalRefs[chartCode].current?.dismiss()}>Cancel</IonButton>
                     <IonButton onClick={onDownloadClick} disabled={validationResult}>Download</IonButton>

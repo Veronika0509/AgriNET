@@ -83,7 +83,7 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
 
       renderContent() {
         return (
-          <div className={s.overlayContainer}>
+          <div className={s.overlay_container}>
             {this.isValidChartData ? (
               <div className={s.mainContainer} onClick={() => onTempSensorClick(
                 this.history,
@@ -98,29 +98,29 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
                 this.userId,
                 this.present
               )}>
-                <div className={s.chartContainer}>
-                  <div id={this.chartData.id} className={s.chart} style={{ display: this.isTempMarkerChartDrawn ? 'block' : 'none' }}></div>
+                <div className={s.overlay_chartContainer}>
+                  <div id={this.chartData.id} className={s.overlay_chart} style={{ display: this.isTempMarkerChartDrawn ? 'block' : 'none' }}></div>
                   {this.isTempMarkerChartDrawn ? null : (
-                    <div className={s.loader}></div>
+                    <div className={s.overlay_loader}></div>
                   )}
-                  <p className={s.underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
+                  <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>
-                <div className={s.overlayInfo}>
+                <div className={s.overlay_info}>
                   <p className={s.chartName}>{this.chartData.name}</p>
                   {this.chartData.batteryPercentage && <p className={s.chartName}>Battery: {this.chartData.batteryPercentage}%</p>}
                   <p>{this.chartData.sensorId}</p>
                 </div>
               </div>
             ) : (
-              <div className={`${s.overlayContainer} ${s.invalidOverlayContainer}`}>
-                <div className={s.wxetNotValidData}>
-                  <div className={s.wxetNotValidDataRectangle}>
-                    <p className={s.wxetNotValidDataRectangleText}>no data</p>
+              <div className={`${s.overlay_container} ${s.overlay_invalidOverlayContainer}`}>
+                <div className={s.overlay_wxetNotValidData}>
+                  <div className={s.overlay_wxetNotValidDataRectangle}>
+                    <p className={s.overlay_wxetNotValidDataRectangleText}>no data</p>
                   </div>
-                  <p className={`${s.wxetNotValidName} ${s.underInformationOverlayText}`}>{truncateText(this.chartData.name)}</p>
+                  <p className={`${s.overlay_wxetNotValidName} ${s.overlay_underInformationOverlayText}`}>{truncateText(this.chartData.name)}</p>
                 </div>
-                <div className={s.overlayInfo}>
-                  <p className={s.overlayText}>{this.chartData.sensorId}</p>
+                <div className={s.overlay_info}>
+                  <p className={s.overlay_text}>{this.chartData.sensorId}</p>
                 </div>
               </div>
             )}

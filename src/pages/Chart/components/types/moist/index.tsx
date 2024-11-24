@@ -7,7 +7,7 @@ import {getIrrigationDates} from "../../../data/types/moist/getIrrigationDates";
 import {getSumChartData} from "../../../data/types/moist/getSumChartData";
 import {IonContent} from "@ionic/react";
 import TopSection from "../../TopSection";
-import IrrigationButtons from "./IrrigationButtons";
+import IrrigationButtons from "./components/IrrigationButtons";
 import {createMainChart} from "../../../functions/types/moist/createMainChart";
 import {getMoistMainChartData} from "../../../../Map/data/types/moist/getMoistMainChartData";
 import {createAdditionalChart} from "../../../functions/types/moist/createAdditionalChart";

@@ -85,7 +85,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         const isBattery: boolean = this.chartData.data.battery !== undefined && this.chartData.data.battery !== null
         const isBatteryPercentage: boolean = this.chartData.data.batteryPercentage !== undefined && this.chartData.data.batteryPercentage !== null
         return (
-          <div className={s.overlayContainer}>
+          <div className={s.overlay_container}>
             {
               this.isValidData ? (
                 <div onClick={() => onWxetSensorClick(
@@ -99,9 +99,9 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
                   this.setAdditionalChartData,
                   this.setChartPageType
                   )}>
-                  <div className={s.wxetOverlayContainer}>
-                    <div className={s.wxetOverlayInnerContainer} style={{backgroundColor: this.chartData.data.bgColor}}>
-                      <img src={this.chartData.data.solar ? wxetOverlaySun : wxetOverlayMoon} className={s.wxetOverlayImage}
+                  <div className={s.overlay_wxetOverlayContainer}>
+                    <div className={s.overlay_wxetOverlayInnerContainer} style={{backgroundColor: this.chartData.data.bgColor}}>
+                      <img src={this.chartData.data.solar ? wxetOverlaySun : wxetOverlayMoon} className={s.overlay_wxetOverlayImage}
                            alt=""/>
                       <div className={s.wxetOverlayData}>
                         <p className={s.wxetOverlayDataText}>Temp: {this.chartData.data.temp} {tempMetric} {termRendArrow}</p>
@@ -114,32 +114,32 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
                         <p className={s.wxetOverlayDataText}>Solar rad: {this.chartData.data.solar} W/m2</p>
                       </div>
                     </div>
-                    <p className={s.underInformationOverlayText}>{this.chartData.name}</p>
+                    <p className={s.overlay_underInformationOverlayText}>{this.chartData.name}</p>
                   </div>
-                  <div className={`${s.overlayInfo} ${s.validWxetOverlayInfo}`}>
+                  <div className={`${s.overlay_info} ${s.overlay_validWxetOverlayInfo}`}>
                     {isBattery && (
                       <div>
                         {isBatteryPercentage && (
-                          <p className={s.overlayText}>{this.chartData.data.batteryPercentage}%</p>
+                          <p className={s.overlay_text}>{this.chartData.data.batteryPercentage}%</p>
                         )}
-                        <p className={s.overlayText}>{this.chartData.data.battery} VDC</p>
+                        <p className={s.overlay_text}>{this.chartData.data.battery} VDC</p>
                       </div>
                     )}
-                    <p className={s.overlayText}>{this.chartData.sensorId}</p>
+                    <p className={s.overlay_text}>{this.chartData.sensorId}</p>
                   </div>
                 </div>
               ) : (
                 <div
-                  className={`${s.overlayContainer} ${s.invalidOverlayContainer}`}
+                  className={`${s.overlay_container} ${s.overlay_invalidOverlayContainer}`}
                 >
-                  <div className={s.wxetNotValidData}>
-                    <div className={s.wxetNotValidDataRectangle}>
-                      <p className={s.wxetNotValidDataRectangleText}>no data</p>
+                  <div className={s.overlay_wxetNotValidData}>
+                    <div className={s.overlay_wxetNotValidDataRectangle}>
+                      <p className={s.overlay_wxetNotValidDataRectangleText}>no data</p>
                     </div>
-                    <p className={`${s.wxetNotValidName} ${s.underInformationOverlayText}`}>{truncateText(this.chartData.name)}</p>
+                    <p className={`${s.overlay_wxetNotValidName} ${s.overlay_underInformationOverlayText}`}>{truncateText(this.chartData.name)}</p>
                   </div>
-                  <div className={s.overlayInfo}>
-                    <p className={s.overlayText}>{this.chartData.sensorId}</p>
+                  <div className={s.overlay_info}>
+                    <p className={s.overlay_text}>{this.chartData.sensorId}</p>
                   </div>
                 </div>
               )

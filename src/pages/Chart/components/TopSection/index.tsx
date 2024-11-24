@@ -54,8 +54,8 @@ const TopSection = (props: any) => {
   }
 
   return (
-    <div className={s.topSection}>
-      <div className={s.topSectionWrapper}>
+    <div className={s.topSection_mainContainer}>
+      <div className={s.topSection_wrapper}>
         <DateTimePicker
           sensorId={props.sensorId}
           root={props.root}
@@ -80,13 +80,13 @@ const TopSection = (props: any) => {
           Add Alarm
         </IonButton>
       </div>
-      <div className={s.configurations}>
+      <div className={s.topSection_configurations}>
         {props.type === 'moist' && (
           <div className={s.moistTopSectionContainer}>
-            <IonItem className={s.moistTopSectionItem}>
+            <IonItem className={s.topSection_moistTopSectionItem}>
               <IonLabel>
                 <IonText color={'light'}>More Charts</IonText>
-                <div className={s.chartsButtonsContainer}>
+                <div className={s.topSection_chartsButtonsContainer}>
                   <IonButton
                     fill={props.batteryChartShowed ? 'outline' : 'solid'}
                     size="default"
@@ -100,23 +100,23 @@ const TopSection = (props: any) => {
                 </div>
               </IonLabel>
             </IonItem>
-            <IonItem className={s.moistTopSectionItem}>
+            <IonItem className={s.topSection_moistTopSectionItem}>
               <IonLabel>
                 <IonText color={'light'}>Modes</IonText>
                 <div className={s.toggles}>
                   <IonToggle className={s.moistToggle} disabled={disabledComparingMode} onIonChange={(event: any) => onMoistToggle(event, 'comparingMode')}>Comparing mode</IonToggle>
                   <IonToggle className={s.moistToggle} disabled={disabledHistoricMode} onIonChange={(event: any) => onMoistToggle(event, 'historicMode')}>Historical Data Perennials Only</IonToggle>
-                  <IonToggle className={s.tempWxetToggle} checked={props.isCommentsShowed} onIonChange={(event: any) => props.setIsCommentsShowed(event.detail.checked)}>Comments</IonToggle>
+                  <IonToggle className={s.topSection_tempWxetToggle} checked={props.isCommentsShowed} onIonChange={(event: any) => props.setIsCommentsShowed(event.detail.checked)}>Comments</IonToggle>
                 </div>
               </IonLabel>
             </IonItem>
           </div>
         )}
         {(props.type === 'temp' || props.type === 'wxet') && (
-          <div className={s.nwsForecast}>
-            <IonToggle className={s.tempWxetToggle} onIonChange={(event: any) => props.setNwsForecast(event.detail.checked)}>NWS Forecast</IonToggle>
-            <IonToggle className={`${s.tempWxetToggle} ${s.tempWxetToggleLeft}`} checked={props.isCommentsShowed} onIonChange={(event: any) => props.setIsCommentsShowed(event.detail.checked)}>Comments</IonToggle>
-            <IonInput className={s.tempWxetInput} min={1} max={6} label="Days" type="number" value={props.nwsForecastDays} onIonChange={(event) => props.setNwsForecastDays(event.detail.value)}></IonInput>
+          <div className={s.topSection_nwsForecast}>
+            <IonToggle className={s.topSection_tempWxetToggle} onIonChange={(event: any) => props.setNwsForecast(event.detail.checked)}>NWS Forecast</IonToggle>
+            <IonToggle className={`${s.topSection_tempWxetToggle} ${s.topSection_tempWxetToggleLeft}`} checked={props.isCommentsShowed} onIonChange={(event: any) => props.setIsCommentsShowed(event.detail.checked)}>Comments</IonToggle>
+            <IonInput className={s.topSection_tempWxetInput} min={1} max={6} label="Days" type="number" value={props.nwsForecastDays} onIonChange={(event) => props.setNwsForecastDays(event.detail.value)}></IonInput>
           </div>
         )}
       </div>

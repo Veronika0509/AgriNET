@@ -1,3 +1,4 @@
+/*  Main  */
 .img {
   width: 222px;
   height: 222px;
@@ -15,4 +16,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/*  Preloader  */
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #5B5B5B;
+  z-index: 1;
+}
+
+.logoContainer {
+  width: 200px;
+  height: 200px;
+}
+
+.hidden {
+  opacity: 0;
+  transition: 0.8s;
+}
+
+.done {
+  display: none;
 }

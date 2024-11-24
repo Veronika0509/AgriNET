@@ -48,7 +48,7 @@ const ModalWindow = (props: any) => {
         ) : (
           <div>
             {props.isSelectDisabled && <IonText color='danger'>Sorry, but the chart is still in development.</IonText>}
-            <IonButton expand="block" className={s.modalButton} disabled={props.isSelectDisabled}
+            <IonButton expand="block" className={s.modal_button} disabled={props.isSelectDisabled}
                        onClick={() => props.onSensorClick(props.sensorId, props.sensorName, props.sensorId, props.setChartData, props.setPage, props.setSiteId, props.setSiteName)}>Select</IonButton>
           </div>
         )}

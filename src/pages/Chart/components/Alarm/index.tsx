@@ -11,8 +11,8 @@ import {getFieldLabels} from "./data/getFieldLabels";
 export const Alarm = (props: any) => {
   return (
     <IonContent>
-      <div className={s.alarmContainer}>
-        <IonText className={s.alarmTextTitle}>Email/SMS</IonText>
+      <div className={s.alarm_container}>
+        <IonText className={s.alarm_textTitle}>Email/SMS</IonText>
         <AlarmItemTelOrEmail
           name={1}
           sensorId={props.sensorId}
@@ -37,7 +37,7 @@ export const Alarm = (props: any) => {
           setIsLowSetpointEnabled={props.setIsLowSetpointEnabled}
           setIsHighSetpointEnabled={props.setIsHighSetpointEnabled}
         ></AlarmItemTelOrEmail>
-        <IonText className={s.alarmTextTitle}>Setpoints</IonText>
+        <IonText className={s.alarm_textTitle}>Setpoints</IonText>
         {props.fieldsLabelsData && (
           <>
             <AlarmItemSetpoints

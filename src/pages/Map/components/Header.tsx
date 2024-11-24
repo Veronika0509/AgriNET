@@ -17,7 +17,7 @@ const Header = (props: any) => {
       <IonToolbar>
         <IonIcon
           onClick={back}
-          className={`${s.backIcon} ${'ion-margin-start'}`}
+          className={`${s.header_backIcon} ${'ion-margin-start'}`}
           slot='start'
           size='large'
           icon={arrowBackOutline}

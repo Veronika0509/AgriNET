@@ -17,8 +17,6 @@ import LayerList from "./components/LayerList";
 import {initializeWxetCustomOverlay} from "./components/types/wxet/WxetCustomOverlay";
 import {initializeTempCustomOverlay} from "./components/types/temp/TempCustomOverlay";
 import {createTempChartForOverlay} from "./functions/types/temp/createTempChartForOverlay";
-import * as am5 from "@amcharts/amcharts5";
-import {CollisionResolver} from "./components/CollisionResolver";
 
 interface MainProps {
   page: any
@@ -77,13 +75,6 @@ const MapPage: React.FC<MainProps> = (props) => {
   const mapRef = useRef(null);
   let overlappingPairs: any[] = []
   const history = useHistory();
-  const [collisionResolver] = useState(() => new CollisionResolver(map));
-  
-  useEffect(() => {
-    if (map) {
-      collisionResolver.setMap(map);
-    }
-  }, [map]);
 
   useEffect(() => {
     if (props.page === 1) {
@@ -145,7 +136,6 @@ const MapPage: React.FC<MainProps> = (props) => {
             setMoistOverlays,
             props.setChartPageType
           )
-          collisionResolver.addOverlay(overlay);
           setOverlays((prevOverlays) => {
             const exists = prevOverlays.some(
               (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
@@ -182,7 +172,6 @@ const MapPage: React.FC<MainProps> = (props) => {
             setMoistOverlays,
             props.setChartPageType
           )
-          collisionResolver.addOverlay(overlay);
           setOverlays((prevOverlays) => {
             const exists = prevOverlays.some(
               (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
@@ -241,7 +230,6 @@ const MapPage: React.FC<MainProps> = (props) => {
             data[0],
             props.setChartPageType
           )
-          collisionResolver.addOverlay(overlay);
           setOverlays((prevOverlays) => {
             const exists = prevOverlays.some(
               (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
@@ -274,7 +262,6 @@ const MapPage: React.FC<MainProps> = (props) => {
             data[0],
             props.setChartPageType
           )
-          collisionResolver.addOverlay(overlay);
           setOverlays((prevOverlays) => {
             const exists = prevOverlays.some(
               (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
@@ -313,7 +300,6 @@ const MapPage: React.FC<MainProps> = (props) => {
             props.userId,
             present
           )
-          collisionResolver.addOverlay(overlay);
           setOverlays((prevOverlays) => {
             const exists = prevOverlays.some(
               (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
@@ -349,7 +335,6 @@ const MapPage: React.FC<MainProps> = (props) => {
           props.userId,
           present
         )
-        collisionResolver.addOverlay(overlay);
         setOverlays((prevOverlays) => {
           const exists = prevOverlays.some(
             (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
@@ -375,7 +360,6 @@ const MapPage: React.FC<MainProps> = (props) => {
 
   useEffect(() => {
     if (overlays.length !== 0 && overlays.length === amountOfSensors) {
-      collisionResolver.resolve();
       const bounds = new google.maps.LatLngBounds();
       overlays.map((overlayToBound: any) => {
         overlayToBound.isAllCoordinatesOfMarkersAreReady.map((coordinateToBound: any) => {

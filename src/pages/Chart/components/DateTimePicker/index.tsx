@@ -68,8 +68,8 @@ const DateTimePicker = (props: any) => {
 
   return (
     <div>
-      <div className={s.datetimePickerWrapper}>
-        <div className={s.datetimePickerWrapperContainer}>
+      <div className={s.datetimePicker_wrapper}>
+        <div className={s.datetimePicker_wrapperContainer}>
           <DatetimeCalendar title={'From'} date={props.startDate} setDate={props.setStartDate} />
           <DatetimeCalendar title={'To'} date={props.endDate} setDate={props.setEndDate}/>
         </div>
