@@ -27,6 +27,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
 
       private layerName: string
       private root: any;
+      private offset: { x: number; y: number };
       private div?: any;
 
       constructor(
@@ -60,6 +61,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         this.chartData = data
         this.layerName = data.layerName
         this.setChartPageType = setChartPageType
+        this.offset = { x: 0, y: 0 };
       }
 
       update() {
@@ -158,7 +160,11 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
           this.div.style.borderStyle = "none";
           this.div.style.borderWidth = "0px";
           this.div.style.position = "absolute";
-
+// Add a small random initial offset to help prevent perfect overlaps
+          this.offset = {
+            x: (Math.random() - 0.5) * 20,
+            y: (Math.random() - 0.5) * 20
+          };
           const panes: any = this.getPanes();
           panes.floatPane.appendChild(this.div);
           if (!this.root) {
@@ -170,42 +176,66 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         }
       }
 
-      draw() {
-        const projection = this.getProjection()
-        const sw: any = projection.fromLatLngToDivPixel(this.bounds.getSouthWest());
-        const ne: any = projection.fromLatLngToDivPixel(this.bounds.getNorthEast());
+      // draw() {
+      //   const projection = this.getProjection()
+      //   const sw: any = projection.fromLatLngToDivPixel(this.bounds.getSouthWest());
+      //   const ne: any = projection.fromLatLngToDivPixel(this.bounds.getNorthEast());
+      //
+      //   if (this.div) {
+      //     this.div.style.left = sw.x + "px";
+      //     this.div.style.top = ne.y + "px";
+      //   }
+      //   // const projection = this.getProjection();
+      //   // const map: any = this.getMap();
+      //   // if (!projection || !map) return;
+      //   //
+      //   // const offset = adjustOverlayPosition(
+      //   //   projection,
+      //   //   this,
+      //   //   this.isAllCoordinatesOfMarkersAreReady,
+      //   //   this.bounds,
+      //   //   map
+      //   // );
+      //   //
+      //   // const position = this.bounds.getCenter();
+      //   // const pixel: any = projection.fromLatLngToDivPixel(position);
+      //   //
+      //   // if (this.div && offset) {
+      //   //   this.div.style.left = (pixel.x + offset.x) + "px";
+      //   //   this.div.style.top = (pixel.y + offset.y) + "px";
+      //   // }
+      //   // moveOverlays(
+      //   //   projection,
+      //   //   this.bounds,
+      //   //   this.div,
+      //   //   this.isAllCoordinatesOfMarkersAreReady,
+      //   //   this.data.mainId,
+      //   //   this.overlappingPairs
+      //   // )
+      // }
 
-        if (this.div) {
-          this.div.style.left = sw.x + "px";
-          this.div.style.top = ne.y + "px";
+      draw() {
+        const projection = this.getProjection();
+        if (!projection || !this.div) return;
+
+        const position = this.bounds.getCenter();
+        const pixel = projection.fromLatLngToDivPixel(position);
+
+        if (pixel) {
+          // Apply the stored offset when drawing
+          this.div.style.left = `${pixel.x + this.offset.x}px`;
+          this.div.style.top = `${pixel.y + this.offset.y}px`;
         }
-        // const projection = this.getProjection();
-        // const map: any = this.getMap();
-        // if (!projection || !map) return;
-        //
-        // const offset = adjustOverlayPosition(
-        //   projection,
-        //   this,
-        //   this.isAllCoordinatesOfMarkersAreReady,
-        //   this.bounds,
-        //   map
-        // );
-        //
-        // const position = this.bounds.getCenter();
-        // const pixel: any = projection.fromLatLngToDivPixel(position);
-        //
-        // if (this.div && offset) {
-        //   this.div.style.left = (pixel.x + offset.x) + "px";
-        //   this.div.style.top = (pixel.y + offset.y) + "px";
-        // }
-        // moveOverlays(
-        //   projection,
-        //   this.bounds,
-        //   this.div,
-        //   this.isAllCoordinatesOfMarkersAreReady,
-        //   this.data.mainId,
-        //   this.overlappingPairs
-        // )
+      }
+
+      updatePosition(x: number, y: number) {
+        this.offset.x += x;
+        this.offset.y += y;
+        this.draw();
+      }
+
+      getDiv() {
+        return this.div;
       }
 
       onRemove() {

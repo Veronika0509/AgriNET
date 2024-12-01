@@ -28,6 +28,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
 
       private layerName: string
       private root: any;
+      private offset: { x: number; y: number };
       private div?: any;
 
       constructor(
@@ -47,7 +48,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         setAdditionalChartData: any,
         siteList: any,
         setMoistOverlays: any,
-        setChartPageType: any
+        setChartPageType: any,
       ) {
         super();
         this.bounds = bounds;
@@ -68,6 +69,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         this.layerName = chartData.layerName
         this.setMoistOverlays = setMoistOverlays
         this.setChartPageType = setChartPageType
+        this.offset = { x: 0, y: 0 };
       }
 
       update() {
@@ -94,7 +96,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
             {this.isValidChartData ? (
               <div className={s.mainContainer}>
                 <div className={s.overlay_chartContainer}>
-                  <div id={`${this.chartData.id}123`} className={s.overlay_chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
+                  <div id={`${this.chartData.id}`} className={s.overlay_chart} style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}></div>
                   {this.isMoistMarkerChartDrawn ? null : (
                     <div className={s.overlay_loader}></div>
                   )}
@@ -138,7 +140,11 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
                 this.chartData.battery = this.chartData.battery + ' VDC'
               }
             }
-
+// Add a small random initial offset to help prevent perfect overlaps
+            this.offset = {
+              x: (Math.random() - 0.5) * 20,
+              y: (Math.random() - 0.5) * 20
+            };
             const panes: any = this.getPanes();
             panes.floatPane.appendChild(this.div);
             if (!this.root) {
@@ -164,14 +170,38 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       draw() {
-        const projection = this.getProjection()
-        const sw: any = projection.fromLatLngToDivPixel(this.bounds.getSouthWest());
-        const ne: any = projection.fromLatLngToDivPixel(this.bounds.getNorthEast());
+        const projection = this.getProjection();
+        if (!projection || !this.div) return;
 
-        if (this.div) {
-          this.div.style.left = sw.x + "px";
-          this.div.style.top = ne.y + "px";
+        const position = this.bounds.getCenter();
+        const pixel = projection.fromLatLngToDivPixel(position);
+
+        if (pixel) {
+          // Apply the stored offset when drawing
+          this.div.style.left = `${pixel.x + this.offset.x}px`;
+          this.div.style.top = `${pixel.y + this.offset.y}px`;
         }
+      }
+
+      updatePosition(x: number, y: number) {
+        this.offset.x += x;
+        this.offset.y += y;
+        this.draw();
+      }
+
+      getDiv() {
+        return this.div;
+      }
+
+      // draw() {
+      //   const projection = this.getProjection()
+      //   const sw: any = projection.fromLatLngToDivPixel(this.bounds.getSouthWest());
+      //   const ne: any = projection.fromLatLngToDivPixel(this.bounds.getNorthEast());
+      //
+      //   if (this.div) {
+      //     this.div.style.left = sw.x + "px";
+      //     this.div.style.top = ne.y + "px";
+      //   }
         // const projection = this.getProjection();
         // const map: any = this.getMap();
         // if (!projection || !map) return;
@@ -199,7 +229,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         //   this.chartData.mainId,
         //   this.overlappingPairs
         // )
-      }
+      // }
 
       onRemove() {
         if (this.div) {

@@ -3,10 +3,9 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
 export const createMoistChartForOverlay = (chartData: any, roots: any, moistOverlays: any) => {
-  console.log('roots before adding', roots)
+  console.log(moistOverlays)
   const root: any = am5.Root.new(chartData.id)
   roots.push(root);
-  console.log('used root ', chartData.id, roots)
   root.setThemes([am5themes_Animated.new(root)]);
 
   const chart = root.container.children.push(am5xy.XYChart.new(root, {

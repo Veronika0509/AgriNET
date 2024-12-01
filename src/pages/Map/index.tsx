@@ -17,6 +17,7 @@ import LayerList from "./components/LayerList";
 import {initializeWxetCustomOverlay} from "./components/types/wxet/WxetCustomOverlay";
 import {initializeTempCustomOverlay} from "./components/types/temp/TempCustomOverlay";
 import {createTempChartForOverlay} from "./functions/types/temp/createTempChartForOverlay";
+import {CollisionResolver} from "./components/CollisionResolver";
 
 interface MainProps {
   page: any
@@ -84,8 +85,6 @@ const MapPage: React.FC<MainProps> = (props) => {
   }, [props.page])
   useEffect(() => {
     if (map && props.siteList.length > 0) {
-      // map.addListener('zoom_changed', () => collisionResolver.resolve());
-      // map.addListener('dragend', () => collisionResolver.resolve());
       createSites(
         props.page,
         map,
@@ -108,6 +107,23 @@ const MapPage: React.FC<MainProps> = (props) => {
         amountOfSensors,
         setAmountOfSensors
       )
+      // Добавляем слушатели событий для разрешения коллизий
+      const handleResize = () => {
+        CollisionResolver.resolve(overlays, false);
+      };
+
+      window.addEventListener('resize', handleResize);
+      map.addListener('zoom_changed', handleResize);
+      map.addListener('dragend', handleResize);
+
+      // Вызываем resolve сразу после добавления всех оверлеев
+      CollisionResolver.resolve(overlays, false);
+
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        google.maps.event.clearListeners(map, 'zoom_changed');
+        google.maps.event.clearListeners(map, 'dragend');
+      };
     }
   }, [map, props.siteList]);
 
@@ -186,7 +202,6 @@ const MapPage: React.FC<MainProps> = (props) => {
   }, [invalidMoistChartDataContainer]);
   // useEffect(() => {
   //   let roots: any[] = [];
-  //   console.log(moistChartDataContainer)
   //   moistChartDataContainer.map((moistOverlay: any) => {
   //     createMoistChartForOverlay(moistOverlay[0], roots, moistOverlays)
   //   })
@@ -195,19 +210,18 @@ const MapPage: React.FC<MainProps> = (props) => {
   //     roots = []
   //   };
   // }, [moistChartDataContainer]);
-  // useEffect(() => {
-  //   console.log(moistOverlays)
-  //   if (moistOverlays.length !== 0) {
-  //     let roots: any[] = [];
-  //     moistOverlays.map((moistOverlay: any) => {
-  //       createMoistChartForOverlay(moistOverlay.chartData, roots, moistOverlays)
-  //     })
-  //     return () => {
-  //       roots.forEach(root => root.dispose());
-  //       roots = []
-  //     };
-  //   }
-  // }, [moistOverlays]);
+  useEffect(() => {
+    if (moistOverlays.length !== 0) {
+      let roots: any[] = [];
+      moistOverlays.map((moistOverlay: any) => {
+        createMoistChartForOverlay(moistOverlay.chartData, roots, moistOverlays)
+      })
+      return () => {
+        roots.forEach(root => root.dispose());
+        roots = []
+      };
+    }
+  }, [moistOverlays]);
 
   // Wxet Marker
   useEffect(() => {
@@ -367,6 +381,7 @@ const MapPage: React.FC<MainProps> = (props) => {
         })
       })
       map.fitBounds(bounds);
+      CollisionResolver.resolve(overlays, false);
     }
   }, [overlays]);
 
@@ -374,10 +389,6 @@ const MapPage: React.FC<MainProps> = (props) => {
     <IonPage>
       <Header setPage={props.setPage}/>
       <IonContent className={s.ionContent}>
-        <div id='1'></div>
-        <div id='2'></div>
-        <div id='3'></div>
-        <div id='4'></div>
         <div className={s.map} ref={mapRef}>
           {secondMap && (
             <LayerList siteList={props.siteList} secondMap={secondMap} overlays={overlays}/>
