@@ -1,12 +1,12 @@
 import s from '../style.module.css'
 import {IonCheckbox, IonItem} from "@ionic/react";
 import {useEffect, useState} from "react";
+import login from "../../Login";
+import {CollisionResolver} from "./CollisionResolver";
 
 const LayerList = (props: any) => {
-  const [activeOverlays, setActiveOverlays] = useState<any[]>([]);
-
-  // Initialize layers array
   let layers: string[] = []
+
   props.siteList.map((site: any) => {
     if (site.name === props.secondMap) {
       site.layers.map((layer: any) => {
@@ -17,42 +17,27 @@ const LayerList = (props: any) => {
     }
   })
 
-  // Initialize all overlays as visible on component mount
-  useEffect(() => {
-    const initialOverlays = props.overlays.map((overlay: any) => {
-      overlay.show();
-      return overlay;
-    });
-    setActiveOverlays(initialOverlays);
-    console.log('Active overlays:', initialOverlays);
-  }, [props.overlays]);
-
   const toggleLayer = (checkbox: any) => {
-    const layerName = checkbox.target.innerText;
-    const isChecked = checkbox.detail.checked;
-    
-    let updatedOverlays = [...activeOverlays];
-    
-    props.overlays.forEach((overlay: any) => {
-      if (overlay.layerName === layerName) {
-        if (isChecked) {
-          overlay.show();
-          if (!updatedOverlays.includes(overlay)) {
-            updatedOverlays.push(overlay);
+    props.allOverlays.forEach((overlay: any) => {
+      if (checkbox.target.innerText === overlay.layerName) {
+        if (checkbox.detail.checked) {
+          overlay.show()
+          if (!props.activeOverlays.includes(overlay)) {
+            props.setActiveOverlays((prevActiveOverlays: any) => {
+              const exists = prevActiveOverlays.some(
+                  (existingOverlay: any) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
+              );
+              return exists ? prevActiveOverlays : [...prevActiveOverlays, overlay];
+            });
           }
         } else {
-          overlay.hide();
-          updatedOverlays = updatedOverlays.filter(active => active !== overlay);
+          overlay.hide()
+          props.setActiveOverlays((prevActiveOverlays: any) =>
+              prevActiveOverlays.filter((active: any) => active.chartData.sensorId !== overlay.chartData.sensorId)
+          );
         }
       }
-    });
-
-    setActiveOverlays(updatedOverlays);
-    console.log('Active overlays:', updatedOverlays);
-  }
-
-  const isLayerActive = (layerName: string) => {
-    return activeOverlays.some((overlay: any) => overlay.layerName === layerName);
+    })
   }
 
   return (
@@ -61,13 +46,7 @@ const LayerList = (props: any) => {
           {
             layers.map((layer: string) => (
                 <IonItem key={layer}>
-                  <IonCheckbox 
-                    checked={isLayerActive(layer)}
-                    justify="space-between" 
-                    onIonChange={(checkbox) => toggleLayer(checkbox)}
-                  >
-                    {layer}
-                  </IonCheckbox>
+                  <IonCheckbox checked justify="space-between" onIonChange={(checkbox) => toggleLayer(checkbox)}>{layer}</IonCheckbox>
                 </IonItem>
             ))
           }
