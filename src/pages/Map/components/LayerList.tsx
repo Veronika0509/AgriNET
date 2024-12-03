@@ -1,12 +1,12 @@
 import s from '../style.module.css'
 import {IonCheckbox, IonItem} from "@ionic/react";
 import {useEffect, useState} from "react";
-import login from "../../Login";
-import {CollisionResolver} from "./CollisionResolver";
 
 const LayerList = (props: any) => {
-  let layers: string[] = []
+  const [activeOverlays, setActiveOverlays] = useState<any[]>([]);
 
+  // Initialize layers array
+  let layers: string[] = []
   props.siteList.map((site: any) => {
     if (site.name === props.secondMap) {
       site.layers.map((layer: any) => {
@@ -17,16 +17,41 @@ const LayerList = (props: any) => {
     }
   })
 
+  // Initialize all overlays as visible on component mount
+  useEffect(() => {
+    const initialOverlays = props.overlays.map((overlay: any) => {
+      overlay.show();
+      return overlay;
+    });
+    setActiveOverlays(initialOverlays);
+    console.log('Active overlays:', initialOverlays);
+  }, [props.overlays]);
+
   const toggleLayer = (checkbox: any) => {
-    props.overlays.forEach((overlay: any) => {
-      if (checkbox.target.innerText === overlay.layerName) {
-        if (checkbox.detail.checked) {
-          overlay.show()
+    const layerName = checkbox.target.innerText;
+    const isChecked = checkbox.detail.checked;
+    
+    const updatedOverlays = props.overlays.filter((overlay: any) => {
+      if (overlay.layerName === layerName) {
+        if (isChecked) {
+          overlay.show();
+          return true;
         } else {
-          overlay.hide()
+          overlay.hide();
+          return false;
         }
       }
-    })
+      return activeOverlays.includes(overlay);
+    });
+
+    setActiveOverlays(updatedOverlays);
+    console.log('Active overlays:', updatedOverlays);
+  }
+
+  const isLayerActive = (layerName: string) => {
+    return props.overlays.some((overlay: any) => 
+      overlay.layerName === layerName && activeOverlays.includes(overlay)
+    );
   }
 
   return (
@@ -35,7 +60,13 @@ const LayerList = (props: any) => {
           {
             layers.map((layer: string) => (
                 <IonItem key={layer}>
-                  <IonCheckbox checked justify="space-between" onIonChange={(checkbox) => toggleLayer(checkbox)}>{layer}</IonCheckbox>
+                  <IonCheckbox 
+                    checked={isLayerActive(layer) || activeOverlays.length === 0}
+                    justify="space-between" 
+                    onIonChange={(checkbox) => toggleLayer(checkbox)}
+                  >
+                    {layer}
+                  </IonCheckbox>
                 </IonItem>
             ))
           }
