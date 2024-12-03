@@ -6,6 +6,20 @@ import {CollisionResolver} from "./CollisionResolver";
 
 const LayerList = (props: any) => {
   let layers: string[] = []
+  const [checkedLayers, setCheckedLayers] = useState<{[key: string]: boolean}>({});
+
+  useEffect(() => {
+    // Initialize all layers as checked
+    const initialCheckedState: {[key: string]: boolean} = {};
+    props.siteList.forEach((site: any) => {
+      if (site.name === props.secondMap) {
+        site.layers.forEach((layer: any) => {
+          initialCheckedState[layer.name] = true;
+        });
+      }
+    });
+    setCheckedLayers(initialCheckedState);
+  }, [props.secondMap, props.siteList]);
 
   props.siteList.map((site: any) => {
     if (site.name === props.secondMap) {
@@ -17,10 +31,16 @@ const LayerList = (props: any) => {
     }
   })
 
-  const toggleLayer = (checkbox: any) => {
+  const toggleLayer = (checkbox: any, layerName: string) => {
+    const isChecked = checkbox.detail.checked;
+    setCheckedLayers(prev => ({
+      ...prev,
+      [layerName]: isChecked
+    }));
+
     props.allOverlays.forEach((overlay: any) => {
-      if (checkbox.target.innerText === overlay.layerName) {
-        if (checkbox.detail.checked) {
+      if (layerName === overlay.layerName) {
+        if (isChecked) {
           overlay.show()
           if (!props.activeOverlays.includes(overlay)) {
             props.setActiveOverlays((prevActiveOverlays: any) => {
@@ -46,7 +66,13 @@ const LayerList = (props: any) => {
           {
             layers.map((layer: string) => (
                 <IonItem key={layer}>
-                  <IonCheckbox checked justify="space-between" onIonChange={(checkbox) => toggleLayer(checkbox)}>{layer}</IonCheckbox>
+                  <IonCheckbox 
+                    checked={checkedLayers[layer]} 
+                    justify="space-between" 
+                    onIonChange={(checkbox) => toggleLayer(checkbox, layer)}
+                  >
+                    {layer}
+                  </IonCheckbox>
                 </IonItem>
             ))
           }
