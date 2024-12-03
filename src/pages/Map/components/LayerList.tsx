@@ -31,17 +31,20 @@ const LayerList = (props: any) => {
     const layerName = checkbox.target.innerText;
     const isChecked = checkbox.detail.checked;
     
-    const updatedOverlays = props.overlays.filter((overlay: any) => {
+    let updatedOverlays = [...activeOverlays];
+    
+    props.overlays.forEach((overlay: any) => {
       if (overlay.layerName === layerName) {
         if (isChecked) {
           overlay.show();
-          return true;
+          if (!updatedOverlays.includes(overlay)) {
+            updatedOverlays.push(overlay);
+          }
         } else {
           overlay.hide();
-          return false;
+          updatedOverlays = updatedOverlays.filter(active => active !== overlay);
         }
       }
-      return activeOverlays.includes(overlay);
     });
 
     setActiveOverlays(updatedOverlays);
@@ -49,9 +52,7 @@ const LayerList = (props: any) => {
   }
 
   const isLayerActive = (layerName: string) => {
-    return props.overlays.some((overlay: any) => 
-      overlay.layerName === layerName && activeOverlays.includes(overlay)
-    );
+    return activeOverlays.some((overlay: any) => overlay.layerName === layerName);
   }
 
   return (
@@ -61,7 +62,7 @@ const LayerList = (props: any) => {
             layers.map((layer: string) => (
                 <IonItem key={layer}>
                   <IonCheckbox 
-                    checked={isLayerActive(layer) || activeOverlays.length === 0}
+                    checked={isLayerActive(layer)}
                     justify="space-between" 
                     onIonChange={(checkbox) => toggleLayer(checkbox)}
                   >
