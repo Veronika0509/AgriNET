@@ -43,8 +43,7 @@ export const createValveChartForOverlay = async (
   axisRenderer.grid.template.set("visible", false);
 
   const xAxis = chart.xAxes.push(
-    am5xy.ValueAxis.new(root, {
-      renderer: axisRenderer,
+    am5radar.AxisRendererCircular.new(root, {
       min: 0,
       max: 12,
       strictMinMax: true
