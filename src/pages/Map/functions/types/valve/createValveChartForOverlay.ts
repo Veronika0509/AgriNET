@@ -1,5 +1,4 @@
 import * as am5 from "@amcharts/amcharts5";
-import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
 const checkOverlay = async (id: string, valveOverlays: any[]): Promise<void> => {
   const element = document.getElementById(id);
