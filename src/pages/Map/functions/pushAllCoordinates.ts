@@ -20,7 +20,11 @@ export const pushAllCoordinates = (
     }
   })
   if (type === 'moist-fuel' || type === 'wxet' || type === 'temp-rh-v2') {
-    allCoordinatesOfMarkers.push({lat, lng, id, mainId})
+    const exists = allCoordinatesOfMarkers.some((marker: any) => marker.id === id);
+
+    if (!exists) {
+      allCoordinatesOfMarkers.push({ lat, lng, id, mainId });
+    }
   }
   if (allCoordinatesOfMarkers.length === neededSensorItemsArray.length) {
     setIsAllCoordinatesOfMarkersAreReady(allCoordinatesOfMarkers)

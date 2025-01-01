@@ -2,7 +2,19 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
-export const createTempChartForOverlay = (chartData: any, roots: any, tempOverlays: any) => {
+const checkOverlay = async (id: string, tempOverlays: any[]): Promise<void> => {
+  const element = document.getElementById(id);
+  if (!element) {
+    const overlay = tempOverlays.find(tempOverlay => tempOverlay.chartData.id === id);
+    if (overlay) {
+      console.log('gonna update overlay', id)
+      await overlay.update();
+    }
+  }
+}
+
+export const createTempChartForOverlay = async (chartData: any, roots: any, tempOverlays: any) => {
+  await checkOverlay(chartData.id, tempOverlays);
   const root = am5.Root.new(chartData.id)
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);

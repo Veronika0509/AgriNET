@@ -1,4 +1,4 @@
-import {getWxetMarkerChartData} from "../../../data/types/wxet/getWxetMarkerChartData";
+import {createWxetDataContainers} from "./createWxetDataContainers";
 import axios from "axios";
 
 export const createWxetMarker = async (
@@ -32,21 +32,21 @@ export const createWxetMarker = async (
       new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
     )
     if (page === 1) {
-      getWxetMarkerChartData(
-        sensorItem.id,
-        sensorItem.sensorId,
+      createWxetDataContainers({
+        mainId: sensorItem.id,
+        sensorId: sensorItem.sensorId,
         bounds,
-        sensorItem.name,
+        name: sensorItem.name,
         setInvalidWxetChartDataContainer,
         setWxetChartDataContainer,
         wxetChartsAmount,
         wxetId,
         wxetData,
-        wxetBoundsArray,
-        wxetInvalidChartData,
+        boundsArray: wxetBoundsArray,
+        invalidChartData: wxetInvalidChartData,
         response,
         countWxet
-      );
+      });
     }
   }
 }

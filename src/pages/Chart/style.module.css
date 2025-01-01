@@ -3,6 +3,10 @@
   cursor: pointer;
 }
 
+.header_valveButtonIcon {
+  margin-right: 6px;
+}
+
 /*  Top Section  */
 .topSection_mainContainer {
   max-width: 80vw;

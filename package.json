@@ -15,7 +15,8 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@amcharts/amcharts5": "^5.7.4",
+    "@amcharts/amcharts5": "^5.10.8",
+    "@amcharts/amcharts5-geodata": "^5.1.4",
     "@capacitor/android": "^5.5.1",
     "@capacitor/app": "5.0.6",
     "@capacitor/core": "5.5.1",

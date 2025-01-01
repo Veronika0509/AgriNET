@@ -1,4 +1,4 @@
-import {getTempMarkerChartData} from "../../../data/types/temp/getTempMarkerChartData";
+import {createTempDataContainers} from "./createTempDataContainers";
 import axios from "axios";
 
 export const createTempMarker = async (
@@ -31,21 +31,21 @@ export const createTempMarker = async (
       new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
     )
     if (page === 1) {
-      getTempMarkerChartData(
-        sensorItem.id,
-        sensorItem.sensorId,
+      createTempDataContainers({
+        mainId: sensorItem.id,
+        sensorId: sensorItem.sensorId,
         bounds,
-        sensorItem.name,
+        name: sensorItem.name,
         tempChartsAmount,
         setInvalidTempChartDataContainer,
         setTempChartDataContainer,
-        tempId,
+        id: tempId,
         tempChartData,
-        tempBoundsArray,
-        tempInvalidChartData,
+        boundsArray: tempBoundsArray,
+        invalidChartData: tempInvalidChartData,
         response,
         countTemp
-      )
+      })
     }
   }
 }

@@ -1,4 +1,4 @@
-import {getMoistMarkerChartData} from "../../../data/types/moist/getMoistMarkerChartData";
+import {createMoistDataContainers} from "./createMoistDataContainers";
 import axios from "axios";
 
 export const createMoistMarker = async (
@@ -31,21 +31,21 @@ export const createMoistMarker = async (
       new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
     )
     if (page === 1) {
-      getMoistMarkerChartData(
-        sensorItem.id,
-        sensorItem.sensorId,
+      createMoistDataContainers({
+        mainId: sensorItem.id,
+        sensorId: sensorItem.sensorId,
         bounds,
-        sensorItem.name,
+        name: sensorItem.name,
         setInvalidMoistChartDataContainer,
         setMoistChartDataContainer,
         moistChartsAmount,
         moistId,
         moistChartData,
         boundsArray,
-        moistInvalidChartData,
+        invalidChartData: moistInvalidChartData,
         response,
         countMoistFuel
-      );
+      });
     }
   }
 }

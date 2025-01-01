@@ -1,246 +1,188 @@
 export class CollisionResolver {
-    private static timerId: NodeJS.Timeout;
-    private static readonly MAX_ITERATIONS = 15;
-    private static readonly MIN_SPACING = 2; // Минимальный отступ между оверлеями
+  private static timerId: NodeJS.Timeout;
+  private static readonly MAX_ITERATIONS = 30; // Increased for more thorough resolution
+  private static readonly MIN_SPACING = 0.5; // Reduced to 0.5px for extremely tight packing
+  private static alreadyMoved: Map<any, boolean> = new Map();
 
-    static resolve(overlays: any[], isMobilePlatform: boolean) {
-        if (isMobilePlatform && overlays.length > 30) return;
+  static resolve(overlays: any[], isMobilePlatform: boolean) {
+    if (isMobilePlatform && overlays.length > 30) return;
 
-        clearTimeout(this.timerId);
-        this.timerId = setTimeout(() => {
-            this.organizeOverlaysInGrid(overlays);
-            this.checkCollisions(overlays);
-        }, 100);
-    }
+    clearTimeout(this.timerId);
+    this.timerId = setTimeout(() => {
+      this.alreadyMoved.clear();
+      this.initialPosition(overlays);
+      setTimeout(() => {
+        this.resolveCollisions(overlays);
+      }, 600);
+    }, 100);
+  }
 
-    private static organizeOverlaysInGrid(overlays: any[]) {
-        // Сначала получаем размеры всех оверлеев
-        const overlaysSizes = overlays.map(overlay => {
-            const div = overlay.getDiv();
-            if (!div) return { width: 0, height: 0 };
-            const bounds = div.getBoundingClientRect();
-            return {
-                width: bounds.width,
-                height: bounds.height
-            };
-        });
+  private static initialPosition(overlays: any[]) {
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const radius = Math.min(window.innerWidth, window.innerHeight) / 8; // Further reduced radius
 
-        // Находим максимальные размеры для расчета сетки
-        const maxWidth = Math.max(...overlaysSizes.map(size => size.width));
-        const maxHeight = Math.max(...overlaysSizes.map(size => size.height));
+    overlays.forEach((overlay, index) => {
+      const angle = (index / overlays.length) * 2 * Math.PI;
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+      this.setOverlayPosition(overlay, x, y);
+    });
+  }
 
-        overlays.sort((a, b) => {
-            const divA = a.getDiv();
-            const divB = b.getDiv();
-            if (!divA || !divB) return 0;
+  private static setOverlayPosition(overlay: any, x: number, y: number) {
+    const div = overlay.getDiv();
+    if (!div) return;
 
-            const boundsA = divA.getBoundingClientRect();
-            const boundsB = divB.getBoundingClientRect();
+    div.style.left = `${x}px`;
+    div.style.top = `${y}px`;
+    overlay.draw();
+  }
 
-            // Сортируем сначала по размеру (большие первые), затем по позиции
-            const sizeA = boundsA.width * boundsA.height;
-            const sizeB = boundsB.width * boundsB.height;
-            if (sizeA !== sizeB) return sizeB - sizeA;
+  private static resolveCollisions(overlays: any[], iteration: number = 0) {
+    if (iteration >= this.MAX_ITERATIONS) return;
 
-            const distA = boundsA.left + boundsA.top;
-            const distB = boundsB.left + boundsB.top;
-            return distA - distB;
-        });
+    let hasCollisions = false;
 
-        // Рассчитываем оптимальное количество колонок
-        const numOverlays = overlays.length;
-        const numCols = Math.ceil(Math.sqrt(numOverlays));
-        const numRows = Math.ceil(numOverlays / numCols);
-
-        // Создаем сетку для отслеживания занятых ячеек
-        const grid: boolean[][] = Array(numRows).fill(null)
-            .map(() => Array(numCols).fill(false));
-
-        overlays.forEach((overlay, index) => {
-            const div = overlay.getDiv();
-            if (!div) return;
-
-            const basePosition = this.getBasePosition(overlay);
-            if (!basePosition) return;
-
-            const bounds = div.getBoundingClientRect();
-            const cellsNeededH = Math.ceil(bounds.width / maxWidth);
-            const cellsNeededV = Math.ceil(bounds.height / maxHeight);
-
-            // Находим свободное место в сетке для текущего оверлея
-            const position = this.findFreeGridPosition(grid, cellsNeededH, cellsNeededV);
-            const row = position.row;
-            const col = position.col;
-
-            // Помечаем ячейки как занятые
-            for (let r = row; r < row + cellsNeededV && r < numRows; r++) {
-                for (let c = col; c < col + cellsNeededH && c < numCols; c++) {
-                    grid[r][c] = true;
-                }
-            }
-
-            // Рассчитываем позицию с учетом размера оверлея
-            const offsetX = col * (maxWidth + this.MIN_SPACING);
-            const offsetY = row * (maxHeight + this.MIN_SPACING);
-
-            // Центрируем сетку
-            const gridCenterOffsetX = ((numCols - 1) * (maxWidth + this.MIN_SPACING)) / 2;
-            const gridCenterOffsetY = ((numRows - 1) * (maxHeight + this.MIN_SPACING)) / 2;
-
-            div.style.left = `${basePosition.x + offsetX - gridCenterOffsetX}px`;
-            div.style.top = `${basePosition.y + offsetY - gridCenterOffsetY}px`;
-
-            if (!overlay.offset) overlay.offset = { x: 0, y: 0 };
-            overlay.offset.x = offsetX - gridCenterOffsetX;
-            overlay.offset.y = offsetY - gridCenterOffsetY;
-        });
-    }
-
-    private static findFreeGridPosition(grid: boolean[][], neededWidth: number, neededHeight: number) {
-        const numRows = grid.length;
-        const numCols = grid[0].length;
-
-        for (let row = 0; row < numRows; row++) {
-            for (let col = 0; col < numCols; col++) {
-                if (this.canPlaceOverlay(grid, row, col, neededHeight, neededWidth)) {
-                    return { row, col };
-                }
-            }
+    for (let i = 0; i < overlays.length; i++) {
+      for (let j = i + 1; j < overlays.length; j++) {
+        const collision = this.checkCollision(overlays[i], overlays[j]);
+        if (collision) {
+          this.resolveCollision(overlays[i], overlays[j], collision);
+          hasCollisions = true;
+        } else {
+          this.attractOverlays(overlays[i], overlays[j]);
         }
-        return { row: 0, col: 0 }; // Fallback position
+      }
     }
 
-    private static canPlaceOverlay(
-        grid: boolean[][],
-        startRow: number,
-        startCol: number,
-        height: number,
-        width: number
-    ): boolean {
-        const numRows = grid.length;
-        const numCols = grid[0].length;
+    if (hasCollisions) {
+      setTimeout(() => this.resolveCollisions(overlays, iteration + 1), 0);
+    } else {
+      this.compactLayout(overlays);
+    }
+  }
 
-        if (startRow + height > numRows || startCol + width > numCols) {
-            return false;
-        }
+  private static checkCollision(overlay1: any, overlay2: any) {
+    const div1 = overlay1.getDiv();
+    const div2 = overlay2.getDiv();
+    if (!div1 || !div2) return null;
 
-        for (let row = startRow; row < startRow + height; row++) {
-            for (let col = startCol; col < startCol + width; col++) {
-                if (grid[row][col]) {
-                    return false;
-                }
-            }
-        }
-        return true;
+    const bounds1 = div1.getBoundingClientRect();
+    const bounds2 = div2.getBoundingClientRect();
+
+    const overlap = {
+      x: Math.min(bounds1.right, bounds2.right) - Math.max(bounds1.left, bounds2.left),
+      y: Math.min(bounds1.bottom, bounds2.bottom) - Math.max(bounds1.top, bounds2.top)
+    };
+
+    if (overlap.x > 0 && overlap.y > 0) {
+      return {
+        x: overlap.x + this.MIN_SPACING,
+        y: overlap.y + this.MIN_SPACING,
+        centerDiffX: bounds2.left + bounds2.width / 2 - (bounds1.left + bounds1.width / 2),
+        centerDiffY: bounds2.top + bounds2.height / 2 - (bounds1.top + bounds1.height / 2)
+      };
     }
 
-    private static getBasePosition(overlay: any) {
-        const div = overlay.getDiv();
-        if (!div) return null;
+    return null;
+  }
 
-        const projection = overlay.getProjection();
-        if (!projection) return null;
+  private static resolveCollision(overlay1: any, overlay2: any, collision: any) {
+    const div1 = overlay1.getDiv();
+    const div2 = overlay2.getDiv();
+    if (!div1 || !div2) return;
 
-        const position = overlay.bounds.getCenter();
-        const pixel = projection.fromLatLngToDivPixel(position);
+    const distance = Math.sqrt(
+      collision.centerDiffX * collision.centerDiffX +
+      collision.centerDiffY * collision.centerDiffY
+    );
 
-        return pixel ? { x: pixel.x, y: pixel.y } : null;
+    if (distance === 0) {
+      const angle = Math.random() * Math.PI * 2;
+      collision.centerDiffX = Math.cos(angle);
+      collision.centerDiffY = Math.sin(angle);
+    } else {
+      collision.centerDiffX /= distance;
+      collision.centerDiffY /= distance;
     }
 
-    private static checkCollisions(overlays: any[], iteration: number = 0) {
-        if (iteration >= this.MAX_ITERATIONS) return;
+    // Minimal push distance for extremely tight packing
+    const pushDistance = Math.max(collision.x, collision.y) * 0.2;
+    const push = pushDistance / 2;
 
-        let hasCollisions = false;
-        const processed = new Set<string>();
+    this.moveOverlay(overlay1,
+      -collision.centerDiffX * push,
+      -collision.centerDiffY * push
+    );
+    this.moveOverlay(overlay2,
+      collision.centerDiffX * push,
+      collision.centerDiffY * push
+    );
+  }
 
-        for (let i = 0; i < overlays.length; i++) {
-            for (let j = i + 1; j < overlays.length; j++) {
-                const overlay1 = overlays[i];
-                const overlay2 = overlays[j];
+  private static attractOverlays(overlay1: any, overlay2: any) {
+    const div1 = overlay1.getDiv();
+    const div2 = overlay2.getDiv();
+    if (!div1 || !div2) return;
 
-                const pairKey = `${i}-${j}`;
-                if (processed.has(pairKey)) continue;
+    const bounds1 = div1.getBoundingClientRect();
+    const bounds2 = div2.getBoundingClientRect();
 
-                const collision = this.checkForOverlap(overlay1, overlay2);
-                if (collision) {
-                    this.resolveCollision(overlay1, overlay2, collision);
-                    hasCollisions = true;
-                    processed.add(pairKey);
-                }
-            }
-        }
+    const centerDiffX = bounds2.left + bounds2.width / 2 - (bounds1.left + bounds1.width / 2);
+    const centerDiffY = bounds2.top + bounds2.height / 2 - (bounds1.top + bounds1.height / 2);
 
-        if (hasCollisions) {
-            setTimeout(() => this.checkCollisions(overlays, iteration + 1), 0);
-        }
+    const distance = Math.sqrt(centerDiffX * centerDiffX + centerDiffY * centerDiffY);
+
+    if (distance > 0 && distance < 50) { // Reduced attraction distance to 50px
+      const attractionForce = 0.1; // Increased attraction strength
+      const moveX = (centerDiffX / distance) * attractionForce;
+      const moveY = (centerDiffY / distance) * attractionForce;
+
+      this.moveOverlay(overlay1, moveX, moveY);
+      this.moveOverlay(overlay2, -moveX, -moveY);
     }
+  }
 
-    private static checkForOverlap(overlay1: any, overlay2: any) {
-        const div1 = overlay1.getDiv();
-        const div2 = overlay2.getDiv();
-        if (!div1 || !div2) return null;
+  private static compactLayout(overlays: any[]) {
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
 
-        const bounds1 = div1.getBoundingClientRect();
-        const bounds2 = div2.getBoundingClientRect();
+    overlays.forEach(overlay => {
+      const div = overlay.getDiv();
+      if (!div) return;
 
-        const overlapX = Math.max(0,
-            Math.min(bounds1.right, bounds2.right) -
-            Math.max(bounds1.left, bounds2.left)
-        );
+      const bounds = div.getBoundingClientRect();
+      const currentCenterX = bounds.left + bounds.width / 2;
+      const currentCenterY = bounds.top + bounds.height / 2;
 
-        const overlapY = Math.max(0,
-            Math.min(bounds1.bottom, bounds2.bottom) -
-            Math.max(bounds1.top, bounds2.top)
-        );
+      const directionX = centerX - currentCenterX;
+      const directionY = centerY - currentCenterY;
+      const distance = Math.sqrt(directionX * directionX + directionY * directionY);
 
-        if (overlapX > 0 && overlapY > 0) {
-            return {
-                x: overlapX,
-                y: overlapY,
-                isVertical: Math.abs(bounds1.top - bounds2.top) < Math.abs(bounds1.left - bounds2.left)
-            };
-        }
+      if (distance > 0) {
+        const moveX = (directionX / distance) * 0.5; // Gentle movement towards center
+        const moveY = (directionY / distance) * 0.5;
 
-        return null;
-    }
+        this.moveOverlay(overlay, moveX, moveY);
+      }
+    });
+  }
 
-    private static resolveCollision(overlay1: any, overlay2: any, collision: any) {
-        const div1 = overlay1.getDiv();
-        const div2 = overlay2.getDiv();
-        if (!div1 || !div2) return;
+  private static moveOverlay(overlay: any, dx: number, dy: number) {
+    const div = overlay.getDiv();
+    if (!div) return;
 
-        const bounds1 = div1.getBoundingClientRect();
-        const bounds2 = div2.getBoundingClientRect();
+    const currentLeft = parseFloat(div.style.left) || 0;
+    const currentTop = parseFloat(div.style.top) || 0;
 
-        const centerDiffX = bounds2.left - bounds1.left;
-        const centerDiffY = bounds2.top - bounds1.top;
+    div.style.left = `${currentLeft + dx}px`;
+    div.style.top = `${currentTop + dy}px`;
 
-        const moveX = (centerDiffX > 0 ? 1 : -1) * collision.x / 2;
-        const moveY = (centerDiffY > 0 ? 1 : -1) * collision.y / 2;
+    if (!overlay.offset) overlay.offset = {x: 0, y: 0};
+    overlay.offset.x += dx;
+    overlay.offset.y += dy;
 
-        this.moveElement(overlay1, -moveX, -moveY);
-        this.moveElement(overlay2, moveX, moveY);
-
-        overlay1.draw();
-        overlay2.draw();
-    }
-
-    private static moveElement(overlay: any, x: number, y: number) {
-        const div = overlay.getDiv();
-        if (!div) return;
-
-        const currentLeft = parseFloat(div.style.left) || 0;
-        const currentTop = parseFloat(div.style.top) || 0;
-
-        const newLeft = Math.round(currentLeft + x);
-        const newTop = Math.round(currentTop + y);
-
-        div.style.left = `${newLeft}px`;
-        div.style.top = `${newTop}px`;
-
-        if (!overlay.offset) overlay.offset = { x: 0, y: 0 };
-        overlay.offset.x += x;
-        overlay.offset.y += y;
-    }
+    overlay.draw();
+  }
 }
-

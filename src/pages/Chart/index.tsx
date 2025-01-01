@@ -10,6 +10,7 @@ import {Alarm} from "./components/Alarm";
 import {getAlarmData} from "./data/getAlarmData";
 import {getFieldLabels} from "./components/Alarm/data/getFieldLabels";
 import {alarmDataProcessing} from "./functions/alarmDataProcessing";
+import {ValveChartPage} from "./components/types/valve";
 
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -37,6 +38,7 @@ const Chart = (props: ChartProps) => {
   const [alarmFieldLabelsData, setAlarmFieldLabelsData] = useState()
   const [isAlarmLowSetpointEnabled, setIsAlarmLowSetpointEnabled] = useState()
   const [isAlarmHighSetpointEnabled, setIsAlarmHighSetpointEnabled] = useState()
+  const [valveArchive, setValveArchive] = useState(false)
 
   useEffect(() => {
     alarmDataProcessing(
@@ -100,6 +102,18 @@ const Chart = (props: ChartProps) => {
             setAlarm={setAlarm}
           />
         )
+      case 'valve':
+        return (
+          <ValveChartPage
+            chartData={props.chartData}
+            sensorId={props.siteId}
+            isMobile={isMobile}
+            setIsMobile={setIsMobile}
+            userId={props.userId}
+            valveArchive={valveArchive}
+            setValveArchive={setValveArchive}
+          />
+        )
       default:
         return null;
     }
@@ -107,7 +121,7 @@ const Chart = (props: ChartProps) => {
 
   return (
     <IonPage className={s.page}>
-      <Header type='chartPage' setPage={props.setPage} siteName={props.siteName} siteId={props.siteId}/>
+      <Header type='chartPage' setPage={props.setPage} siteName={props.siteName} sensorId={props.siteId} chartType={props.chartPageType} setValveArchive={setValveArchive} />
       {renderChartPage()}
       <IonModal isOpen={alarm} className={s.alarmPage}>
         <Header type='alarmPage' setAlarm={setAlarm}/>

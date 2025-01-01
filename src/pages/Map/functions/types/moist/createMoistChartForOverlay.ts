@@ -2,8 +2,19 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
-export const createMoistChartForOverlay = (chartData: any, roots: any, moistOverlays: any) => {
-  console.log(moistOverlays)
+const checkOverlay = async (id: string, moistOverlays: any[]): Promise<void> => {
+  const element = document.getElementById(id);
+  if (!element) {
+    const overlay = moistOverlays.find(moistOverlay => moistOverlay.chartData.id === id);
+    if (overlay) {
+      console.log('gonna update overlay', id)
+      await overlay.update();
+    }
+  }
+}
+
+export const createMoistChartForOverlay = async (chartData: any, roots: any, moistOverlays: any) => {
+  await checkOverlay(chartData.id, moistOverlays);
   const root: any = am5.Root.new(chartData.id)
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);
@@ -95,7 +106,7 @@ export const createMoistChartForOverlay = (chartData: any, roots: any, moistOver
 
   let bottomBudgetRegion: any = yAxis.makeDataItem({
     value: chartData.budgetLines[4].value,
-    endValue: 0
+    endValue: -100
   });
   series.createAxisRange(bottomBudgetRegion);
   bottomBudgetRegion.get("axisFill").setAll({

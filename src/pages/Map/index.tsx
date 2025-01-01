@@ -18,6 +18,9 @@ import {initializeWxetCustomOverlay} from "./components/types/wxet/WxetCustomOve
 import {initializeTempCustomOverlay} from "./components/types/temp/TempCustomOverlay";
 import {createTempChartForOverlay} from "./functions/types/temp/createTempChartForOverlay";
 import {CollisionResolver} from "./components/CollisionResolver";
+import {initializeValveCustomOverlay} from "./components/types/valve/ValveCustomOverlay";
+import {createValveChartForOverlay} from "./functions/types/valve/createValveChartForOverlay";
+import login from "../Login";
 
 interface MainProps {
   page: any
@@ -55,8 +58,14 @@ const MapPage: React.FC<MainProps> = (props) => {
   const [tempChartDataContainer, setTempChartDataContainer] = useState<any>([])
   const [invalidTempChartDataContainer, setInvalidTempChartDataContainer] = useState([])
   const [tempOverlays, setTempOverlays] = useState([])
-  let createdTempCharts: any = []
   const tempChartsAmount: any = []
+
+  // Valve type
+  let isValveMarkerChartDrawn: boolean = false
+  const [valveChartDataContainer, setValveChartDataContainer] = useState<any>([])
+  const [invalidValveChartDataContainer, setInvalidValveChartDataContainer] = useState([])
+  const [valveOverlays, setValveOverlays] = useState([])
+  const valveChartsAmount: any = []
 
   // Wxet type
   const [wxetDataContainer, setWxetDataContainer] = useState<any>([])
@@ -65,7 +74,8 @@ const MapPage: React.FC<MainProps> = (props) => {
 
   // All Types
   let allCoordinatesOfMarkers: any = [];
-  const [overlays, setOverlays] = useState<any[]>([])
+  const [activeOverlays, setActiveOverlays] = useState<any[]>([])
+  const [allOverlays, setAllOverlays] = useState<any[]>([])
   const [isAllCoordinatesOfMarkersAreReady, setIsAllCoordinatesOfMarkersAreReady] = useState([])
 
   // Map
@@ -73,8 +83,8 @@ const MapPage: React.FC<MainProps> = (props) => {
   const [markers, setMarkers] = useState([]);
   const [secondMap, setSecondMap] = useState()
   const [amountOfSensors, setAmountOfSensors] = useState<number>(0)
+  const [areBoundsFitted, setAreBoundsFitted] = useState(false)
   const mapRef = useRef(null);
-  let overlappingPairs: any[] = []
   const history = useHistory();
 
   useEffect(() => {
@@ -85,13 +95,13 @@ const MapPage: React.FC<MainProps> = (props) => {
   }, [props.page])
   useEffect(() => {
     if (map && props.siteList.length > 0) {
-      createSites(
-        props.page,
+      createSites({
+        page: props.page,
         map,
-        props.siteList,
+        siteList: props.siteList,
         markers,
         setMarkers,
-        props.userId,
+        userId: props.userId,
         allCoordinatesOfMarkers,
         setIsAllCoordinatesOfMarkersAreReady,
         setSecondMap,
@@ -104,100 +114,71 @@ const MapPage: React.FC<MainProps> = (props) => {
         tempChartsAmount,
         setInvalidTempChartDataContainer,
         setTempChartDataContainer,
+        valveChartsAmount,
+        setInvalidValveChartDataContainer,
+        setValveChartDataContainer,
         amountOfSensors,
         setAmountOfSensors
-      )
-      // Добавляем слушатели событий для разрешения коллизий
-      const handleResize = () => {
-        CollisionResolver.resolve(overlays, false);
-      };
-
-      window.addEventListener('resize', handleResize);
-      map.addListener('zoom_changed', handleResize);
-      map.addListener('dragend', handleResize);
-
-      // Вызываем resolve сразу после добавления всех оверлеев
-      CollisionResolver.resolve(overlays, false);
-
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        google.maps.event.clearListeners(map, 'zoom_changed');
-        google.maps.event.clearListeners(map, 'dragend');
-      };
+      })
     }
   }, [map, props.siteList]);
 
+  const addOverlayToOverlaysArray = (overlay: any)=> {
+    setActiveOverlays((prevActiveOverlays) => {
+      const exists = prevActiveOverlays.some(
+        (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
+      );
+      return exists ? prevActiveOverlays : [...prevActiveOverlays, overlay];
+    });
+    overlay.setMap(map)
+  }
   // Moist Marker Chart
   useEffect(() => {
     if (moistChartDataContainer.length !== 0) {
-      const addOverlay = (() => {
-        moistChartDataContainer.map((chartData: any) => {
-          const MoistCustomOverlayExport: any = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
-          const overlay = new MoistCustomOverlayExport(
-            chartData[1],
-            invalidChartDataImage,
-            true,
-            chartData[0],
-            isAllCoordinatesOfMarkersAreReady,
-            overlappingPairs,
-            // sensorId,
-            props.setChartData,
-            props.setPage,
-            props.setSiteId,
-            props.setSiteName,
-            history,
-            isMoistMarkerChartDrawn,
-            props.setAdditionalChartData,
-            props.siteList,
-            setMoistOverlays,
-            props.setChartPageType
-          )
-          setOverlays((prevOverlays) => {
-            const exists = prevOverlays.some(
-              (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
-            );
-            return exists ? prevOverlays : [...prevOverlays, overlay];
-          });
-          overlay.setMap(map)
-        })
+      moistChartDataContainer.map((chartData: any) => {
+        const MoistCustomOverlayExport: any = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
+        const overlay = new MoistCustomOverlayExport(
+          chartData[1],
+          invalidChartDataImage,
+          true,
+          chartData[0],
+          props.setChartData,
+          props.setPage,
+          props.setSiteId,
+          props.setSiteName,
+          history,
+          isMoistMarkerChartDrawn,
+          props.setAdditionalChartData,
+          props.siteList,
+          setMoistOverlays,
+          props.setChartPageType
+        )
+        addOverlayToOverlaysArray(overlay)
       })
-      addOverlay();
     }
   }, [moistChartDataContainer]);
   useEffect(() => {
     if (invalidMoistChartDataContainer.length !== 0) {
-      const addOverlay = () => {
-        invalidMoistChartDataContainer.map((chartData: any) => {
-          const CustomOverlayExport: any = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
-          const overlay: any = new CustomOverlayExport(
-            chartData[1],
-            invalidChartDataImage,
-            false,
-            chartData[0],
-            isAllCoordinatesOfMarkersAreReady,
-            overlappingPairs,
-            // sensorId,
-            props.setChartData,
-            props.setPage,
-            props.setSiteId,
-            props.setSiteName,
-            history,
-            isMoistMarkerChartDrawn,
-            props.setAdditionalChartData,
-            props.siteList,
-            setMoistOverlays,
-            props.setChartPageType
-          )
-          setOverlays((prevOverlays) => {
-            const exists = prevOverlays.some(
-              (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
-            )
-            return exists ? prevOverlays : [...prevOverlays, overlay];
-          });
-          map && overlay.setMap(map)
-        })
-      }
-      addOverlay()
+      invalidMoistChartDataContainer.map((chartData: any) => {
+        const CustomOverlayExport: any = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
+        const overlay: any = new CustomOverlayExport(
+          chartData[1],
+          invalidChartDataImage,
+          false,
+          chartData[0],
+          props.setChartData,
+          props.setPage,
+          props.setSiteId,
+          props.setSiteName,
+          history,
+          isMoistMarkerChartDrawn,
+          props.setAdditionalChartData,
+          props.siteList,
+          setMoistOverlays,
+          props.setChartPageType
+        )
+        addOverlayToOverlaysArray(overlay)
+      })
     }
   }, [invalidMoistChartDataContainer]);
   // useEffect(() => {
@@ -226,104 +207,68 @@ const MapPage: React.FC<MainProps> = (props) => {
   // Wxet Marker
   useEffect(() => {
     if (wxetDataContainer.length !== 0) {
-      const addOverlay = (() => {
-        wxetDataContainer.map((data: any) => {
-          const WxetCustomOverlayExport: any = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
-          const overlay = new WxetCustomOverlayExport(
-            isAllCoordinatesOfMarkersAreReady,
-            overlappingPairs,
-            props.setChartData,
-            props.setPage,
-            props.setSiteId,
-            props.setSiteName,
-            props.setAdditionalChartData,
-            history,
-            props.userId,
-            data[1],
-            true,
-            data[0],
-            props.setChartPageType
-          )
-          setOverlays((prevOverlays) => {
-            const exists = prevOverlays.some(
-              (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
-            )
-            return exists ? prevOverlays : [...prevOverlays, overlay];
-          });
-          overlay.setMap(map)
-        })
+      wxetDataContainer.map((data: any) => {
+        const WxetCustomOverlayExport: any = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
+        const overlay = new WxetCustomOverlayExport(
+          props.setChartData,
+          props.setPage,
+          props.setSiteId,
+          props.setSiteName,
+          props.setAdditionalChartData,
+          history,
+          data[1],
+          true,
+          data[0],
+          props.setChartPageType
+        )
+        addOverlayToOverlaysArray(overlay)
       })
-      addOverlay();
     }
   }, [wxetDataContainer]);
   useEffect(() => {
     if (invalidWxetDataContainer.length !== 0) {
-      const addOverlay = (() => {
-        invalidWxetDataContainer.map((data: any) => {
-          const WxetCustomOverlayExport: any = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
-          const overlay = new WxetCustomOverlayExport(
-            isAllCoordinatesOfMarkersAreReady,
-            overlappingPairs,
-            props.setChartData,
-            props.setPage,
-            props.setSiteId,
-            props.setSiteName,
-            props.setAdditionalChartData,
-            history,
-            props.userId,
-            data[1],
-            false,
-            data[0],
-            props.setChartPageType
-          )
-          setOverlays((prevOverlays) => {
-            const exists = prevOverlays.some(
-              (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
-            );
-            return exists ? prevOverlays : [...prevOverlays, overlay];
-          });
-          overlay.setMap(map)
-        })
+      invalidWxetDataContainer.map((data: any) => {
+        const WxetCustomOverlayExport: any = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
+        const overlay = new WxetCustomOverlayExport(
+          props.setChartData,
+          props.setPage,
+          props.setSiteId,
+          props.setSiteName,
+          props.setAdditionalChartData,
+          history,
+          data[1],
+          false,
+          data[0],
+          props.setChartPageType
+        )
+        addOverlayToOverlaysArray(overlay)
       })
-      addOverlay();
     }
   }, [invalidWxetDataContainer])
 
   // Temp Marker
   useEffect(() => {
     if (tempChartDataContainer.length !== 0) {
-      const addOverlay = (() => {
-        tempChartDataContainer.map((chartData: any) => {
-          const TempCustomOverlayExport: any = initializeTempCustomOverlay(props.isGoogleApiLoaded)
-          const overlay = new TempCustomOverlayExport(
-            chartData[1],
-            true,
-            chartData[0],
-            isAllCoordinatesOfMarkersAreReady,
-            overlappingPairs,
-            props.setChartData,
-            props.setPage,
-            props.setSiteId,
-            props.setSiteName,
-            history,
-            isTempMarkerChartDrawn,
-            props.setAdditionalChartData,
-            props.siteList,
-            setTempOverlays,
-            props.setChartPageType,
-            props.userId,
-            present
-          )
-          setOverlays((prevOverlays) => {
-            const exists = prevOverlays.some(
-              (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
-            );
-            return exists ? prevOverlays : [...prevOverlays, overlay];
-          });
-          overlay.setMap(map)
-        })
+      tempChartDataContainer.map((chartData: any) => {
+        const TempCustomOverlayExport: any = initializeTempCustomOverlay(props.isGoogleApiLoaded)
+        const overlay = new TempCustomOverlayExport(
+          chartData[1],
+          true,
+          chartData[0],
+          props.setChartData,
+          props.setPage,
+          props.setSiteId,
+          props.setSiteName,
+          history,
+          isTempMarkerChartDrawn,
+          props.setAdditionalChartData,
+          setTempOverlays,
+          props.setChartPageType,
+          props.userId,
+          present
+        )
+        addOverlayToOverlaysArray(overlay)
       })
-      addOverlay();
     }
   }, [tempChartDataContainer]);
   useEffect(() => {
@@ -334,8 +279,6 @@ const MapPage: React.FC<MainProps> = (props) => {
           chartData[1],
           false,
           chartData[0],
-          isAllCoordinatesOfMarkersAreReady,
-          overlappingPairs,
           props.setChartData,
           props.setPage,
           props.setSiteId,
@@ -343,19 +286,12 @@ const MapPage: React.FC<MainProps> = (props) => {
           history,
           isTempMarkerChartDrawn,
           props.setAdditionalChartData,
-          props.siteList,
           setTempOverlays,
           props.setChartPageType,
           props.userId,
           present
         )
-        setOverlays((prevOverlays) => {
-          const exists = prevOverlays.some(
-            (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
-          );
-          return exists ? prevOverlays : [...prevOverlays, overlay];
-        });
-        map && overlay.setMap(map)
+        addOverlayToOverlaysArray(overlay)
       })
     }
   }, [invalidTempChartDataContainer]);
@@ -372,18 +308,99 @@ const MapPage: React.FC<MainProps> = (props) => {
     }
   }, [tempOverlays]);
 
+  // Valve Marker
   useEffect(() => {
-    if (overlays.length !== 0 && overlays.length === amountOfSensors) {
-      const bounds = new google.maps.LatLngBounds();
-      overlays.map((overlayToBound: any) => {
-        overlayToBound.isAllCoordinatesOfMarkersAreReady.map((coordinateToBound: any) => {
-          bounds.extend({lat: coordinateToBound.lat, lng: coordinateToBound.lng})
-        })
+    if (valveChartDataContainer.length !== 0) {
+      valveChartDataContainer.map((chartData: any) => {
+        const ValveCustomOverlayExport: any = initializeValveCustomOverlay(props.isGoogleApiLoaded)
+        const overlay = new ValveCustomOverlayExport(
+          chartData[1],
+          true,
+          chartData[0],
+          props.setChartData,
+          props.setPage,
+          props.setSiteId,
+          props.setSiteName,
+          props.setChartPageType,
+          history,
+          isValveMarkerChartDrawn,
+          setValveOverlays,
+          props.userId
+        )
+        addOverlayToOverlaysArray(overlay)
       })
-      map.fitBounds(bounds);
-      CollisionResolver.resolve(overlays, false);
     }
-  }, [overlays]);
+  }, [valveChartDataContainer]);
+  useEffect(() => {
+    if (invalidValveChartDataContainer.length !== 0) {
+      invalidValveChartDataContainer.map((chartData: any) => {
+        const ValveCustomOverlayExport: any = initializeValveCustomOverlay(props.isGoogleApiLoaded)
+        const overlay = new ValveCustomOverlayExport(
+          chartData[1],
+          false,
+          chartData[0],
+          props.setChartData,
+          props.setPage,
+          props.setSiteId,
+          props.setSiteName,
+          props.setChartPageType,
+          history,
+          isValveMarkerChartDrawn,
+          setValveOverlays,
+          props.userId
+        )
+        addOverlayToOverlaysArray(overlay)
+      })
+    }
+  }, [invalidValveChartDataContainer]);
+  useEffect(() => {
+    if (valveOverlays.length !== 0) {
+      const roots: any[] = [];
+      valveOverlays.map((valveOverlay: any) => {
+        createValveChartForOverlay(valveOverlay.chartData, roots, valveOverlays)
+      })
+
+      return () => {
+        roots.forEach(root => root.dispose());
+      };
+    }
+  }, [valveOverlays]);
+
+  useEffect(() => {
+    if (activeOverlays.length !== 0 && activeOverlays.length === amountOfSensors && !areBoundsFitted) {
+      CollisionResolver.resolve(activeOverlays, false);
+      setAllOverlays(activeOverlays)
+
+      const bounds = new google.maps.LatLngBounds();
+      isAllCoordinatesOfMarkersAreReady.forEach((coordinate: any) => {
+        bounds.extend({lat: coordinate.lat, lng: coordinate.lng});
+      });
+      map.fitBounds(bounds);
+      setAreBoundsFitted(true);
+    }
+  }, [activeOverlays]);
+  useEffect(() => {
+    if (activeOverlays.length !== 0 && areBoundsFitted) {
+      CollisionResolver.resolve(activeOverlays, false);
+      const handleResize = (reason: any) => {
+        console.log(reason)
+        new Promise((resolve: any) => {
+          activeOverlays.map((overlay: any) => {
+            overlay.offset = {x: 0, y: 0}
+          })
+          resolve()
+        }).then(() => {
+          CollisionResolver.resolve(activeOverlays, false);
+        })
+      };
+      window.addEventListener('resize', () => handleResize('resize'));
+      map.addListener('zoom_changed', () => handleResize('zoom'));
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        google.maps.event.clearListeners(map, 'zoom_changed');
+      };
+    }
+  }, [activeOverlays, areBoundsFitted]);
 
   return (
     <IonPage>
@@ -391,7 +408,7 @@ const MapPage: React.FC<MainProps> = (props) => {
       <IonContent className={s.ionContent}>
         <div className={s.map} ref={mapRef}>
           {secondMap && (
-            <LayerList siteList={props.siteList} secondMap={secondMap} overlays={overlays}/>
+            <LayerList siteList={props.siteList} secondMap={secondMap} allOverlays={allOverlays} activeOverlays={activeOverlays} setActiveOverlays={setActiveOverlays}/>
           )}
         </div>
         {/*<ModalWindow isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} sensorName={sensorName}*/}

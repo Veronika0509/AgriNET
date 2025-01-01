@@ -1,25 +1,25 @@
 import s from "../../../style.module.css";
 import {createRoot} from "react-dom/client";
 import React from "react";
+import {onValveSensorClick} from "../../../functions/types/valve/onValveSensorClick";
 import {truncateText} from "../../../functions/truncateTextFunc";
-import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
-export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
+// import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
+
+export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
     return class CustomOverlayExport extends google.maps.OverlayView {
       private bounds: google.maps.LatLngBounds;
-      private invalidChartDataImage: any;
       private isValidChartData: boolean;
       private chartData: any;
       private setChartData: any
       private setPage: any
       private setSiteId: any
       private setSiteName: any
-      private history: any
-      private isMoistMarkerChartDrawn: boolean
-      private setAdditionalChartData: any
-      private siteList: any
-      private setMoistOverlays: any
       private setChartPageType: any
+      private history: any
+      private isValveMarkerChartDrawn: boolean
+      private setValveOverlays: any
+      private userId: any
 
       private layerName: string
       private root: any;
@@ -28,85 +28,86 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
 
       constructor(
         bounds: google.maps.LatLngBounds,
-        invalidChartDataImage: any,
         isValidChartData: boolean,
         chartData: any,
         setChartData: any,
         setPage: any,
         setSiteId: any,
         setSiteName: any,
-        history: any,
-        isMoistMarkerChartDrawn: boolean,
-        setAdditionalChartData: any,
-        siteList: any,
-        setMoistOverlays: any,
         setChartPageType: any,
+        history: any,
+        isValveMarkerChartDrawn: boolean,
+        setValveOverlays: any,
+        userId: any
       ) {
         super();
         this.bounds = bounds;
-        this.invalidChartDataImage = invalidChartDataImage;
         this.isValidChartData = isValidChartData;
         this.chartData = chartData;
         this.setChartData = setChartData
         this.setPage = setPage
         this.setSiteId = setSiteId
         this.setSiteName = setSiteName
-        this.history = history
-        this.isMoistMarkerChartDrawn = isMoistMarkerChartDrawn
-        this.setAdditionalChartData = setAdditionalChartData
-        this.siteList = siteList
-        this.setMoistOverlays = setMoistOverlays
         this.setChartPageType = setChartPageType
+        this.history = history
+        this.isValveMarkerChartDrawn = isValveMarkerChartDrawn
+        this.setValveOverlays = setValveOverlays
+        this.userId = userId
 
         this.layerName = chartData.layerName
         this.offset = { x: 0, y: 0 };
       }
 
       update() {
-        if (this.div && this.isMoistMarkerChartDrawn && this.root) {
+        if (this.div && this.isValveMarkerChartDrawn && this.root) {
           this.root.render(this.renderContent());
         }
       }
 
       renderContent() {
         return (
-          <div className={s.overlay_container} onClick={() => onMoistSensorClick(
+          <div className={`${s.overlay_container}`} onClick={() => onValveSensorClick(
             this.history,
+            this.userId,
             this.chartData.sensorId,
-            this.chartData.mainId,
             this.chartData.name,
             this.setChartData,
             this.setPage,
             this.setSiteId,
             this.setSiteName,
-            this.setAdditionalChartData,
-            this.siteList,
             this.setChartPageType
           )}>
             {this.isValidChartData ? (
-              <div className={s.mainContainer}>
+              <div>
                 <div className={s.overlay_chartContainer}>
-                  {/*style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}*/}
-                  <div style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }} id={`${this.chartData.id}`} className={s.overlay_chart}></div>
-                  {this.isMoistMarkerChartDrawn ? null : (
+                  <div className={s.overlay_chartWrapper}>
+                    <div style={{display: this.isValveMarkerChartDrawn ? 'block' : 'none'}} id={`${this.chartData.id}`}
+                         className={`${s.overlay_chart} ${s.overlay_chart__valve} ppp`}></div>
+                    <div
+                      className={`${s.overlay_valveEnabled} ${this.chartData.enabled && s.overlay_valveEnabled__enabled}`}></div>
+                  </div>
+                  {this.isValveMarkerChartDrawn ? null : (
                     <div className={s.overlay_loader}></div>
                   )}
-                  <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
+                  <p style={{marginTop: this.isValveMarkerChartDrawn ? '0' : '15px'}}
+                     className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlay_info}>
                   <p className={s.chartName}>{this.chartData.name}</p>
-                  {this.chartData.battery && <p className={s.chartName}>{this.chartData.battery}</p>}
                   <p>{this.chartData.sensorId}</p>
                 </div>
               </div>
             ) : (
               <div className={`${s.overlay_container} ${s.overlay_invalidOverlayContainer}`}>
-                <div className={s.overlay_invalidMoistChartDataImgContainer}>
-                  <img src={this.invalidChartDataImage} className={s.overlay_invalidChartDataImg} alt='Invalid Chart Data'/>
-                  <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
+                <div className={s.overlay_wxetNotValidData}>
+                  <div className={s.overlay_wxetNotValidDataRectangle}>
+                    <p className={s.overlay_wxetNotValidDataRectangleText}>no data</p>
+                  </div>
+                  <p
+                    className={`${s.overlay_wxetNotValidName} ${s.overlay_underInformationOverlayText}`}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlay_info}>
-                  <p className={s.chartName}>{this.chartData.sensorId}</p>
+                  <p className={s.overlay_text}>{this.chartData.sensorId}</p>
                 </div>
               </div>
             )}
@@ -126,12 +127,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
             this.div.style.borderWidth = "0px";
             this.div.style.position = "absolute";
 
-            if (this.chartData.battery !== null) {
-              if (!this.chartData.battery.toString().includes(" VDC")) {
-                this.chartData.battery = this.chartData.battery + ' VDC'
-              }
-            }
-
             this.offset = {
               x: (Math.random() - 0.5) * 20,
               y: (Math.random() - 0.5) * 20
@@ -147,9 +142,8 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
           resolve()
         }).then(() => {
           if (this.isValidChartData) {
-            this.setMoistOverlays((overlays: any[]) => {
-              const newOverlayId = this.chartData.id;
-              const overlayExists = overlays.some(overlay => overlay.chartData.id === newOverlayId);
+            this.setValveOverlays((overlays: any[]) => {
+              const overlayExists = overlays.some(overlay => overlay.chartData.id === this.chartData.id);
 
               if (!overlayExists) {
                 return [...overlays, this];
@@ -169,7 +163,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         const pixel = projection.fromLatLngToDivPixel(position);
 
         if (pixel) {
-          // Apply the stored offset when drawing
           this.div.style.left = `${pixel.x + this.offset.x}px`;
           this.div.style.top = `${pixel.y + this.offset.y}px`;
         }
@@ -186,6 +179,9 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         }
       }
 
+      /**
+       *  Set the visibility to 'hidden' or 'visible'.
+       */
       hide() {
         if (this.div) {
           this.div.style.visibility = "hidden";

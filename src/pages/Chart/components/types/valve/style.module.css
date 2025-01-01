@@ -1,0 +1,204 @@
+.tableContainer {
+  width: 550px;
+  height: 83vh;
+  margin: 40px auto 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.table {
+  width: 99%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.tableHeadRow, .archiveTableHeadRow {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.archiveTableHeadRow {
+  background: #fff;
+}
+
+.archiveTableHeadRow::after {
+  content: '';
+  position: absolute;
+  top: 39px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background-color: #000;
+  width: 100%;
+}
+
+.tableHeadRow::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background-color: #000;
+  width: 100%;
+}
+
+.tableBodyContainer {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.tableHeadTitle {
+  text-align: left;
+  padding: 10px 8px;
+  font-weight: bold;
+}
+
+.tableItem {
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.tableItem:hover {
+  background: #f3f3f3;
+}
+
+.tableRowItem {
+  padding: 2px 8px;
+  vertical-align: middle;
+}
+
+.off {
+  color: #ff0000;
+}
+
+.on {
+  color: #00da50;
+}
+
+.buttonContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nowButton {
+  color: #00da50;
+}
+
+/* Column widths */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 30%;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 20%;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 25%;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 25%;
+}
+
+.tableArchiveButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.tableArchiveButton > ion-buttons {
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+
+.tableArchiveButton > ion-buttons > ion-button {
+  width: 100%;
+  padding: 2px 8px;
+}
+
+.tableArchiveButton > ion-buttons > ion-button:hover {
+  background: #f3f3f3;
+}
+
+.archiveModal {
+  --width: 100% !important;
+  --height: 100% !important;
+  position: fixed;
+  z-index: 10;
+  transition: opacity 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.archiveModalContent {
+  --padding-top: 0;
+  --padding-bottom: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.archiveModal .tableContainer {
+  height: auto;
+  min-height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.archiveModal .tableBodyContainer {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Column widths for the second table */
+.archiveModal .table th:nth-child(1),
+.archiveModal .table td:nth-child(1) {
+  width: 22%;
+}
+
+.archiveModal .table th:nth-child(2),
+.archiveModal .table td:nth-child(2) {
+  width: 28%;
+}
+
+.archiveModal .table th:nth-child(3),
+.archiveModal .table td:nth-child(3) {
+  width: 30%;
+}
+
+.archiveModal .table th:nth-child(4),
+.archiveModal .table td:nth-child(4) {
+  width: 20%;
+}
+
+.archiveDataSpinner {
+  display: block;
+  margin: 0 auto 15px auto;
+}
+
+.refreshButton {
+  cursor: pointer;
+}
+
+.refreshButton::part(native) {
+  padding: 5px;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 35px;
+  height: 36px;
+}

@@ -1,98 +1,83 @@
 import {onSiteClick} from "./onSiteClick";
 
-export const createSites = (
-  page: any,
-  map: any,
-  siteList: any,
-  markers: any,
-  setMarkers: any,
-  userId: any,
-  allCoordinatesOfMarkers: any,
-  setIsAllCoordinatesOfMarkersAreReady: any,
-  setSecondMap: any,
-  moistChartsAmount: any,
-  setInvalidMoistChartDataContainer: any,
-  setMoistChartDataContainer: any,
-  wxetChartsAmount: any,
-  setInvalidWxetDataContainer: any,
-  setWxetDataContainer: any,
-  tempChartsAmount: any,
-  setInvalidTempChartDataContainer: any,
-  setTempChartDataContainer: any,
-  amountOfSensors: number,
-  setAmountOfSensors: any
-) => {
-  if (markers.length === 0) {
-    const newMarkers = siteList.map((sensorsGroupData: any) => {
+export const createSites = (props: any) => {
+  if (props.markers.length === 0) {
+    const newMarkers = props.siteList.map((sensorsGroupData: any) => {
       let groupMarker: any = new google.maps.Marker({
         position: {lat: sensorsGroupData.lat, lng: sensorsGroupData.lng},
-        map: map,
+        map: props.map,
         title: sensorsGroupData.name,
       });
       const info: string = `<p class="infoWindowText">${sensorsGroupData.name}</p>`
       const infoWindow = new google.maps.InfoWindow({
         content: info,
       });
-      infoWindow.open(map, groupMarker);
-      if (siteList.length === 1) {
+      infoWindow.open(props.map, groupMarker);
+      if (props.siteList.length === 1) {
         setTimeout(() => {
-          onSiteClick(
-            page,
-            userId,
-            allCoordinatesOfMarkers,
-            setIsAllCoordinatesOfMarkersAreReady,
-            siteList,
+          onSiteClick({
+            page: props.page,
+            userId: props.userId,
+            allCoordinatesOfMarkers: props.allCoordinatesOfMarkers,
+            setIsAllCoordinatesOfMarkersAreReady: props.setIsAllCoordinatesOfMarkersAreReady,
+            siteList: props.siteList,
             groupMarker,
             sensorsGroupData,
-            setSecondMap,
-            moistChartsAmount,
-            setInvalidMoistChartDataContainer,
-            setMoistChartDataContainer,
-            wxetChartsAmount,
-            setInvalidWxetDataContainer,
-            setWxetDataContainer,
-            tempChartsAmount,
-            setInvalidTempChartDataContainer,
-            setTempChartDataContainer,
-            amountOfSensors,
-            setAmountOfSensors
-          )
+            setSecondMap: props.setSecondMap,
+            moistChartsAmount: props.moistChartsAmount,
+            setInvalidMoistChartDataContainer: props.setInvalidMoistChartDataContainer,
+            setMoistChartDataContainer: props.setMoistChartDataContainer,
+            wxetChartsAmount: props.wxetChartsAmount,
+            setInvalidWxetDataContainer: props.setInvalidWxetDataContainer,
+            setWxetDataContainer: props.setWxetDataContainer,
+            tempChartsAmount: props.tempChartsAmount,
+            setInvalidTempChartDataContainer: props.setInvalidTempChartDataContainer,
+            setTempChartDataContainer: props.setTempChartDataContainer,
+            valveChartsAmount: props.valveChartsAmount,
+            setInvalidValveChartDataContainer: props.setInvalidValveChartDataContainer,
+            setValveChartDataContainer: props.setValveChartDataContainer,
+            amountOfSensors: props.amountOfSensors,
+            setAmountOfSensors: props.setAmountOfSensors
+          })
         }, 2000)
       }
 
       groupMarker.addListener('click', async () => {
-        onSiteClick(
-          page,
-          userId,
-          allCoordinatesOfMarkers,
-          setIsAllCoordinatesOfMarkersAreReady,
-          siteList,
+        onSiteClick({
+          page: props.page,
+          userId: props.userId,
+          allCoordinatesOfMarkers: props.allCoordinatesOfMarkers,
+          setIsAllCoordinatesOfMarkersAreReady: props.setIsAllCoordinatesOfMarkersAreReady,
+          siteList: props.siteList,
           groupMarker,
           sensorsGroupData,
-          setSecondMap,
-          moistChartsAmount,
-          setInvalidMoistChartDataContainer,
-          setMoistChartDataContainer,
-          wxetChartsAmount,
-          setInvalidWxetDataContainer,
-          setWxetDataContainer,
-          tempChartsAmount,
-          setInvalidTempChartDataContainer,
-          setTempChartDataContainer,
-          amountOfSensors,
-          setAmountOfSensors
-        )
+          setSecondMap: props.setSecondMap,
+          moistChartsAmount: props.moistChartsAmount,
+          setInvalidMoistChartDataContainer: props.setInvalidMoistChartDataContainer,
+          setMoistChartDataContainer: props.setMoistChartDataContainer,
+          wxetChartsAmount: props.wxetChartsAmount,
+          setInvalidWxetDataContainer: props.setInvalidWxetDataContainer,
+          setWxetDataContainer: props.setWxetDataContainer,
+          tempChartsAmount: props.tempChartsAmount,
+          setInvalidTempChartDataContainer: props.setInvalidTempChartDataContainer,
+          setTempChartDataContainer: props.setTempChartDataContainer,
+          valveChartsAmount: props.valveChartsAmount,
+          setInvalidValveChartDataContainer: props.setInvalidValveChartDataContainer,
+          setValveChartDataContainer: props.setValveChartDataContainer,
+          amountOfSensors: props.amountOfSensors,
+          setAmountOfSensors: props.setAmountOfSensors
+        })
       })
     });
-    setMarkers(newMarkers);
+    props.setMarkers(newMarkers);
 
     const bounds = new google.maps.LatLngBounds();
-    siteList.forEach((marker: any) => {
+    props.siteList.forEach((marker: any) => {
       bounds.extend({
         lat: marker.lat,
         lng: marker.lng
       });
     });
-    map.fitBounds(bounds);
+    props.map.fitBounds(bounds);
   }
 }
