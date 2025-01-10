@@ -24,31 +24,32 @@ const Header = (props: any) => {
 
   return (
     <IonHeader>
-      <IonToolbar>
-        <IonButtons slot="start">
-          <IonIcon
-            onClick={onBackClick}
-            className={s.header_backIcon}
-            size='large'
-            icon={arrowBackOutline}
-          />
-        </IonButtons>
-        <IonTitle className={s.header_title}>
-          {props.type === 'chartPage' && (
-            <>{props.chartType !== 'valve' ? <>{props.siteName} / {props.sensorId}</> : <>{props.sensorId} Valve
-              Scheduler</>}</>
-          )}
-          {props.type === 'alarmPage' && (
-            <>Alarm Configuration</>
-          )}
-          {props.type === 'valveArchiveModal' && (
-            <>{props.sensorId} Valve Scheduler Archive</>
-          )}
-        </IonTitle>
-      </IonToolbar>
-      {props.chartType === 'valve' && (
-        <IonToolbar className={s.header_valveButtonsToolbar}>
-          <IonButtons className={s.header_valveButtons}>
+      <IonToolbar className={s.header_mainToolbar}>
+        <div className={s.header_contentWrapper}>
+          <div className={s.header_titleSection}>
+            <IonButtons slot="start">
+              <IonIcon
+                onClick={onBackClick}
+                className={s.header_backIcon}
+                size='large'
+                icon={arrowBackOutline}
+              />
+            </IonButtons>
+            <IonTitle className={s.header_title}>
+              {props.type === 'chartPage' && (
+                <>{props.chartType !== 'valve' ? <>{props.siteName} / {props.sensorId}</> : <>{props.sensorId} Valve
+                  Scheduler</>}</>
+              )}
+              {props.type === 'alarmPage' && (
+                <>Alarm Configuration</>
+              )}
+              {props.type === 'valveArchiveModal' && (
+                <>{props.sensorId} Valve Scheduler Archive</>
+              )}
+            </IonTitle>
+          </div>
+          {props.chartType === 'valve' && (
+            <IonButtons className={s.header_valveButtons}>
             <IonButton className={s.header_valveButton}>
               <IonIcon icon={addOutline} className={s.header_valveButtonIcon}/>
               Create

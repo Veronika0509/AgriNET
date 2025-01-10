@@ -1,34 +1,63 @@
 /*  Header  */
+.header_mainToolbar {
+  --min-height: auto;
+}
+
+.header_contentWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  gap: 16px;
+}
+
+.header_titleSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .header_backIcon {
   cursor: pointer;
 }
 
-.header_valveButtonsToolbar {
-  --min-height: auto;
-  padding: 8px 0;
+.header_title {
+  padding: 0;
+  text-align: left;
 }
 
 .header_valveButtons {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  width: 100%;
+  justify-content: flex-end;
   gap: 8px;
-  padding: 0 16px;
 }
 
 .header_valveButton {
-  flex: 1 1 calc(50% - 8px);
+  flex: 0 1 auto;
   min-width: 120px;
-  max-width: 200px;
 }
 
 .header_valveButtonIcon {
   margin-right: 6px;
 }
 
-.header_title {
-  text-align: center;
+@media only screen and (max-width: 640px) {
+  .header_contentWrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header_valveButtons {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .header_valveButton {
+    flex: 1 1 calc(50% - 8px);
+    max-width: 200px;
+  }
 }
 
 /*  Top Section  */
