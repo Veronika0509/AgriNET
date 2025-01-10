@@ -45,7 +45,6 @@ const Header = (props: any) => {
             <>{props.sensorId} Valve Scheduler Archive</>
           )}
         </IonTitle>
-        </IonTitle>
       </IonToolbar>
       {props.chartType === 'valve' && (
         <IonToolbar className={s.header_valveButtonsToolbar}>
