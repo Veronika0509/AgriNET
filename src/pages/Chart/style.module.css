@@ -3,8 +3,32 @@
   cursor: pointer;
 }
 
+.header_valveButtonsToolbar {
+  --min-height: auto;
+  padding: 8px 0;
+}
+
+.header_valveButtons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.header_valveButton {
+  flex: 1 1 calc(50% - 8px);
+  min-width: 120px;
+  max-width: 200px;
+}
+
 .header_valveButtonIcon {
   margin-right: 6px;
+}
+
+.header_title {
+  text-align: center;
 }
 
 /*  Top Section  */
