@@ -24,7 +24,7 @@ const Header = (props: any) => {
 
   return (
     <IonHeader>
-      <IonToolbar>
+      <IonToolbar className={`${props.chartType === 'valve' && s.header_valveToolbar}`}>
         <IonIcon
           onClick={onBackClick}
           className={`${s.header_backIcon} ${'ion-margin-start'}`}
@@ -45,7 +45,7 @@ const Header = (props: any) => {
           )}
         </IonTitle>
         {props.chartType === 'valve' && (
-          <IonButtons slot='end'>
+          <IonButtons slot='end' className={s.header_valveButtons}>
             <IonButton>
               <IonIcon icon={addOutline} className={s.header_valveButtonIcon}></IonIcon>
               Create
