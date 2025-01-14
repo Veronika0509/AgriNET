@@ -62,53 +62,66 @@ export const Settings = (props: any) => {
     setHasChanges(hasAnyChange)
   }, [valveName, probeId, enabled, priority, setpointSensor, moistureSetpoint, duration, hoursAve, startDelay, waterDrainTime, concurrent]);
 
-  const validateInputs = () => {
-    // Проверка на пустые значения
-    if (!valveName || !probeId || !enabled || !priority ||
-        !setpointSensor || !moistureSetpoint || !duration ||
-        !hoursAve || !startDelay || !waterDrainTime ||
-        !concurrent) {
-      return false;
-    }
+  const validateAndPrepareInputs = () => {
+    // Set default values for empty fields
+    const validatedEnabled = !enabled ? 2 : enabled;
+    const validatedPriority = !priority ? 0 : priority;
+    const validatedSetpointSensor = !setpointSensor ? 0 : setpointSensor;
+    const validatedMoistureSetpoint = !moistureSetpoint ? 0 : moistureSetpoint;
+    const validatedDuration = !duration ? 0 : duration;
+    const validatedHoursAve = !hoursAve ? 0 : hoursAve;
+    const validatedStartDelay = !startDelay ? 0 : startDelay;
+    const validatedWaterDrainTime = !waterDrainTime ? 0 : waterDrainTime;
 
-    // Проверка числовых значений
+    // Validate numeric values
     const numericFields = [
-      enabled,
-      priority,
-      setpointSensor,
-      moistureSetpoint,
-      duration,
-      hoursAve,
-      startDelay,
-      waterDrainTime
+      validatedEnabled,
+      validatedPriority,
+      validatedSetpointSensor,
+      validatedMoistureSetpoint,
+      validatedDuration,
+      validatedHoursAve,
+      validatedStartDelay,
+      validatedWaterDrainTime
     ];
 
     for (const field of numericFields) {
       if (isNaN(Number(field))) {
-        return false;
+        alert('All numeric fields must contain valid numbers');
+        return null;
       }
     }
 
-    return true;
+    return {
+      enabled: Number(validatedEnabled),
+      priority: Number(validatedPriority),
+      setpointSensor: Number(validatedSetpointSensor),
+      moistureSetpoint: Number(validatedMoistureSetpoint),
+      duration: Number(validatedDuration),
+      hoursAve: Number(validatedHoursAve),
+      startDelay: Number(validatedStartDelay),
+      waterDrainTime: Number(validatedWaterDrainTime)
+    };
   };
 
   const save = async () => {
-    if (validateInputs()) {
+    const validatedInputs = validateAndPrepareInputs();
+    if (validatedInputs) {
       const updatedSettings = {
         id: settingsData.id,
         sensorId: settingsData.sensorId,
         probeId: probeId,
         pumpId: settingsData.pumpId,
-        enabled: enabled,
+        enabled: validatedInputs.enabled,
         valvename: valveName,
-        priority: priority,
-        msetPoint: moistureSetpoint,
-        setPointSensor: setpointSensor,
+        priority: validatedInputs.priority,
+        msetPoint: validatedInputs.moistureSetpoint,
+        setPointSensor: validatedInputs.setpointSensor,
         validate: settingsData.validate,
-        hrsAve: hoursAve,
-        duration: duration,
-        waterDrainTime: waterDrainTime,
-        startDelay: startDelay,
+        hrsAve: validatedInputs.hoursAve,
+        duration: validatedInputs.duration,
+        waterDrainTime: validatedInputs.waterDrainTime,
+        startDelay: validatedInputs.startDelay,
         concurrent: concurrent,
         time: settingsData.time,
         chemName: settingsData.chemName,
