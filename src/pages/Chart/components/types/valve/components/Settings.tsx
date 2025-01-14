@@ -62,8 +62,43 @@ export const Settings = (props: any) => {
     setHasChanges(hasAnyChange)
   }, [valveName, probeId, enabled, priority, setpointSensor, moistureSetpoint, duration, hoursAve, startDelay, waterDrainTime, concurrent]);
 
+  const validateInputs = () => {
+    // Проверка на пустые значения
+    if (!valveName || !probeId || enabled === undefined || priority === undefined || 
+        setpointSensor === undefined || moistureSetpoint === undefined || duration === undefined || 
+        hoursAve === undefined || startDelay === undefined || waterDrainTime === undefined || 
+        concurrent === undefined) {
+      alert('Все поля должны быть заполнены');
+      return false;
+    }
+
+    // Проверка числовых значений
+    const numericFields = [
+      { value: enabled, name: 'Enabled' },
+      { value: priority, name: 'Priority' },
+      { value: setpointSensor, name: 'Set Point Sensor' },
+      { value: moistureSetpoint, name: 'Moisture Setpoint' },
+      { value: duration, name: 'Duration' },
+      { value: hoursAve, name: 'Hours Ave' },
+      { value: startDelay, name: 'Start Delay' },
+      { value: waterDrainTime, name: 'Water Drain Time' }
+    ];
+
+    for (const field of numericFields) {
+      if (isNaN(Number(field.value))) {
+        alert(`${field.name} должно быть числом`);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const save = async () => {
-    console.log(settingsData)
+    if (!validateInputs()) {
+      return;
+    }
+
     const updatedSettings = {
       id: settingsData.id,
       sensorId: settingsData.sensorId,
