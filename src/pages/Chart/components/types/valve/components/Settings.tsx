@@ -49,14 +49,14 @@ export const Settings = (props: any) => {
     const hasAnyChange: boolean =
       valveName !== settingsData.valvename ||
       probeId !== settingsData.probeId ||
-      enabled.toString() !== settingsData.enabled.toString() ||
-      priority.toString() !== settingsData.priority.toString() ||
-      setpointSensor.toString() !== settingsData.setPointSensor.toString() ||
-      moistureSetpoint.toString() !== settingsData.msetPoint.toString() ||
-      duration.toString() !== settingsData.duration.toString() ||
-      hoursAve.toString() !== settingsData.hrsAve.toString() ||
-      startDelay.toString() !== settingsData.startDelay.toString() ||
-      waterDrainTime.toString() !== settingsData.waterDrainTime.toString() ||
+      enabled && enabled.toString() !== settingsData.enabled && settingsData.enabled.toString() ||
+      priority && priority.toString() !== settingsData.priority && settingsData.priority.toString() ||
+      setpointSensor && setpointSensor.toString() !== settingsData.setPointSensor && settingsData.setPointSensor.toString() ||
+      moistureSetpoint && moistureSetpoint.toString() !== settingsData.msetPoint && settingsData.msetPoint.toString() ||
+      duration && duration.toString() !== settingsData.duration && settingsData.duration.toString() ||
+      hoursAve && hoursAve.toString() !== settingsData.hrsAve && settingsData.hrsAve.toString() ||
+      startDelay && startDelay.toString() !== settingsData.startDelay && settingsData.startDelay.toString() ||
+      waterDrainTime && waterDrainTime.toString() !== settingsData.waterDrainTime && settingsData.waterDrainTime.toString() ||
       concurrent !== settingsData.concurrent;
 
     setHasChanges(hasAnyChange)
@@ -64,29 +64,27 @@ export const Settings = (props: any) => {
 
   const validateInputs = () => {
     // Проверка на пустые значения
-    if (!valveName || !probeId || enabled === undefined || priority === undefined || 
-        setpointSensor === undefined || moistureSetpoint === undefined || duration === undefined || 
-        hoursAve === undefined || startDelay === undefined || waterDrainTime === undefined || 
-        concurrent === undefined) {
-      alert('Все поля должны быть заполнены');
+    if (!valveName || !probeId || !enabled || !priority ||
+        !setpointSensor || !moistureSetpoint || !duration ||
+        !hoursAve || !startDelay || !waterDrainTime ||
+        !concurrent) {
       return false;
     }
 
     // Проверка числовых значений
     const numericFields = [
-      { value: enabled, name: 'Enabled' },
-      { value: priority, name: 'Priority' },
-      { value: setpointSensor, name: 'Set Point Sensor' },
-      { value: moistureSetpoint, name: 'Moisture Setpoint' },
-      { value: duration, name: 'Duration' },
-      { value: hoursAve, name: 'Hours Ave' },
-      { value: startDelay, name: 'Start Delay' },
-      { value: waterDrainTime, name: 'Water Drain Time' }
+      enabled,
+      priority,
+      setpointSensor,
+      moistureSetpoint,
+      duration,
+      hoursAve,
+      startDelay,
+      waterDrainTime
     ];
 
     for (const field of numericFields) {
-      if (isNaN(Number(field.value))) {
-        alert(`${field.name} должно быть числом`);
+      if (isNaN(Number(field))) {
         return false;
       }
     }
@@ -95,40 +93,39 @@ export const Settings = (props: any) => {
   };
 
   const save = async () => {
-    if (!validateInputs()) {
-      return;
+    if (validateInputs()) {
+      const updatedSettings = {
+        id: settingsData.id,
+        sensorId: settingsData.sensorId,
+        probeId: probeId,
+        pumpId: settingsData.pumpId,
+        enabled: enabled,
+        valvename: valveName,
+        priority: priority,
+        msetPoint: moistureSetpoint,
+        setPointSensor: setpointSensor,
+        validate: settingsData.validate,
+        hrsAve: hoursAve,
+        duration: duration,
+        waterDrainTime: waterDrainTime,
+        startDelay: startDelay,
+        concurrent: concurrent,
+        time: settingsData.time,
+        chemName: settingsData.chemName,
+        chemicalStatus: settingsData.chemicalStatus,
+        waterStatus: settingsData.waterStatus,
+        targFlow: settingsData.targFlow,
+        targFlowUnit: settingsData.targFlowUnit,
+        flowRate: settingsData.flowRate,
+        flowRateUnit: settingsData.flowRateUnit,
+        total: settingsData.total,
+        totalUnit: settingsData.totalUnit,
+        minPump: settingsData.minPump
+      }
+      await postValveSettings(updatedSettings)
+    } else {
+      console.log('wrong')
     }
-
-    const updatedSettings = {
-      id: settingsData.id,
-      sensorId: settingsData.sensorId,
-      probeId: probeId,
-      pumpId: settingsData.pumpId,
-      enabled: enabled,
-      valvename: valveName,
-      priority: priority,
-      msetPoint: moistureSetpoint,
-      setPointSensor: setpointSensor,
-      validate: settingsData.validate,
-      hrsAve: hoursAve,
-      duration: duration,
-      waterDrainTime: waterDrainTime,
-      startDelay: startDelay,
-      concurrent: concurrent,
-      time: settingsData.time,
-      chemName: settingsData.chemName,
-      chemicalStatus: settingsData.chemicalStatus,
-      waterStatus: settingsData.waterStatus,
-      targFlow: settingsData.targFlow,
-      targFlowUnit: settingsData.targFlowUnit,
-      flowRate: settingsData.flowRate,
-      flowRateUnit: settingsData.flowRateUnit,
-      total: settingsData.total,
-      totalUnit: settingsData.totalUnit,
-      minPump: settingsData.minPump
-    }
-    // const response = await postValveSettings(updatedSettings)
-    // console.log(settingsData)
   }
 
   return (
@@ -146,7 +143,7 @@ export const Settings = (props: any) => {
           </IonItem>
           <IonItem className={s.settingsInputWrapper}>
             <IonInput className={s.settingsInput} label="Enabled" value={enabled}
-                      onIonInput={(event: any) => setEnabled(event.detail.value)} type='number'></IonInput>
+                      onIonInput={(event: any) => setEnabled(event.detail.value)}></IonInput>
           </IonItem>
           <IonItem className={s.settingsInputWrapper}>
             <IonInput className={s.settingsInput} label="Priority" value={priority}
