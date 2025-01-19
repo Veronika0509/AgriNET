@@ -1,3 +1,5 @@
+/*   Main Table    */
+
 .tableContainer {
   width: 550px;
   height: 83vh;
@@ -6,40 +8,10 @@
   flex-direction: column;
 }
 
-@media (max-width: 560px) {
-  .tableContainer {
-    width: 100%;
-    margin: 20px auto 0 auto;
-    padding: 0 10px;
-  }
-}
-
 .table {
   width: 99%;
   border-collapse: collapse;
   table-layout: fixed;
-}
-
-.tableHeadRow, .archiveTableHeadRow {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.archiveTableHeadRow {
-  background: #fff;
-}
-
-.archiveTableHeadRow::after {
-  content: '';
-  position: absolute;
-  top: 39px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background-color: #000;
-  width: 100%;
 }
 
 .tableHeadRow::after {
@@ -92,23 +64,10 @@
   gap: 8px;
 }
 
-@media (max-width: 560px) {
-  .buttonContainer {
-    flex-direction: column;
-    gap: 4px;
-  }
-  
-  .buttonContainer ion-button {
-    width: 100%;
-    margin: 0;
-  }
-}
-
 .nowButton {
   color: #00da50;
 }
 
-/* Column widths */
 .table th:nth-child(1),
 .table td:nth-child(1) {
   width: 30%;
@@ -129,36 +88,41 @@
   width: 25%;
 }
 
-@media (max-width: 560px) {
-  .table th:nth-child(1),
-  .table td:nth-child(1) {
-    width: 25%;
-  }
+.refreshButton {
+  cursor: pointer;
+}
 
-  .table th:nth-child(2),
-  .table td:nth-child(2) {
-    width: 20%;
-  }
+.refreshButton::part(native) {
+  padding: 5px;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 35px;
+  height: 36px;
+}
 
-  .table th:nth-child(3),
-  .table td:nth-child(3) {
-    width: 25%;
-  }
+/*   Archive   */
 
-  .table th:nth-child(4),
-  .table td:nth-child(4) {
-    width: 30%;
-  }
+.tableHeadRow, .archiveTableHeadRow {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
 
-  .tableHeadTitle,
-  .tableRowItem {
-    padding: 8px 4px;
-    font-size: 14px;
-  }
+.archiveTableHeadRow {
+  background: #fff;
+}
 
-  .tableRowItem {
-    word-break: break-word;
-  }
+.archiveTableHeadRow::after {
+  content: '';
+  position: absolute;
+  top: 39px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background-color: #000;
+  width: 100%;
 }
 
 .tableArchiveButton {
@@ -206,7 +170,6 @@
 .archiveModal .tableContainer {
   height: auto;
   min-height: 100%;
-  padding: 20px;
   display: flex;
   flex-direction: column;
 }
@@ -216,7 +179,6 @@
   overflow-y: auto;
 }
 
-/* Column widths for the second table */
 .archiveModal .table th:nth-child(1),
 .archiveModal .table td:nth-child(1) {
   width: 22%;
@@ -242,15 +204,139 @@
   margin: 0 auto 15px auto;
 }
 
-.refreshButton {
-  cursor: pointer;
+/*   Settings   */
+
+.settingsModal, .createModal {
+  --width: 100% !important;
+  --height: 100% !important;
+  position: fixed;
+  z-index: 10;
+  transition: opacity 0.3s ease;
 }
 
-.refreshButton::part(native) {
-  padding: 5px;
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  width: 35px;
-  height: 36px;
+.settingsWrapper {
+  width: 100%;
+}
+
+.settingsInputWrapper {
+  --padding-start: 0;
+  width: 500px;
+  margin: 0 auto;
+  outline: none;
+  border-bottom: 2px solid #33db64;
+  transition: 0.1s;
+}
+
+.settingsInputWrapper:nth-child(1) {
+  margin-top: 40px;
+}
+
+.settingsInputWrapper::part(native) {
+  --inner-border-width: 0;
+}
+
+.settingsInput > label > div:nth-child(1) {
+  color: #999;
+  min-width: 175px;
+}
+
+.settingsInputWrapper:has(.settingsInput:global(.has-focus)) {
+  border-color: #05a55a;
+  border-width: 2px;
+}
+
+.settingsWrongInput {
+  border-color: var(--ion-color-danger) !important;
+}
+
+.settingsInputConcurrentWrapper {
+  border-bottom: 1px solid #dedede;
+  transition: 0.1s;
+}
+
+.settingsButton {
+  width: 500px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/*   Create   */
+
+.createModalContent {
+  max-width: 600px;
+  margin: 40px auto 0 auto;
+}
+
+.createModalItem {
+  --padding-start: 0;
+}
+
+.createModalItem:hover {
+  --background: transparent !important;
+}
+
+.createModalItemLabel {
+  color: #999 !important;
+}
+
+/*   Responsibility   */
+
+@media (max-width: 560px) {
+  /*   Main Table    */
+
+  .tableContainer {
+    width: 100%;
+    margin: 20px auto 0 auto;
+    padding: 0 10px;
+  }
+
+  .table th:nth-child(1),
+  .table td:nth-child(1) {
+    width: 30%;
+  }
+
+  .table th:nth-child(2),
+  .table td:nth-child(2) {
+    width: 25%;
+  }
+
+  .table th:nth-child(3),
+  .table td:nth-child(3) {
+    width: 30%;
+  }
+
+  .table th:nth-child(4),
+  .table td:nth-child(4) {
+    width: 15%;
+  }
+
+  .tableHeadTitle,
+  .tableRowItem {
+    padding: 8px 4px;
+    font-size: 17px;
+  }
+
+  .tableRowItem {
+    word-break: break-word;
+  }
+
+  .buttonContainer {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .buttonContainer ion-button {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+@media (max-width: 440px) {
+  /*   Main Table    */
+
+  .tableHeadTitle,
+  .tableRowItem {
+    font-size: 14px;
+  }
 }
