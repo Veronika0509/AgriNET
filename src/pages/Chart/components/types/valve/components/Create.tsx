@@ -13,7 +13,7 @@ export const Create = (props: any) => {
           <IonItem className={s.createModalItem}>
             <IonLabel className={s.createModalItemLabel}>Duration</IonLabel>
             <IonDatetimeButton datetime="datetime"></IonDatetimeButton>
-            <IonModal keepContentsMounted={true}>
+            <IonModal keepContentsMounted={true} className={s.timePickerModal}>
               <IonDatetime id="datetime" className={s.createModalItemDatetime} presentation='time'></IonDatetime>
             </IonModal>
           </IonItem>
