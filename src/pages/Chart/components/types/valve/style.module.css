@@ -302,6 +302,8 @@
 
 .createPulseCountItem {
   border-bottom: 2px solid #33db64;
+  display: flex;
+  align-items: center;
 }
 
 .createPulseCountItem::part(native) {
@@ -310,6 +312,7 @@
 
 .createPulseCountItem ion-input {
   text-align: right;
+  flex: 1;
 }
 
 .pulseCountControls {
@@ -317,6 +320,7 @@
   align-items: center;
   gap: 5px;
   margin-left: 10px;
+  margin-right: 5px;
 }
 
 .pulseCountButton {
