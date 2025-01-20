@@ -59,7 +59,7 @@ export const Create = (props: any) => {
           {isPulseIrrigation && (
             <>
             <IonItem className={`${s.createModalItem} ${s.createPulseCountItem}`}>
-              <IonInput label="Pulse Count" type='number'></IonInput>
+              <IonInput label="Pulse Count" type='number' min={2}></IonInput>
             </IonItem>
             </>
           )}

@@ -308,6 +308,10 @@
   --inner-border-width: 0;
 }
 
+.createPulseCountItem ion-input {
+  text-align: right;
+}
+
 /*   Responsibility   */
 
 @media (max-width: 560px) {
