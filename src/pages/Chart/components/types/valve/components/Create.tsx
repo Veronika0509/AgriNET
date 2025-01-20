@@ -11,10 +11,18 @@ import {
   IonSelect, IonSelectOption,
   IonSpinner
 } from "@ionic/react";
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React, {useState} from "react";
 
 export const Create = (props: any) => {
-  const [isPulseIrrigation, setIsPulseIrrigation] = useState(false)
+  const [isPulseIrrigation, setIsPulseIrrigation] = useState(false);
+  const [pulseCount, setPulseCount] = useState(2);
+
+  const handlePulseCount = (change: number) => {
+    const newValue = pulseCount + change;
+    if (newValue >= 2) {
+      setPulseCount(newValue);
+    }
+  };
   const startTime = new Date(new Date().getTime() + 2 * 60 * 1000)
   const stopTime = new Date(startTime.getTime() + 6 * 60 * 60 * 1000)
 
@@ -59,7 +67,30 @@ export const Create = (props: any) => {
           {isPulseIrrigation && (
             <>
             <IonItem className={`${s.createModalItem} ${s.createPulseCountItem}`}>
-              <IonInput label="Pulse Count" type='number' min={2}></IonInput>
+              <IonInput 
+                label="Pulse Count" 
+                type="number" 
+                min={2}
+                value={pulseCount}
+                onIonInput={(e) => {
+                  const value = parseInt(e.detail.value || '2');
+                  if (value >= 2) setPulseCount(value);
+                }}
+              />
+              <div className={s.pulseCountControls}>
+                <button 
+                  className={s.pulseCountButton} 
+                  onClick={() => handlePulseCount(-1)}
+                >
+                  -
+                </button>
+                <button 
+                  className={s.pulseCountButton} 
+                  onClick={() => handlePulseCount(1)}
+                >
+                  +
+                </button>
+              </div>
             </IonItem>
             </>
           )}

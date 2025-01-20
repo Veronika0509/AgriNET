@@ -312,6 +312,32 @@
   text-align: right;
 }
 
+.pulseCountControls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 10px;
+}
+
+.pulseCountButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #33db64;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+  border: none;
+  padding: 0;
+}
+
+.pulseCountButton:hover {
+  background: #05a55a;
+}
+
 /*   Responsibility   */
 
 @media (max-width: 560px) {
