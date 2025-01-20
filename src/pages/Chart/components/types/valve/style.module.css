@@ -280,6 +280,34 @@
   color: #999 !important;
 }
 
+.createTimePickerModal {
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.createTimezoneItem {
+  border-bottom: 2px solid #33db64;
+}
+
+.createTimezoneItem[class*="item-interactive"]  {
+  --border-width: 0;
+}
+
+.createTimezoneItem[class*="item-has-focus"]  {
+  --highlight-background: transparent !important;
+}
+
+.createModalItemCheckbox {
+  color: #999;
+}
+
+.createPulseCountItem {
+  border-bottom: 2px solid #33db64;
+}
+
+.createPulseCountItem::part(native) {
+  --inner-border-width: 0;
+}
+
 /*   Responsibility   */
 
 @media (max-width: 560px) {
