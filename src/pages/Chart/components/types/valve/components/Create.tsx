@@ -18,6 +18,7 @@ import {addOutline, removeOutline} from "ionicons/icons";
 export const Create = (props: any) => {
   const [isPulseIrrigation, setIsPulseIrrigation] = useState(false);
   const [pulseCount, setPulseCount] = useState(2);
+  const [pulseOffMinutes, setPulseOffMinutes] = useState(60);
 
   const handlePulseCount = (change: number) => {
     const newValue = pulseCount + change;
@@ -93,7 +94,17 @@ export const Create = (props: any) => {
                 <IonLabel className={s.createModalItemLabel}>Pulse Off Hours</IonLabel>
                 <IonDatetimeButton datetime="pulseOffHours"></IonDatetimeButton>
                 <IonModal keepContentsMounted={true} className={s.createTimePickerModal}>
-                  <IonDatetime id="pulseOffHours" presentation='time' show-default-buttons="true" value={'01:00'}></IonDatetime>
+                  <IonDatetime 
+                    id="pulseOffHours" 
+                    presentation='time' 
+                    show-default-buttons="true" 
+                    value={`${String(Math.floor(pulseOffMinutes / 60)).padStart(2, '0')}:${String(pulseOffMinutes % 60).padStart(2, '0')}`}
+                    onIonChange={(e) => {
+                      const timeStr = e.detail.value?.toString() || '';
+                      const [hours, minutes] = timeStr.split(':').map(Number);
+                      setPulseOffMinutes(hours * 60 + minutes);
+                    }}
+                  ></IonDatetime>
                 </IonModal>
               </IonItem>
               <IonItem className={`${s.createModalItem} ${s.createPulseCountItem}`}>
@@ -101,13 +112,26 @@ export const Create = (props: any) => {
                   label="Pulse Off Minutes"
                   type="number"
                   min={10}
+                  value={pulseOffMinutes}
+                  onIonInput={(e) => {
+                    const value = parseInt(e.detail.value || '60');
+                    if (value >= 10) setPulseOffMinutes(value);
+                  }}
                   className={s.createPulseCountInput}
                 />
                 <div>
-                  <IonButton className={s.createPulseButton} fill={'clear'}>
+                  <IonButton 
+                    className={s.createPulseButton} 
+                    fill={'clear'}
+                    onClick={() => setPulseOffMinutes(Math.max(10, pulseOffMinutes - 10))}
+                  >
                     <IonIcon slot="icon-only" icon={removeOutline}></IonIcon>
                   </IonButton>
-                  <IonButton className={s.createPulseButton} fill={'clear'}>
+                  <IonButton 
+                    className={s.createPulseButton} 
+                    fill={'clear'}
+                    onClick={() => setPulseOffMinutes(pulseOffMinutes + 10)}
+                  >
                     <IonIcon slot="icon-only" icon={addOutline}></IonIcon>
                   </IonButton>
                 </div>
