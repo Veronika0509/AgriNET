@@ -15,6 +15,7 @@ import {
 import React, {useEffect, useState} from "react";
 import {addOutline, removeOutline} from "ionicons/icons";
 import {getDatetime} from "../../../DateTimePicker/functions/getDatetime";
+import login from "../../../../../Login";
 
 export const Create = (props: any) => {
   const [isPulseIrrigation, setIsPulseIrrigation] = useState(false);
@@ -35,7 +36,9 @@ export const Create = (props: any) => {
     setStopTime(newStopTime)
   }, [startTime]);
   useEffect(() => {
-    if (new Date(stopTime).getTime() <= new Date(startTime).getTime()) {
+    console.log(new Date(stopTime).getTime())
+    console.log(new Date(startTime).getTime())
+    if (new Date(stopTime).getTime() < new Date(startTime).getTime()) {
       console.log('alert')
     }
   }, [stopTime, startTime]);
