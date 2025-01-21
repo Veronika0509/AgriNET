@@ -35,10 +35,10 @@ export const Create = (props: any) => {
     setStopTime(newStopTime)
   }, [startTime]);
   useEffect(() => {
-    if (new Date(stopTime).getTime() < new Date(startTime).getTime()) {
+    if (new Date(stopTime).getTime() <= new Date(startTime).getTime()) {
       console.log('alert')
     }
-  }, [stopTime]);
+  }, [stopTime, startTime]);
 
   return (
     <IonModal isOpen={props.valveCreate} className={s.createModal}>
