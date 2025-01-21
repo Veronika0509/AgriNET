@@ -12,13 +12,16 @@ import {
   IonSelect, IonSelectOption,
   IonSpinner
 } from "@ionic/react";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {addOutline, removeOutline} from "ionicons/icons";
+import {getDatetime} from "../../../DateTimePicker/functions/getDatetime";
 
 export const Create = (props: any) => {
   const [isPulseIrrigation, setIsPulseIrrigation] = useState(false);
   const [pulseCount, setPulseCount] = useState(2);
   const [pulseOffMinutes, setPulseOffMinutes] = useState(60);
+  const [startTime, setStartTime] = useState(new Date(new Date().getTime() + 2 * 60 * 1000))
+  const [stopTime, setStopTime] = useState(new Date(new Date(startTime).getTime() + 6 * 60 * 60 * 1000))
 
   const handlePulseCount = (change: number) => {
     const newValue = pulseCount + change;
@@ -26,8 +29,16 @@ export const Create = (props: any) => {
       setPulseCount(newValue);
     }
   };
-  const startTime = new Date(new Date().getTime() + 2 * 60 * 1000)
-  const stopTime = new Date(startTime.getTime() + 6 * 60 * 60 * 1000)
+
+  useEffect(() => {
+    const newStopTime = new Date(new Date(startTime).getTime() + 6 * 60 * 60 * 1000)
+    setStopTime(newStopTime)
+  }, [startTime]);
+  useEffect(() => {
+    if (new Date(stopTime) < new Date(startTime)) {
+      console.log('alert')
+    }
+  }, [stopTime]);
 
   return (
     <IonModal isOpen={props.valveCreate} className={s.createModal}>
@@ -46,19 +57,21 @@ export const Create = (props: any) => {
             <IonLabel className={s.createModalItemLabel}>Start Time</IonLabel>
             <IonDatetimeButton datetime="startDatetime"></IonDatetimeButton>
             <IonModal keepContentsMounted={true} className={s.createTimePickerModal}>
-              <IonDatetime id="startDatetime" presentation='date-time' show-default-buttons="true" value={startTime.toISOString()}></IonDatetime>
+              <IonDatetime id="startDatetime" presentation='date-time' show-default-buttons="true" value={getDatetime(new Date(startTime))}
+                           onIonChange={(e: any) => setStartTime(e.detail.value)}></IonDatetime>
             </IonModal>
           </IonItem>
           <IonItem className={s.createModalItem}>
             <IonLabel className={s.createModalItemLabel}>Stop Time</IonLabel>
             <IonDatetimeButton datetime="stopDatetime"></IonDatetimeButton>
             <IonModal keepContentsMounted={true} className={s.createTimePickerModal}>
-              <IonDatetime id="stopDatetime" presentation='date-time' show-default-buttons="true" value={stopTime.toISOString()}></IonDatetime>
+              <IonDatetime id="stopDatetime" presentation='date-time' show-default-buttons="true" value={getDatetime(new Date(stopTime))}
+                           onIonChange={(e: any) => setStopTime(e.detail.value)}></IonDatetime>
             </IonModal>
           </IonItem>
           <IonItem className={`${s.createModalItem} ${s.createTimezoneItem}`}>
             <IonLabel className={s.createModalItemLabel}>Current timezone</IonLabel>
-            <IonSelect placeholder="Timezone">
+            <IonSelect placeholder="Timezone" value={'America/Los_Angeles'}>
               {Intl.supportedValuesOf('timeZone').map((timezone: any) => (
                 <IonSelectOption value={timezone}>{timezone}</IonSelectOption>
               ))}
@@ -111,7 +124,7 @@ export const Create = (props: any) => {
                 <IonInput
                   label="Pulse Off Minutes"
                   type="number"
-                  min={10}
+                  min={0}
                   value={pulseOffMinutes}
                   onIonInput={(e) => {
                     const value = parseInt(e.detail.value || '60');
@@ -138,6 +151,7 @@ export const Create = (props: any) => {
               </IonItem>
             </>
           )}
+          <IonButton className={s.createButton}>{isPulseIrrigation ? `Create ${pulseCount} pulses` : 'Create'}</IonButton>
         </div>
       </IonContent>
     </IonModal>
