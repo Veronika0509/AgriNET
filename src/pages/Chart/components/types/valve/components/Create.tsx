@@ -1,10 +1,11 @@
 import s from "../style.module.css";
 import Header from "../../../Header";
 import {
+  IonButton,
   IonCheckbox,
   IonContent,
   IonDatetime,
-  IonDatetimeButton, IonInput,
+  IonDatetimeButton, IonIcon, IonInput,
   IonItem,
   IonLabel,
   IonModal,
@@ -12,6 +13,7 @@ import {
   IonSpinner
 } from "@ionic/react";
 import React, {useState} from "react";
+import {addOutline, removeOutline} from "ionicons/icons";
 
 export const Create = (props: any) => {
   const [isPulseIrrigation, setIsPulseIrrigation] = useState(false);
@@ -66,32 +68,50 @@ export const Create = (props: any) => {
           </IonItem>
           {isPulseIrrigation && (
             <>
-            <IonItem className={`${s.createModalItem} ${s.createPulseCountItem}`}>
-              <IonInput 
-                label="Pulse Count" 
-                type="number" 
-                min={2}
-                value={pulseCount}
-                onIonInput={(e) => {
-                  const value = parseInt(e.detail.value || '2');
-                  if (value >= 2) setPulseCount(value);
-                }}
-              />
-              <div className={s.pulseCountControls}>
-                <button 
-                  className={s.pulseCountButton} 
-                  onClick={() => handlePulseCount(-1)}
-                >
-                  -
-                </button>
-                <button 
-                  className={s.pulseCountButton} 
-                  onClick={() => handlePulseCount(1)}
-                >
-                  +
-                </button>
-              </div>
-            </IonItem>
+              <IonItem className={`${s.createModalItem} ${s.createPulseCountItem}`}>
+                <IonInput
+                  label="Pulse Count"
+                  type="number"
+                  min={2}
+                  value={pulseCount}
+                  onIonInput={(e) => {
+                    const value = parseInt(e.detail.value || '2');
+                    if (value >= 2) setPulseCount(value);
+                  }}
+                  className={s.createPulseCountInput}
+                />
+                <div>
+                  <IonButton className={s.createPulseButton} onClick={() => handlePulseCount(-1)} fill={'clear'}>
+                    <IonIcon slot="icon-only" icon={removeOutline}></IonIcon>
+                  </IonButton>
+                  <IonButton className={s.createPulseButton} onClick={() => handlePulseCount(1)} fill={'clear'}>
+                    <IonIcon slot="icon-only" icon={addOutline}></IonIcon>
+                  </IonButton>
+                </div>
+              </IonItem>
+              <IonItem className={s.createModalItem}>
+                <IonLabel className={s.createModalItemLabel}>Pulse Off Hours</IonLabel>
+                <IonDatetimeButton datetime="pulseOffHours"></IonDatetimeButton>
+                <IonModal keepContentsMounted={true} className={s.createTimePickerModal}>
+                  <IonDatetime id="pulseOffHours" presentation='time' show-default-buttons="true" value={'01:00'}></IonDatetime>
+                </IonModal>
+              </IonItem>
+              <IonItem className={`${s.createModalItem} ${s.createPulseCountItem}`}>
+                <IonInput
+                  label="Pulse Off Minutes"
+                  type="number"
+                  min={10}
+                  className={s.createPulseCountInput}
+                />
+                <div>
+                  <IonButton className={s.createPulseButton} fill={'clear'}>
+                    <IonIcon slot="icon-only" icon={removeOutline}></IonIcon>
+                  </IonButton>
+                  <IonButton className={s.createPulseButton} fill={'clear'}>
+                    <IonIcon slot="icon-only" icon={addOutline}></IonIcon>
+                  </IonButton>
+                </div>
+              </IonItem>
             </>
           )}
         </div>
