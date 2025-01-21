@@ -36,9 +36,15 @@ export const Create = (props: any) => {
     setStopTime(newStopTime)
   }, [startTime]);
   useEffect(() => {
-    console.log(new Date(stopTime).getTime())
-    console.log(new Date(startTime).getTime())
-    if (new Date(stopTime).getTime() < new Date(startTime).getTime()) {
+    // Round down to nearest minute by removing seconds and milliseconds
+    const stopDate = new Date(stopTime);
+    const startDate = new Date(startTime);
+    
+    // Set seconds and milliseconds to 0 for both dates
+    stopDate.setSeconds(0, 0);
+    startDate.setSeconds(0, 0);
+    
+    if (stopDate.getTime() < startDate.getTime()) {
       console.log('alert')
     }
   }, [stopTime, startTime]);
