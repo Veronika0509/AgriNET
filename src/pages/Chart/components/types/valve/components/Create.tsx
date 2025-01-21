@@ -35,7 +35,7 @@ export const Create = (props: any) => {
     setStopTime(newStopTime)
   }, [startTime]);
   useEffect(() => {
-    if (new Date(stopTime) < new Date(startTime)) {
+    if (new Date(stopTime).getTime() < new Date(startTime).getTime()) {
       console.log('alert')
     }
   }, [stopTime]);
