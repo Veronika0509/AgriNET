@@ -23,9 +23,12 @@ export const Create = (props: any) => {
   const [isPulseIrrigation, setIsPulseIrrigation] = useState(false)
   const [pulseCount, setPulseCount] = useState(2)
   const [pulseOffMinutes, setPulseOffMinutes] = useState(60)
-  const [duration, setDuration] = useState(6)
+  const [duration, setDuration] = useState('06:00')
   const [startTime, setStartTime] = useState(new Date(new Date().getTime() + 2 * 60 * 1000))
-  const [stopTime, setStopTime] = useState(new Date(new Date(startTime).getTime() + 6 * 60 * 60 * 1000))
+  const [stopTime, setStopTime] = useState(() => {
+    const [hours, minutes] = '06:00'.split(':').map(Number)
+    return new Date(new Date(startTime).getTime() + (hours * 60 + minutes) * 60 * 1000)
+  })
   const [presentAlert] = useIonAlert()
   const stopDatetimeRef = useRef<HTMLIonDatetimeElement>(null)
 
@@ -37,9 +40,10 @@ export const Create = (props: any) => {
   }
 
   useEffect(() => {
-    const newStopTime = new Date(new Date(startTime).getTime() + 6 * 60 * 60 * 1000)
+    const [hours, minutes] = duration.split(':').map(Number)
+    const newStopTime = new Date(new Date(startTime).getTime() + (hours * 60 + minutes) * 60 * 1000)
     setStopTime(newStopTime)
-  }, [startTime])
+  }, [startTime, duration])
 
   const onStopTimeChange = (e: CustomEvent) => {
     e.preventDefault()
@@ -64,8 +68,9 @@ export const Create = (props: any) => {
     }
   }
 
-  const onDurationChange = (e: any) => {
-    setDuration(e.detail.value)
+  const onDurationChange = (e: CustomEvent) => {
+    const newDuration = e.detail.value
+    setDuration(newDuration)
   }
 
   return (
