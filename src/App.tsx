@@ -11,7 +11,7 @@ import {
 import {IonReactRouter} from '@ionic/react-router';
 import {home, informationCircle, logoFacebook} from 'ionicons/icons';
 import {loadGoogleApi} from "./functions/loadGoogleApiFunc";
-import { useHistory } from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -65,41 +65,48 @@ const App: React.FC = () => {
         <IonApp>
           <div>
             {page === 0
-                ? <div>
-                  <Preloader/>
-                  <IonReactRouter basename="/AgriNET">
-                    <IonTabs>
-                      <IonRouterOutlet>
-                        <Route exact path="/login">
-                          <Login setPage={setPage} setUserId={setUserId} />
-                        </Route>
-                        <Route exact path="/info">
-                          <Info />
-                        </Route>
-                      </IonRouterOutlet>
-                      <IonTabBar slot="bottom">
-                        <IonTabButton tab="login" layout="icon-start" href="/login">
-                          <IonIcon icon={home}/>
-                        </IonTabButton>
-                        <IonTabButton tab="info" href="/info">
-                          <IonIcon icon={informationCircle}/>
-                        </IonTabButton>
-                      </IonTabBar>
-                    </IonTabs>
-                  </IonReactRouter>
-                </div>
-                  : page === 2 &&
-                    <div>
-                      <IonReactRouter basename="/AgriNET">
+              ? <div>
+                <Preloader/>
+                <IonReactRouter basename="/AgriNET">
+                  <IonTabs>
+                    <IonRouterOutlet>
+                      <Route exact path="/login">
+                        <Login setPage={setPage} setUserId={setUserId}/>
+                      </Route>
+                      <Route exact path="/info">
+                        <Info/>
+                      </Route>
+                    </IonRouterOutlet>
+                    <IonTabBar slot="bottom">
+                      <IonTabButton tab="login" layout="icon-start" href="/login">
+                        <IonIcon icon={home}/>
+                      </IonTabButton>
+                      <IonTabButton tab="info" href="/info">
+                        <IonIcon icon={informationCircle}/>
+                      </IonTabButton>
+                    </IonTabBar>
+                  </IonTabs>
+                </IonReactRouter>
+              </div>
+              : page === 2 &&
+                <div>
+                    <IonReactRouter basename="/AgriNET">
                         <Route path="/chart">
-                          <Chart additionalChartData={additionalChartData} chartData={chartData} setPage={setPage} siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName} userId={userId} chartPageType={chartPageType} />
+                            <Chart additionalChartData={additionalChartData} chartData={chartData} setPage={setPage}
+                                   siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName}
+                                   userId={userId} chartPageType={chartPageType}
+                                   setAdditionalChartData={setAdditionalChartData} setChartData={setChartData}
+                                   setSiteId={setSiteId} setSiteName={setSiteName} setChartPageType={setChartPageType}/>
                         </Route>
-                      </IonReactRouter>
-                    </div>
+                    </IonReactRouter>
+                </div>
             }
           </div>
           <div style={{display: page === 1 ? 'block' : 'none'}}>
-            <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData} setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId} setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData} setChartPageType={setChartPageType} />
+            <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData}
+                 setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId}
+                 setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData}
+                 setChartPageType={setChartPageType}/>
           </div>
         </IonApp>
       )}

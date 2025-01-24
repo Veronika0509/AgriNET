@@ -1,11 +1,14 @@
-import {IonButton, IonContent, IonInput, IonItem, IonModal} from "@ionic/react";
+import {IonButton, IonContent, IonInput, IonItem, IonModal, useIonAlert, useIonToast} from "@ionic/react";
 import s from '../style.module.css'
 import Header from "../../../Header";
 import React, {useEffect, useState} from "react";
 import {getValveSettingsData} from "../../../../data/types/valve/getValveSettingsData";
-import {settings} from "ionicons/icons";
-import login from "../../../../../Login";
 import {postValveSettings} from "../../../../data/types/valve/postValveSettings";
+import {getFieldLabels} from "../../../Alarm/data/getFieldLabels";
+import {getAlarmData} from "../../../Alarm/data/getAlarmData";
+import {onSensorSelect} from "../../../Alarm/functions/setpoints/onSensorSelect";
+import {onSetpointSubmit} from "../../../Alarm/functions/setpoints/onSetpointSubmit";
+import {onEnableCLick} from "../../../Alarm/functions/setpoints/onEnableClick";
 
 export const Settings = (props: any) => {
   const [settingsData, setSettingsData] = useState<any>([])
@@ -21,6 +24,10 @@ export const Settings = (props: any) => {
   const [waterDrainTime, setWaterDrainTime] = useState<any>()
   const [concurrent, setConcurrent] = useState<any>()
   const [hasChanges, setHasChanges] = useState<boolean>(false)
+
+  const [presentAlert] = useIonAlert();
+  const [presentSensorSelectToast] = useIonToast()
+  const [presentSetpointSubmitToast] = useIonToast()
 
   useEffect(() => {
     if (props.valveSettings) {
@@ -46,17 +53,18 @@ export const Settings = (props: any) => {
   }, [props.valveSettings]);
 
   useEffect(() => {
+    // console.log(probeId !== settingsData.probeId)
     const hasAnyChange: boolean =
       valveName !== settingsData.valvename ||
       probeId !== settingsData.probeId ||
-      enabled && enabled.toString() !== settingsData.enabled && settingsData.enabled.toString() ||
-      priority && priority.toString() !== settingsData.priority && settingsData.priority.toString() ||
-      setpointSensor && setpointSensor.toString() !== settingsData.setPointSensor && settingsData.setPointSensor.toString() ||
-      moistureSetpoint && moistureSetpoint.toString() !== settingsData.msetPoint && settingsData.msetPoint.toString() ||
-      duration && duration.toString() !== settingsData.duration && settingsData.duration.toString() ||
-      hoursAve && hoursAve.toString() !== settingsData.hrsAve && settingsData.hrsAve.toString() ||
-      startDelay && startDelay.toString() !== settingsData.startDelay && settingsData.startDelay.toString() ||
-      waterDrainTime && waterDrainTime.toString() !== settingsData.waterDrainTime && settingsData.waterDrainTime.toString() ||
+      enabled?.toString() !== settingsData.enabled?.toString() ||
+      priority?.toString() !== settingsData.priority?.toString() ||
+      setpointSensor?.toString() !== settingsData.setPointSensor?.toString() ||
+      moistureSetpoint?.toString() !== settingsData.msetPoint?.toString() ||
+      duration?.toString() !== settingsData.duration?.toString() ||
+      hoursAve?.toString() !== settingsData.hrsAve?.toString() ||
+      startDelay?.toString() !== settingsData.startDelay?.toString() ||
+      waterDrainTime?.toString() !== settingsData.waterDrainTime?.toString() ||
       concurrent !== settingsData.concurrent;
 
     setHasChanges(hasAnyChange)
@@ -87,7 +95,6 @@ export const Settings = (props: any) => {
 
     for (const field of numericFields) {
       if (isNaN(Number(field))) {
-        alert('All numeric fields must contain valid numbers');
         return null;
       }
     }
@@ -135,15 +142,71 @@ export const Settings = (props: any) => {
         totalUnit: settingsData.totalUnit,
         minPump: settingsData.minPump
       }
-      await postValveSettings(updatedSettings)
+      await postValveSettings(updatedSettings, props.userId)
+      setHasChanges(false)
     } else {
-      console.log('wrong')
+      presentAlert({
+        header: 'Please standby',
+        message: 'Standby: Data is being re routed',
+        buttons: ['Close'],
+      })
     }
+  }
+
+  const setAutowaterAlarm = async () => {
+    let markerDescriptor
+    props.siteList.forEach((site: any) => site.layers.forEach((layer: any) => layer.markers.forEach((d: any) => {
+      if (d.sensorId == settingsData.probeId) {
+        markerDescriptor = d
+      }
+    })))
+    if (!markerDescriptor) {
+      presentAlert({
+        header: 'Set AutoWATER Alarm Error',
+        message: `You have no ${settingsData.probeId} Moisture marker`,
+        buttons: ['Close'],
+      })
+    } else {
+      const alarmData = await getAlarmData(settingsData.probeId)
+      if (alarmData.data.lowSetpoint) {
+        presentAlert({
+          header: 'LowSetpoint Overriding Confirmation',
+          message: `You already has LowSetpoint ${alarmData.data.lowFieldLabel} ${alarmData.data.lowSetpoint}. Do you want to override it?`,
+          buttons: [
+            {
+              text: 'Cancel',
+              role: 'cancel',
+            },
+            {
+              text: 'Confirm',
+              role: 'confirm',
+              handler: () => {
+                setLowSetpoint()
+              }
+            }
+          ]
+        })
+      } else {
+        setLowSetpoint()
+      }
+    }
+  }
+
+  const setLowSetpoint = async () => {
+    props.setAlarm(true)
+    const fieldsLabelsData = await getFieldLabels(settingsData.probeId)
+    const depthSetpointSensor = `Depth ${settingsData.setPointSensor}`
+    onSensorSelect(fieldsLabelsData.data, 'Low', settingsData.probeId, props.setLowSelectedSensor,  presentSensorSelectToast, depthSetpointSensor)
+    onSetpointSubmit('Low', settingsData.probeId, props.setLowSetpoint, presentSetpointSubmitToast, settingsData.msetPoint)
+    onEnableCLick(settingsData.probeId, 'Low', props.isSetpointEnabled, props.setIsSetpointEnabled, props.setIsEnabledToastOpen, props.setIsDisabledToastOpen, props.setIsEnableActionSheet)
+
+    props.setChartPageType('moist')
+    props.setAlarmOddBack(true)
   }
 
   return (
     <IonModal isOpen={props.valveSettings} className={s.settingsModal}>
-      <Header type='valveSettingsModal' sensorId={props.sensorId} setValveSettings={props.setValveSettings}/>
+      <Header type='valveSettingsModal' sensorId={props.sensorId} setValveSettings={props.setValveSettings} settingsOddBack={props.settingsOddBack} setSettingsOddBack={props.setSettingsOddBack} setOddBack={props.setOddBack} setChartPageType={props.setChartPageType} setSiteId={props.setSiteId} moistSensorId={settingsData.probeId} setAutowater={props.setAutowater} />
       {settingsData && (
         <IonContent className={s.settingsWrapper}>
           <IonItem className={s.settingsInputWrapper}>
@@ -154,7 +217,7 @@ export const Settings = (props: any) => {
             <IonInput className={s.settingsInput} label="Probe ID" value={probeId}
                       onIonInput={(event: any) => setProbeId(event.detail.value)}></IonInput>
           </IonItem>
-          <IonItem className={s.settingsInputWrapper}>
+          <IonItem className={`${isNaN(Number(enabled)) && s.settingsWrongInput} ${s.settingsInputWrapper}`}>
             <IonInput className={s.settingsInput} label="Enabled" value={enabled}
                       onIonInput={(event: any) => setEnabled(event.detail.value)}></IonInput>
           </IonItem>
@@ -190,8 +253,10 @@ export const Settings = (props: any) => {
             <IonInput className={s.settingsInput} label="Concurrent" value={concurrent}
                       onIonInput={(event: any) => setConcurrent(event.detail.value)}></IonInput>
           </IonItem>
-          <IonButton className={s.settingsButton} disabled={!hasChanges} onClick={save}>Save</IonButton>
-          <IonButton className={s.settingsButton} fill='outline'>Set AutoWATER Alarm</IonButton>
+          <IonButton className={s.settingsButton} onClick={save} disabled={!hasChanges}>Save</IonButton>
+          {settingsData.probeId &&
+              <IonButton className={s.settingsButton} disabled={hasChanges} fill='outline' onClick={setAutowaterAlarm}>Set
+                  AutoWATER Alarm</IonButton>}
         </IonContent>
       )}
     </IonModal>

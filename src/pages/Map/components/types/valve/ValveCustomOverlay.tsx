@@ -3,6 +3,7 @@ import {createRoot} from "react-dom/client";
 import React from "react";
 import {onValveSensorClick} from "../../../functions/types/valve/onValveSensorClick";
 import {truncateText} from "../../../functions/truncateTextFunc";
+import {simpleColors} from "../../../../../assets/getColors";
 // import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
 
 export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
@@ -20,6 +21,7 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
       private isValveMarkerChartDrawn: boolean
       private setValveOverlays: any
       private userId: any
+      private bgColor: any
 
       private layerName: string
       private root: any;
@@ -53,6 +55,7 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
         this.isValveMarkerChartDrawn = isValveMarkerChartDrawn
         this.setValveOverlays = setValveOverlays
         this.userId = userId
+        this.bgColor = this.chartData.bgColor && simpleColors[this.chartData.bgColor.toLowerCase()]
 
         this.layerName = chartData.layerName
         this.offset = { x: 0, y: 0 };
@@ -80,9 +83,12 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
             {this.isValidChartData ? (
               <div>
                 <div className={s.overlay_chartContainer}>
-                  <div className={s.overlay_chartWrapper}>
-                    <div style={{display: this.isValveMarkerChartDrawn ? 'block' : 'none'}} id={`${this.chartData.id}`}
-                         className={`${s.overlay_chart} ${s.overlay_chart__valve} ppp`}></div>
+                  <div className={s.overlay_chartWrapper} style={this.chartData.bgColor && {background: `#${this.bgColor}`}}>
+                    <div style={{
+                      display: this.isValveMarkerChartDrawn ? 'block' : 'none',
+                      ...(this.bgColor && { background: `#${this.bgColor}` })
+                    }} id={`${this.chartData.id}`}
+                         className={`${s.overlay_chart} ${s.overlay_chart__valve}`}></div>
                     <div
                       className={`${s.overlay_valveEnabled} ${this.chartData.enabled && s.overlay_valveEnabled__enabled}`}></div>
                   </div>

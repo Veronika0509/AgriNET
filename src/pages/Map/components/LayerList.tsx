@@ -66,9 +66,9 @@ const LayerList = (props: any) => {
           {
             layers.map((layer: string) => (
                 <IonItem key={layer}>
-                  <IonCheckbox 
-                    checked={checkedLayers[layer]} 
-                    justify="space-between" 
+                  <IonCheckbox
+                    checked={checkedLayers[layer]}
+                    justify="space-between"
                     onIonChange={(checkbox) => toggleLayer(checkbox, layer)}
                   >
                     {layer}

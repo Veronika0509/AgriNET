@@ -1,4 +1,4 @@
-import {getAlarmData} from "../data/getAlarmData";
+import {getAlarmData} from "../components/Alarm/data/getAlarmData";
 import {getFieldLabels} from "../components/Alarm/data/getFieldLabels";
 
 export const alarmDataProcessing = async (

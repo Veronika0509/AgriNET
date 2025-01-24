@@ -9,7 +9,7 @@ export const onSetpointSubmit = (
 ) => {
   const setpointName = name === 'Low' ? 'low-setpoint' : 'high-setpoint'
   new Promise((resolve: any) => {
-    onSetpointChange(sensorId, setpointName, event[0], resolve)
+    onSetpointChange(sensorId, setpointName, event, resolve)
   }).then((response: any) => {
     setSetpoint(response)
     presentToast({

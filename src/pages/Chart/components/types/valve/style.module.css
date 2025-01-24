@@ -280,6 +280,10 @@
   color: #999 !important;
 }
 
+.createModalSelect::part(label) {
+  color: #999 !important;
+}
+
 .createTimePickerModal {
   background: rgba(0, 0, 0, 0.32);
 }
@@ -294,9 +298,24 @@
 
 .createTimezoneItem[class*="item-has-focus"]  {
   --highlight-background: transparent !important;
+  border-color: #05a55a;
 }
 
 .createModalItemCheckbox {
+  color: #999;
+}
+
+.createPulseCountItem::part(native) {
+  --inner-border-width: 0;
+  --inner-padding-end: 0;
+}
+
+.createPulseCountInput {
+  text-align: right;
+  flex: 1;
+}
+
+.createPulseCountInput > label > div:nth-child(1) {
   color: #999;
 }
 
@@ -306,40 +325,21 @@
   align-items: center;
 }
 
-.createPulseCountItem::part(native) {
-  --inner-border-width: 0;
+.createPulseCountItem:has(.createPulseCountInput:global(.has-focus)) {
+  border-color: #05a55a;
 }
 
-.createPulseCountItem ion-input {
-  text-align: right;
-  flex: 1;
+.createPulseButton, .createButton {
+  margin: 0;
 }
 
-.pulseCountControls {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-left: 10px;
-  margin-right: 5px;
-}
-
-.pulseCountButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #33db64;
-  color: white;
-  cursor: pointer;
-  font-size: 18px;
-  border: none;
+.createPulseButton::part(native) {
   padding: 0;
 }
 
-.pulseCountButton:hover {
-  background: #05a55a;
+.createButton {
+  width: 100%;
+  margin-top: 5px;
 }
 
 /*   Responsibility   */

@@ -1,4 +1,4 @@
-import {getAlarmData} from "../../../../data/getAlarmData";
+import {getAlarmData} from "../../data/getAlarmData";
 import {removeTelOrEmail} from "../../data/telOrEmail/removeTelOrEmail";
 import {enableSetpoint} from "../../data/setpoints/enableSetpoint";
 

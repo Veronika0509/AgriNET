@@ -27,11 +27,11 @@ export const onIrrigationButtonClick = async (
     if (buttonProps === 1) {
       const closestDate = new Date(Math.min(...validDates.map(date => date.getTime())));
       closestDate.setDate(closestDate.getDate() + 7);
-      return closestDate.toISOString().split('T')[0];
+      return getDatetime(closestDate).split('T')[0];
     } else {
       const nearestDateObj = new Date(Math.max.apply(null, validDates.map(date => date.getTime())));
       nearestDateObj.setDate(nearestDateObj.getDate() + 7);
-      return nearestDateObj.toISOString().split('T')[0];
+      return getDatetime(nearestDateObj).split('T')[0];
     }
   }
 

@@ -3,10 +3,9 @@ import {
   IonContent,
   IonText
 } from "@ionic/react";
-import React, {useEffect, useState} from "react";
+import React from "react";
 import {AlarmItemTelOrEmail} from "./components/AlarmItemTelOrEmail";
 import {AlarmItemSetpoints} from "./components/AlarmItemSetpoints";
-import {getFieldLabels} from "./data/getFieldLabels";
 
 export const Alarm = (props: any) => {
   return (
@@ -52,6 +51,12 @@ export const Alarm = (props: any) => {
               isSetpointEnabled={props.isLowSetpointEnabled}
               setIsSetpointEnabled={props.setIsLowSetpointEnabled}
               setEmailOrTel={props.setEmailOrTel1}
+              isEnableActionSheet={props.isEnableActionSheet}
+              setIsEnableActionSheet={props.setIsEnableActionSheet}
+              isEnabledToastOpen={props.isEnabledToastOpen}
+              setIsEnabledToastOpen={props.setIsEnabledToastOpen}
+              isDisabledToastOpen={props.isDisabledToastOpen}
+              setIsDisabledToastOpen={props.setIsDisabledToastOpen}
             ></AlarmItemSetpoints>
             <AlarmItemSetpoints
               name='High'
@@ -65,6 +70,12 @@ export const Alarm = (props: any) => {
               isSetpointEnabled={props.isHighSetpointEnabled}
               setIsSetpointEnabled={props.setIsHighSetpointEnabled}
               setEmailOrTel={props.setEmailOrTel1}
+              isEnableActionSheet={props.isEnableActionSheet}
+              setIsEnableActionSheet={props.setIsEnableActionSheet}
+              isEnabledToastOpen={props.isEnabledToastOpen}
+              setIsEnabledToastOpen={props.setIsEnabledToastOpen}
+              isDisabledToastOpen={props.isDisabledToastOpen}
+              setIsDisabledToastOpen={props.setIsDisabledToastOpen}
             ></AlarmItemSetpoints>
           </>
         )}

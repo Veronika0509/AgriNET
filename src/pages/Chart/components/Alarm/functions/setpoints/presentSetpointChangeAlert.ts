@@ -28,7 +28,7 @@ export const presentSetpointChangeAlert = (
           sensorId,
           setSetpoint,
           presentToast,
-          event
+          event[0]
         )
       },
     ]

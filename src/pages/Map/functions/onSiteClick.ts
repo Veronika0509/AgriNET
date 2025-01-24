@@ -32,6 +32,7 @@ export const onSiteClick = async (props: any) => {
   let valveBoundsArray: any = []
   let valveInvalidChartData: any = []
   const countValve = sensorItems.filter((sensorItem: any) => sensorItem.markerType === 'valve').length;
+  console.log(sensorItems)
   sensorItems.map((sensorItem: any) => {
     if (sensorItem.markerType === 'moist-fuel') {
       props.setAmountOfSensors(props.amountOfSensors += 1)

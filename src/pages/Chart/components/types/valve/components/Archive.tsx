@@ -18,7 +18,6 @@ export const Archive = (props: any) => {
       const uniqueNewData = newData.data.filter((newItem: any) =>
         !archiveData.some((existingItem: any) => existingItem.id === newItem.id)
       );
-      console.log('I set archive data', uniqueNewData, 'to', archiveData)
       setArchiveData((prevData: any[]) => [...prevData, ...uniqueNewData]);
     } catch (error) {
       console.error("Error loading more data:", error);

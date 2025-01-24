@@ -1,5 +1,6 @@
 import axios from "axios";
 import {loadGoogleApi} from "../../../../../functions/loadGoogleApiFunc";
+import {getValveData} from "../../../../Map/data/types/valve/getValvetData";
 
 export const getIrrigationDates = async (
   setIsIrrigationDataIsLoading: any,
@@ -7,7 +8,9 @@ export const getIrrigationDates = async (
   userId: number,
   sensorId: string,
   setIrrigationDates: any,
-  setFullDatesArray: any
+  setFullDatesArray: any,
+  startDate: any,
+  setDisablePrevButton: any
 ): Promise<void> => {
   let datesArray: any = []
   let fullDatesArrayNs: any = []
@@ -17,43 +20,40 @@ export const getIrrigationDates = async (
       setIsIrrigationDataIsLoading(true)
       const idForIrrigationDataRequest = axios.get(`https://app.agrinet.us/api/autowater/${sensorId}`)
       resolve(idForIrrigationDataRequest)
-    }).then((idForIrrigationDataRequest: any) => {
+    }).then( async (idForIrrigationDataRequest: any) => {
       if (idForIrrigationDataRequest.data === '') {
         setIsIrrigationButtons(false)
         setIsIrrigationDataIsLoading(false)
       } else {
         setIsIrrigationDataIsLoading(false)
         const idForIrrigationData = idForIrrigationDataRequest.data.valve.sensorId
-        new Promise((resolve: any) => {
-          const response: any = axios.get('https://app.agrinet.us/api/valve/scheduler?v=43', {
-            params: {
-              sensorId: idForIrrigationData,
-              user: userId,
-            },
-          });
+        const response = await getValveData(idForIrrigationData, userId)
+        let index: number = 0
 
-          resolve(response)
-        }).then((response: any) => {
-          let index: number = 0
+        response.data.map((valve: any) => {
+          if (valve.valve1 === 'OFF') {
+            index += 1
+          }
+        })
 
-          response.data.map((valve: any) => {
-            if (valve.valve1 === 'OFF') {
-              index += 1
-            }
-          })
-
-          response.data.map((valve: any) => {
-            if (valve.valve1 === 'OFF') {
-              datesArray.push(valve.localTime.substring(0, 10))
-              fullDatesArrayNs.push(valve.localTime)
-              if (datesArray.length === index) {
-                setIrrigationDates(datesArray)
-              }
-              if (fullDatesArrayNs.length === index) {
-                setFullDatesArray(fullDatesArrayNs)
+        response.data.map((valve: any) => {
+          if (valve.valve1 === 'OFF') {
+            datesArray.push(valve.localTime.substring(0, 10))
+            fullDatesArrayNs.push(valve.localTime)
+            if (datesArray.length === index) {
+              setIrrigationDates(datesArray)
+              const hasEarlierDate = datesArray.some((dateStr: any) => {
+                const date = new Date(dateStr);
+                return date < new Date(startDate);
+              });
+              if (hasEarlierDate) {
+                setDisablePrevButton(false)
               }
             }
-          })
+            if (fullDatesArrayNs.length === index) {
+              setFullDatesArray(fullDatesArrayNs)
+            }
+          }
         })
       }
     })

@@ -20,7 +20,6 @@ import {createTempChartForOverlay} from "./functions/types/temp/createTempChartF
 import {CollisionResolver} from "./components/CollisionResolver";
 import {initializeValveCustomOverlay} from "./components/types/valve/ValveCustomOverlay";
 import {createValveChartForOverlay} from "./functions/types/valve/createValveChartForOverlay";
-import login from "../Login";
 
 interface MainProps {
   page: any
@@ -94,6 +93,9 @@ const MapPage: React.FC<MainProps> = (props) => {
     }
   }, [props.page])
   useEffect(() => {
+    if (activeOverlays.length !== 0) {
+      CollisionResolver.resolve(activeOverlays);
+    }
     if (map && props.siteList.length > 0) {
       createSites({
         page: props.page,
@@ -181,16 +183,6 @@ const MapPage: React.FC<MainProps> = (props) => {
       })
     }
   }, [invalidMoistChartDataContainer]);
-  // useEffect(() => {
-  //   let roots: any[] = [];
-  //   moistChartDataContainer.map((moistOverlay: any) => {
-  //     createMoistChartForOverlay(moistOverlay[0], roots, moistOverlays)
-  //   })
-  //   return () => {
-  //     roots.forEach(root => root.dispose());
-  //     roots = []
-  //   };
-  // }, [moistChartDataContainer]);
   useEffect(() => {
     if (moistOverlays.length !== 0) {
       let roots: any[] = [];
@@ -368,7 +360,7 @@ const MapPage: React.FC<MainProps> = (props) => {
 
   useEffect(() => {
     if (activeOverlays.length !== 0 && activeOverlays.length === amountOfSensors && !areBoundsFitted) {
-      CollisionResolver.resolve(activeOverlays, false);
+      CollisionResolver.resolve(activeOverlays);
       setAllOverlays(activeOverlays)
 
       const bounds = new google.maps.LatLngBounds();
@@ -381,16 +373,17 @@ const MapPage: React.FC<MainProps> = (props) => {
   }, [activeOverlays]);
   useEffect(() => {
     if (activeOverlays.length !== 0 && areBoundsFitted) {
-      CollisionResolver.resolve(activeOverlays, false);
+      CollisionResolver.resolve(activeOverlays);
       const handleResize = (reason: any) => {
         console.log(reason)
         new Promise((resolve: any) => {
           activeOverlays.map((overlay: any) => {
+            console.log('change to 0')
             overlay.offset = {x: 0, y: 0}
           })
           resolve()
         }).then(() => {
-          CollisionResolver.resolve(activeOverlays, false);
+          CollisionResolver.resolve(activeOverlays);
         })
       };
       window.addEventListener('resize', () => handleResize('resize'));

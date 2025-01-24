@@ -17,8 +17,22 @@ const Header = (props: any) => {
       back(props.setPage, history)
     } else if (props.type === 'alarmPage') {
       props.setAlarm(false)
-    } else {
+      if (props.alarmOddBack) {
+        props.setAlarmOddBack(false)
+        props.setChartPageType('valve')
+      }
+    } else if (props.type === 'valveArchiveModal') {
       props.setValveArchive(false)
+    } else if (props.type === 'valveSettingsModal') {
+      props.setValveSettings(false)
+      if (props.settingsOddBack) {
+        props.setSettingsOddBack(false)
+        props.setChartPageType('moist')
+        props.setSiteId(props.moistSensorId)
+        props.setAutowater(true)
+      }
+    } else if (props.type === 'valveCreateModal') {
+      props.setValveCreate(false)
     }
   }
 
@@ -46,29 +60,32 @@ const Header = (props: any) => {
               {props.type === 'valveArchiveModal' && (
                 <>{props.sensorId} Valve Scheduler Archive</>
               )}
+              {props.type === 'valveSettingsModal' && (
+                <>{props.sensorId} Settings</>
+              )}
+              {props.type === 'valveCreateModal' && (
+                <>Create Scheduler</>
+              )}
             </IonTitle>
           </div>
           {props.chartType === 'valve' && (
             <IonButtons className={s.header_valveButtons}>
-            <IonButton className={s.header_valveButton}>
-              <IonIcon icon={addOutline} className={s.header_valveButtonIcon}/>
-              Create
-            </IonButton>
-            <IonButton className={s.header_valveButton}>
-              <IonIcon icon={trash} className={s.header_valveButtonIcon}/>
-              Clear
-            </IonButton>
-            <IonButton className={s.header_valveButton} onClick={() => props.setValveArchive(true)}>
-              <IonIcon icon={timeOutline} className={s.header_valveButtonIcon}/>
-              Open archive
-            </IonButton>
-            <IonButton className={s.header_valveButton}>
-              <IonIcon icon={settings} className={s.header_valveButtonIcon}/>
-              Settings
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      )}
+              <IonButton className={s.header_valveButton} onClick={() => props.setValveCreate(true)}>
+                <IonIcon icon={addOutline} className={s.header_valveButtonIcon}/>
+                Create
+              </IonButton>
+              <IonButton className={s.header_valveButton} onClick={() => props.setValveArchive(true)}>
+                <IonIcon icon={timeOutline} className={s.header_valveButtonIcon}/>
+                Open archive
+              </IonButton>
+              <IonButton className={s.header_valveButton} onClick={() => props.setValveSettings(true)}>
+                <IonIcon icon={settings} className={s.header_valveButtonIcon}/>
+                Settings
+              </IonButton>
+            </IonButtons>
+          )}
+        </div>
+      </IonToolbar>
     </IonHeader>
   )
 }

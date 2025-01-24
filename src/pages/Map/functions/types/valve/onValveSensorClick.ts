@@ -1,4 +1,4 @@
-import {getValvetData} from "../../../data/types/valve/getValvetData";
+import {getValveData} from "../../../data/types/valve/getValvetData";
 
 export const onValveSensorClick = async (
   history: any,
@@ -11,7 +11,7 @@ export const onValveSensorClick = async (
   setSiteName: any,
   setChartPageType: any
 ) => {
-  const newValveChartData = await getValvetData(sensorId, userId)
+  const newValveChartData = await getValveData(sensorId, userId)
   setChartData(newValveChartData.data)
   setSiteId(sensorId)
   setSiteName(name)

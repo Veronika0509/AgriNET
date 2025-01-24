@@ -13,11 +13,12 @@ import {
   IonModal,
   IonSelect,
   IonSelectOption,
-  useIonAlert,
+  useIonAlert, useIonToast,
 } from "@ionic/react"
-import React, { useEffect, useRef, useState } from "react"
-import { addOutline, removeOutline } from "ionicons/icons"
-import { getDatetime } from "../../../DateTimePicker/functions/getDatetime"
+import React, {useEffect, useRef, useState} from "react"
+import {addOutline, removeOutline} from "ionicons/icons"
+import {getDatetime} from "../../../DateTimePicker/functions/getDatetime"
+import {createScheduler} from "../../../../data/types/valve/createScheduler";
 
 export const Create = (props: any) => {
   const [isPulseIrrigation, setIsPulseIrrigation] = useState(false)
@@ -31,6 +32,8 @@ export const Create = (props: any) => {
   })
   const [presentAlert] = useIonAlert()
   const stopDatetimeRef = useRef<HTMLIonDatetimeElement>(null)
+  const [timezone, setTimezone] = useState("America/Los_Angeles")
+  const [presentToast] = useIonToast();
 
   const handlePulseCount = (change: number) => {
     const newValue = pulseCount + change
@@ -73,9 +76,64 @@ export const Create = (props: any) => {
     setDuration(newDuration)
   }
 
+  const updateStartTime = () => {
+    const startDate = new Date(startTime)
+    startDate.setSeconds(0, 0)
+    const startDateForCheck = startDate.getTime() - 2 * 60 * 1000
+    if (new Date().getTime() > startDateForCheck) {
+      const newStartTime = new Date(new Date().getTime() + 2 * 60 * 1000)
+      setStartTime(newStartTime)
+      return newStartTime
+    } else {
+      return new Date(startTime)
+    }
+  }
+
+  const onCreateClick = async () => {
+    const updatedStartTime: any = updateStartTime()
+
+    const offsetMinutes = -updatedStartTime.getTimezoneOffset();
+    const sign = offsetMinutes >= 0 ? '+' : '-';
+    const absOffset = Math.abs(offsetMinutes);
+    const hours = Math.floor(absOffset / 60).toString().padStart(2, '0');
+    const minutes = (absOffset % 60).toString().padStart(2, '0');
+    const startTimeTimezone = `${sign}${hours}:${minutes}`
+
+    const [durationMinutes, durationSeconds] = duration.split(':').map(Number)
+    const updatedDuration = durationMinutes * 60 + durationSeconds
+
+    await createScheduler({
+      sensorId: props.sensorId,
+      time: `${getDatetime(updatedStartTime)}${startTimeTimezone}`,
+      timezone,
+      duration: updatedDuration,
+      ...(isPulseIrrigation ? { pulses: {
+        count: pulseCount,
+        offInMinutes: pulseOffMinutes
+      } } : {})
+    }, props.userId).then(() => {
+      presentToast({
+        message: 'Created',
+        duration: 3000,
+        position: 'bottom',
+      });
+      props.setValveCreate(false)
+      setDuration('06:00')
+      setStartTime(new Date(new Date().getTime() + 2 * 60 * 1000))
+      setStopTime(() => {
+        const [hours, minutes] = '06:00'.split(':').map(Number)
+        return new Date(new Date(startTime).getTime() + (hours * 60 + minutes) * 60 * 1000)
+      })
+      setTimezone("America/Los_Angeles")
+      setIsPulseIrrigation(false)
+      setPulseCount(2)
+      setPulseOffMinutes(60)
+    })
+  }
+
   return (
     <IonModal isOpen={props.valveCreate} className={s.createModal}>
-      <Header type="valveCreateModal" sensorId={props.sensorId} setValveCreate={props.setValveCreate} />
+      <Header type="valveCreateModal" sensorId={props.sensorId} setValveCreate={props.setValveCreate}/>
       <IonContent>
         <div className={s.createModalContent}>
           <IonItem className={s.createModalItem}>{props.config?.names[0] ? props.config?.names[0] : "Valve"}</IonItem>
@@ -87,7 +145,7 @@ export const Create = (props: any) => {
                 id="durationDatetime"
                 presentation="time"
                 showDefaultButtons={true}
-                value={'06:00'}
+                value={duration}
                 onIonChange={onDurationChange}
               ></IonDatetime>
             </IonModal>
@@ -124,7 +182,8 @@ export const Create = (props: any) => {
               className={s.createModalSelect}
               label={"Current timezone"}
               placeholder="Timezone"
-              value={"America/Los_Angeles"}
+              value={timezone}
+              onIonChange={(e: any) => setTimezone(e.detail.value)}
             >
               {Intl.supportedValuesOf("timeZone").map((timezone: string) => (
                 <IonSelectOption key={timezone} value={timezone}>
@@ -213,7 +272,7 @@ export const Create = (props: any) => {
               </IonItem>
             </>
           )}
-          <IonButton className={s.createButton}>
+          <IonButton className={s.createButton} onClick={onCreateClick}>
             {isPulseIrrigation ? `Create ${pulseCount} pulses` : "Create"}
           </IonButton>
         </div>

@@ -7,7 +7,7 @@ import {handleResize} from "./functions/handleResize";
 import React, {useEffect, useState} from "react";
 import {TempChartPage} from "./components/types/temp";
 import {Alarm} from "./components/Alarm";
-import {getAlarmData} from "./data/getAlarmData";
+import {getAlarmData} from "./components/Alarm/data/getAlarmData";
 import {getFieldLabels} from "./components/Alarm/data/getFieldLabels";
 import {alarmDataProcessing} from "./functions/alarmDataProcessing";
 import {ValveChartPage} from "./components/types/valve";
@@ -22,10 +22,18 @@ interface ChartProps {
   chartData?: any;
   additionalChartData: any;
   chartPageType: any;
+  setAdditionalChartData: any,
+  setChartData: any,
+  setSiteId: any,
+  setSiteName: any,
+  setChartPageType: any
 }
 
 const Chart = (props: ChartProps) => {
   const [isMobile, setIsMobile] = useState(false)
+  const [alarmOddBack, setAlarmOddBack] = useState(false)
+  const [settingsOddBack, setSettingsOddBack] = useState(false)
+  const [autowater, setAutowater] = useState<any>(false)
   const [alarm, setAlarm] = useState(false)
   const [alarmData, setAlarmData] = useState()
   const [alarmEmailOrTel1, setAlarmEmailOrTel1] = useState('Unset')
@@ -38,7 +46,13 @@ const Chart = (props: ChartProps) => {
   const [alarmFieldLabelsData, setAlarmFieldLabelsData] = useState()
   const [isAlarmLowSetpointEnabled, setIsAlarmLowSetpointEnabled] = useState()
   const [isAlarmHighSetpointEnabled, setIsAlarmHighSetpointEnabled] = useState()
+  const [isAlarmEnableActionSheet, setIsAlarmEnableActionSheet] = useState(false)
+  const [isAlarmEnabledToastOpen, setIsAlarmEnabledToastOpen] = useState(false)
+  const [isAlarmDisabledToastOpen, setIsAlarmDisabledToastOpen] = useState(false)
+  // Valve
   const [valveArchive, setValveArchive] = useState(false)
+  const [valveSettings, setValveSettings] = useState(false)
+  const [valveCreate, setValveCreate] = useState(false)
 
   useEffect(() => {
     alarmDataProcessing(
@@ -74,6 +88,16 @@ const Chart = (props: ChartProps) => {
             setIsMobile={setIsMobile}
             alarm={alarm}
             setAlarm={setAlarm}
+            setChartData={props.setChartData}
+            setSiteId={props.setSiteId}
+            setChartPageType={props.setChartPageType}
+            setValveSettings={setValveSettings}
+            alarmOddBack={alarmOddBack}
+            setAlarmOddBack={setAlarmOddBack}
+            settingsOddBack={settingsOddBack}
+            setSettingsOddBack={setSettingsOddBack}
+            autowater={autowater}
+            setAutowater={setAutowater}
           />
         );
       case 'wxet':
@@ -112,6 +136,29 @@ const Chart = (props: ChartProps) => {
             userId={props.userId}
             valveArchive={valveArchive}
             setValveArchive={setValveArchive}
+            valveSettings={valveSettings}
+            setValveSettings={setValveSettings}
+            valveCreate={valveCreate}
+            setValveCreate={setValveCreate}
+            siteList={props.siteList}
+            setLowSelectedSensor={setAlarmLowSelectedSensor}
+            setLowSetpoint={setAlarmLowSetpoint}
+            isSetpointEnabled={isAlarmLowSetpointEnabled}
+            setIsSetpointEnabled={setIsAlarmLowSetpointEnabled}
+            setIsEnableActionSheet={setIsAlarmEnableActionSheet}
+            setIsEnabledToastOpen={setIsAlarmEnabledToastOpen}
+            setIsDisabledToastOpen={setIsAlarmDisabledToastOpen}
+            setAdditionalChartData={props.setAdditionalChartData}
+            setChartData={props.setChartData}
+            setSiteId={props.setSiteId}
+            setSiteName={props.setSiteName}
+            setChartPageType={props.setChartPageType}
+            setAlarm={setAlarm}
+            alarmOddBack={alarmOddBack}
+            setAlarmOddBack={setAlarmOddBack}
+            settingsOddBack={settingsOddBack}
+            setSettingsOddBack={setSettingsOddBack}
+            setAutowater={setAutowater}
           />
         )
       default:
@@ -121,10 +168,23 @@ const Chart = (props: ChartProps) => {
 
   return (
     <IonPage className={s.page}>
-      <Header type='chartPage' setPage={props.setPage} siteName={props.siteName} sensorId={props.siteId} chartType={props.chartPageType} setValveArchive={setValveArchive} />
+      <Header
+        type='chartPage'
+        setPage={props.setPage}
+        siteName={props.siteName}
+        sensorId={props.siteId}
+        chartType={props.chartPageType}
+        setValveArchive={setValveArchive}
+        setValveSettings={setValveSettings}
+        setValveCreate={setValveCreate}
+        alarmOddBack={alarmOddBack}
+        setAlarmOddBack={setAlarmOddBack}
+        settingsOddBack={settingsOddBack}
+        setSettingsOddBack={setSettingsOddBack}
+      />
       {renderChartPage()}
       <IonModal isOpen={alarm} className={s.alarmPage}>
-        <Header type='alarmPage' setAlarm={setAlarm}/>
+        <Header type='alarmPage' setAlarm={setAlarm} alarmOddBack={alarmOddBack} setAlarmOddBack={setAlarmOddBack} settingsOddBack={settingsOddBack} setSettingsOddBack={setSettingsOddBack} setChartPageType={props.setChartPageType} />
         <Alarm
           alarm={alarm}
           setAlarm={setAlarm}
@@ -149,6 +209,12 @@ const Chart = (props: ChartProps) => {
           isHighSetpointEnabled={isAlarmHighSetpointEnabled}
           setIsLowSetpointEnabled={setIsAlarmLowSetpointEnabled}
           setIsHighSetpointEnabled={setIsAlarmHighSetpointEnabled}
+          isEnableActionSheet={isAlarmEnableActionSheet}
+          setIsEnableActionSheet={setIsAlarmEnableActionSheet}
+          isEnabledToastOpen={isAlarmEnabledToastOpen}
+          setIsEnabledToastOpen={setIsAlarmEnabledToastOpen}
+          isDisabledToastOpen={isAlarmDisabledToastOpen}
+          setIsDisabledToastOpen={setIsAlarmDisabledToastOpen}
         ></Alarm>
       </IonModal>
     </IonPage>

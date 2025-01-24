@@ -58,15 +58,14 @@ export const createMoistChartForOverlay = async (chartData: any, roots: any, moi
     tooltip: am5.Tooltip.new(root, {})
   }));
 
-  const minimum = chartData.budgetLines[0].value > 0 ? chartData.budgetLines[0].value : undefined
-  const maximum = chartData.budgetLines[5].value > 0 ? chartData.budgetLines[5].value : undefined
+  const maximum = chartData.budgetLines[0].value > 0 ? chartData.budgetLines[0].value : undefined
+  const minimum = chartData.budgetLines[5].value > 0 ? chartData.budgetLines[5].value : undefined
   let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
     min: minimum,
     max: maximum,
     strictMinMax: true,
     renderer: am5xy.AxisRendererY.new(root, {
       pan: "zoom",
-      inversed: true
     })
   }));
   yAxis.set('visible', false)

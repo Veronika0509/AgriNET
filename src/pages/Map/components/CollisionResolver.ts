@@ -4,8 +4,8 @@ export class CollisionResolver {
   private static readonly MIN_SPACING = 0.5; // Reduced to 0.5px for extremely tight packing
   private static alreadyMoved: Map<any, boolean> = new Map();
 
-  static resolve(overlays: any[], isMobilePlatform: boolean) {
-    if (isMobilePlatform && overlays.length > 30) return;
+  static resolve(overlays: any[]) {
+    if (overlays.length > 30) return;
 
     clearTimeout(this.timerId);
     this.timerId = setTimeout(() => {

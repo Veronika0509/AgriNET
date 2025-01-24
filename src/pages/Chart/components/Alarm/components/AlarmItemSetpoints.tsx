@@ -15,9 +15,6 @@ export const AlarmItemSetpoints = (props: any) => {
   const [presentSelectToast] = useIonToast();
   const [presentSetpointToast] = useIonToast();
   const [presentErrorAlert] = useIonAlert();
-  const [isEnableActionSheet, setIsEnableActionSheet] = useState(false)
-  const [isEnabledToastOpen, setIsEnabledToastOpen] = useState(false)
-  const [isDisabledToastOpen, setIsDisabledToastOpen] = useState(false)
   let initialSensorActionSheetButtonsArray: any = Object.values(props.fieldsLabelsData)
   let sensorActionSheetButtons: any = []
 
@@ -55,12 +52,12 @@ export const AlarmItemSetpoints = (props: any) => {
           ></IonActionSheet>
           <IonButton fill='clear' color='light' onClick={() => presentSetpointChangeAlert(presentAlert, props.name, props.sensorId, props.setSetpoint, presentSetpointToast)}>{props.setpoint}</IonButton>
           <IonButton fill={props.isSetpointEnabled ? 'clear' : 'solid'} onClick={
-            () => onEnableCLick(props.sensorId, props.name, props.isSetpointEnabled, props.setIsSetpointEnabled, setIsEnabledToastOpen, setIsDisabledToastOpen, setIsEnableActionSheet)
+            () => onEnableCLick(props.sensorId, props.name, props.isSetpointEnabled, props.setIsSetpointEnabled, props.setIsEnabledToastOpen, props.setIsDisabledToastOpen, props.setIsEnableActionSheet)
           }>
             {props.isSetpointEnabled ? 'Disable' : 'Enable'}
           </IonButton>
           <IonActionSheet
-            isOpen={isEnableActionSheet}
+            isOpen={props.isEnableActionSheet}
             header="Action Type"
             buttons={[
               {
@@ -75,9 +72,9 @@ export const AlarmItemSetpoints = (props: any) => {
                   undefined,
                   props.name,
                   props.setIsSetpointEnabled,
-                  setIsEnabledToastOpen,
-                  setIsDisabledToastOpen,
-                  setIsEnableActionSheet
+                  props.setIsEnabledToastOpen,
+                  props.setIsDisabledToastOpen,
+                  props.setIsEnableActionSheet
                 )
               },              {
                 text: 'SMS',
@@ -91,9 +88,9 @@ export const AlarmItemSetpoints = (props: any) => {
                   undefined,
                   props.name,
                   props.setIsSetpointEnabled,
-                  setIsEnabledToastOpen,
-                  setIsDisabledToastOpen,
-                  setIsEnableActionSheet
+                  props.setIsEnabledToastOpen,
+                  props.setIsDisabledToastOpen,
+                  props.setIsEnableActionSheet
                 )
               },
               {
@@ -104,14 +101,14 @@ export const AlarmItemSetpoints = (props: any) => {
                 },
               },
             ]}
-            onDidDismiss={() => setIsEnableActionSheet(false)}
+            onDidDismiss={() => props.setIsEnableActionSheet(false)}
           ></IonActionSheet>
           <IonToast
-            isOpen={isEnabledToastOpen}
-            onDidDismiss={() => setIsEnabledToastOpen(false)}
+            isOpen={props.isEnabledToastOpen}
+            onDidDismiss={() => props.setIsEnabledToastOpen(false)}
             onWillPresent={() => {
-              if (isDisabledToastOpen) {
-                setIsDisabledToastOpen(false)
+              if (props.isDisabledToastOpen) {
+                props.setIsDisabledToastOpen(false)
               }
             }}
             message={props.name + ' Setpoint Enabled'}
@@ -119,13 +116,13 @@ export const AlarmItemSetpoints = (props: any) => {
             position='bottom'
           />
           <IonToast
-            isOpen={isDisabledToastOpen}
+            isOpen={props.isDisabledToastOpen}
             onWillPresent={() => {
-              if (isEnabledToastOpen) {
-                setIsEnabledToastOpen(false)
+              if (props.isEnabledToastOpen) {
+                props.setIsEnabledToastOpen(false)
               }
             }}
-            onDidDismiss={() => setIsDisabledToastOpen(false)}
+            onDidDismiss={() => props.setIsDisabledToastOpen(false)}
             message={props.name + ' Setpoint Disabled'}
             duration={3000}
             position='bottom'

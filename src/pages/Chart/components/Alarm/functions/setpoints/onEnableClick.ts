@@ -1,5 +1,5 @@
 import {enableSetpoint} from "../../data/setpoints/enableSetpoint";
-import {getAlarmData} from "../../../../data/getAlarmData";
+import {getAlarmData} from "../../data/getAlarmData";
 import login from "../../../../../Login";
 
 export const onEnableCLick = async (
