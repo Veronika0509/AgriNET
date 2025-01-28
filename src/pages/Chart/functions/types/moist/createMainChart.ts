@@ -3,6 +3,7 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import {removeComment} from "../../../components/AddComment/data/removeComment";
 import {updateCommentDate} from "../../../components/AddComment/data/updateCommentDate";
+import login from "../../../../Login";
 
 let startDateForZooming: any;
 let endDateForZooming: any;
@@ -27,7 +28,6 @@ export const createMainChart = (
   setMainTabularDataColors?: any
 ): void => {
   const chartDataWrapper = props;
-
   if (root.current) {
     root.current.dispose();
     root.current = null;
@@ -58,7 +58,7 @@ export const createMainChart = (
     let chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
       wheelY: comparingMode ? undefined : "zoomX",
       layout: isMobile ? root.current.verticalLayout : root.current.horizontalLayout,
-      maxTooltipDistance: comparingMode ? undefined : 0,
+      maxTooltipDistance: undefined,
     }));
 
     let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root.current, {
@@ -82,11 +82,11 @@ export const createMainChart = (
 
     yAxis.set('visible', false);
 
-    function createChartData(chartDate: any, chartCount: number) {
+    function createChartData(chartDate: any, chartCount: number, valueToShow: any) {
       return {
         date: chartDate,
         value: chartCount,
-        percentValue: Number(chartCount.toFixed(1))
+        valueToShow
       };
     }
 
@@ -95,7 +95,7 @@ export const createMainChart = (
       chartDataWrapper.map((chartDataItem: any) => {
         const chartDate = new Date(chartDataItem['DateTime']).getTime();
         if (chartDate && chartDataItem[prefix + 'MS ' + count]) {
-          const chartData = createChartData(chartDate, chartDataItem[prefix + 'MS ' + count]);
+          const chartData = createChartData(chartDate, chartDataItem[prefix + 'MS ' + count], chartDataItem[prefix + 'MABS' + `${count - 1}`]);
           data.push(chartData);
         }
       });
@@ -131,7 +131,7 @@ export const createMainChart = (
           tension: 0.5,
           tooltip: seriesItem.name === 'ordinarySeries' ? am5.Tooltip.new(root.current, {
             pointerOrientation: "horizontal",
-            labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + " - {percentValue} %",
+            labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + " = {valueToShow}%",
           }) : undefined,
           snapTooltip: true,
         }));
