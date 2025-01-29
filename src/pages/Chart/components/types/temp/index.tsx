@@ -117,6 +117,7 @@ export const TempChartPage = (props: any) => {
             )
           }
         }
+        updateChart()
       } else {
         setNwsForecastData(undefined)
         if (currentChartData) {
