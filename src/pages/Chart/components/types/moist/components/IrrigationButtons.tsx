@@ -17,26 +17,30 @@ const IrrigationButtons = (props: any) => {
                            0,
                            props.currentChartData,
                            props.irrigationDates,
-                           props.setDisableNextButton,
-                           props.setDisablePrevButton,
-                           props.disableNextButton,
-                           props.disablePrevButton,
                            props.setStartDate,
                            props.setEndDate,
-                           props.setCurrentDates
+                           props.setDateDifferenceInDays,
+                           props.setCurrentDates,
+                           props.fullDatesArray,
+                           props.setDisableNextButton,
+                           props.setDisablePrevButton,
+                           props.setShowForecast,
+                           props.updateChart
                          )}>Prev Irigation Event</IonButton>
               <IonButton disabled={props.disableNextButton}
                          onClick={() => onIrrigationButtonClick(
                            1,
                            props.currentChartData,
                            props.irrigationDates,
-                           props.setDisableNextButton,
-                           props.setDisablePrevButton,
-                           props.disableNextButton,
-                           props.disablePrevButton,
                            props.setStartDate,
                            props.setEndDate,
-                           props.setCurrentDates
+                           props.setDateDifferenceInDays,
+                           props.setCurrentDates,
+                           props.fullDatesArray,
+                           props.setDisableNextButton,
+                           props.setDisablePrevButton,
+                           props.setShowForecast,
+                           props.updateChart
                          )}>Next Irigation Event</IonButton>
             </div>
           )}

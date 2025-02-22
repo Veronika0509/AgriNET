@@ -1,16 +1,19 @@
 import {getDatetime} from "../../../components/DateTimePicker/functions/getDatetime";
+import {updateChartWithNewDates} from "./updateChartWithNewDates";
 
 export const onIrrigationButtonClick = async (
   buttonProps: number,
   currentChartData: any,
   irrigationDates: any,
-  setDisableNextButton: any,
-  setDisablePrevButton: any,
-  disableNextButton: any,
-  disablePrevButton: any,
   setStartDate: any,
   setEndDate: any,
-  setCurrentDates: any
+  setDateDifferenceInDays: any,
+  setCurrentDates: any,
+  fullDatesArray: any,
+  setDisableNextButton: any,
+  setDisablePrevButton: any,
+  setShowForecast: any,
+  updateChart: any
 ) => {
   let currentDate: any
 
@@ -35,36 +38,14 @@ export const onIrrigationButtonClick = async (
     }
   }
 
-  const nearestDate = new Date(findNearestDate(currentDate, irrigationDates))
-  nearestDate.setDate(nearestDate.getDate() - 7);
-  const year = nearestDate.getFullYear();
-  const month = (nearestDate.getMonth() + 1).toString().padStart(2, '0');
-  const day = nearestDate.getDate().toString().padStart(2, '0');
-  const formattedNearestDate = `${year}-${month}-${day}`;
-
-  if (formattedNearestDate === irrigationDates[0]) {
-    setDisableNextButton(true)
-  }
-  if (formattedNearestDate === irrigationDates[irrigationDates.length - 1]) {
-    setDisablePrevButton(true)
-  }
-  if (formattedNearestDate !== irrigationDates[0]) {
-    if (disableNextButton) {
-      setDisableNextButton(false)
-    }
-  }
-  if (formattedNearestDate !== irrigationDates[irrigationDates.length - 1]) {
-    if (disablePrevButton) {
-      setDisablePrevButton(false)
-    }
-  }
-
-  setCurrentDates([14, findNearestDate(currentDate, irrigationDates), formattedNearestDate, formattedNearestDate])
-
   const endDateTimeDefault = new Date(findNearestDate(currentDate, irrigationDates))
   const endDatetime = getDatetime(new Date(endDateTimeDefault.setDate(endDateTimeDefault.getDate() - 1)))
   setEndDate(endDatetime)
 
-  const startDatetime = new Date(endDatetime)
-  setStartDate(getDatetime(new Date(startDatetime.setDate(startDatetime.getDate() - 14))))
+  const startDatetimeDefault = new Date(endDatetime)
+  const startDatetime = getDatetime(new Date(startDatetimeDefault.setDate(startDatetimeDefault.getDate() - 14)))
+  setStartDate(startDatetime)
+
+  setDateDifferenceInDays('14')
+  updateChartWithNewDates(startDatetime, endDatetime, setCurrentDates, fullDatesArray, setDisableNextButton, setDisablePrevButton, setShowForecast, updateChart)
 }

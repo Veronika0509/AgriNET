@@ -130,6 +130,9 @@ export const createAdditionalChart = (
           snapTooltip: true,
           stroke: am5.color(6779356)
         }));
+        series.strokes.template.setAll({
+          strokeWidth: 2,
+        });
 
         if (seriesItem.name === 'historicSeries') {
           series.strokes.template.setAll({
@@ -188,6 +191,9 @@ export const createAdditionalChart = (
             }),
             snapTooltip: true,
           }));
+          series.strokes.template.setAll({
+            strokeWidth: 2,
+          });
 
           count += 4;
 
@@ -234,6 +240,9 @@ export const createAdditionalChart = (
         stroke: am5.color(0x000000),
         snapTooltip: true
       }));
+      series.strokes.template.setAll({
+        strokeWidth: 2,
+      });
 
       let data = createChartDataArray()
 

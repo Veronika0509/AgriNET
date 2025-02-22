@@ -43,8 +43,8 @@ export const getIrrigationDates = async (
             if (datesArray.length === index) {
               setIrrigationDates(datesArray)
               const hasEarlierDate = datesArray.some((dateStr: any) => {
-                const date = new Date(dateStr);
-                return date < new Date(startDate);
+                const date = new Date(new Date(dateStr).setHours(0, 0, 0, 0));
+                return date < new Date(new Date(startDate).setHours(0, 0, 0, 0));
               });
               if (hasEarlierDate) {
                 setDisablePrevButton(false)

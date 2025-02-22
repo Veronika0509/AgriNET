@@ -1,4 +1,4 @@
-import {getCurrentDatetime} from "./getCurrentTime";
+import {getCurrentDatetime} from "./getCurrentDatetime";
 
 export const checkDateValidity = (startDate: any, endDate: any) => {
   const startDatetime: any = new Date(startDate).getTime()

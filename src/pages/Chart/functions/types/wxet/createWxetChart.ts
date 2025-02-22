@@ -127,6 +127,9 @@ export const createWxetChart = (
         }),
         snapTooltip: true,
       }));
+      series.strokes.template.setAll({
+        strokeWidth: 2,
+      });
 
       let data = createChartDataArray(dataLabel.label)
 

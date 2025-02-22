@@ -128,6 +128,9 @@ export const createTempChart = (
         }),
         snapTooltip: true,
       }));
+      series.strokes.template.setAll({
+        strokeWidth: 2,
+      });
 
       let data = createChartDataArray(dataLabel.label)
       series.data.setAll(data)

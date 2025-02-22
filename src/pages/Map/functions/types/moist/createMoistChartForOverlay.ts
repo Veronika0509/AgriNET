@@ -7,7 +7,6 @@ const checkOverlay = async (id: string, moistOverlays: any[]): Promise<void> => 
   if (!element) {
     const overlay = moistOverlays.find(moistOverlay => moistOverlay.chartData.id === id);
     if (overlay) {
-      console.log('gonna update overlay', id)
       await overlay.update();
     }
   }

@@ -21,7 +21,7 @@ const TopSection = (props: any) => {
     }
 
     batteryHandler()
-  }, [props.batteryChartShowed, props.currentDates]);
+  }, [props.batteryChartShowed]);
 
 
 
@@ -56,26 +56,33 @@ const TopSection = (props: any) => {
   return (
     <div className={s.topSection_mainContainer}>
       <div className={s.topSection_wrapper}>
-        <DateTimePicker
-          sensorId={props.sensorId}
-          root={props.root}
-          isMobile={props.isMobile}
-          fullDatesArray={props.fullDatesArray}
-          setCurrentChartData={props.setCurrentChartData}
-          setDisableNextButton={props.setDisableNextButton}
-          setDisablePrevButton={props.setDisablePrevButton}
-          endDate={props.endDate}
-          startDate={props.startDate}
-          setEndDate={props.setEndDate}
-          setStartDate={props.setStartDate}
-          additionalChartData={props.additionalChartData}
-          type={props.type}
-          batteryRoot={props.batteryRoot}
-          sumRoot={props.sumRoot}
-          setCurrentDates={props.setCurrentDates}
-          userId={props.userId}
-        />
-        <IonButton fill="outline" onClick={() => props.setAlarm(true)}>
+        <IonItem className={s.topSection_timeItem}>
+          <div>
+            <DateTimePicker
+              sensorId={props.sensorId}
+              root={props.root}
+              fullDatesArray={props.fullDatesArray}
+              setCurrentChartData={props.setCurrentChartData}
+              setDisableNextButton={props.setDisableNextButton}
+              setDisablePrevButton={props.setDisablePrevButton}
+              endDate={props.endDate}
+              startDate={props.startDate}
+              setEndDate={props.setEndDate}
+              setStartDate={props.setStartDate}
+              additionalChartData={props.additionalChartData}
+              type={props.type}
+              batteryRoot={props.batteryRoot}
+              sumRoot={props.sumRoot}
+              setCurrentDates={props.setCurrentDates}
+              userId={props.userId}
+              dateDifferenceInDays={props.dateDifferenceInDays}
+              setDateDifferenceInDays={props.setDateDifferenceInDays}
+              updateChart={props.updateChart}
+              setShowForecast={props.setShowForecast}
+            />
+          </div>
+        </IonItem>
+        <IonButton fill="outline" className={s.topSection_addAlarm} onClick={() => props.setAlarm(true)}>
           <IonIcon slot="start" icon={alarmOutline}></IonIcon>
           Add Alarm
         </IonButton>

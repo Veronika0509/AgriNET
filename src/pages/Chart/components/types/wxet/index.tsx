@@ -3,7 +3,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {handleResize} from "../../../functions/handleResize";
 import {IonContent, useIonToast} from "@ionic/react";
 import TopSection from "../../TopSection";
-import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentTime";
+import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentDatetime";
 import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import {createWxetChart} from "../../../functions/types/wxet/createWxetChart";
 import {getWxetMainChartData} from "../../../../Map/data/types/wxet/getWxetMainChartData";

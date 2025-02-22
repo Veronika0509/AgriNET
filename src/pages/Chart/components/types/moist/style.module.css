@@ -196,7 +196,7 @@
   font-weight: 700;
 }
 
-@media only screen and (max-width: 850px) {
+@media only screen and (max-width: 950px) {
   .chartLinesSix {
     height: 480px;
   }
@@ -260,6 +260,12 @@
     font-weight: bold;
     text-align: left;
     white-space: nowrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .wrapper {
+    margin-top: 20px;
   }
 }
 

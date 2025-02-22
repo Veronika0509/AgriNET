@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
-import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentTime";
+import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentDatetime";
 import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import TopSection from "../../TopSection";
 import s from "./style.module.css";

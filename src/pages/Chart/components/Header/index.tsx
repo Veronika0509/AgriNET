@@ -51,7 +51,7 @@ const Header = (props: any) => {
             </IonButtons>
             <IonTitle className={s.header_title}>
               {props.type === 'chartPage' && (
-                <>{props.chartType !== 'valve' ? <>{props.siteName} / {props.sensorId}</> : <>{props.sensorId} Valve
+                <>{props.chartType !== 'valve' ? <p className={s.header_titleText}><span>{props.siteName} / </span><span>{props.sensorId}</span></p> : <>{props.sensorId} Valve
                   Scheduler</>}</>
               )}
               {props.type === 'alarmPage' && (

@@ -65,7 +65,6 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       update(){
-        console.log('update overlay', this.chartData.id)
         if (this.div && this.isTempMarkerChartDrawn && this.root) {
           this.root.render(this.renderContent());
         }

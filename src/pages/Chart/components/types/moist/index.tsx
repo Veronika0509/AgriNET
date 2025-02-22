@@ -1,6 +1,6 @@
 import s from './style.module.css'
-import React, {useEffect, useRef, useState} from "react";
-import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentTime";
+import React, {useCallback, useEffect, useRef, useState} from "react";
+import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentDatetime";
 import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import {handleResize} from "../../../functions/handleResize";
 import {getIrrigationDates} from "../../../data/types/moist/getIrrigationDates";
@@ -20,10 +20,15 @@ import AddCommentModal from "../../AddComment/components/AddCommentModal";
 import {getComments} from "../../AddComment/data/getComments";
 import {getSoilTempChartData} from "../../../data/types/moist/getSoilTempChartData";
 import {getBatteryChartData} from "../../../data/types/moist/getBatteryChartData";
-import {getAutowaterData} from "../../../data/types/moist/getAutowaterData";
-import {getValveData} from "../../../../Map/data/types/valve/getValvetData";
-import login from "../../../../Login";
 import {Autowater} from "./components/Autowater";
+import {updateCommentsArray} from "../../../functions/types/moist/updateCommentsArray";
+import {compareDates} from "../../../functions/types/moist/compareDates";
+import {getSetAddCommentItemShowed} from "../../../functions/types/moist/getSetAddCommentItemShowed";
+import {getAddCommentItemShowed} from "../../../functions/types/moist/getAddCommentItemShowed";
+import {getDatetime} from "../../DateTimePicker/functions/getDatetime";
+import {formatDate} from "../../../functions/formatDate";
+import {logoFacebook} from "ionicons/icons";
+import {handleResizeForChartLegend} from "../../../functions/types/moist/handleResizeForChartLegend";
 
 export const MoistChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -38,7 +43,8 @@ export const MoistChartPage = (props: any) => {
   const initialStartDate: any = getStartDate(getCurrentDatetime())
   const [startDate, setStartDate] = useState<string>(initialStartDate);
   const [endDate, setEndDate] = useState<string>(currentDate);
-  const [currentDates, setCurrentDates] = useState([])
+  const [currentDates, setCurrentDates] = useState<any>([])
+  const [dateDifferenceInDays, setDateDifferenceInDays] = React.useState('14');
   const [comparingMode, setComparingMode] = useState(false)
   // Battery Chart
   const batteryRoot = useRef<any>(null);
@@ -83,38 +89,16 @@ export const MoistChartPage = (props: any) => {
   const [moistSoilTempAddCommentItemShowed, setMoistSoilTempAddCommentItemShowed] = useState<any>(false)
   const [moistSoilTempComments, setMoistSoilTempComments] = useState();
 
+  // Responsibility
+  const [smallScreen, setSmallScreen] = useState(false)
+  const [middleScreen, setMiddleScreen] = useState(false)
+  const [largeScreen, setLargeScreen] = useState(false)
+
   // Chart Codes
   const mainChartCode: string = 'm'
   const soilTempChartCode: string = 'mst'
   const sumChartCode: string = 'mSum'
 
-  function compareDates(targetDateInMillis: any) {
-    const targetDate = new Date(targetDateInMillis);
-    const currentDate = new Date();
-
-    const targetDay = targetDate.getUTCDate();
-    const targetMonth = targetDate.getUTCMonth();
-    const targetYear = targetDate.getUTCFullYear();
-
-    const currentDay = currentDate.getUTCDate();
-    const currentMonth = currentDate.getUTCMonth();
-    const currentYear = currentDate.getUTCFullYear();
-
-    return targetDay === currentDay && targetMonth === currentMonth && targetYear === currentYear;
-  }
-
-  const updateCommentsArray = async (type: string) => {
-    const newComments: any = await getComments(type, props.sensorId)
-    if (type === 'M') {
-      setMoistMainComments(newComments.data)
-    } else if (type === 'MSum') {
-      setMoistSumComments(newComments.data)
-    } else if (type === 'MST') {
-      setMoistSoilTempComments(newComments.data)
-    } else {
-      setMoistBatteryComments(newComments.data)
-    }
-  }
   const updateChart = async (
     typeOfChart: string,
     updateReason?: string,
@@ -148,94 +132,205 @@ export const MoistChartPage = (props: any) => {
         const newCommentData = await getCommentsFunc()
         if (moistMainAddCommentItemShowed === 'comments') {
           setMoistMainAddCommentItemShowed(false)
-          createMainChart(
-            currentChartData, props.userId, root, props.isMobile,
-            fullDatesArray, props.additionalChartData, comparingMode,
-            false, historicMode, showForecast,
-            setMoistAddCommentModal, false, newCommentData,
-            updateCommentsArray, updateChart, isMoistCommentsShowed, setMoistMainTabularDataColors
-          )
+          createMainChart({
+            data: currentChartData,
+            userId: props.userId,
+            root,
+            fullDatesArray,
+            additionalChartData: props.additionalChartData,
+            comparingMode,
+            isNewDates: false,
+            historicMode,
+            showForecast,
+            setMoistAddCommentModal,
+            moistMainAddCommentItemShowed: false,
+            moistMainComments: newCommentData,
+            updateCommentsArray,
+            updateChart,
+            isMoistCommentsShowed,
+            setMoistMainTabularDataColors
+          })
         } else {
-          createMainChart(
-            currentChartData, props.userId, root, props.isMobile,
-            fullDatesArray, props.additionalChartData, comparingMode,
-            false, historicMode, showForecast,
-            setMoistAddCommentModal, moistMainAddCommentItemShowed, newCommentData,
-            updateCommentsArray, updateChart, isMoistCommentsShowed, setMoistMainTabularDataColors
-          )
+          if (currentChartData.length !== 0) {
+            createMainChart({
+              data: currentChartData,
+              userId: props.userId,
+              root,
+              fullDatesArray,
+              additionalChartData: props.additionalChartData,
+              comparingMode,
+              isNewDates: false,
+              historicMode,
+              showForecast,
+              setMoistAddCommentModal,
+              moistMainAddCommentItemShowed,
+              moistMainComments: newCommentData,
+              updateCommentsArray,
+              updateChart,
+              isMoistCommentsShowed,
+              setMoistMainTabularDataColors
+            })
+          } else {
+            createMainChart({
+              data: props.chartData,
+              userId: props.userId,
+              root,
+              fullDatesArray,
+              additionalChartData: props.additionalChartData,
+              comparingMode,
+              isNewDates: false,
+              historicMode,
+              showForecast,
+              setMoistAddCommentModal,
+              moistMainAddCommentItemShowed,
+              moistMainComments: newCommentData,
+              updateCommentsArray,
+              updateChart,
+              isMoistCommentsShowed,
+              setMoistMainTabularDataColors
+            })
+          }
         }
       } else if (updateReason === 'toggleComments') {
-        createMainChart(
-          currentChartData, props.userId, root, props.isMobile,
-          fullDatesArray, props.additionalChartData, comparingMode,
-          false, historicMode, showForecast,
-          setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments,
-          updateCommentsArray, updateChart, isMoistCommentsShowed
-        )
+        createMainChart({
+          data: currentChartData,
+          userId: props.userId,
+          root,
+          fullDatesArray,
+          additionalChartData: props.additionalChartData,
+          comparingMode,
+          isNewDates: false,
+          historicMode,
+          showForecast,
+          setMoistAddCommentModal,
+          moistMainAddCommentItemShowed,
+          moistMainComments,
+          updateCommentsArray,
+          updateChart,
+          isMoistCommentsShowed
+        })
       } else if (updateReason === 'comparingMode') {
-        if (currentChartData) {
-          createMainChart(
-            currentChartData, props.userId, root, props.isMobile,
-            fullDatesArray, props.additionalChartData, comparingMode,
-            false, historicMode, showForecast,
-            setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments,
-            updateCommentsArray, updateChart, isMoistCommentsShowed
-          )
+        if (currentChartData.length !== 0) {
+          createMainChart({
+            data: currentChartData,
+            userId: props.userId,
+            root,
+            fullDatesArray,
+            additionalChartData: props.additionalChartData,
+            comparingMode,
+            isNewDates: false,
+            historicMode,
+            showForecast,
+            setMoistAddCommentModal,
+            moistMainAddCommentItemShowed,
+            moistMainComments,
+            updateCommentsArray,
+            updateChart,
+            isMoistCommentsShowed
+          })
         } else {
-          if (currentChartData) {
-            createMainChart(
-              currentChartData, props.userId, root, props.isMobile,
-              fullDatesArray, props.additionalChartData, comparingMode,
-              false, historicMode, showForecast,
-              setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments,
-              updateCommentsArray, updateChart, isMoistCommentsShowed
-            )
-          } else {
-            createMainChart(
-              props.chartData, props.userId, root, props.isMobile,
-              fullDatesArray, props.additionalChartData, comparingMode,
-              false, historicMode, showForecast,
-              setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments,
-              updateCommentsArray, updateChart, isMoistCommentsShowed
-            )
-          }
+          createMainChart({
+            data: props.chartData,
+            userId: props.userId,
+            root,
+            fullDatesArray,
+            additionalChartData: props.additionalChartData,
+            comparingMode,
+            isNewDates: false,
+            historicMode,
+            showForecast,
+            setMoistAddCommentModal,
+            moistMainAddCommentItemShowed,
+            moistMainComments,
+            updateCommentsArray,
+            updateChart,
+            isMoistCommentsShowed
+          })
         }
       } else if (updateReason === 'dates') {
         const newMoistChartData = await getMoistMainChartData(props.sensorId, historicMode, days, endDateDays)
         setCurrentChartData(newMoistChartData.data.data)
-        createMainChart(
-          newMoistChartData.data.data, props.userId, root, props.isMobile,
-          fullDatesArray, props.additionalChartData, comparingMode,
-          true, historicMode, compareDates(endDatetime),
-          setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments,
-          updateCommentsArray, updateChart, isMoistCommentsShowed
-        )
+        createMainChart({
+          data: newMoistChartData.data.data,
+          userId: props.userId,
+          root,
+          fullDatesArray,
+          additionalChartData: props.additionalChartData,
+          comparingMode,
+          isNewDates: true,
+          historicMode,
+          showForecast: compareDates(endDatetime),
+          setMoistAddCommentModal,
+          moistMainAddCommentItemShowed,
+          moistMainComments,
+          updateCommentsArray,
+          updateChart,
+          isMoistCommentsShowed
+        })
       } else if (updateReason === 'historic') {
         const historicData = await getMoistMainChartData(props.sensorId, historicMode, currentDates[0], currentDates[1])
-        createMainChart(
-          historicData.data.data, props.userId, root, props.isMobile,
-          fullDatesArray, props.additionalChartData, comparingMode,
-          false, historicMode, showForecast,
-          setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments,
-          props.userId, updateCommentsArray, updateChart, isMoistCommentsShowed
-        )
+        createMainChart({
+          data: historicData.data.data,
+          userId: props.userId,
+          root,
+          fullDatesArray,
+          additionalChartData: props.additionalChartData,
+          comparingMode,
+          isNewDates: false,
+          historicMode,
+          showForecast,
+          setMoistAddCommentModal,
+          moistMainAddCommentItemShowed,
+          moistMainComments,
+          updateCommentsArray,
+          updateChart,
+          isMoistCommentsShowed
+        })
       } else {
-        if (currentChartData) {
-          createMainChart(
-            currentChartData, props.userId, root, props.isMobile,
-            fullDatesArray, props.additionalChartData, comparingMode,
-            false, historicMode, showForecast,
-            setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments,
-            updateCommentsArray, updateChart, isMoistCommentsShowed, setMoistMainTabularDataColors
-          )
+        if (currentChartData.length !== 0) {
+          createMainChart({
+            data: currentChartData,
+            userId: props.userId,
+            root,
+            fullDatesArray,
+            additionalChartData: props.additionalChartData,
+            comparingMode,
+            isNewDates: false,
+            historicMode,
+            showForecast,
+            setMoistAddCommentModal,
+            moistMainAddCommentItemShowed,
+            moistMainComments,
+            updateCommentsArray,
+            updateChart,
+            isMoistCommentsShowed,
+            setMoistMainTabularDataColors,
+            smallScreen,
+            middleScreen,
+            largeScreen
+          })
         } else {
-          createMainChart(
-            props.chartData, props.userId, root, props.isMobile,
-            fullDatesArray, props.additionalChartData, comparingMode,
-            false, historicMode, showForecast,
-            setMoistAddCommentModal, moistMainAddCommentItemShowed, moistMainComments,
-            updateCommentsArray, updateChart, isMoistCommentsShowed, setMoistMainTabularDataColors
-          )
+          createMainChart({
+            data: props.chartData,
+            userId: props.userId,
+            root,
+            fullDatesArray,
+            additionalChartData: props.additionalChartData,
+            comparingMode,
+            isNewDates: false,
+            historicMode,
+            showForecast,
+            setMoistAddCommentModal,
+            moistMainAddCommentItemShowed,
+            moistMainComments,
+            updateCommentsArray,
+            updateChart,
+            isMoistCommentsShowed,
+            setMoistMainTabularDataColors,
+            smallScreen,
+            middleScreen,
+            largeScreen
+          })
         }
       }
     } else if (typeOfChart === 'sum') {
@@ -407,13 +502,9 @@ export const MoistChartPage = (props: any) => {
   useEffect(() => {
     setCurrentChartData(props.chartData)
     getIrrigationDates(setIsIrrigationDataIsLoading, setIsIrrigationButtons, props.userId, props.sensorId, setIrrigationDates, setFullDatesArray, startDate, setDisablePrevButton)
-    handleResize(props.setIsMobile)
     updateChart('main', 'comments')
     updateChart('sum', 'comments')
   }, []);
-  useEffect(() => {
-    updateChart('main')
-  }, [props.isMobile]);
   useEffect(() => {
     if (fullDatesArray) {
       updateChart('main')
@@ -426,34 +517,6 @@ export const MoistChartPage = (props: any) => {
     updateChart('main', 'historic')
     updateChart('sum', 'historic')
   }, [historicMode]);
-  useEffect(() => {
-    const updateChartsWithNewDates = async (days?: any, endDateDays?: any, startDatetime?: any, endDatetime?: any) => {
-      if (startDatetime && endDatetime) {
-        if (endDatetime < new Date(fullDatesArray[0]).getTime()) {
-          setDisableNextButton(false)
-        }
-        if (endDatetime >= new Date(fullDatesArray[0]).getTime()) {
-          setDisableNextButton(true)
-        }
-        if (startDatetime < new Date(fullDatesArray[fullDatesArray.length - 1]).getTime()) {
-          setDisablePrevButton(true)
-        }
-        if (startDatetime >= new Date(fullDatesArray[fullDatesArray.length - 1]).getTime()) {
-          setDisablePrevButton(false)
-        }
-      }
-
-      if (endDatetime) {
-        setShowForecast(compareDates(endDatetime))
-      }
-
-      updateChart('main', 'dates', days, endDateDays, endDatetime)
-      updateChart('sum', 'dates', days, endDateDays, endDatetime)
-      updateChart('soilTemp', 'dates', days, endDateDays, endDatetime)
-      updateChart('battery', 'dates', days, endDateDays, endDatetime)
-    }
-    updateChartsWithNewDates(currentDates[0], currentDates[1], currentDates[2], currentDates[3])
-  }, [currentDates, props.isMobile]);
   useEffect(() => {
     if (moistMainAddCommentItemShowed === 'comments') {
       updateChart('main', 'comments')
@@ -488,40 +551,29 @@ export const MoistChartPage = (props: any) => {
     updateChart('soilTemp')
     updateChart('battery')
   }, [isMoistCommentsShowed]);
+  const handleResize = useCallback(() => {
+    handleResizeForChartLegend({
+      additionalChartData: props.additionalChartData,
+      smallScreen,
+      setSmallScreen,
+      middleScreen,
+      setMiddleScreen,
+      largeScreen,
+      setLargeScreen
+    })
+  }, [smallScreen, middleScreen, largeScreen])
+  useEffect(() => {
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => {
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [handleResize])
+  useEffect(() => {
+    updateChart('main')
+  }, [smallScreen, middleScreen, largeScreen]);
 
   let chartAdditionalClass: any
-
-  if (props.isMobile) {
-    if (props.additionalChartData.linesCount > 3 && props.additionalChartData.linesCount <= 6) {
-      chartAdditionalClass = s.chartLinesSix
-    } else if (props.additionalChartData.linesCount > 6 && props.additionalChartData.linesCount <= 9) {
-      chartAdditionalClass = s.chartLinesNine
-    } else if (props.additionalChartData.linesCount > 9) {
-      chartAdditionalClass = s.chartLinesMoreThanNine
-    }
-  }
-  const getSetAddCommentItemShowed = (type: string) => {
-    if (type === 'main') {
-      return setMoistMainAddCommentItemShowed
-    } else if (type === 'soilTemp') {
-      return setMoistSoilTempAddCommentItemShowed
-    } else if (type === 'sum') {
-      return setMoistSumAddCommentItemShowed
-    } else if (type === 'battery') {
-      return setMoistBatteryAddCommentItemShowed
-    }
-  }
-  const getAddCommentItemShowed = (type: string) => {
-    if (type === 'main') {
-      return moistMainAddCommentItemShowed
-    } else if (type === 'soilTemp') {
-      return moistSoilTempAddCommentItemShowed
-    } else if (type === 'sum') {
-      return moistSumAddCommentItemShowed
-    } else if (type === 'battery') {
-      return moistBatteryAddCommentItemShowed
-    }
-  }
 
   return (
     <IonContent className={s.container}>
@@ -530,7 +582,6 @@ export const MoistChartPage = (props: any) => {
           userId={props.userId}
           sensorId={props.sensorId}
           root={root}
-          isMobile={props.isMobile}
           fullDatesArray={fullDatesArray}
           setCurrentChartData={setCurrentChartData}
           setDisableNextButton={setDisableNextButton}
@@ -546,7 +597,6 @@ export const MoistChartPage = (props: any) => {
           batteryRoot={batteryRoot}
           sumRoot={sumRoot}
           setCurrentDates={setCurrentDates}
-          currentDates={currentDates}
           setComparingMode={setComparingMode}
           setHistoricMode={setHistoricMode}
           setAlarm={props.setAlarm}
@@ -555,6 +605,9 @@ export const MoistChartPage = (props: any) => {
           updateChart={updateChart}
           setIsCommentsShowed={setIsMoistCommentsShowed}
           isCommentsShowed={isMoistCommentsShowed}
+          dateDifferenceInDays={dateDifferenceInDays}
+          setDateDifferenceInDays={setDateDifferenceInDays}
+          setShowForecast={setShowForecast}
         />
         <div>
           <div className='ion-margin-top' style={{display: soilTempChartShowed ? 'block' : 'none'}}>
@@ -578,8 +631,8 @@ export const MoistChartPage = (props: any) => {
                 addCommentModal={moistAddCommentModal.date}
                 setMoistAddCommentModal={setMoistAddCommentModal}
                 setMoistMainComments={setMoistMainComments}
-                setAddCommentItemShowed={getSetAddCommentItemShowed(moistAddCommentModal.type)}
-                addCommentItemShowed={getAddCommentItemShowed(moistAddCommentModal.type)}
+                setAddCommentItemShowed={getSetAddCommentItemShowed(moistAddCommentModal.type, setMoistMainAddCommentItemShowed, setMoistSoilTempAddCommentItemShowed, setMoistSumAddCommentItemShowed, setMoistBatteryAddCommentItemShowed)}
+                addCommentItemShowed={getAddCommentItemShowed(moistAddCommentModal.type, moistMainAddCommentItemShowed, moistSoilTempAddCommentItemShowed, moistSumAddCommentItemShowed, moistBatteryAddCommentItemShowed)}
                 setAddCommentModal={setMoistAddCommentModal}
                 updateChart={updateChart}
             />}
@@ -655,14 +708,16 @@ export const MoistChartPage = (props: any) => {
             sensorId={props.sensorId}
             setCurrentChartData={setCurrentChartData}
             root={root}
-            isMobile={props.isMobile}
             fullDatesArray={fullDatesArray}
             setStartDate={setStartDate}
             setEndDate={setEndDate}
             additionalChartData={props.additionalChartData}
             batteryRoot={batteryRoot}
             sumRoot={sumRoot}
+            setDateDifferenceInDays={setDateDifferenceInDays}
             setCurrentDates={setCurrentDates}
+            setShowForecast={setShowForecast}
+            updateChart={updateChart}
           />
         </div>
         <div>

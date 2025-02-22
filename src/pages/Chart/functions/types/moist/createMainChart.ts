@@ -4,39 +4,23 @@ import * as am5xy from "@amcharts/amcharts5/xy";
 import {removeComment} from "../../../components/AddComment/data/removeComment";
 import {updateCommentDate} from "../../../components/AddComment/data/updateCommentDate";
 import login from "../../../../Login";
+import {logoFacebook} from "ionicons/icons";
 
 let startDateForZooming: any;
 let endDateForZooming: any;
 
-export const createMainChart = (
-  props: any,
-  userId: any,
-  root: any,
-  isMobile: any,
-  fullDatesArray: any,
-  additionalChartData: any,
-  comparingMode: boolean,
-  isNewDates: boolean,
-  historicMode: boolean,
-  showForecast: boolean,
-  setMoistAddCommentModal: any,
-  moistMainAddCommentItemShowed: any,
-  moistMainComments: any,
-  updateCommentsArray: any,
-  updateChart: any,
-  isMoistCommentsShowed: any,
-  setMainTabularDataColors?: any
-): void => {
-  const chartDataWrapper = props;
-  if (root.current) {
-    root.current.dispose();
-    root.current = null;
+export const createMainChart = (props: any): void => {
+  const chartDataWrapper = props.data;
+  const colors = "#FF6600 #FCD202 #B0DE09 #0D8ECF #2A0CD0 #CD0D74 #CC0000 #00CC00 #0000CC #DDDDDD #999999 #333333".split(" ");
+  if (props.root.current) {
+    props.root.current.dispose();
+    props.root.current = null;
   }
 
-  if (!root.current) {
-    root.current = am5.Root.new("mainChart");
+  if (!props.root.current) {
+    props.root.current = am5.Root.new("mainChart");
 
-    const myTheme = am5.Theme.new(root.current);
+    const myTheme = am5.Theme.new(props.root.current);
 
     myTheme.rule("AxisLabel", ["minor"]).setAll({
       dy: 1
@@ -50,34 +34,34 @@ export const createMainChart = (
       strokeOpacity: 0.05
     });
 
-    root.current.setThemes([
-      am5themes_Animated.new(root.current),
+    props.root.current.setThemes([
+      am5themes_Animated.new(props.root.current),
       myTheme
     ]);
 
-    let chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
-      wheelY: comparingMode ? undefined : "zoomX",
-      layout: isMobile ? root.current.verticalLayout : root.current.horizontalLayout,
+    let chart = props.root.current.container.children.push(am5xy.XYChart.new(props.root.current, {
+      wheelY: props.comparingMode ? undefined : "zoomX",
+      layout: props.root.current.verticalLayout,
       maxTooltipDistance: undefined,
     }));
 
-    let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root.current, {
+    let xAxis = chart.xAxes.push(am5xy.DateAxis.new(props.root.current, {
       maxDeviation: 0.2,
       baseInterval: {
         timeUnit: "minute",
         count: 20
       },
-      renderer: am5xy.AxisRendererX.new(root.current, {
+      renderer: am5xy.AxisRendererX.new(props.root.current, {
         opposite: true,
         minorGridEnabled: true
       }),
-      tooltip: am5.Tooltip.new(root.current, {
+      tooltip: am5.Tooltip.new(props.root.current, {
         forceHidden: true
       }),
     }));
 
-    let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
-      renderer: am5xy.AxisRendererY.new(root.current, {})
+    let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(props.root.current, {
+      renderer: am5xy.AxisRendererY.new(props.root.current, {})
     }));
 
     yAxis.set('visible', false);
@@ -106,10 +90,10 @@ export const createMainChart = (
     let listOfSeries = [
       {name: 'ordinarySeries', prefix: ''}
     ]
-    if (historicMode) {
+    if (props.historicMode) {
       listOfSeries.push({name: 'historicSeries', prefix: 'H_'})
     }
-    if (showForecast) {
+    if (props.historicMode && props.showForecast) {
       listOfSeries.push({name: 'futureSeries', prefix: 'P_'})
     }
 
@@ -119,9 +103,22 @@ export const createMainChart = (
     let seriesColors: any = []
     listOfSeries.map((seriesItem: any, index: number) => {
       let count = 4;
-      for (var i = 0; i < additionalChartData.linesCount; i++) {
+      for (var i = 0; i < props.additionalChartData.linesCount; i++) {
         let name = count + ' inch';
-        series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
+        let tooltip: any
+        if (seriesItem.name === 'ordinarySeries') {
+          tooltip = am5.Tooltip.new(props.root.current, {
+            pointerOrientation: "horizontal",
+            getFillFromSprite: false,
+            labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + " = {valueToShow}%",
+          })
+        }
+        if (tooltip) {
+          tooltip.get("background").setAll({
+            fill: am5.color(colors[i]),
+          });
+        }
+        series = chart.series.push(am5xy.SmoothedXLineSeries.new(props.root.current, {
           name: name,
           xAxis: xAxis,
           yAxis: yAxis,
@@ -129,12 +126,14 @@ export const createMainChart = (
           valueXField: "date",
           legendValueText: "{valueY}",
           tension: 0.5,
-          tooltip: seriesItem.name === 'ordinarySeries' ? am5.Tooltip.new(root.current, {
-            pointerOrientation: "horizontal",
-            labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + " = {valueToShow}%",
-          }) : undefined,
+          tooltip: tooltip,
           snapTooltip: true,
+          strokeWidth: 5,
         }));
+        series.set('stroke', colors[i])
+        series.strokes.template.setAll({
+          strokeWidth: 2,
+        });
 
         if (series.get("tooltip")) {
           series.get("tooltip").label.setAll({
@@ -173,15 +172,15 @@ export const createMainChart = (
       }
     })
 
-    if (setMainTabularDataColors) {
+    if (props.setMainTabularDataColors) {
       let colors: any[] = []
       seriesColors.map((seriesColor: any) => {
-        colors.push([seriesColor.r, seriesColor.g, seriesColor.b])
+        colors.push(seriesColor)
       })
-      setMainTabularDataColors(colors)
+      props.setMainTabularDataColors(colors)
     }
 
-    if (historicMode) {
+    if (props.historicMode) {
       let seriesRangeDataItem = xAxis.makeDataItem({
         value: new Date().getTime()
       });
@@ -203,7 +202,7 @@ export const createMainChart = (
       })
     }
 
-    fullDatesArray.map((date: any) => {
+    props.fullDatesArray.map((date: any) => {
       let seriesRangeDataItem = xAxis.makeDataItem({
         value: new Date(date).getTime()
       });
@@ -216,7 +215,7 @@ export const createMainChart = (
       });
     });
 
-    if (startDateForZooming && endDateForZooming && !isNewDates) {
+    if (startDateForZooming && endDateForZooming && !props.isNewDates) {
       seriesArray.map((mappedSeries: any) => {
         mappedSeries.events.once("datavalidated", function (event: any) {
           event.target.get("xAxis").zoomToDates(startDateForZooming, endDateForZooming, 0);
@@ -226,21 +225,21 @@ export const createMainChart = (
 
 // Cursor
     let cursorBehavior: any
-    if (comparingMode) {
+    if (props.comparingMode) {
       cursorBehavior = 'selectX'
-    } else if (moistMainAddCommentItemShowed) {
+    } else if (props.moistMainAddCommentItemShowed) {
       cursorBehavior = 'zoomX'
     } else {
       cursorBehavior = 'zoomX'
     }
 
-    let cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
+    let cursor = chart.set("cursor", am5xy.XYCursor.new(props.root.current, {
       behavior: cursorBehavior,
       xAxis: xAxis
     }));
 
     cursor.selection.setAll({
-      fill: comparingMode ? am5.color(0xfb6909) : am5.color(0xff0000),
+      fill: props.comparingMode ? am5.color(0xfb6909) : am5.color(0xff0000),
       fillOpacity: 0.2,
     });
 
@@ -253,7 +252,7 @@ export const createMainChart = (
     cursor.lineY.set("visible", false);
 
 // Add Comments
-    if (moistMainAddCommentItemShowed) {
+    if (props.moistMainAddCommentItemShowed) {
       chart.events.on("click", (ev: any) => {
         let xAxis = chart.xAxes.getIndex(0);
 
@@ -261,10 +260,10 @@ export const createMainChart = (
 
         let clickDate = xAxis.positionToDate(xPosition);
 
-        setMoistAddCommentModal({date: clickDate, type: 'main'})
+        props.setMoistAddCommentModal({date: clickDate, type: 'main'})
       });
     }
-    if (moistMainComments && isMoistCommentsShowed) {
+    if (props.moistMainComments && props.isMoistCommentsShowed) {
       const colors: any = {
         'Advisory': 'F08080',
         'Plant Health': '90EE90',
@@ -286,15 +285,15 @@ export const createMainChart = (
 
       let labelsArray: any[] = []
 
-      moistMainComments.forEach((moistMainComment: any) => {
+      props.moistMainComments.forEach((moistMainComment: any) => {
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
         const rangeDataItem = xAxis.makeDataItem({})
         xAxis.createAxisRange(rangeDataItem)
         let isContainerDragging: boolean = false
-        const container = am5.Container.new(root.current, {
+        const container = am5.Container.new(props.root.current, {
           centerX: am5.p50,
           draggable: true,
-          layout: root.verticalLayout,
+          layout: props.root.verticalLayout,
           dy: 4,
         })
         container.adapters.add("y", function () {
@@ -314,17 +313,17 @@ export const createMainChart = (
           isContainerDragging = false
           cursor.set('behavior', 'zoomX')
           const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
-          const newDate = root.current.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
+          const newDate = props.root.current.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
           new Promise((resolve: any) => {
-            updateCommentDate(moistMainComment.id, newDate, userId, resolve)
+            updateCommentDate(moistMainComment.id, newDate, props.userId, resolve)
           }).then(() => {
-            updateCommentsArray('M')
+            props.updateCommentsArray('M')
           })
         })
         xAxis.topGridContainer.children.push(container)
         rangeDataItem.set(
           "bullet",
-          am5xy.AxisBullet.new(root.current, {
+          am5xy.AxisBullet.new(props.root.current, {
             sprite: container,
           })
         )
@@ -335,10 +334,10 @@ export const createMainChart = (
           strokeWidth: 6,
           location: 0,
         })
-        container.set("background", am5.RoundedRectangle.new(root.current, {fill: am5.color(commentColor)}))
+        container.set("background", am5.RoundedRectangle.new(props.root.current, {fill: am5.color(commentColor)}))
 
         const label = container.children.push(
-          am5.Label.new(root.current, {
+          am5.Label.new(props.root.current, {
             text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
             fill: am5.color(0x000000),
             maxWidth: 150,
@@ -353,25 +352,25 @@ export const createMainChart = (
         );
 
         labelsArray.push(label);
-        let buttonsContainer = label.children.push(am5.Container.new(root.current, {
-          layout: root.current.horizontalLayout,
+        let buttonsContainer = label.children.push(am5.Container.new(props.root.current, {
+          layout: props.root.current.horizontalLayout,
           x: am5.p100,
           y: 0,
           centerX: am5.p100,
           paddingTop: 3,
           paddingRight: 3,
         }));
-        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        let dragButton = buttonsContainer.children.push(am5.Button.new(props.root.current, {
           width: 20,
           height: 20,
           cursorOverStyle: "ew-resize",
-          background: am5.Rectangle.new(root.current, {
+          background: am5.Rectangle.new(props.root.current, {
             fill: am5.color(0xffffff),
             fillOpacity: 0,
           }),
           dx: -20
         }));
-        dragButton.children.push(am5.Picture.new(root.current, {
+        dragButton.children.push(am5.Picture.new(props.root.current, {
           src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
           width: 12,
           height: 12,
@@ -381,16 +380,16 @@ export const createMainChart = (
         dragButton.events.on('pointerdown', () => {
           isContainerDragging = true
         })
-        let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        let closeButton = buttonsContainer.children.push(am5.Button.new(props.root.current, {
           width: 20,
           height: 20,
           cursorOverStyle: "pointer",
-          background: am5.Rectangle.new(root.current, {
+          background: am5.Rectangle.new(props.root.current, {
             fill: am5.color(0xffffff),
             fillOpacity: 0,
           }),
         }));
-        closeButton.children.push(am5.Picture.new(root.current, {
+        closeButton.children.push(am5.Picture.new(props.root.current, {
           src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
           width: 12,
           height: 12,
@@ -400,10 +399,10 @@ export const createMainChart = (
         closeButton.events.on('click', () => {
           if (window.confirm('Are you sure want to delete this message?')) {
             new Promise((resolve: any) => {
-              removeComment(moistMainComment.id, userId, resolve)
+              removeComment(moistMainComment.id, props.userId, resolve)
             }).then(() => {
-              updateCommentsArray('M')
-              updateChart('comments')
+              props.updateCommentsArray('M')
+              props.updateChart('comments')
               label.dispose()
               rangeDataItem.dispose()
             })
@@ -418,10 +417,11 @@ export const createMainChart = (
             value = xAxis.positionToValue(position)
           }
 
-          label.set("text", `${root.current.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`)
+          label.set("text", `${props.root.current.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`)
 
           rangeDataItem.set("value", value)
         }
+
         function positionLabels() {
           let labels = labelsArray;
 
@@ -478,10 +478,10 @@ export const createMainChart = (
           const h2 = label2.height();
 
           return !(x1 + w1 < x2 || x2 + w2 < x1 ||
-                  y1 + h1 < y2 || y2 + h2 < y1);
+            y1 + h1 < y2 || y2 + h2 < y1);
         }
 
-        root.current.events.on("frameended", positionLabels)
+        props.root.current.events.on("frameended", positionLabels)
 
         series.events.on("datavalidated", () => {
           const commentDate = new Date(moistMainComment.key).getTime()
@@ -492,7 +492,7 @@ export const createMainChart = (
     }
 
 // Comparing Mode
-    if (!comparingMode) {
+    if (!props.comparingMode) {
       xAxis.onPrivate("selectionMin", function (value: any) {
         startDateForZooming = new Date(value)
       });
@@ -500,7 +500,7 @@ export const createMainChart = (
         endDateForZooming = new Date(value)
       });
     }
-    if (comparingMode) {
+    if (props.comparingMode) {
       cursor.setAll({
         alwaysShow: true
       })
@@ -509,7 +509,7 @@ export const createMainChart = (
     let tooltips: any = []
     let selectionLabel: any
     cursor.events.on('selectended', function (event: any) {
-      if (comparingMode) {
+      if (props.comparingMode) {
         let selection = event.target;
         const startSelectionPosition = event.target.getPrivate("downPositionX")
         const endSelectionPosition = event.target.getPrivate("positionX")
@@ -535,25 +535,47 @@ export const createMainChart = (
           selectionTime = selectionDays + ' days (' + selectionHours + ' hours)'
         }
 
-        const selectionX = (startSelectionPosition + endSelectionPosition) / 2;
+        let newEndSelectionPosition
+        if (startSelectionPosition > endSelectionPosition) {
+          if (endSelectionPosition < 0) {
+            newEndSelectionPosition = 0
+          } else {
+            newEndSelectionPosition = endSelectionPosition
+          }
+        } else {
+          if (endSelectionPosition > 1) {
+            newEndSelectionPosition = 1
+          } else {
+            newEndSelectionPosition = endSelectionPosition
+          }
+        }
+        const selectionX = (startSelectionPosition + newEndSelectionPosition) / 2;
         const selectionDate = xAxis.positionToDate(selectionX);
         const selectionPixelX = xAxis.valueToPosition(selectionDate.getTime()) * chart.plotContainer.width();
         const selectionPixelY = 20;
-        selectionLabel = chart.plotContainer.children.push(am5.Label.new(root.current, {
+        const labelWidth = selectionTime.length * 6;
+        const plotWidth = chart.plotContainer.width();
+
+// Adjust x position to keep label within bounds
+        let adjustedX = Math.min(
+          Math.max(labelWidth/2, selectionPixelX),
+          plotWidth - labelWidth/2
+        );
+        selectionLabel = chart.plotContainer.children.push(am5.Label.new(props.root.current, {
           height: 25,
           dy: -25,
           text: selectionTime,
           fontSize: 14,
           textAlign: "center",
           fill: am5.color(0xfb6909),
-          x: selectionPixelX,
+          x: adjustedX,
           y: selectionPixelY,
           centerX: am5.percent(50),
           centerY: am5.percent(100),
-          background: am5.Rectangle.new(root.current, {
+          background: am5.Rectangle.new(props.root.current, {
             fill: am5.color(0xffffff),
             fillOpacity: 1
-          })
+          }),
         }));
 
         // Selection Data
@@ -561,7 +583,6 @@ export const createMainChart = (
 
         let x1 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(selection.getPrivate("downPositionX"))).getTime();
         let x2 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(selection.getPrivate("positionX"))).getTime();
-
         chart.series.each(function (series: any) {
           let dataItemStart = series.dataItems.find(function (dataItem: any) {
             if (x1 < x2) {
@@ -571,22 +592,23 @@ export const createMainChart = (
             }
           });
 
-          let dataItemEnd = series.dataItems.find(function (dataItem: any) {
+          let dataItemEnd = series.dataItems.find((dataItem: any) => {
             if (x1 < x2) {
               return dataItem.get("valueX") >= x2;
             } else {
               return dataItem.get("valueX") >= x1;
             }
           });
-
+          if (!dataItemEnd) {
+            dataItemEnd = series.dataItems.at(-1)
+          }
           if (dataItemStart && dataItemEnd) {
             const fixedDataItemStart = parseFloat(dataItemStart.get('valueY').toFixed(1))
             const fixedDataItemEnd = parseFloat(dataItemEnd.get('valueY').toFixed(1))
             const difference = (fixedDataItemEnd - fixedDataItemStart).toFixed(1)
 
             const labelText = fixedDataItemStart + '%' + ' - ' + fixedDataItemEnd + '%' + '\n' + difference + '%' + ' / ' + selectionTime
-
-            let tooltip: any = am5.Tooltip.new(root.current, {
+            let tooltip: any = am5.Tooltip.new(props.root.current, {
               labelText: labelText,
               tooltipPosition: "fixed",
               pointerOrientation: "left",
@@ -595,7 +617,8 @@ export const createMainChart = (
               x: series.get("tooltip")._settings.x,
               y: series.get("tooltip")._settings.y,
               bounds: series.get("tooltip")._settings.bounds,
-              layer: 30
+              layer: 30,
+              getFillFromSprite: false,
             });
             tooltip.get("background").setAll({
               fill: series.get("tooltip").get("background").get("fill"),
@@ -618,7 +641,7 @@ export const createMainChart = (
     })
 
     const destroyTooltipsAndLabels = () => {
-      if (comparingMode) {
+      if (props.comparingMode) {
         tooltips.map((tooltip: any) => {
           tooltip.set('forceHidden', true)
           selectionLabel.set('forceHidden', true)
@@ -633,28 +656,47 @@ export const createMainChart = (
     })
 
 // Legend
-    let legendHeight: number
-    if (additionalChartData.linesCount <= 3) {
-      legendHeight = 80
-    } else if (additionalChartData.linesCount > 3 && additionalChartData.linesCount <= 6) {
-      legendHeight = 160
-    } else if (additionalChartData.linesCount > 6 && additionalChartData.linesCount <= 9) {
-      legendHeight = 260
-    } else {
-      legendHeight = 350
+    const legend = chart.children.push(
+      am5.Legend.new(props.root.current, {
+        centerX: am5.percent(50),
+        x: am5.percent(50),
+        layout: props.root.current.horizontalLayout,
+        marginTop: 15,
+      }),
+    )
+    if (props.additionalChartData.linesCount > 3 && props.additionalChartData.linesCount <= 6) {
+      if (props.smallScreen) {
+        legend.set("layout", props.root.current.verticalLayout)
+        legend.set("x", am5.percent(5))
+      }
+    } else if (props.additionalChartData.linesCount > 6 && props.additionalChartData.linesCount <= 9) {
+      if (props.middleScreen) {
+        legend.set("layout", props.root.current.verticalLayout)
+        legend.set("x", am5.percent(5))
+      }
+    } else if (props.additionalChartData.linesCount > 9) {
+      if (props.largeScreen) {
+        legend.set("layout", props.root.current.verticalLayout)
+        legend.set("x", am5.percent(5))
+      }
     }
-    let legend = chart.children.push(am5.Legend.new(root.current, {
-      width: 200,
-      paddingLeft: isMobile ? -15 : 15,
-      height: legendHeight
-    }));
 
-    legend.itemContainers.template.set("width", am5.p100);
-    legend.valueLabels.template.setAll({
-      width: am5.p100,
-      textAlign: "right"
-    });
-    legend.data.setAll(ordinarySeriesArray);
+    legend.itemContainers.template.setAll({
+      paddingTop: 1,
+      paddingBottom: 1,
+      paddingLeft: 5,
+      paddingRight: 5,
+    })
+
+    legend.labels.template.setAll({
+      fontSize: 13,
+      fontWeight: "400",
+    })
+
+    // Remove value labels
+    legend.valueLabels.template.set("forceHidden", true)
+
+    legend.data.setAll(ordinarySeriesArray)
 
     chart.appear(1000, 100);
   }

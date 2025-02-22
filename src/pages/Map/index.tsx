@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import s from './style.module.css';
 import {
   IonPage,
   IonContent, useIonToast
@@ -20,6 +19,7 @@ import {createTempChartForOverlay} from "./functions/types/temp/createTempChartF
 import {CollisionResolver} from "./components/CollisionResolver";
 import {initializeValveCustomOverlay} from "./components/types/valve/ValveCustomOverlay";
 import {createValveChartForOverlay} from "./functions/types/valve/createValveChartForOverlay";
+import s from './style.module.css';
 
 interface MainProps {
   page: any
@@ -374,11 +374,9 @@ const MapPage: React.FC<MainProps> = (props) => {
   useEffect(() => {
     if (activeOverlays.length !== 0 && areBoundsFitted) {
       CollisionResolver.resolve(activeOverlays);
-      const handleResize = (reason: any) => {
-        console.log(reason)
+      const handleResize = () => {
         new Promise((resolve: any) => {
           activeOverlays.map((overlay: any) => {
-            console.log('change to 0')
             overlay.offset = {x: 0, y: 0}
           })
           resolve()
@@ -386,8 +384,8 @@ const MapPage: React.FC<MainProps> = (props) => {
           CollisionResolver.resolve(activeOverlays);
         })
       };
-      window.addEventListener('resize', () => handleResize('resize'));
-      map.addListener('zoom_changed', () => handleResize('zoom'));
+      window.addEventListener('resize', () => handleResize());
+      map.addListener('zoom_changed', () => handleResize());
       return () => {
         window.removeEventListener('resize', handleResize);
         google.maps.event.clearListeners(map, 'zoom_changed');

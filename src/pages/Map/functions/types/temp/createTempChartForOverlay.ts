@@ -7,7 +7,6 @@ const checkOverlay = async (id: string, tempOverlays: any[]): Promise<void> => {
   if (!element) {
     const overlay = tempOverlays.find(tempOverlay => tempOverlay.chartData.id === id);
     if (overlay) {
-      console.log('gonna update overlay', id)
       await overlay.update();
     }
   }

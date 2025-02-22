@@ -107,10 +107,15 @@
   margin-top: 5px;
 }
 
+.topSection_addAlarm {
+  margin-left: 25px;
+}
+
 /*  Datetime Picker  */
 .datetimePicker_wrapper {
   display: flex;
   align-items: center;
+  cursor: auto;
 }
 
 .datetimePicker_container {
@@ -124,7 +129,6 @@
 
 .datetimePicker_container:nth-child(2) {
   margin-left: 10px;
-  margin-right: 20px;
 }
 
 .datetimePicker_wrapperContainer {
@@ -138,6 +142,37 @@
 
 .datetimePicker_modal {
   background: rgba(0, 0, 0, 0.2);
+}
+
+.datetimePicker_tabs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.datetimePicker_tabsInput {
+  max-width: 50px;
+  min-width: 50px;
+  --background: #fff;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.datetimePicker_segment {
+  max-width: 140px;
+}
+
+.datetimePicker_segmentButton {
+  min-width: 70px !important;
+}
+
+.datetimePicker_calendars {
+  display: flex;
+  align-items: center;
+}
+
+.datetimePicker_updateButton {
+  margin: 0 0 0 20px;
 }
 
 /*  Alarm  */
@@ -263,9 +298,23 @@
   height: 100%;
 }
 
-@media only screen and (max-width: 850px) {
+@media only screen and (max-width: 950px) {
   .topSection_mainContainer {
     max-width: 95vw;
+  }
+}
+
+@media (max-width: 800px) {
+  .topSection_wrapper {
+    display: block;
+  }
+
+  .topSection_addAlarm {
+    margin-left: 0;
+  }
+
+  .topSection_timeItem {
+    display: inline-block;
   }
 }
 
@@ -274,9 +323,23 @@
     display: block;
   }
 
-  .topSection_tempWxetToggle {
-    margin-left: 0;
+  .topSection_timeItem {
+    display: block;
+    width: 500px;
+    --padding-start: 0;
+    --padding-bottom: 10px
+  }
+
+  .datetimePicker_wrapperContainer {
+    display: block;
+  }
+
+  .datetimePicker_calendars {
     margin-top: 10px;
+  }
+
+  .datetimePicker_wrapper {
+    align-items: flex-end;
   }
 
   /*.header_valveButtons {*/
@@ -285,11 +348,17 @@
 }
 
 @media only screen and (max-width: 515px) {
-  .topSection_moistTopSectionItem {
+  .topSection_moistTopSectionItem, .topSection_timeItem {
     width: 300px;
   }
-  .topSection_wrapper {
+
+  .datetimePicker_calendars {
     display: block;
+  }
+
+  .datetimePicker_container:nth-child(2) {
+    margin-left: 0;
+    margin-top: 10px;
   }
 }
 
@@ -297,15 +366,39 @@
   .alarm_Container {
     width: 290px;
   }
+
   .datetimePicker_wrapperContainer {
     display: block;
   }
-  .datetimePicker_container:nth-child(2) {
-    margin-top: 10px;
-    margin-left: 0;
-    margin-bottom: 10px;
-  }
+
   .moistTopSectionContainer {
     display: block;
+  }
+
+  .header_titleText > span {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topSection_nwsForecast {
+    display: block;
+  }
+
+  .topSection_tempWxetInput {
+    margin-left: 0;
+  }
+
+  .topSection_tempWxetToggle {
+    margin-top: 10px;
+  }
+}
+
+@media only screen and (max-width: 360px) {
+  .topSection_tempWxetToggleLeft {
+    display: block;
+  }
+
+  .topSection_tempWxetToggle {
+    margin-left: 0;
   }
 }

@@ -4,7 +4,6 @@ export const getSensorItems = (
   siteName?: string
 ) => {
   const sensorItems: any = [];
-
   siteList.forEach((sensors: any) => {
     if (!siteName || sensors.name === siteName) {
       sensors.layers.forEach((sensor: any) => {
