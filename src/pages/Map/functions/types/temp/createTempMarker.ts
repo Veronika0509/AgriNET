@@ -14,7 +14,6 @@ export const createTempMarker = async (
   tempInvalidChartData: any,
   countTemp: number
 ) => {
-  console.log('prove')
   const exists = tempChartsAmount.some((secondItemTemp: any) => secondItemTemp.id === sensorItem.id);
   if (!exists) {
     const response = await axios.get('https://app.agrinet.us/api/map/temp-data-v2?v=43', {

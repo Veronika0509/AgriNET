@@ -64,12 +64,13 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
         this.offset = { x: 0, y: 0 };
       }
 
-      update(){
-        if (this.div && this.isTempMarkerChartDrawn && this.root) {
-          this.root.render(this.renderContent());
-        }
-
-        this.draw()
+      update() {
+        return new Promise<void>((resolve) => {
+          if (this.div && this.isTempMarkerChartDrawn && this.root) {
+            this.root.render(this.renderContent());
+          }
+          resolve();
+        });
       }
 
       renderContent() {

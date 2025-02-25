@@ -423,7 +423,7 @@ export const MoistChartPage = (props: any) => {
           )
         }
       } else if (updateReason === 'dates') {
-        const newSoilTempChartData = await getSoilTempChartData(props.sensorId, currentDates[0], currentDates[1])
+        const newSoilTempChartData = await getSoilTempChartData(props.sensorId, days, endDateDays)
         createAdditionalChart(
           'soilTemp',
           newSoilTempChartData.data.data,
@@ -482,7 +482,7 @@ export const MoistChartPage = (props: any) => {
           )
         }
       } else if (updateReason === 'dates') {
-        const newBatteryChartData = await getBatteryChartData(props.sensorId, currentDates[0], currentDates[1])
+        const newBatteryChartData = await getBatteryChartData(props.sensorId, days, endDateDays)
         createAdditionalChart(
           'battery', newBatteryChartData.data, batteryRoot,
           setMoistAddCommentModal, updateCommentsArray, moistBatteryAddCommentItemShowed,

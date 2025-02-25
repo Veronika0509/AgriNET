@@ -6,6 +6,13 @@ import {createTempMarker} from "./types/temp/createTempMarker";
 import {createValveMarker} from "./types/valve/createValveMarker";
 
 export const onSiteClick = async (props: any) => {
+
+  props.markers.map((marker: any) => {
+    marker.visible = false
+    marker.setMap(null)
+    marker.infoWindow.close()
+  })
+
   props.setSecondMap(props.sensorsGroupData.name)
   const sensorItems = getSensorItems(undefined, props.siteList, props.groupMarker.title)
   // moist props
@@ -32,7 +39,7 @@ export const onSiteClick = async (props: any) => {
   let valveBoundsArray: any = []
   let valveInvalidChartData: any = []
   const countValve = sensorItems.filter((sensorItem: any) => sensorItem.markerType === 'valve').length;
-  console.log(sensorItems)
+
   sensorItems.map((sensorItem: any) => {
     if (sensorItem.markerType === 'moist-fuel') {
       props.setAmountOfSensors(props.amountOfSensors += 1)
@@ -101,9 +108,8 @@ export const onSiteClick = async (props: any) => {
       sensorItem,
       props.allCoordinatesOfMarkers,
       props.siteList,
-      props.setIsAllCoordinatesOfMarkersAreReady,
+      props.setCoordinatesForFitting,
       props.groupMarker.title
     )
   })
-  props.groupMarker.setMap(null)
 }

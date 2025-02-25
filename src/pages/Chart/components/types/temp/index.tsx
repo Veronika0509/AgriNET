@@ -15,6 +15,8 @@ import {AddCommentButton} from "../../AddComment/components/AddCommentButton";
 import {AddCommentMessage} from "../../AddComment/components/AddCommentMessage";
 import {getComments} from "../../AddComment/data/getComments";
 import AddCommentModal from "../../AddComment/components/AddCommentModal";
+import {compareDates} from "../../../functions/types/moist/compareDates";
+import {formatDate} from "../../../functions/formatDate";
 
 export const TempChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -24,6 +26,7 @@ export const TempChartPage = (props: any) => {
   const [startDate, setStartDate] = useState<string>(initialStartDate);
   const [endDate, setEndDate] = useState<string>(currentDate);
   const [currentDates, setCurrentDates] = useState([])
+  const [dateDifferenceInDays, setDateDifferenceInDays] = React.useState('14');
   const [nwsForecast, setNwsForecast] = useState(false)
   const [nwsForecastDays, setNwsForecastDays] = useState(1)
   const [nwsForecastData, setNwsForecastData] = useState(undefined)
@@ -211,31 +214,17 @@ export const TempChartPage = (props: any) => {
     updateChart('comments')
   }, []);
   useEffect(() => {
-    const updateCharts = async (days?: any, endDateDays?: any, startDatetime?: any, endDatetime?: any) => {
-      function compareDates(targetDateInMillis: any) {
-        const targetDate = new Date(targetDateInMillis);
-        const currentDate = new Date();
-
-        const targetDay = targetDate.getUTCDate();
-        const targetMonth = targetDate.getUTCMonth();
-        const targetYear = targetDate.getUTCFullYear();
-
-        const currentDay = currentDate.getUTCDate();
-        const currentMonth = currentDate.getUTCMonth();
-        const currentYear = currentDate.getUTCFullYear();
-
-        return targetDay === currentDay && targetMonth === currentMonth && targetYear === currentYear;
-      }
-
+    const updateCharts = async () => {
+      const endDatetime = new Date(currentDates[1]).setHours(0, 0, 0, 0)
       if (endDatetime) {
         if (nwsForecast && compareDates(endDatetime)) {
           setNwsForecast(compareDates(endDatetime))
         }
       }
-
-      updateChart('dates', days, endDateDays)
+      const days = (endDatetime - new Date(currentDates[0]).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000)
+      updateChart('dates', days, formatDate(new Date(endDatetime + (1000 * 60 * 60 * 24))))
     }
-    updateCharts(currentDates[0], currentDates[1], currentDates[2], currentDates[3])
+    updateCharts()
   }, [props.isMobile, currentDates]);
   useEffect(() => {
     updateChart('nwsForecast')
@@ -273,6 +262,8 @@ export const TempChartPage = (props: any) => {
           setAlarm={props.setAlarm}
           isCommentsShowed={isTempCommentsShowed}
           setIsCommentsShowed={setIsTempCommentsShowed}
+          dateDifferenceInDays={dateDifferenceInDays}
+          setDateDifferenceInDays={setDateDifferenceInDays}
         />
         <h2 className='ion-text-center'>Temperature RH</h2>
         <div className={s.additionalButtons}>

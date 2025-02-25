@@ -31,6 +31,7 @@ export const createValveDataContainers = async (props: any) => {
         }
       }
       new Promise((resolve: any) => {
+        console.log(props.invalidChartData, updatedValveChartData)
         if (props.invalidChartData.length + updatedValveChartData.length === props.countValve) {
           props.setInvalidValveChartDataContainer(props.invalidChartData)
           props.setValveChartDataContainer(updatedValveChartData)

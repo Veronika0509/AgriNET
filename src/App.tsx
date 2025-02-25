@@ -52,7 +52,12 @@ const App: React.FC = () => {
   const [additionalChartData, setAdditionalChartData] = useState([])
   const [chartPageType, setChartPageType] = useState('')
   const [isGoogleApiLoaded, setGoogleApiLoaded] = useState(false);
+  const [mapPageKey, setMapPageKey] = useState(0);
   const history = useHistory();
+
+  const reloadMapPage = () => {
+    setMapPageKey(prevKey => prevKey + 1);
+  };
 
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);
@@ -106,7 +111,7 @@ const App: React.FC = () => {
             <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData}
                  setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId}
                  setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData}
-                 setChartPageType={setChartPageType}/>
+                 setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage} />
           </div>
         </IonApp>
       )}

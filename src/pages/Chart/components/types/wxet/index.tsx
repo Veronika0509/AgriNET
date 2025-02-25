@@ -13,6 +13,8 @@ import {Export} from "../../Export";
 import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
 import {AddCommentButton} from "../../AddComment/components/AddCommentButton";
 import {AddCommentMessage} from "../../AddComment/components/AddCommentMessage";
+import {compareDates} from "../../../functions/types/moist/compareDates";
+import {formatDate} from "../../../functions/formatDate";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -21,14 +23,14 @@ export const WxetChartPage = (props: any) => {
   const initialStartDate: any = getStartDate(getCurrentDatetime())
   const [startDate, setStartDate] = useState<string>(initialStartDate);
   const [endDate, setEndDate] = useState<string>(currentDate);
-  const [currentDates, setCurrentDates] = useState([])
+  const [currentDates, setCurrentDates] = useState<any>()
   const [nwsForecast, setNwsForecast] = useState(false)
   const [nwsForecastDays, setNwsForecastDays] = useState(1)
   const [nwsForecastData, setNwsForecastData] = useState(undefined)
   const [wxetTabularData, setWxetTabularData] = useState<any>(null)
   const [isWxetTabularDataLoading, setIsWxetTabularDataLoading] = useState(false)
   const chartCode: string = 'weather_leaf'
-  const [wxetAddCommentItemShowed, setWxetAddCommentItemShowed] = useState(false)
+  const [dateDifferenceInDays, setDateDifferenceInDays] = React.useState('14');
 
   useEffect(() => {
     setCurrentChartData(props.chartData)
@@ -36,33 +38,20 @@ export const WxetChartPage = (props: any) => {
     handleResize(props.setIsMobile)
   }, []);
   useEffect(() => {
-    const updateCharts = async (days?: any, endDateDays?: any, startDatetime?: any, endDatetime?: any) => {
-      function compareDates(targetDateInMillis: any) {
-        const targetDate = new Date(targetDateInMillis);
-        const currentDate = new Date();
-
-        const targetDay = targetDate.getUTCDate();
-        const targetMonth = targetDate.getUTCMonth();
-        const targetYear = targetDate.getUTCFullYear();
-
-        const currentDay = currentDate.getUTCDate();
-        const currentMonth = currentDate.getUTCMonth();
-        const currentYear = currentDate.getUTCFullYear();
-
-        return targetDay === currentDay && targetMonth === currentMonth && targetYear === currentYear;
-      }
-
+    const updateCharts = async () => {
+      const endDatetime = new Date(currentDates[1]).setHours(0, 0, 0, 0)
       if (endDatetime) {
         if (nwsForecast && compareDates(endDatetime)) {
           setNwsForecast(compareDates(endDatetime))
         }
       }
 
-      const newChartData = await getWxetMainChartData(props.sensorId, days, endDateDays)
+      const days = (endDatetime - new Date(currentDates[0]).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000)
+      const newChartData = await getWxetMainChartData(props.sensorId, days, formatDate(new Date(endDatetime + (1000 * 60 * 60 * 24))))
       createWxetChart(newChartData.data.data, root, props.isMobile, props.additionalChartData, nwsForecastData)
       setCurrentChartData(newChartData.data.data)
     }
-    updateCharts(currentDates[0], currentDates[1], currentDates[2], currentDates[3])
+    updateCharts()
   }, [props.isMobile, currentDates]);
   useEffect(() => {
     if (nwsForecast) {
@@ -105,14 +94,14 @@ export const WxetChartPage = (props: any) => {
           nwsForecastDays={nwsForecastDays}
           setNwsForecastDays={setNwsForecastDays}
           setAlarm={props.setAlarm}
+          dateDifferenceInDays={dateDifferenceInDays}
+          setDateDifferenceInDays={setDateDifferenceInDays}
         />
         <h2 className='ion-text-center'>Weather Station</h2>
         <div className={s.additionalButtons}>
           <ButtonAndSpinner data={wxetTabularData} setData={setWxetTabularData} setIsLoading={setIsWxetTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode} isLoading={isWxetTabularDataLoading} />
           <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId} />
-          {/*<AddCommentButton addCommentItemShowed={wxetAddCommentItemShowed} setAddCommentItemShowed={setWxetAddCommentItemShowed} />*/}
         </div>
-        {/*<AddCommentMessage addCommentItemShowed={wxetAddCommentItemShowed}></AddCommentMessage>*/}
         <TabularData
           type={'wxet'}
           sensorId={props.sensorId}

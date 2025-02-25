@@ -21,7 +21,7 @@ import {initializeValveCustomOverlay} from "./components/types/valve/ValveCustom
 import {createValveChartForOverlay} from "./functions/types/valve/createValveChartForOverlay";
 import s from './style.module.css';
 
-interface MainProps {
+interface MapProps {
   page: any
   setPage: React.Dispatch<React.SetStateAction<number>>;
   userId: number;
@@ -33,52 +33,51 @@ interface MainProps {
   chartData: any;
   isGoogleApiLoaded: any;
   setAdditionalChartData: React.Dispatch<React.SetStateAction<any>>;
-  setChartPageType: React.Dispatch<React.SetStateAction<string>>
+  setChartPageType: React.Dispatch<React.SetStateAction<string>>;
+  key: any,
+  reloadMapPage: any
 }
 
-const MapPage: React.FC<MainProps> = (props) => {
-  // const [isModalOpen, setIsModalOpen] = useState(false)
-  // const [sensorId, setSensorId] = useState('')
-  // const [sensorName, setSensorName] = useState('')
-  // const [sensorChartType, setSensorType] = useState('')
-  // const [isSelectDisabled, setIsSelectDisabled] = useState(false)
-  // const [isChartDataIsLoading, setIsChartDataIsLoading] = useState(false)
+const MapPage: React.FC<MapProps> = (props) => {
   const present = useIonToast()
+  const [isMarkerClicked, setIsMarkerClicked] = useState(false)
 
   // Moist type
   let isMoistMarkerChartDrawn: boolean = false
   const [moistChartDataContainer, setMoistChartDataContainer] = useState<any>([])
   const [invalidMoistChartDataContainer, setInvalidMoistChartDataContainer] = useState([])
   const [moistOverlays, setMoistOverlays] = useState([])
-  const moistChartsAmount: any = []
+  let moistChartsAmount: any = []
 
   // Temp type
   let isTempMarkerChartDrawn: boolean = false
   const [tempChartDataContainer, setTempChartDataContainer] = useState<any>([])
   const [invalidTempChartDataContainer, setInvalidTempChartDataContainer] = useState([])
   const [tempOverlays, setTempOverlays] = useState([])
-  const tempChartsAmount: any = []
+  let tempChartsAmount: any = []
 
   // Valve type
   let isValveMarkerChartDrawn: boolean = false
   const [valveChartDataContainer, setValveChartDataContainer] = useState<any>([])
   const [invalidValveChartDataContainer, setInvalidValveChartDataContainer] = useState([])
   const [valveOverlays, setValveOverlays] = useState([])
-  const valveChartsAmount: any = []
+  let valveChartsAmount: any = []
 
   // Wxet type
   const [wxetDataContainer, setWxetDataContainer] = useState<any>([])
   const [invalidWxetDataContainer, setInvalidWxetDataContainer] = useState([])
-  const wxetChartsAmount: any = []
+  let wxetChartsAmount: any = []
 
   // All Types
   let allCoordinatesOfMarkers: any = [];
   const [activeOverlays, setActiveOverlays] = useState<any[]>([])
   const [allOverlays, setAllOverlays] = useState<any[]>([])
-  const [isAllCoordinatesOfMarkersAreReady, setIsAllCoordinatesOfMarkersAreReady] = useState([])
+  const [coordinatesForFitting, setCoordinatesForFitting] = useState([])
+  const [areArraysUpdated, setAreArraysUpdated] = useState(false)
 
   // Map
   const [map, setMap] = React.useState<any>();
+  const [initialZoom, setInitialZoom] = useState(0)
   const [markers, setMarkers] = useState([]);
   const [secondMap, setSecondMap] = useState()
   const [amountOfSensors, setAmountOfSensors] = useState<number>(0)
@@ -105,7 +104,7 @@ const MapPage: React.FC<MainProps> = (props) => {
         setMarkers,
         userId: props.userId,
         allCoordinatesOfMarkers,
-        setIsAllCoordinatesOfMarkersAreReady,
+        setCoordinatesForFitting,
         setSecondMap,
         moistChartsAmount,
         setInvalidMoistChartDataContainer,
@@ -120,7 +119,11 @@ const MapPage: React.FC<MainProps> = (props) => {
         setInvalidValveChartDataContainer,
         setValveChartDataContainer,
         amountOfSensors,
-        setAmountOfSensors
+        setAmountOfSensors,
+        setIsMarkerClicked,
+        setAreArraysUpdated,
+        setInitialZoom,
+        initialZoom
       })
     }
   }, [map, props.siteList]);
@@ -362,13 +365,12 @@ const MapPage: React.FC<MainProps> = (props) => {
     if (activeOverlays.length !== 0 && activeOverlays.length === amountOfSensors && !areBoundsFitted) {
       CollisionResolver.resolve(activeOverlays);
       setAllOverlays(activeOverlays)
-
       const bounds = new google.maps.LatLngBounds();
-      isAllCoordinatesOfMarkersAreReady.forEach((coordinate: any) => {
+      coordinatesForFitting.forEach((coordinate: any) => {
         bounds.extend({lat: coordinate.lat, lng: coordinate.lng});
       });
-      map.fitBounds(bounds);
       setAreBoundsFitted(true);
+      map.fitBounds(bounds);
     }
   }, [activeOverlays]);
   useEffect(() => {
@@ -392,20 +394,24 @@ const MapPage: React.FC<MainProps> = (props) => {
       };
     }
   }, [activeOverlays, areBoundsFitted]);
+  const updateComponent = () => {
+    props.reloadMapPage()
+  }
 
   return (
     <IonPage>
-      <Header setPage={props.setPage}/>
+      <Header
+        setPage={props.setPage}
+        setIsMarkerClicked={setIsMarkerClicked}
+        isMarkerClicked={isMarkerClicked}
+        updateComponent={updateComponent}
+      />
       <IonContent className={s.ionContent}>
         <div className={s.map} ref={mapRef}>
           {secondMap && (
             <LayerList siteList={props.siteList} secondMap={secondMap} allOverlays={allOverlays} activeOverlays={activeOverlays} setActiveOverlays={setActiveOverlays}/>
           )}
         </div>
-        {/*<ModalWindow isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} sensorName={sensorName}*/}
-        {/*             sensorId={sensorId} sensorChartType={sensorChartType} isChartDataIsLoading={isChartDataIsLoading}*/}
-        {/*             isSelectDisabled={isSelectDisabled} onSensorClick={onSensorClick} setChartData={props.setChartData}*/}
-        {/*             setPage={props.setPage} setSiteId={props.setSiteId} setSiteName={props.setSiteName}/>*/}
       </IonContent>
     </IonPage>
   )

@@ -1,5 +1,5 @@
 import {checkDateValidity} from "./checkDateValidity";
-import {updateChartWithNewDates} from "../../../functions/types/moist/updateChartWithNewDates";
+import {updateMoistChartWithNewDates} from "../../../functions/types/moist/updateMoistChartWithNewDates";
 
 export const updateChartsWithNewDatetime = async (
   startDate: any,
@@ -11,15 +11,34 @@ export const updateChartsWithNewDatetime = async (
   setDisableNextButton: any,
   setDisablePrevButton: any,
   setShowForecast: any,
-  updateChart: any
+  updateChart: any,
+  dateDifferenceInDays: any,
+  type: string
 ) => {
-  if (selectedTab === 'years') {
-    updateChartWithNewDates(startDate, endDate, setCurrentDates, fullDatesArray, setDisableNextButton, setDisablePrevButton, setShowForecast, updateChart)
-  } else {
-    if (checkDateValidity(startDate, endDate)) {
-      presentToast()
+  if (type === 'moist') {
+    if (selectedTab === 'years') {
+      const newEndDate = new Date().setHours(0, 0, 0, 0)
+      const newStartDate = new Date(newEndDate - ((365 * dateDifferenceInDays) * 24 * 60 * 60 * 1000))
+      updateMoistChartWithNewDates(newStartDate, newEndDate, setCurrentDates, fullDatesArray, setDisableNextButton, setDisablePrevButton, setShowForecast, updateChart)
     } else {
-      updateChartWithNewDates(startDate, endDate, setCurrentDates, fullDatesArray, setDisableNextButton, setDisablePrevButton, setShowForecast, updateChart)
+      if (checkDateValidity(startDate, endDate)) {
+        presentToast()
+      } else {
+        updateMoistChartWithNewDates(startDate, endDate, setCurrentDates, fullDatesArray, setDisableNextButton, setDisablePrevButton, setShowForecast, updateChart)
+      }
+    }
+  } else if (type === 'wxet' || type === 'temp') {
+    if (selectedTab === 'years') {
+      const newEndDate = new Date().setHours(0, 0, 0, 0)
+      const newStartDate = new Date(newEndDate - ((365 * dateDifferenceInDays) * 24 * 60 * 60 * 1000))
+
+      setCurrentDates([newStartDate, newEndDate])
+    } else {
+      if (checkDateValidity(startDate, endDate)) {
+        presentToast()
+      } else {
+        setCurrentDates([startDate, endDate])
+      }
     }
   }
 }

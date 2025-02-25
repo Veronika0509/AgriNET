@@ -4,7 +4,7 @@ export const pushAllCoordinates = (
   sensorItem: any,
   allCoordinatesOfMarkers: any,
   siteList: any,
-  setIsAllCoordinatesOfMarkersAreReady: any,
+  setCoordinatesForFitting: any,
   siteName: string
 ) => {
   const lat = sensorItem.lat
@@ -15,11 +15,11 @@ export const pushAllCoordinates = (
   const allSensorItems = getSensorItems(undefined, siteList, siteName)
   let neededSensorItemsArray: any = []
   allSensorItems.map((neededSensorItem: any) => {
-    if (neededSensorItem.markerType === 'moist-fuel' || neededSensorItem.markerType === 'wxet' || neededSensorItem.markerType === 'temp-rh-v2') {
+    if (neededSensorItem.markerType === 'moist-fuel' || neededSensorItem.markerType === 'wxet' || neededSensorItem.markerType === 'temp-rh-v2' || neededSensorItem.markerType === 'valve') {
       neededSensorItemsArray.push(neededSensorItem)
     }
   })
-  if (type === 'moist-fuel' || type === 'wxet' || type === 'temp-rh-v2') {
+  if (type === 'moist-fuel' || type === 'wxet' || type === 'temp-rh-v2' || type === 'valve') {
     const exists = allCoordinatesOfMarkers.some((marker: any) => marker.id === id);
 
     if (!exists) {
@@ -27,6 +27,6 @@ export const pushAllCoordinates = (
     }
   }
   if (allCoordinatesOfMarkers.length === neededSensorItemsArray.length) {
-    setIsAllCoordinatesOfMarkersAreReady(allCoordinatesOfMarkers)
+    setCoordinatesForFitting(allCoordinatesOfMarkers)
   }
 }

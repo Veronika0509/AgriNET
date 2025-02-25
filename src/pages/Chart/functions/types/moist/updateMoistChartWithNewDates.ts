@@ -1,7 +1,7 @@
 import {formatDate} from "../../formatDate";
 import {compareDates} from "./compareDates";
 
-export const updateChartWithNewDates = (
+export const updateMoistChartWithNewDates = (
   newStartDate: any,
   newEndDate: any,
   setCurrentDates: any,
@@ -31,8 +31,9 @@ export const updateChartWithNewDates = (
   if (endDatetime) {
     setShowForecast(compareDates(endDatetime))
   }
-  updateChart('main', 'dates', days, endDateFormatted, endDatetime)
-  updateChart('sum', 'dates', days, endDateFormatted, endDatetime)
-  updateChart('soilTemp', 'dates', days, endDateFormatted, endDatetime)
-  updateChart('battery', 'dates', days, endDateFormatted, endDatetime)
+  const newEndDateFormatted = formatDate(new Date(new Date(endDateFormatted).getTime() + 1000 * 60 * 60 * 24))
+  updateChart('main', 'dates', days, newEndDateFormatted, endDatetime)
+  updateChart('sum', 'dates', days, newEndDateFormatted, endDatetime)
+  updateChart('soilTemp', 'dates', days, newEndDateFormatted, endDatetime)
+  updateChart('battery', 'dates', days, newEndDateFormatted, endDatetime)
 }

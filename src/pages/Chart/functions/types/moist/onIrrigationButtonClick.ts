@@ -1,5 +1,5 @@
 import {getDatetime} from "../../../components/DateTimePicker/functions/getDatetime";
-import {updateChartWithNewDates} from "./updateChartWithNewDates";
+import {updateMoistChartWithNewDates} from "./updateMoistChartWithNewDates";
 
 export const onIrrigationButtonClick = async (
   buttonProps: number,
@@ -47,5 +47,5 @@ export const onIrrigationButtonClick = async (
   setStartDate(startDatetime)
 
   setDateDifferenceInDays('14')
-  updateChartWithNewDates(startDatetime, endDatetime, setCurrentDates, fullDatesArray, setDisableNextButton, setDisablePrevButton, setShowForecast, updateChart)
+  updateMoistChartWithNewDates(startDatetime, endDatetime, setCurrentDates, fullDatesArray, setDisableNextButton, setDisablePrevButton, setShowForecast, updateChart)
 }

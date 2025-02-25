@@ -30,6 +30,7 @@ export const createMoistDataContainers = async (props: any) => {
         }
       }
       new Promise((resolve: any) => {
+        console.log(props.invalidChartData, updatedMoistChartData)
         if (props.invalidChartData.length + updatedMoistChartData.length === props.countMoistFuel) {
           props.setInvalidMoistChartDataContainer(props.invalidChartData)
           props.setMoistChartDataContainer(updatedMoistChartData)

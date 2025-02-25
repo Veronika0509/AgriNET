@@ -86,7 +86,9 @@ const DateTimePicker = (props: any) => {
           props.setDisableNextButton,
           props.setDisablePrevButton,
           props.setShowForecast,
-          props.updateChart
+          props.updateChart,
+          props.dateDifferenceInDays,
+          props.type
         )}>
           <IonIcon icon={refreshOutline}></IonIcon>
         </IonButton>

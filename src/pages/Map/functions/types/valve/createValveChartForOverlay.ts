@@ -2,26 +2,16 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import * as am5radar from "@amcharts/amcharts5/radar";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
-import { getOptions } from "../../../data/getOptions";
+import {getOptions} from "../../../data/getOptions";
 import login from "../../../../Login";
-
-const checkOverlay = async (id: string, valveOverlays: any[]): Promise<void> => {
-  const element = document.getElementById(id);
-  if (!element) {
-    const overlay = valveOverlays.find(valveOverlay => valveOverlay.chartData.id === id);
-    if (overlay) {
-      await overlay.update();
-    }
-  }
-};
+import {checkOverlay} from "../../checkOverlay";
 
 export const createValveChartForOverlay = async (
   chartData: any,
   roots: am5.Root[],
   valveOverlays: any[]
 ): Promise<void> => {
-  await checkOverlay(chartData.id, valveOverlays);
-
+  await checkOverlay(chartData.id, valveOverlays)
   const container: any = document.getElementById(chartData.id);
   if (!container.style.width) container.style.width = "42px";
   if (!container.style.height) container.style.height = "48px";

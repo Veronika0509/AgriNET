@@ -10,7 +10,6 @@ interface moistTableProps {
 }
 
 export const MoistTable: React.FC<moistTableProps> = ({type, data, colors, firstRowColor, isWxetMobile}) => {
-  console.log(colors)
   return (
     <table className={`${s.mainTabularDataTable} ${type === 'moistSoilTemp' && s.mainMoistSoilTempTabularDataTable}`}>
       <thead className={s.mainTabularDataTableThead}>

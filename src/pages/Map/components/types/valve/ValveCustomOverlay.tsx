@@ -62,9 +62,12 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       update() {
-        if (this.div && this.isValveMarkerChartDrawn && this.root) {
-          this.root.render(this.renderContent());
-        }
+        return new Promise<void>((resolve) => {
+          if (this.div && this.isValveMarkerChartDrawn && this.root) {
+            this.root.render(this.renderContent());
+          }
+          resolve();
+        });
       }
 
       renderContent() {

@@ -1,16 +1,7 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
-
-const checkOverlay = async (id: string, moistOverlays: any[]): Promise<void> => {
-  const element = document.getElementById(id);
-  if (!element) {
-    const overlay = moistOverlays.find(moistOverlay => moistOverlay.chartData.id === id);
-    if (overlay) {
-      await overlay.update();
-    }
-  }
-}
+import {checkOverlay} from "../../checkOverlay";
 
 export const createMoistChartForOverlay = async (chartData: any, roots: any, moistOverlays: any) => {
   await checkOverlay(chartData.id, moistOverlays);

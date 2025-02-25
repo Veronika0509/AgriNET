@@ -172,12 +172,12 @@ export const createMainChart = (props: any): void => {
       }
     })
 
-    if (props.setMainTabularDataColors) {
+    if (props.setMoistMainTabularDataColors) {
       let colors: any[] = []
       seriesColors.map((seriesColor: any) => {
         colors.push(seriesColor)
       })
-      props.setMainTabularDataColors(colors)
+      props.setMoistMainTabularDataColors(colors)
     }
 
     if (props.historicMode) {

@@ -30,6 +30,7 @@ export const createWxetDataContainers = async (props: any) => {
         }
       }
       new Promise((resolve: any) => {
+        console.log(props.invalidChartData, updatedWxetData)
         if (props.invalidChartData.length + updatedWxetData.length === props.countWxet) {
           props.setInvalidWxetChartDataContainer(props.invalidChartData)
           props.setWxetChartDataContainer(updatedWxetData)
