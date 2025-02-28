@@ -8,7 +8,7 @@ import {
   IonTabs,
   setupIonicReact
 } from '@ionic/react';
-import {IonReactRouter} from '@ionic/react-router';
+import { HashRouter } from 'react-router-dom';
 import {home, informationCircle, logoFacebook} from 'ionicons/icons';
 import {loadGoogleApi} from "./functions/loadGoogleApiFunc";
 import {useHistory} from 'react-router-dom';
@@ -61,7 +61,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);
-    history.push('/#/login');
+    history.push('/login');
   }, []);
 
   return (
@@ -72,7 +72,7 @@ const App: React.FC = () => {
             {page === 0
               ? <div>
                 <Preloader/>
-                <IonReactRouter>
+                <HashRouter>
                   <IonTabs>
                     <IonRouterOutlet>
                       <Route exact path="/login">
@@ -91,11 +91,11 @@ const App: React.FC = () => {
                       </IonTabButton>
                     </IonTabBar>
                   </IonTabs>
-                </IonReactRouter>
+                </HashRouter>
               </div>
               : page === 2 &&
                 <div>
-                    <IonReactRouter basename="/AgriNET">
+                    <HashRouter basename="/AgriNET">
                         <Route path="/chart">
                             <Chart additionalChartData={additionalChartData} chartData={chartData} setPage={setPage}
                                    siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName}
@@ -103,7 +103,7 @@ const App: React.FC = () => {
                                    setAdditionalChartData={setAdditionalChartData} setChartData={setChartData}
                                    setSiteId={setSiteId} setSiteName={setSiteName} setChartPageType={setChartPageType}/>
                         </Route>
-                    </IonReactRouter>
+                    </HashRouter>
                 </div>
             }
           </div>
