@@ -8,7 +8,7 @@ import {
   IonTabs,
   setupIonicReact
 } from '@ionic/react';
-import { HashRouter } from 'react-router-dom';
+import {IonReactRouter} from '@ionic/react-router';
 import {home, informationCircle, logoFacebook} from 'ionicons/icons';
 import {loadGoogleApi} from "./functions/loadGoogleApiFunc";
 import {useHistory} from 'react-router-dom';
@@ -61,7 +61,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);
-    history.push('/login');
+    history.push('/AgriNET/login');
   }, []);
 
   return (
@@ -72,7 +72,7 @@ const App: React.FC = () => {
             {page === 0
               ? <div>
                 <Preloader/>
-                <HashRouter>
+                <IonReactRouter basename="/AgriNET">
                   <IonTabs>
                     <IonRouterOutlet>
                       <Route exact path="/login">
@@ -83,19 +83,19 @@ const App: React.FC = () => {
                       </Route>
                     </IonRouterOutlet>
                     <IonTabBar slot="bottom">
-                      <IonTabButton tab="login" layout="icon-start" href="#/login">
+                      <IonTabButton tab="login" layout="icon-start" href="/login">
                         <IonIcon icon={home}/>
                       </IonTabButton>
-                      <IonTabButton tab="info" href="#/info">
+                      <IonTabButton tab="info" href="/info">
                         <IonIcon icon={informationCircle}/>
                       </IonTabButton>
                     </IonTabBar>
                   </IonTabs>
-                </HashRouter>
+                </IonReactRouter>
               </div>
               : page === 2 &&
                 <div>
-                    <HashRouter basename="/AgriNET">
+                    <IonReactRouter basename="/AgriNET">
                         <Route path="/chart">
                             <Chart additionalChartData={additionalChartData} chartData={chartData} setPage={setPage}
                                    siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName}
@@ -103,7 +103,7 @@ const App: React.FC = () => {
                                    setAdditionalChartData={setAdditionalChartData} setChartData={setChartData}
                                    setSiteId={setSiteId} setSiteName={setSiteName} setChartPageType={setChartPageType}/>
                         </Route>
-                    </HashRouter>
+                    </IonReactRouter>
                 </div>
             }
           </div>
