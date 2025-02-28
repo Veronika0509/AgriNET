@@ -61,7 +61,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);
-    history.push('/AgriNET/login');
+    history.push('/#/login');
   }, []);
 
   return (
@@ -72,7 +72,7 @@ const App: React.FC = () => {
             {page === 0
               ? <div>
                 <Preloader/>
-                <IonReactRouter basename="/AgriNET">
+                <IonReactRouter>
                   <IonTabs>
                     <IonRouterOutlet>
                       <Route exact path="/login">
@@ -83,10 +83,10 @@ const App: React.FC = () => {
                       </Route>
                     </IonRouterOutlet>
                     <IonTabBar slot="bottom">
-                      <IonTabButton tab="login" layout="icon-start" href="/login">
+                      <IonTabButton tab="login" layout="icon-start" href="#/login">
                         <IonIcon icon={home}/>
                       </IonTabButton>
-                      <IonTabButton tab="info" href="/info">
+                      <IonTabButton tab="info" href="#/info">
                         <IonIcon icon={informationCircle}/>
                       </IonTabButton>
                     </IonTabBar>
