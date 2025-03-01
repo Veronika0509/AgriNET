@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
+// /AgriNET/
 export default defineConfig({
   base: '/AgriNET/',
   plugins: [
