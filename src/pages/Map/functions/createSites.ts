@@ -7,11 +7,13 @@ export const createSites = (props: any) => {
   props.setAreArraysUpdated(false)
   if (props.markers.length === 0) {
     const newMarkers = props.siteList.map((sensorsGroupData: any) => {
-      let groupMarker: any = new google.maps.Marker({
-        position: {lat: sensorsGroupData.lat, lng: sensorsGroupData.lng},
+      // console.log(google.maps.marker.AdvancedMarkerElement)
+      let groupMarker: any = new google.maps.marker.AdvancedMarkerElement({
         map: props.map,
+        position: { lat: sensorsGroupData.lat, lng: sensorsGroupData.lng },
         title: sensorsGroupData.name,
       });
+
       const info: string = `<p class="infoWindowText">${sensorsGroupData.name}</p>`
       const infoWindow = new google.maps.InfoWindow({
         content: info,

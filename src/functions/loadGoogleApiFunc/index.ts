@@ -5,7 +5,7 @@ export const loadGoogleApi = (setLoaded: React.Dispatch<React.SetStateAction<boo
   if (apiKey) {
     const script = document.createElement('script');
 
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=beta&libraries=geometry,drawing`;    script.async = true;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=beta&libraries=geometry,drawing,marker`;    script.async = true;
     script.defer = true;
     script.onload = () => {
       setLoaded(true);
