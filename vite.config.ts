@@ -5,7 +5,7 @@ import { defineConfig } from 'vite'
 // https://vitejs.dev/config/
 // /AgriNET/
 export default defineConfig({
-  base: '/AgriNET/',
+  base: '',
   plugins: [
     react(),
     legacy()
