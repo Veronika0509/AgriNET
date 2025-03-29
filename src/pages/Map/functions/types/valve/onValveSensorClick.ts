@@ -1,4 +1,4 @@
-import {getValveData} from "../../../data/types/valve/getValvetData";
+import {getValveData} from "../../../data/types/valve/getValveData";
 
 export const onValveSensorClick = async (
   history: any,

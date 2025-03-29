@@ -1,5 +1,6 @@
 import {createMoistDataContainers} from "./createMoistDataContainers";
 import axios from "axios";
+import {getMoistMarkerChartData} from "../../../data/types/moist/getMoistMarkerChartData";
 
 export const createMoistMarker = async (
   moistChartsAmount: any,
@@ -16,14 +17,7 @@ export const createMoistMarker = async (
 ) => {
   const exists = moistChartsAmount.some((secondItemMoist: any) => secondItemMoist.id === sensorItem.id);
   if (!exists) {
-    const response = await axios.get('https://app.agrinet.us/api/map/moist-fuel?v=43', {
-      params: {
-        sensorId: sensorItem.sensorId,
-        cacheFirst: true,
-        'do-not-catch-error': '',
-        user: userId,
-      },
-    })
+    const response = await getMoistMarkerChartData(sensorItem.sensorId, userId)
     moistId.value++;
     moistChartsAmount.push(sensorItem);
     const bounds: any = new google.maps.LatLngBounds(

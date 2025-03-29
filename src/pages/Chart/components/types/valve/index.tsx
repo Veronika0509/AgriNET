@@ -5,7 +5,7 @@ import React, {useEffect, useState} from "react";
 import {Archive} from "./components/Archive";
 import {refreshOutline} from "ionicons/icons";
 import '../../../../../App.css'
-import {getValveData} from "../../../../Map/data/types/valve/getValvetData";
+import {getValveData} from "../../../../Map/data/types/valve/getValveData";
 import {Settings} from "./components/Settings";
 import {setValveNowTime} from "../../../data/types/valve/setValveNowTime";
 import {getValveConfig} from "../../../data/types/valve/getValveConfig";

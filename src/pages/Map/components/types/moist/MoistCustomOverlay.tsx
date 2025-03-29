@@ -3,9 +3,12 @@ import {createRoot} from "react-dom/client";
 import React from "react";
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
+import {logoFacebook} from "ionicons/icons";
+import {loadGoogleApi} from "../../../../../functions/loadGoogleApiFunc";
 export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
     return class CustomOverlayExport extends google.maps.OverlayView {
+      private isBudgetEditorMap: any
       private bounds: google.maps.LatLngBounds;
       private invalidChartDataImage: any;
       private isValidChartData: boolean;
@@ -20,13 +23,19 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
       private siteList: any
       private setMoistOverlays: any
       private setChartPageType: any
+      private moistOverlaysRef: any
+      private currentSensorId: any
+      private setCurrentSensorId: any
 
+      private div?: any;
       private layerName: string
       private root: any;
       private offset: { x: number; y: number };
-      private div?: any;
+      private prefix: any;
+      private isCurrentOverlay: any;
 
       constructor(
+        isBudgetEditorMap: any,
         bounds: google.maps.LatLngBounds,
         invalidChartDataImage: any,
         isValidChartData: boolean,
@@ -41,8 +50,12 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         siteList: any,
         setMoistOverlays: any,
         setChartPageType: any,
+        moistOverlaysRef: any,
+        currentSensorId: any,
+        setCurrentSensorId: any
       ) {
         super();
+        this.isBudgetEditorMap = isBudgetEditorMap
         this.bounds = bounds;
         this.invalidChartDataImage = invalidChartDataImage;
         this.isValidChartData = isValidChartData;
@@ -57,40 +70,81 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         this.siteList = siteList
         this.setMoistOverlays = setMoistOverlays
         this.setChartPageType = setChartPageType
+        this.moistOverlaysRef = moistOverlaysRef
+        this.currentSensorId = currentSensorId
+        this.setCurrentSensorId = setCurrentSensorId
 
         this.layerName = chartData.layerName
         this.offset = { x: 0, y: 0 };
+        this.prefix = this.isBudgetEditorMap ? 'b' : 'm'
+        this.isCurrentOverlay = this.chartData.sensorId === this.currentSensorId
       }
 
-      update() {
+      update(currentSensorId?: any) {
         return new Promise<void>((resolve) => {
-          if (this.div && this.isMoistMarkerChartDrawn && this.root) {
-            this.root.render(this.renderContent());
+          if (currentSensorId) {
+            this.currentSensorId = currentSensorId;
+            this.isCurrentOverlay = this.chartData.sensorId === currentSensorId;
+            this.div.removeEventListener('mouseenter', this._onMouseEnter);
+            this.div.removeEventListener('mouseleave', this._onMouseLeave);
+            this._onMouseEnter = () => {
+              this.div.style.zIndex = "10000";
+            };
+            this._onMouseLeave = () => {
+              this.div.style.zIndex = this.isCurrentOverlay ? "9999" : "0";
+            };
+            this.div.style.zIndex = this.isCurrentOverlay ? "9999" : "0";
+            this.div.addEventListener('mouseenter', this._onMouseEnter);
+            this.div.addEventListener('mouseleave', this._onMouseLeave);
+          }
+
+          if (this.div && this.root) {
+            const shouldRender = !this.isValidChartData || (this.isValidChartData && this.isMoistMarkerChartDrawn);
+            if (shouldRender) {
+              this.root.render(this.renderContent());
+            }
           }
           resolve();
         });
       }
 
+// Добавьте эти свойства в класс
+      private _onMouseEnter: () => void = () => {};
+      private _onMouseLeave: () => void = () => {};
+
       renderContent() {
+        const onMarkerClick = () => {
+          if (this.isBudgetEditorMap) {
+            if (!this.isCurrentOverlay) {
+              this.setCurrentSensorId(this.chartData.sensorId)
+            }
+          } else {
+            onMoistSensorClick(
+              this.history,
+              this.chartData.sensorId,
+              this.chartData.mainId,
+              this.chartData.name,
+              this.setChartData,
+              this.setPage,
+              this.setSiteId,
+              this.setSiteName,
+              this.setAdditionalChartData,
+              this.siteList,
+              this.setChartPageType
+            )
+          }
+        }
         return (
-          <div className={s.overlay_container} onClick={() => onMoistSensorClick(
-            this.history,
-            this.chartData.sensorId,
-            this.chartData.mainId,
-            this.chartData.name,
-            this.setChartData,
-            this.setPage,
-            this.setSiteId,
-            this.setSiteName,
-            this.setAdditionalChartData,
-            this.siteList,
-            this.setChartPageType
-          )}>
+          <div className={s.overlay_container} onClick={onMarkerClick} style={{width: this.isCurrentOverlay ? '62px' : '58px'}}>
             {this.isValidChartData ? (
               <div className={s.mainContainer}>
-                <div className={s.overlay_chartContainer}>
-                  {/*style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }}*/}
-                  <div style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }} id={`${this.chartData.id}`} className={s.overlay_chart}></div>
+                <div className={s.overlay_chartContainer} style={{
+                  boxShadow: this.isCurrentOverlay
+                    ? '0 0 20px 10px rgba(255, 255, 0, 0.8)'
+                    : 'none',
+                  border: this.isCurrentOverlay ? '3px solid #ffff00' : '1px solid #000',
+                }}>
+                  <div style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }} id={`${this.prefix}-${this.chartData.id}`} className={s.overlay_chart}></div>
                   {this.isMoistMarkerChartDrawn ? null : (
                     <div className={s.overlay_loader}></div>
                   )}
@@ -104,7 +158,12 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
               </div>
             ) : (
               <div className={`${s.overlay_container} ${s.overlay_invalidOverlayContainer}`}>
-                <div className={s.overlay_invalidMoistChartDataImgContainer}>
+                <div className={s.overlay_invalidMoistChartDataImgContainer} style={{
+                  boxShadow: this.isCurrentOverlay
+                    ? '0 0 20px 10px rgba(255, 255, 0, 0.8)'
+                    : 'none',
+                  border: this.isCurrentOverlay ? '3px solid #ffff00' : '1px solid #000',
+                }}>
                   <img src={this.invalidChartDataImage} className={s.overlay_invalidChartDataImg} alt='Invalid Chart Data'/>
                   <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>
@@ -119,35 +178,54 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
 
       onAdd() {
         new Promise((resolve: any) => {
-          const divId = `overlay-${this.chartData.id}`;
+          const divId = `overlay-${this.prefix}-${this.chartData.id}`;
           this.div = document.getElementById(divId);
 
-          if (!this.div) {
-            this.div = document.createElement("div");
-            this.div.id = divId;
-            this.div.style.borderStyle = "none";
-            this.div.style.borderWidth = "0px";
-            this.div.style.position = "absolute";
+          if (this.div) return resolve();
 
-            if (this.chartData.battery !== null) {
-              if (!this.chartData.battery.toString().includes(" VDC")) {
-                this.chartData.battery = this.chartData.battery + ' VDC'
-              }
-            }
+          this.div = document.createElement("div");
+          this.div.id = divId;
+          this.div.style.position = "absolute";
+          this.div.style.WebkitTransform = 'translateZ(0)';
 
-            this.offset = {
-              x: (Math.random() - 0.5) * 20,
-              y: (Math.random() - 0.5) * 20
-            };
-            const panes: any = this.getPanes();
-            panes.floatPane.appendChild(this.div);
-            if (!this.root) {
-              this.root = createRoot(this.div);
+          const setupZIndex = () => {
+            if (this.prefix === 'b') {
+              this.div.style.zIndex = this.isCurrentOverlay ? "9999" : "0";
+              if (!this.isCurrentOverlay) addHoverEffect();
+            } else {
+              addHoverEffect();
             }
-            const content = this.renderContent()
-            this.root.render(content);
           }
-          resolve()
+
+          const addHoverEffect = () => {
+            this.div.addEventListener('mouseenter', () => {
+              this.div.style.zIndex = "10000";
+            });
+            this.div.addEventListener('mouseleave', () => {
+              this.div.style.zIndex = "0";
+            });
+          }
+
+          setupZIndex();
+
+          if (this.chartData.battery && !this.chartData.battery.toString().includes(" VDC")) {
+            this.chartData.battery += " VDC";
+          }
+
+          this.offset = {
+            x: (Math.random() - 0.5) * 20,
+            y: (Math.random() - 0.5) * 20
+          };
+
+          const panes: any = this.getPanes();
+          panes.floatPane.appendChild(this.div);
+
+          if (!this.root) {
+            this.root = createRoot(this.div);
+          }
+          this.root.render(this.renderContent());
+
+          resolve();
         }).then(() => {
           if (this.isValidChartData) {
             this.setMoistOverlays((overlays: any[]) => {
@@ -155,6 +233,25 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
               const overlayExists = overlays.some(overlay => overlay.chartData.id === newOverlayId);
 
               if (!overlayExists) {
+                if (this.prefix === 'b') {
+                  if (!this.moistOverlaysRef.current.some((overlay: any) => overlay.chartData.id === this.chartData.id)) {
+                    this.moistOverlaysRef.current.push(this);
+                  }
+                }
+                return [...overlays, this];
+              }
+
+              return overlays;
+            });
+          } else if (this.prefix === 'b') {
+            this.setMoistOverlays((overlays: any[]) => {
+              const newOverlayId = this.chartData.id;
+              const overlayExists = overlays.some(overlay => overlay.chartData.id === newOverlayId);
+
+              if (!overlayExists) {
+                if (!this.moistOverlaysRef.current.some((overlay: any) => overlay.chartData.id === this.chartData.id)) {
+                  this.moistOverlaysRef.current.push(this);
+                }
                 return [...overlays, this];
               }
 
@@ -172,7 +269,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         const pixel = projection.fromLatLngToDivPixel(position);
 
         if (pixel) {
-          // Apply the stored offset when drawing
           this.div.style.left = `${pixel.x + this.offset.x}px`;
           this.div.style.top = `${pixel.y + this.offset.y}px`;
         }
@@ -184,8 +280,13 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
 
       onRemove() {
         if (this.div) {
-          (this.div.parentNode as HTMLElement).removeChild(this.div);
-          delete this.div;
+          this.div.removeEventListener('mouseenter', this._onMouseEnter);
+          this.div.removeEventListener('mouseleave', this._onMouseLeave);
+
+          if (this.div.parentNode) {
+            this.div.parentNode.removeChild(this.div);
+          }
+          this.div = null;
         }
       }
 

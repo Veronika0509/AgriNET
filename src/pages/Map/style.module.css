@@ -4,8 +4,12 @@
 }
 
 .map {
-  height: 100%;
+  height: 91.5%;
   width: 100%;
+}
+
+.contentWrapper > div > div {
+  display: none !important;
 }
 
 /*  Header  */
@@ -30,7 +34,6 @@
   font-size: 10px;
   padding: 4px;
   position: relative;
-  z-index: 1;
 }
 
 .overlay_container {
@@ -45,12 +48,15 @@
 
 .overlay_chartContainer {
   background: #96fd66;
-  border: 1px solid #000;
   border-radius: 6px;
   overflow-x: hidden;
   overflow-y: hidden;
   padding: 5px;
   height: 75px;
+}
+
+.overlay_valveChartContainer {
+  border: 1px solid #000;
 }
 
 .overlay_chart {
@@ -60,7 +66,6 @@
   display: flex;
   align-items: center;
   justify-items: center;
-  z-index: 2;
   border: 1px solid #000;
 }
 
@@ -92,7 +97,6 @@
   border-radius: 6px;
   padding-top: 5px;
   padding-bottom: 5px;
-  border: 1px solid #000;
 }
 
 .overlay_loader {
@@ -101,9 +105,8 @@
   aspect-ratio: 1;
   border-radius: 50%;
   border: 4px solid #000000;
-  animation:
-          l20-1 0.8s infinite linear alternate,
-          l20-2 1.6s infinite linear;
+  animation: l20-1 0.8s infinite linear alternate,
+  l20-2 1.6s infinite linear;
 }
 
 .overlay_valveEnabled {
@@ -118,20 +121,43 @@
   background: #fff;
 }
 
-@keyframes l20-1{
-  0%    {clip-path: polygon(50% 50%,0       0,  50%   0%,  50%    0%, 50%    0%, 50%    0%, 50%    0% )}
-  12.5% {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100%   0%, 100%   0%, 100%   0% )}
-  25%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 100% 100%, 100% 100% )}
-  50%   {clip-path: polygon(50% 50%,0       0,  50%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
-  62.5% {clip-path: polygon(50% 50%,100%    0, 100%   0%,  100%   0%, 100% 100%, 50%  100%, 0%   100% )}
-  75%   {clip-path: polygon(50% 50%,100% 100%, 100% 100%,  100% 100%, 100% 100%, 50%  100%, 0%   100% )}
-  100%  {clip-path: polygon(50% 50%,50%  100%,  50% 100%,   50% 100%,  50% 100%, 50%  100%, 0%   100% )}
+@keyframes l20-1 {
+  0% {
+    clip-path: polygon(50% 50%, 0 0, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%)
+  }
+  12.5% {
+    clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 0%, 100% 0%, 100% 0%)
+  }
+  25% {
+    clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 100%, 100% 100%, 100% 100%)
+  }
+  50% {
+    clip-path: polygon(50% 50%, 0 0, 50% 0%, 100% 0%, 100% 100%, 50% 100%, 0% 100%)
+  }
+  62.5% {
+    clip-path: polygon(50% 50%, 100% 0, 100% 0%, 100% 0%, 100% 100%, 50% 100%, 0% 100%)
+  }
+  75% {
+    clip-path: polygon(50% 50%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 50% 100%, 0% 100%)
+  }
+  100% {
+    clip-path: polygon(50% 50%, 50% 100%, 50% 100%, 50% 100%, 50% 100%, 50% 100%, 0% 100%)
+  }
 }
-@keyframes l20-2{
-  0%    {transform:scaleY(1)  rotate(0deg)}
-  49.99%{transform:scaleY(1)  rotate(135deg)}
-  50%   {transform:scaleY(-1) rotate(0deg)}
-  100%  {transform:scaleY(-1) rotate(-135deg)}
+
+@keyframes l20-2 {
+  0% {
+    transform: scaleY(1) rotate(0deg)
+  }
+  49.99% {
+    transform: scaleY(1) rotate(135deg)
+  }
+  50% {
+    transform: scaleY(-1) rotate(0deg)
+  }
+  100% {
+    transform: scaleY(-1) rotate(-135deg)
+  }
 }
 
 .overlay_underInformationOverlayText {
@@ -219,4 +245,103 @@
 
 .layers_checkbox > ion-item {
   border-radius: 3px;
+}
+
+/*   Budget Editor   */
+
+.budget_container {
+  height: 100%;
+}
+
+.budget_firstHalfWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.budget_chart, .budget_noData {
+  width: 600px;
+  height: 300px;
+}
+
+.budget_noData {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.budget_noDataWrapper {
+  text-align: center;
+}
+
+.budget_setting:nth-child(1) > .budget_settingLabel,
+.budget_setting:nth-child(6) > .budget_settingLabel {
+  --color: #b6b6b6;
+}
+
+.budget_setting:nth-child(1) > .budget_settingValue,
+.budget_setting:nth-child(2) > .budget_settingValue,
+.budget_setting:nth-child(2) > .budget_settingLabel {
+  --color: #80e2fe;
+}
+
+.budget_setting:nth-child(3) > .budget_settingValue,
+.budget_setting:nth-child(3) > .budget_settingLabel,
+.budget_setting:nth-child(4) > .budget_settingValue,
+.budget_setting:nth-child(4) > .budget_settingLabel {
+  --color: #84fc84;
+}
+
+.budget_setting:nth-child(5) > .budget_settingValue,
+.budget_setting:nth-child(5) > .budget_settingLabel,
+.budget_setting:nth-child(6) > .budget_settingValue {
+  --color: #fc9a9d;
+}
+
+.budget_settingValue {
+  font-size: 35px;
+  text-transform: capitalize;
+  --padding-start: 15px;
+  --padding-end: 15px;
+  --padding-top: 2px;
+  --padding-bottom: 2px;
+  width: 100px;
+}
+
+.budget_settingLabel {
+  font-size: 19px;
+  opacity: 1;
+  text-transform: none;
+}
+
+.budget_menu {
+  height: 50px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #d3d3d3;
+}
+
+.budget_menuSite {
+  width: 100px;
+  margin-left: 40px;
+}
+
+.budget_menuSensorID {
+  width: 300px;
+  margin-left: 20px;
+}
+
+.budget_secondHalf {
+  width: 100%;
+  height: 100%;
+}
+
+.budget_map {
+  width: 100%;
+  height: 54%;
+}
+
+.budget_lineInput {
+  padding-top: 0 !important;
 }

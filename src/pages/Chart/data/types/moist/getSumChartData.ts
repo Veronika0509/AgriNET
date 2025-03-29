@@ -7,7 +7,8 @@ export const getSumChartData = async (sensorId: any, historicMode: boolean, days
         sensorId: sensorId,
         days: daysProps,
         endDate: endDate,
-        includeHistoricalData: historicMode
+        includeHistoricalData: historicMode,
+        nocache: Date.now()
       }
     })
   } else {
@@ -15,7 +16,8 @@ export const getSumChartData = async (sensorId: any, historicMode: boolean, days
       params: {
         sensorId: sensorId,
         days: 14,
-        includeHistoricalData: historicMode
+        includeHistoricalData: historicMode,
+        nocache: Date.now()
       }
     })
   }

@@ -248,6 +248,7 @@ export const MoistChartPage = (props: any) => {
           })
         }
       } else if (updateReason === 'dates') {
+        console.log(endDateDays)
         const newMoistChartData = await getMoistMainChartData(props.sensorId, historicMode, days, endDateDays)
         setCurrentChartData(newMoistChartData.data.data)
         createMainChart({

@@ -119,7 +119,6 @@ export const createValveChartForOverlay = async (
   // Create and animate event hands
   if (chartData.events.length !== 0) {
     const options = await getOptions();
-    console.log(options)
     chartData.events.forEach((event: any, index: number) => {
       const color = options.data[`valve-marker.colors.${event.status}`] || 0x962e40
       let eventMinuteHand = createClockHand(color, 'event');

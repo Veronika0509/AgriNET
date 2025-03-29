@@ -150,6 +150,13 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
           this.div.style.borderStyle = "none";
           this.div.style.borderWidth = "0px";
           this.div.style.position = "absolute";
+          this.div.style.WebkitTransform = 'translateZ(0)';
+          this.div.addEventListener('mouseenter', () => {
+            this.div.style.zIndex = "9999";
+          });
+          this.div.addEventListener('mouseleave', () => {
+            this.div.style.zIndex = "0";
+          });
 
           this.offset = {
             x: (Math.random() - 0.5) * 20,

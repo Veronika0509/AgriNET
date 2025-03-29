@@ -79,7 +79,25 @@ const App: React.FC = () => {
                         <Login setPage={setPage} setUserId={setUserId}/>
                       </Route>
                       <Route exact path="/info">
-                        <Info/>
+                        <Info showHeader={true} />
+                      </Route>
+                      <Route path="/map">
+                        <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData}
+                             setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId}
+                             setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData}
+                             setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage} />
+                      </Route>
+                      <Route path="/layers">
+                        <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData}
+                             setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId}
+                             setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData}
+                             setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage} />
+                      </Route>
+                      <Route path="/settings">
+                        <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData}
+                             setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId}
+                             setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData}
+                             setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage} />
                       </Route>
                     </IonRouterOutlet>
                     <IonTabBar slot="bottom">

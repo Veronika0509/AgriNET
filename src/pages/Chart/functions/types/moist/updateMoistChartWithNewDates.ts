@@ -31,7 +31,10 @@ export const updateMoistChartWithNewDates = (
   if (endDatetime) {
     setShowForecast(compareDates(endDatetime))
   }
-  const newEndDateFormatted = formatDate(new Date(new Date(endDateFormatted).getTime() + 1000 * 60 * 60 * 24))
+  const dateParts: any = endDateFormatted.split('-');
+  const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+  date.setDate(date.getDate() + 1);
+  const newEndDateFormatted = formatDate(date);
   updateChart('main', 'dates', days, newEndDateFormatted, endDatetime)
   updateChart('sum', 'dates', days, newEndDateFormatted, endDatetime)
   updateChart('soilTemp', 'dates', days, newEndDateFormatted, endDatetime)

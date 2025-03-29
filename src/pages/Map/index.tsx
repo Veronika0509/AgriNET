@@ -1,7 +1,17 @@
 import React, {useEffect, useState} from 'react';
 import {
   IonPage,
-  IonContent, useIonToast
+  IonContent,
+  useIonToast,
+  IonTabBar,
+  IonTabs,
+  IonTabButton,
+  IonIcon,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonTab,
+  IonSegment, IonSegmentButton, IonLabel
 } from '@ionic/react';
 import {useRef} from 'react';
 import invalidChartDataImage from '../../assets/images/invalidChartData.png';
@@ -20,6 +30,11 @@ import {CollisionResolver} from "./components/CollisionResolver";
 import {initializeValveCustomOverlay} from "./components/types/valve/ValveCustomOverlay";
 import {createValveChartForOverlay} from "./functions/types/valve/createValveChartForOverlay";
 import s from './style.module.css';
+import {addOverlayToOverlaysArray} from "./functions/types/moist/addOverlayToOverlaysArray";
+import {cloudUpload, home, informationCircle, settings, water} from "ionicons/icons";
+import Info from "../Info";
+import Index from "./components/types/moist/BudgetEditor";
+import BudgetEditor from "./components/types/moist/BudgetEditor";
 
 interface MapProps {
   page: any
@@ -40,6 +55,7 @@ interface MapProps {
 
 const MapPage: React.FC<MapProps> = (props) => {
   const present = useIonToast()
+  const [activeTab, setActiveTab] = useState("map");
   const [isMarkerClicked, setIsMarkerClicked] = useState(false)
 
   // Moist type
@@ -83,14 +99,23 @@ const MapPage: React.FC<MapProps> = (props) => {
   const [amountOfSensors, setAmountOfSensors] = useState<number>(0)
   const [areBoundsFitted, setAreBoundsFitted] = useState(false)
   const mapRef = useRef(null);
+  const [mapInitialized, setMapInitialized] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
-    if (props.page === 1) {
-      getSiteList(props.userId, props.setSiteList)
-      createMap(map, setMap, mapRef)
+    const initializeMap = async () => {
+      if (props.page === 1 && activeTab === 'map' && !mapInitialized) {
+        const sites: any = await getSiteList(props.userId);
+        props.setSiteList(sites.data)
+
+        if (mapRef.current) {
+          createMap(map, setMap, mapRef);
+          setMapInitialized(true);
+        }
+      }
     }
-  }, [props.page])
+    initializeMap()
+  }, [props.page, activeTab, mapInitialized]);
   useEffect(() => {
     if (activeOverlays.length !== 0) {
       CollisionResolver.resolve(activeOverlays);
@@ -128,21 +153,13 @@ const MapPage: React.FC<MapProps> = (props) => {
     }
   }, [map, props.siteList]);
 
-  const addOverlayToOverlaysArray = (overlay: any)=> {
-    setActiveOverlays((prevActiveOverlays) => {
-      const exists = prevActiveOverlays.some(
-        (existingOverlay) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
-      );
-      return exists ? prevActiveOverlays : [...prevActiveOverlays, overlay];
-    });
-    overlay.setMap(map)
-  }
   // Moist Marker Chart
   useEffect(() => {
     if (moistChartDataContainer.length !== 0) {
       moistChartDataContainer.map((chartData: any) => {
         const MoistCustomOverlayExport: any = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
         const overlay = new MoistCustomOverlayExport(
+          false,
           chartData[1],
           invalidChartDataImage,
           true,
@@ -158,7 +175,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           setMoistOverlays,
           props.setChartPageType
         )
-        addOverlayToOverlaysArray(overlay)
+        addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
       })
     }
   }, [moistChartDataContainer]);
@@ -167,6 +184,7 @@ const MapPage: React.FC<MapProps> = (props) => {
       invalidMoistChartDataContainer.map((chartData: any) => {
         const CustomOverlayExport: any = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
         const overlay: any = new CustomOverlayExport(
+          false,
           chartData[1],
           invalidChartDataImage,
           false,
@@ -182,7 +200,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           setMoistOverlays,
           props.setChartPageType
         )
-        addOverlayToOverlaysArray(overlay)
+        addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
       })
     }
   }, [invalidMoistChartDataContainer]);
@@ -190,7 +208,7 @@ const MapPage: React.FC<MapProps> = (props) => {
     if (moistOverlays.length !== 0) {
       let roots: any[] = [];
       moistOverlays.map((moistOverlay: any) => {
-        createMoistChartForOverlay(moistOverlay.chartData, roots, moistOverlays)
+        createMoistChartForOverlay('m', moistOverlay.chartData, roots, moistOverlays)
       })
       return () => {
         roots.forEach(root => root.dispose());
@@ -216,7 +234,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           data[0],
           props.setChartPageType
         )
-        addOverlayToOverlaysArray(overlay)
+        addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
       })
     }
   }, [wxetDataContainer]);
@@ -236,7 +254,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           data[0],
           props.setChartPageType
         )
-        addOverlayToOverlaysArray(overlay)
+        addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
       })
     }
   }, [invalidWxetDataContainer])
@@ -262,7 +280,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           props.userId,
           present
         )
-        addOverlayToOverlaysArray(overlay)
+        addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
       })
     }
   }, [tempChartDataContainer]);
@@ -286,7 +304,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           props.userId,
           present
         )
-        addOverlayToOverlaysArray(overlay)
+        addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
       })
     }
   }, [invalidTempChartDataContainer]);
@@ -322,7 +340,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           setValveOverlays,
           props.userId
         )
-        addOverlayToOverlaysArray(overlay)
+        addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
       })
     }
   }, [valveChartDataContainer]);
@@ -344,7 +362,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           setValveOverlays,
           props.userId
         )
-        addOverlayToOverlaysArray(overlay)
+        addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
       })
     }
   }, [invalidValveChartDataContainer]);
@@ -394,9 +412,66 @@ const MapPage: React.FC<MapProps> = (props) => {
       };
     }
   }, [activeOverlays, areBoundsFitted]);
-  const updateComponent = () => {
-    props.reloadMapPage()
-  }
+  useEffect(() => {
+    if (map) {
+      if (activeTab !== 'map') {
+        const mapDivs = document.querySelectorAll('.gm-style');
+        mapDivs.forEach(div => {
+          (div as HTMLElement).style.visibility = 'hidden';
+        });
+      } else {
+        const mapDivs = document.querySelectorAll('.gm-style');
+        mapDivs.forEach(div => {
+          (div as HTMLElement).style.visibility = 'visible';
+        });
+        google.maps.event.trigger(map, 'resize');
+      }
+    }
+  }, [activeTab, map]);
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'map':
+        return (
+          <div
+            className={s.map}
+            ref={mapRef}
+            style={{
+              height: '100%',
+              width: '100%',
+              position: 'relative'
+            }}
+          >
+            {secondMap && (
+              <LayerList
+                siteList={props.siteList}
+                secondMap={secondMap}
+                allOverlays={allOverlays}
+                activeOverlays={activeOverlays}
+                setActiveOverlays={setActiveOverlays}
+              />
+            )}
+          </div>
+        );
+      case 'budgetEditor':
+        return (
+          <div style={{height: '100%'}}>
+            <section style={{height: '100%'}}>
+              <BudgetEditor siteList={props.siteList} userId={props.userId} isGoogleApiLoaded={props.isGoogleApiLoaded} />
+            </section>
+          </div>
+        );
+      case 'info':
+        return (
+          <div style={{height: '100%', padding: '16px'}}>
+            <section>
+              <Info />
+            </section>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <IonPage>
@@ -404,13 +479,36 @@ const MapPage: React.FC<MapProps> = (props) => {
         setPage={props.setPage}
         setIsMarkerClicked={setIsMarkerClicked}
         isMarkerClicked={isMarkerClicked}
-        updateComponent={updateComponent}
+        reloadMapPage={props.reloadMapPage}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
       <IonContent className={s.ionContent}>
-        <div className={s.map} ref={mapRef}>
-          {secondMap && (
-            <LayerList siteList={props.siteList} secondMap={secondMap} allOverlays={allOverlays} activeOverlays={activeOverlays} setActiveOverlays={setActiveOverlays}/>
-          )}
+        <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+          <div className={activeTab === 'map' ? undefined : s.contentWrapper} style={{flex: 1, overflow: 'hidden'}}>
+            {renderContent()}
+          </div>
+          <IonSegment value={activeTab}>
+            <IonSegmentButton value="map" onClick={() => setActiveTab('map')}>
+              <IonIcon icon={home}/>
+            </IonSegmentButton>
+
+            <IonSegmentButton value="budgetEditor" onClick={() => setActiveTab('budgetEditor')}>
+              <IonIcon icon={settings}/>
+            </IonSegmentButton>
+
+            <IonSegmentButton value="valveControl">
+              <IonIcon icon={water}/>
+            </IonSegmentButton>
+
+            <IonSegmentButton value="upload">
+              <IonIcon icon={cloudUpload}/>
+            </IonSegmentButton>
+
+            <IonSegmentButton value="info" onClick={() => setActiveTab('info')}>
+              <IonIcon icon={informationCircle}/>
+            </IonSegmentButton>
+          </IonSegment>
         </div>
       </IonContent>
     </IonPage>

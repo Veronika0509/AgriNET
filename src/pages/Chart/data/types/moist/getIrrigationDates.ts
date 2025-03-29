@@ -1,6 +1,6 @@
 import axios from "axios";
 import {loadGoogleApi} from "../../../../../functions/loadGoogleApiFunc";
-import {getValveData} from "../../../../Map/data/types/valve/getValvetData";
+import {getValveData} from "../../../../Map/data/types/valve/getValveData";
 
 export const getIrrigationDates = async (
   setIsIrrigationDataIsLoading: any,

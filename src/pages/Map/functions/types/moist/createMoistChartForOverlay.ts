@@ -3,9 +3,10 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import {checkOverlay} from "../../checkOverlay";
 
-export const createMoistChartForOverlay = async (chartData: any, roots: any, moistOverlays: any) => {
-  await checkOverlay(chartData.id, moistOverlays);
-  const root: any = am5.Root.new(chartData.id)
+export const createMoistChartForOverlay = async (type: any, chartData: any, roots: any, moistOverlays: any) => {
+  const chartId = `${type}-${chartData.id}`
+  await checkOverlay(chartId, moistOverlays);
+  const root: any = am5.Root.new(chartId)
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);
 
@@ -116,8 +117,15 @@ export const createMoistChartForOverlay = async (chartData: any, roots: any, moi
   chart.appear(1000, 100);
 
   moistOverlays.map((overlay: any) => {
-    if (overlay.layerName === 'Moist') {
-      if (overlay.chartData.mainId === chartData.mainId) {
+    if (type === 'm') {
+      if (overlay.layerName === 'Moist') {
+        if (overlay.chartData.mainId === chartData.mainId) {
+          overlay.isMoistMarkerChartDrawn = true
+          overlay.update();
+        }
+      }
+    } else {
+      if (overlay.chartData.id === chartData.id) {
         overlay.isMoistMarkerChartDrawn = true
         overlay.update();
       }

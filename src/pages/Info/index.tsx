@@ -4,14 +4,16 @@ import Logo from '../../assets/images/logo.png'
 import {star} from "ionicons/icons";
 import React from "react";
 
-const Info: React.FC = () => {
+const Info = (props: any) => {
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>About</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      {props.showHeader && (
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>About</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+      )}
       <IonContent className={s.content}>
         <IonRow class="ion-justify-content-center" className={s.content}>
           <div>
