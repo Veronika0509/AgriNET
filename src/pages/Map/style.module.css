@@ -4,8 +4,9 @@
 }
 
 .map {
-  height: 91.5%;
+  height: 100%;
   width: 100%;
+  min-height: 300px;
 }
 
 .contentWrapper > div > div {
@@ -24,16 +25,19 @@
 
 /*  Custom Overlays  */
 .overlay_info {
-  width: 68px;
+  width: max-content;
+  min-width: 68px;
+  max-width: 200px;
   display: none;
   margin-top: 5px;
   margin-left: -5px;
   background: #f1e279;
   color: #000;
   border-radius: 5px;
-  font-size: 10px;
-  padding: 4px;
+  font-size: clamp(10px, 2vw, 12px);
+  padding: 6px 8px;
   position: relative;
+  z-index: 10;
 }
 
 .overlay_container {
@@ -235,12 +239,15 @@
 /*  Layer List  */
 
 .layers_checkbox {
-  width: 160px;
+  width: clamp(160px, 25vw, 200px);
   position: absolute;
-  top: 100px;
+  top: clamp(60px, 10vh, 100px);
   left: 10px;
   opacity: 0.85;
   background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 5;
 }
 
 .layers_checkbox > ion-item {
@@ -250,15 +257,19 @@
 /*   Budget Editor   */
 
 .budget_container {
-  height: 100%;
+  height: 100vh;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .budget_content {
   display: flex;
   flex-direction: row;
   height: calc(100% - 50px);
+  min-height: 0;
+  gap: 20px;
 }
 
 .budget_chartSection {
@@ -266,7 +277,9 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: clamp(10px, 2vw, 20px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .budget_chart, .budget_noData {
@@ -349,14 +362,15 @@
 }
 
 .budget_controls {
-  height: 50px;
+  min-height: 50px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #d3d3d3;
-  padding: 0 10px;
-  gap: 10px;
+  padding: clamp(10px, 2vw, 15px);
+  gap: clamp(10px, 2vw, 20px);
+  flex-wrap: wrap;
 }
 
 .budget_menuSite {
@@ -380,7 +394,7 @@
 }
 
 /* Media Queries */
-@media (max-width: 1024px) {
+@media screen and (max-width: 1024px) {
   .budget_content {
     flex-direction: column;
   }
@@ -394,7 +408,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   .budget_controls {
     flex-direction: column;
     height: auto;
@@ -421,7 +435,69 @@
   }
 }
 
-@media (max-width: 480px) {
+@media screen and (max-width: 480px) {
+  .budget_container {
+    height: 100%;
+  }
+  
+  .budget_content {
+    height: auto;
+    min-height: calc(100vh - 60px);
+  }
+  
+  .budget_chartSection {
+    padding: 10px;
+  }
+  
+  .budget_chart, 
+  .budget_noData {
+    height: 200px;
+  }
+  
+  .budget_mapSection {
+    height: 250px;
+    min-height: 250px;
+  }
+  
+  .budget_settingsGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .budget_controls {
+    padding: 8px;
+  }
+  
+  .overlay_container {
+    transform: scale(0.9);
+  }
+  
+  .layers_checkbox {
+    width: calc(100% - 20px);
+    top: auto;
+    bottom: 10px;
+    left: 10px;
+  }
+}
+
+@media screen and (max-width: 360px) {
+  .budget_chartSection {
+    padding: 5px;
+  }
+  
+  .budget_controls {
+    padding: 5px;
+    gap: 5px;
+  }
+  
+  .budget_settingValue {
+    font-size: 20px;
+  }
+  
+  .budget_settingLabel {
+    font-size: 12px;
+  }
+}
   .budget_chartSection {
     padding: 10px;
   }
