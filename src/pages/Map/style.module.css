@@ -251,17 +251,29 @@
 
 .budget_container {
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.budget_firstHalfWrapper {
+.budget_content {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: row;
+  height: calc(100% - 50px);
+}
+
+.budget_chartSection {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
 }
 
 .budget_chart, .budget_noData {
-  width: 600px;
+  width: 100%;
   height: 300px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .budget_noData {
@@ -269,8 +281,30 @@
   align-items: center;
   justify-content: center;
 }
+
 .budget_noDataWrapper {
   text-align: center;
+}
+
+.budget_settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.budget_settingRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.budget_settingButton {
+  width: 100%;
+  margin: 5px 0;
 }
 
 .budget_setting:nth-child(1) > .budget_settingLabel,
@@ -298,48 +332,108 @@
 }
 
 .budget_settingValue {
-  font-size: 35px;
+  font-size: clamp(24px, 4vw, 35px);
   text-transform: capitalize;
-  --padding-start: 15px;
-  --padding-end: 15px;
+  --padding-start: 10px;
+  --padding-end: 10px;
   --padding-top: 2px;
   --padding-bottom: 2px;
-  width: 100px;
+  width: 100%;
 }
 
 .budget_settingLabel {
-  font-size: 19px;
+  font-size: clamp(14px, 2vw, 19px);
   opacity: 1;
   text-transform: none;
+  width: 100%;
 }
 
-.budget_menu {
+.budget_controls {
   height: 50px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #d3d3d3;
+  padding: 0 10px;
+  gap: 10px;
 }
 
 .budget_menuSite {
-  width: 100px;
-  margin-left: 40px;
+  min-width: 100px;
+  max-width: 150px;
 }
 
 .budget_menuSensorID {
-  width: 300px;
-  margin-left: 20px;
+  flex: 1;
+  max-width: 400px;
 }
 
-.budget_secondHalf {
-  width: 100%;
-  height: 100%;
+.budget_mapSection {
+  flex: 1;
+  min-width: 0;
 }
 
 .budget_map {
   width: 100%;
-  height: 54%;
+  height: 100%;
+}
+
+/* Media Queries */
+@media (max-width: 1024px) {
+  .budget_content {
+    flex-direction: column;
+  }
+  
+  .budget_chartSection {
+    height: auto;
+  }
+  
+  .budget_mapSection {
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .budget_controls {
+    flex-direction: column;
+    height: auto;
+    padding: 10px;
+  }
+  
+  .budget_menuSite,
+  .budget_menuSensorID {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .budget_settingsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .budget_chart, 
+  .budget_noData {
+    height: 250px;
+  }
+  
+  .budget_mapSection {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .budget_chartSection {
+    padding: 10px;
+  }
+  
+  .budget_chart, 
+  .budget_noData {
+    height: 200px;
+  }
+  
+  .budget_mapSection {
+    height: 250px;
+  }
 }
 
 .budget_lineInput {
