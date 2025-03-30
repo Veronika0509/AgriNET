@@ -157,8 +157,8 @@ const BudgetEditor = (props: any) => {
 
   return (
     <div className={s.budget_container}>
-      <div className={s.budget_content}>
-        <div className={s.budget_chartSection}>
+      <div className={s.budget_firstHalf}>
+        <div className={s.budget_firstHalfWrapper}>
           {dataExists === undefined ? null : dataExists ? (
             <div className={s.budget_chart} id={'budgetChart'}></div>
           ) : (

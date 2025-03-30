@@ -128,13 +128,18 @@ function BudgetEditorLine(props: any) {
     setLabel(props.index === 1 ? 'Top' : props.index === 6 ? 'Bottom' : props.chartData.budgetLines[props.index - 1].label)
   }, [props.chartData, props.currentSensorId]);
 
+  const truncateText = (text: string, maxLength = 17) => {
+    if (!text) return '';
+    return text.length > maxLength ? text.slice(0, maxLength) + '…' : text;
+  };
+
   return (
     <div className={s.budget_setting}>
       <IonButton fill='clear' onClick={() => onSettingClick('value')}
                  className={s.budget_settingValue}>{!value || value === '0' ? "No" : value}</IonButton>
       <IonButton fill='clear' onClick={() => onSettingClick('label')}
                  disabled={props.index === 1 || props.index === 6 && true}
-                 className={s.budget_settingLabel}>{!label || label.length === 0 ? "Unset" : label}</IonButton>
+                 className={s.budget_settingLabel}>{!label || label.length === 0 ? "Unset" : truncateText(label)}</IonButton>
     </div>
   );
 }

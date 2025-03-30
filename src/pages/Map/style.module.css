@@ -4,9 +4,8 @@
 }
 
 .map {
-  height: 100%;
+  height: 91.5%;
   width: 100%;
-  min-height: 300px;
 }
 
 .contentWrapper > div > div {
@@ -25,19 +24,16 @@
 
 /*  Custom Overlays  */
 .overlay_info {
-  width: max-content;
-  min-width: 68px;
-  max-width: 200px;
+  width: 68px;
   display: none;
   margin-top: 5px;
   margin-left: -5px;
   background: #f1e279;
   color: #000;
   border-radius: 5px;
-  font-size: clamp(10px, 2vw, 12px);
-  padding: 6px 8px;
+  font-size: 10px;
+  padding: 4px;
   position: relative;
-  z-index: 10;
 }
 
 .overlay_container {
@@ -239,15 +235,12 @@
 /*  Layer List  */
 
 .layers_checkbox {
-  width: clamp(160px, 25vw, 200px);
+  width: 160px;
   position: absolute;
-  top: clamp(60px, 10vh, 100px);
+  top: 100px;
   left: 10px;
   opacity: 0.85;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  z-index: 5;
 }
 
 .layers_checkbox > ion-item {
@@ -257,36 +250,18 @@
 /*   Budget Editor   */
 
 .budget_container {
-  height: 100vh;
-  max-height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  height: 100%;
 }
 
-.budget_content {
+.budget_firstHalfWrapper {
   display: flex;
-  flex-direction: row;
-  height: calc(100% - 50px);
-  min-height: 0;
-  gap: 20px;
-}
-
-.budget_chartSection {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  padding: clamp(10px, 2vw, 20px);
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
+  align-items: center;
+  justify-content: center;
 }
 
 .budget_chart, .budget_noData {
-  width: 100%;
+  width: 600px;
   height: 300px;
-  max-width: 800px;
-  margin: 0 auto;
 }
 
 .budget_noData {
@@ -297,27 +272,6 @@
 
 .budget_noDataWrapper {
   text-align: center;
-}
-
-.budget_settingsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.budget_settingRow {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-}
-
-.budget_settingButton {
-  width: 100%;
-  margin: 5px 0;
 }
 
 .budget_setting:nth-child(1) > .budget_settingLabel,
@@ -344,174 +298,129 @@
   --color: #fc9a9d;
 }
 
+.budget_setting {
+  display: flex;
+  align-items: center;
+}
+
 .budget_settingValue {
-  font-size: clamp(24px, 4vw, 35px);
+  font-size: 35px;
   text-transform: capitalize;
-  --padding-start: 10px;
-  --padding-end: 10px;
+  --padding-start: 15px;
+  --padding-end: 15px;
   --padding-top: 2px;
   --padding-bottom: 2px;
-  width: 100%;
+  width: 100px;
 }
 
 .budget_settingLabel {
-  font-size: clamp(14px, 2vw, 19px);
+  font-size: 19px;
+  text-align: start;
   opacity: 1;
   text-transform: none;
-  width: 100%;
 }
 
-.budget_controls {
-  min-height: 50px;
+.budget_menu {
+  height: 50px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #d3d3d3;
-  padding: clamp(10px, 2vw, 15px);
-  gap: clamp(10px, 2vw, 20px);
-  flex-wrap: wrap;
 }
 
 .budget_menuSite {
-  min-width: 100px;
-  max-width: 150px;
+  width: 100px;
+  margin-right: 20px;
 }
 
 .budget_menuSensorID {
-  flex: 1;
-  max-width: 400px;
+  width: 300px;
 }
 
-.budget_mapSection {
-  flex: 1;
-  min-width: 0;
-}
-
-.budget_map {
+.budget_secondHalf {
   width: 100%;
   height: 100%;
 }
 
-/* Media Queries */
-@media screen and (max-width: 1024px) {
-  .budget_content {
-    flex-direction: column;
-  }
-  
-  .budget_chartSection {
-    height: auto;
-  }
-  
-  .budget_mapSection {
-    height: 400px;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .budget_controls {
-    flex-direction: column;
-    height: auto;
-    padding: 10px;
-  }
-  
-  .budget_menuSite,
-  .budget_menuSensorID {
-    width: 100%;
-    max-width: none;
-  }
-  
-  .budget_settingsGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .budget_chart, 
-  .budget_noData {
-    height: 250px;
-  }
-  
-  .budget_mapSection {
-    height: 300px;
-  }
-}
-
-@media screen and (max-width: 480px) {
-  .budget_container {
-    height: 100%;
-  }
-  
-  .budget_content {
-    height: auto;
-    min-height: calc(100vh - 60px);
-  }
-  
-  .budget_chartSection {
-    padding: 10px;
-  }
-  
-  .budget_chart, 
-  .budget_noData {
-    height: 200px;
-  }
-  
-  .budget_mapSection {
-    height: 250px;
-    min-height: 250px;
-  }
-  
-  .budget_settingsGrid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  
-  .budget_controls {
-    padding: 8px;
-  }
-  
-  .overlay_container {
-    transform: scale(0.9);
-  }
-  
-  .layers_checkbox {
-    width: calc(100% - 20px);
-    top: auto;
-    bottom: 10px;
-    left: 10px;
-  }
-}
-
-@media screen and (max-width: 360px) {
-  .budget_chartSection {
-    padding: 5px;
-  }
-  
-  .budget_controls {
-    padding: 5px;
-    gap: 5px;
-  }
-  
-  .budget_settingValue {
-    font-size: 20px;
-  }
-  
-  .budget_settingLabel {
-    font-size: 12px;
-  }
-}
-  .budget_chartSection {
-    padding: 10px;
-  }
-  
-  .budget_chart, 
-  .budget_noData {
-    height: 200px;
-  }
-  
-  .budget_mapSection {
-    height: 250px;
-  }
+.budget_map {
+  width: 100%;
+  height: 54%;
 }
 
 .budget_lineInput {
   padding-top: 0 !important;
+}
+
+@media (max-width: 800px) {
+  .budget_firstHalfWrapper {
+    display: block;
+  }
+
+  .budget_chart, .budget_noData {
+    width: 100%;
+  }
+
+  .budget_settings {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    column-gap: 4px;
+    row-gap: 8px;
+    justify-content: start;
+  }
+
+  .budget_setting {
+    display: flex;
+    gap: 4px;
+    max-width: 100%;
+  }
+
+  .budget_map {
+    width: 100%;
+    height: 35.5%;
+  }
+}
+
+@media (max-width: 700px) {
+  .budget_settings, .budget_menu {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .budget_settings {
+    display: block;
+  }
+
+  .budget_map {
+    display: none;
+  }
+
+  .budget_menu {
+    background: transparent;
+    justify-content: left;
+    display: block;
+  }
+
+  .budget_settingValue {
+    --padding-start: 5px;
+    --padding-end: 5px;
+    width: 80px;
+  }
+
+  .budget_settingLabel {
+    --padding-start: 5px;
+    --padding-end: 5px;
+  }
+}
+
+@media (max-width: 450px) {
+  .appMenu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .appMenuButton {
+    max-width: 60px !important;
+    min-width: 60px !important;
+  }
 }

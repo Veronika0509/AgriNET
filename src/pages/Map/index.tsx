@@ -488,24 +488,24 @@ const MapPage: React.FC<MapProps> = (props) => {
           <div className={activeTab === 'map' ? undefined : s.contentWrapper} style={{flex: 1, overflow: 'hidden'}}>
             {renderContent()}
           </div>
-          <IonSegment value={activeTab}>
-            <IonSegmentButton value="map" onClick={() => setActiveTab('map')}>
+          <IonSegment value={activeTab} className={s.appMenu}>
+            <IonSegmentButton className={s.appMenuButton} value="map" onClick={() => setActiveTab('map')}>
               <IonIcon icon={home}/>
             </IonSegmentButton>
 
-            <IonSegmentButton value="budgetEditor" onClick={() => setActiveTab('budgetEditor')}>
+            <IonSegmentButton className={s.appMenuButton} value="budgetEditor" onClick={() => setActiveTab('budgetEditor')}>
               <IonIcon icon={settings}/>
             </IonSegmentButton>
 
-            <IonSegmentButton value="valveControl">
+            <IonSegmentButton className={s.appMenuButton} value="valveControl">
               <IonIcon icon={water}/>
             </IonSegmentButton>
 
-            <IonSegmentButton value="upload">
+            <IonSegmentButton className={s.appMenuButton} value="upload">
               <IonIcon icon={cloudUpload}/>
             </IonSegmentButton>
 
-            <IonSegmentButton value="info" onClick={() => setActiveTab('info')}>
+            <IonSegmentButton className={s.appMenuButton} value="info" onClick={() => setActiveTab('info')}>
               <IonIcon icon={informationCircle}/>
             </IonSegmentButton>
           </IonSegment>
