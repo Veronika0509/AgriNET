@@ -3,6 +3,7 @@ import s from "../../../../../style.module.css";
 import {IonButton, useIonAlert} from "@ionic/react";
 import {updateBudgetLine} from "../../../../../data/types/moist/updateBudgetLine";
 import {getNewData} from "../functions/getNewData";
+import {updateChart} from "../functions/updateChart";
 
 function BudgetEditorLine(props: any) {
   const [value, setValue] = useState(props.chartData.budgetLines[props.index - 1]?.value)
@@ -86,6 +87,7 @@ function BudgetEditorLine(props: any) {
             props.setChartData,
             props.setDataExists
           )
+          updateChart(props.currentSensorId, props.userId, props.moistOverlays, props.setMoistOverlays, props.moistOverlaysRef)
         })
         .catch(error => {
           presentErrorAlert({

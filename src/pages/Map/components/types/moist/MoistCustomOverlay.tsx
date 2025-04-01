@@ -26,6 +26,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
       private moistOverlaysRef: any
       private currentSensorId: any
       private setCurrentSensorId: any
+      private toUpdate: boolean
 
       private div?: any;
       private layerName: string
@@ -52,7 +53,8 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         setChartPageType: any,
         moistOverlaysRef: any,
         currentSensorId: any,
-        setCurrentSensorId: any
+        setCurrentSensorId: any,
+        toUpdate: boolean
       ) {
         super();
         this.isBudgetEditorMap = isBudgetEditorMap
@@ -73,6 +75,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         this.moistOverlaysRef = moistOverlaysRef
         this.currentSensorId = currentSensorId
         this.setCurrentSensorId = setCurrentSensorId
+        this.toUpdate = toUpdate
 
         this.layerName = chartData.layerName
         this.offset = { x: 0, y: 0 };
@@ -108,7 +111,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         });
       }
 
-// Добавьте эти свойства в класс
       private _onMouseEnter: () => void = () => {};
       private _onMouseLeave: () => void = () => {};
 

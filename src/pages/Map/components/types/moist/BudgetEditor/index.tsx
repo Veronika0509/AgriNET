@@ -30,7 +30,7 @@ const BudgetEditor = (props: any) => {
   const chartRoot: any = useRef<any>(null);
   const mapRef = useRef<any>(null);
   const [map, setMap] = useState<any>()
-  const [moistOverlays, setMoistOverlays] = useState([])
+  const [moistOverlays, setMoistOverlays] = useState<any>([])
   let isMoistMarkerChartDrawn: boolean = false
   const moistOverlaysRef = useRef<any[]>([])
   const [dataExists, setDataExists] = useState<boolean>(false)
@@ -123,7 +123,8 @@ const BudgetEditor = (props: any) => {
           undefined,
           moistOverlaysRef,
           currentSensorId,
-          setCurrentSensorId
+          setCurrentSensorId,
+          true
         );
         await overlay.setMap(map);
       });
@@ -134,7 +135,7 @@ const BudgetEditor = (props: any) => {
     if (moistOverlays.length !== 0) {
       let roots: any[] = [];
       moistOverlaysRef.current.forEach((moistOverlay: any) => {
-        if (moistOverlay.isValidChartData) {
+        if (moistOverlay.isValidChartData && moistOverlay.toUpdate) {
           createMoistChartForOverlay('b', moistOverlay.chartData, roots, moistOverlaysRef.current)
         }
       });
@@ -142,7 +143,7 @@ const BudgetEditor = (props: any) => {
         roots.forEach(root => root.dispose());
       };
     }
-  }, [moistOverlays, currentSensorId]);
+  }, [moistOverlays]);
 
   useEffect(() => {
     if (currentAmountOfDays > 0) {
@@ -179,17 +180,17 @@ const BudgetEditor = (props: any) => {
           <div className={s.budget_settings}>
             {chartData.budgetLines && (
               <>
-                <BudgetEditorLine index={1} chartData={chartData} currentSensorId={currentSensorId}
+                <BudgetEditorLine moistOverlaysRef={moistOverlaysRef} setMoistOverlays={setMoistOverlays} moistOverlays={moistOverlays} index={1} chartData={chartData} currentSensorId={currentSensorId}
                                   userId={props.userId} currentAmountOfDays={currentAmountOfDays} setChartData={setChartData} setDataExists={setDataExists} />
-                <BudgetEditorLine index={2} chartData={chartData} currentSensorId={currentSensorId}
+                <BudgetEditorLine moistOverlaysRef={moistOverlaysRef} setMoistOverlays={setMoistOverlays} moistOverlays={moistOverlays} index={2} chartData={chartData} currentSensorId={currentSensorId}
                                   userId={props.userId} currentAmountOfDays={currentAmountOfDays} setChartData={setChartData} setDataExists={setDataExists} />
-                <BudgetEditorLine index={3} chartData={chartData} currentSensorId={currentSensorId}
+                <BudgetEditorLine moistOverlaysRef={moistOverlaysRef} setMoistOverlays={setMoistOverlays} moistOverlays={moistOverlays} index={3} chartData={chartData} currentSensorId={currentSensorId}
                                   userId={props.userId} currentAmountOfDays={currentAmountOfDays} setChartData={setChartData} setDataExists={setDataExists} />
-                <BudgetEditorLine index={4} chartData={chartData} currentSensorId={currentSensorId}
+                <BudgetEditorLine moistOverlaysRef={moistOverlaysRef} setMoistOverlays={setMoistOverlays} moistOverlays={moistOverlays} index={4} chartData={chartData} currentSensorId={currentSensorId}
                                   userId={props.userId} currentAmountOfDays={currentAmountOfDays} setChartData={setChartData} setDataExists={setDataExists} />
-                <BudgetEditorLine index={5} chartData={chartData} currentSensorId={currentSensorId}
+                <BudgetEditorLine moistOverlaysRef={moistOverlaysRef} setMoistOverlays={setMoistOverlays} moistOverlays={moistOverlays} index={5} chartData={chartData} currentSensorId={currentSensorId}
                                   userId={props.userId} currentAmountOfDays={currentAmountOfDays} setChartData={setChartData} setDataExists={setDataExists} />
-                <BudgetEditorLine index={6} chartData={chartData} currentSensorId={currentSensorId}
+                <BudgetEditorLine moistOverlaysRef={moistOverlaysRef} setMoistOverlays={setMoistOverlays} moistOverlays={moistOverlays} index={6} chartData={chartData} currentSensorId={currentSensorId}
                                   userId={props.userId} currentAmountOfDays={currentAmountOfDays} setChartData={setChartData} setDataExists={setDataExists} />
               </>
             )}
