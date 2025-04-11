@@ -226,7 +226,8 @@ export const Comments = (props: any) => {
             <td>{item.date}</td>
             <td style={{
               backgroundColor: types?.find((t: any) => t.id === item.type)?.color,
-              whiteSpace: 'nowrap'
+              whiteSpace: 'normal',
+              wordBreak: 'break-word'
             }}>
               {types?.find((t: any) => t.id === item.type)?.name}
             </td>
