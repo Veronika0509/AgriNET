@@ -8,6 +8,16 @@
   width: 100%;
 }
 
+.appMenu {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-top: 1px solid #ddd;
+  z-index: 1000;
+}
+
 .contentWrapper > div > div {
   display: none !important;
 }
@@ -34,6 +44,7 @@
   font-size: 10px;
   padding: 4px;
   position: relative;
+  text-align: center;
 }
 
 .overlay_container {
@@ -47,7 +58,7 @@
 }
 
 .overlay_chartContainer {
-  background: #96fd66;
+  /*background: #96fd66;*/
   border-radius: 6px;
   overflow-x: hidden;
   overflow-y: hidden;
@@ -161,7 +172,6 @@
 }
 
 .overlay_underInformationOverlayText {
-  background: #96fd66;
   font-size: 11px;
   text-align: center;
   color: #00ade3;
@@ -170,7 +180,7 @@
 }
 
 .overlay_wxetOverlayContainer {
-  background: #96fd66;
+  /*background: #96fd66;*/
   border: 1px solid #000;
   border-radius: 6px;
   width: 130px;
@@ -230,6 +240,18 @@
 
 .overlay_text {
   text-align: center;
+}
+
+.overlay_skullImageContent > img {
+  width: 50px;
+}
+
+.overlay_skullImageContent > p {
+  width: 58px;
+  background: #ff0000;
+  text-align: center;
+  border-radius: 3px;
+  font-weight: bold;
 }
 
 /*  Layer List  */
@@ -340,7 +362,7 @@
 
 .budget_secondHalf {
   width: 100%;
-  height: 100%;
+  height: 94%;
 }
 
 .budget_map {
@@ -379,6 +401,55 @@
     width: 100%;
     height: 35.5%;
   }
+
+  .budget_secondHalf {
+    width: 100%;
+    height: 89%;
+  }
+}
+
+/*   Comments   */
+
+.comments_settings {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  width: 100%;
+  background: #efefef;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.comments_settingsTypes {
+  display: flex;
+  align-items: center;
+}
+
+.comments_settingsTypesButton {
+  background: transparent;
+}
+
+.comments_table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 14px;
+  margin-bottom: 48px;
+}
+
+.comments_table th, .comments_table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.comments_table th {
+  background-color: #f2f2f2;
+  font-weight: 600;
+}
+
+.comments_tableComment {
+  width: 50%;
 }
 
 @media (max-width: 700px) {
@@ -411,6 +482,10 @@
     --padding-start: 5px;
     --padding-end: 5px;
   }
+
+  .comments_settings {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }
 
 @media (max-width: 450px) {
@@ -420,7 +495,7 @@
     justify-content: space-between;
   }
   .appMenuButton {
-    max-width: 60px !important;
-    min-width: 60px !important;
+    max-width: 75px !important;
+    min-width: 75px !important;
   }
 }
