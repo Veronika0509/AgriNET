@@ -205,7 +205,8 @@ export const Comments = (props: any) => {
         </IonSelect>
       </div>
 
-      <table className={s.comments_table}>
+      <div className={s.comments_tableWrapper}>
+        <table className={s.comments_table}>
         <thead>
         <tr>
           <th>Chart</th>
@@ -240,7 +241,8 @@ export const Comments = (props: any) => {
           </tr>
         )}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   )
 }

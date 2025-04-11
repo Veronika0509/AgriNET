@@ -429,12 +429,18 @@
   background: transparent;
 }
 
+.comments_tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 16px 0 48px 0;
+}
+
 .comments_table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 16px;
   font-size: 14px;
-  margin-bottom: 48px;
+  min-width: 600px;
 }
 
 .comments_table th, .comments_table td {
@@ -446,10 +452,84 @@
 .comments_table th {
   background-color: #f2f2f2;
   font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.comments_table td {
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 .comments_tableComment {
   width: 50%;
+}
+
+@media screen and (max-width: 545px) {
+  .comments_table {
+    min-width: 320px;
+  }
+  
+  .comments_table td {
+    padding: 6px 4px;
+    font-size: 0.85em;
+  }
+
+  .comments_table th {
+    padding: 8px 4px;
+    font-size: 0.9em;
+  }
+  
+  .comments_tableComment {
+    max-width: 120px;
+  }
+
+  .comments_table td:nth-child(1), /* Chart */
+  .comments_table th:nth-child(1) {
+    max-width: 80px;
+  }
+
+  .comments_table td:nth-child(2), /* Sensor ID */
+  .comments_table th:nth-child(2) {
+    max-width: 70px;
+  }
+
+  .comments_table td:nth-child(3), /* Field */
+  .comments_table th:nth-child(3) {
+    max-width: 60px;
+  }
+
+  .comments_table td:nth-child(4), /* Date */
+  .comments_table th:nth-child(4) {
+    max-width: 75px;
+  }
+
+  .comments_table td:nth-child(5), /* Type */
+  .comments_table th:nth-child(5) {
+    max-width: 65px;
+  }
+}
+
+@media screen and (max-width: 375px) {
+  .comments_table {
+    min-width: 320px;
+  }
+
+  .comments_table td {
+    padding: 4px 3px;
+    font-size: 0.8em;
+  }
+
+  .comments_table th {
+    padding: 6px 3px;
+    font-size: 0.85em;
+  }
+
+  .comments_tableComment {
+    max-width: 100px;
+  }
 }
 
 @media (max-width: 700px) {
