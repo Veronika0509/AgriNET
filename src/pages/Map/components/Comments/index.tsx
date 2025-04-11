@@ -217,26 +217,21 @@ export const Comments = (props: any) => {
         </tr>
         </thead>
         <tbody>
-        {data && data.length > 0 ? data.map((item: any, index: number) => (
+        {data && data.length > 0 && data.map((item: any, index: number) => (
           <tr key={index} ref={index === data.length - 1 ? lastElementRef : null}>
             <td>{chartKinds.find((chartKindObj: any) => chartKindObj.code === item.chartKind)?.name}</td>
             <td>{item.sensorId}</td>
             <td>{item.field}</td>
-            <td>{new Date(item.date).toLocaleString()}</td>
+            <td>{item.date}</td>
             <td style={{
               backgroundColor: types?.find((t: any) => t.id === item.type)?.color,
-              fontSize: '12px',
               whiteSpace: 'nowrap'
             }}>
               {types?.find((t: any) => t.id === item.type)?.name}
             </td>
-            <td>{item.text}</td>
+            <td className={s.comments_tableComment}>{item.text}</td>
           </tr>
-        )) : !isLoading && (
-          <tr>
-            <td colSpan={6} style={{textAlign: 'center', padding: '20px'}}>No data</td>
-          </tr>
-        )}
+        ))}
         {isLoading && (
           <tr>
             <td colSpan={6} style={{textAlign: 'center', padding: '20px'}}>
