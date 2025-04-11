@@ -1,70 +1,160 @@
-import {useEffect, useState} from "react";
+import {useEffect, useState, useRef} from "react";
 import {getCommentsTypes} from "./data/getCommentsTypes";
 import {getCommentsData} from "./data/getCommentsData";
-import {IonButton, IonIcon, IonInput, IonSelect, IonSelectOption} from "@ionic/react";
+import {IonButton, IonIcon, IonInput, IonSelect, IonSelectOption, IonSpinner} from "@ionic/react";
 import s from '../../style.module.css'
 import {closeOutline} from "ionicons/icons";
 
 export const Comments = (props: any) => {
   const [types, setTypes] = useState<any>()
-  const [data, setData] = useState<any>([])
+  const [data, setData] = useState<any[]>([])
   const [currentType, setCurrentType] = useState(0)
   const [currentSort, setCurrentSort] = useState('dateDesc')
   const [currentSensorId, setCurrentSensorId] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const observer = useRef<IntersectionObserver | null>(null)
+  const lastElementRef = useRef<HTMLTableRowElement | null>(null)
+
+  const loadMoreData = async () => {
+    if (isLoading || !hasMore) return;
+    
+    setIsLoading(true);
+    try {
+      const newData = await getCommentsData({
+        sort: currentSort,
+        startIndex: data.length,
+        type: currentType,
+        userId: props.userId,
+        sensorId: currentSensorId,
+      });
+      
+      if (newData.data.length === 0) {
+        setHasMore(false);
+      } else {
+        setData(prev => [...prev, ...newData.data]);
+      }
+    } catch (error) {
+      console.error('Error loading more data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    observer.current = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore) {
+          loadMoreData();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    return () => {
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+    };
+  }, [data.length, currentSort, currentType, currentSensorId]);
+
+  useEffect(() => {
+    const currentElement = lastElementRef.current;
+    if (currentElement && observer.current) {
+      observer.current.observe(currentElement);
+    }
+    return () => {
+      if (currentElement && observer.current) {
+        observer.current.unobserve(currentElement);
+      }
+    };
+  }, [data]);
 
   useEffect(() => {
     const setInitialData = async () => {
-      const currentTypes = await getCommentsTypes()
-      setTypes(currentTypes.data)
+      setIsLoading(true);
+      try {
+        const currentTypes = await getCommentsTypes();
+        setTypes(currentTypes.data);
 
-      const initialData = await getCommentsData({
-        sort: 'dateDesc',
-        startIndex: 0,
-        type: 0,
-        userId: props.userId,
-        sensorId: '',
-      })
-      setData(initialData.data)
-    }
-    setInitialData()
+        const initialData = await getCommentsData({
+          sort: 'dateDesc',
+          startIndex: 0,
+          type: 0,
+          userId: props.userId,
+          sensorId: '',
+        });
+        setData(initialData.data);
+        setHasMore(initialData.data.length > 0);
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    setInitialData();
   }, []);
 
   const onTypeChange = async (value: any) => {
     if (value !== currentType) {
-      setCurrentType(value)
-      const newData = await getCommentsData({
-        type: value,
-        sort: currentSort,
-        sensorId: currentSensorId,
-        startIndex: 0,
-        userId: props.userId
-      })
-      setData(newData.data)
+      setCurrentType(value);
+      setIsLoading(true);
+      try {
+        const newData = await getCommentsData({
+          type: value,
+          sort: currentSort,
+          sensorId: currentSensorId,
+          startIndex: 0,
+          userId: props.userId
+        });
+        setData(newData.data);
+        setHasMore(true);
+      } catch (error) {
+        console.error('Error changing type:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   }
   const onSensorIdChange = async (value: any) => {
     if (value !== currentSensorId) {
-      setCurrentSensorId(value)
-      const newData = await getCommentsData({
-        type: currentType,
-        sort: currentSort,
-        sensorId: value,
-        startIndex: 0,
-        userId: props.userId
-      })
-      setData(newData.data)
+      setCurrentSensorId(value);
+      setIsLoading(true);
+      try {
+        const newData = await getCommentsData({
+          type: currentType,
+          sort: currentSort,
+          sensorId: value,
+          startIndex: 0,
+          userId: props.userId
+        });
+        setData(newData.data);
+        setHasMore(true);
+      } catch (error) {
+        console.error('Error changing sensor ID:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   }
   const onSortChangeChange = async (value: any) => {
-    setCurrentSort(value)
-    const newData = await getCommentsData({
-      type: currentType,
-      sort: value,
-      sensorId: currentSensorId,
-      startIndex: 0,
-      userId: props.userId
-    })
-    setData(newData.data)
+    setCurrentSort(value);
+    setIsLoading(true);
+    try {
+      const newData = await getCommentsData({
+        type: currentType,
+        sort: value,
+        sensorId: currentSensorId,
+        startIndex: 0,
+        userId: props.userId
+      });
+      setData(newData.data);
+      setHasMore(true);
+    } catch (error) {
+      console.error('Error changing sort:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const sortOptions = [
@@ -128,7 +218,7 @@ export const Comments = (props: any) => {
         </thead>
         <tbody>
         {data && data.length > 0 ? data.map((item: any, index: number) => (
-          <tr key={index}>
+          <tr key={index} ref={index === data.length - 1 ? lastElementRef : null}>
             <td>{chartKinds.find((chartKindObj: any) => chartKindObj.code === item.chartKind)?.name}</td>
             <td>{item.sensorId}</td>
             <td>{item.field}</td>
@@ -142,9 +232,16 @@ export const Comments = (props: any) => {
             </td>
             <td>{item.text}</td>
           </tr>
-        )) : (
+        )) : !isLoading && (
           <tr>
             <td colSpan={6} style={{textAlign: 'center', padding: '20px'}}>No data</td>
+          </tr>
+        )}
+        {isLoading && (
+          <tr>
+            <td colSpan={6} style={{textAlign: 'center', padding: '20px'}}>
+              <IonSpinner name="crescent" />
+            </td>
           </tr>
         )}
         </tbody>
