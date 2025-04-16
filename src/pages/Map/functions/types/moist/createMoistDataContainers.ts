@@ -1,3 +1,5 @@
+import {getOptions} from "../../../data/getOptions";
+
 export const createMoistDataContainers = async (props: any) => {
   const moistChartDataItem = {
     mainId: props.mainId,
@@ -7,14 +9,15 @@ export const createMoistDataContainers = async (props: any) => {
     battery: props.response.data.battery,
     data: props.response.data.data,
     budgetLines: props.response.data.budgetLines,
-    layerName: 'Moist'
+    layerName: 'Moist',
+    freshness: props.response.data.freshness
   }
   props.moistChartData.push(moistChartDataItem)
   props.boundsArray.push(props.bounds)
   if (props.moistChartsAmount.length === props.moistChartData.length) {
     let updatedMoistChartData: any = []
     props.boundsArray.map((bounds: any, index: number) => {
-      if (props.moistChartData[index].data.length !== 0 && props.moistChartData[index].data.length !== 1) {
+      if (props.moistChartData[index].data.length > 1 && props.response.data.freshness !== 'outdated') {
         const exists = updatedMoistChartData.some(
           (updatedMoistChartDataItem: any) => updatedMoistChartDataItem[0].sensorId === props.moistChartData[index].sensorId
         );

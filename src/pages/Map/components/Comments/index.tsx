@@ -12,12 +12,9 @@ import {
   IonSpinner, IonTitle, IonToolbar, IonTextarea, IonButtons, IonButton, IonFooter, useIonAlert
 } from "@ionic/react";
 import s from '../../style.module.css'
-import {closeOutline, pencilOutline, trashOutline} from "ionicons/icons";
-import {getDatetime} from "../../../Chart/components/DateTimePicker/functions/getDatetime";
-import login from "../../../Login";
-import {onRemoveTelOrEmailSubmit} from "../../../Chart/components/Alarm/functions/telOrEmail/onRemoveTelOrEmailSubmit";
+import {closeOutline, pencilOutline, refreshOutline, trashOutline} from "ionicons/icons";
 import {deleteComment} from "./data/deleteComment";
-import {resolveConfig} from "vite";
+import {saveComment} from "./data/saveComment";
 
 export const Comments = (props: any) => {
   const [types, setTypes] = useState<any>()
@@ -32,9 +29,9 @@ export const Comments = (props: any) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   // Modal
-  const [modalCurrentItem, setModalCurrentItem] = useState<any>()
   const [modalId, setModalId] = useState()
   const [modalChart, setModalChart] = useState()
+  const [modalField, setModalField] = useState()
   const [modalType, setModalType] = useState()
   const [modalSensorId, setModalSensorId] = useState()
   const [modalDate, setModalDate] = useState<any>()
@@ -55,6 +52,26 @@ export const Comments = (props: any) => {
   })
 
   const [presentAlert] = useIonAlert();
+  const sortOptions = [
+    {name: "dateDesc", label: "By Date, newest first"},
+    {name: "dateAsc", label: "By Date, oldest first"},
+    {name: "type", label: "By Type"},
+    {name: "field", label: "By Field"},
+    {name: "chartKind", label: "By Chart"},
+  ]
+  const chartKinds: any = [
+    {code: "M", name: "Soil Moisture"},
+    {code: "MSum", name: "Sum of Soil Moisture"},
+    {code: "SMT", name: "Soil Temperature"},
+    {code: "T", name: "Temperature RH"},
+    {code: "BandDiff", name: "Band Difference"},
+    {code: "BFlow", name: "BFlow"},
+    {code: "disease", name: "Disease"},
+    {code: "InfraRed", name: "Infra Red"},
+    {code: "S", name: "Other"},
+    {code: "SRS", name: "SRS"},
+    {code: "WL", name: "Weather Station"}
+  ];
 
   const loadMoreData = async () => {
     if (isMoreLoading || !hasMore) return;
@@ -80,6 +97,33 @@ export const Comments = (props: any) => {
       setIsMoreLoading(false);
     }
   };
+  const updateData = async (type?: string, value?: any) => {
+    setIsLoading(true);
+
+    const params = {
+      type: currentType,
+      sort: currentSort,
+      sensorId: currentSensorId,
+      startIndex: 0,
+      userId: props.userId,
+    };
+
+    if (type === 'types') params.type = value;
+    if (type === 'sensorId') params.sensorId = value;
+    if (type === 'sort') params.sort = value;
+    if (type === 'initial') {
+      Object.assign(params, { sort: 'dateDesc', type: 0, sensorId: '' });
+    }
+
+    const newData = await getCommentsData(params);
+    setData(newData.data);
+    if (type === 'initial') {
+      setHasMore(newData.data.length > 0);
+    } else {
+      setHasMore(true);
+    }
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     observer.current = new IntersectionObserver(
@@ -97,7 +141,6 @@ export const Comments = (props: any) => {
       }
     };
   }, [data.length, currentSort, currentType, currentSensorId]);
-
   useEffect(() => {
     const currentElement = lastElementRef.current;
     if (currentElement && observer.current) {
@@ -109,28 +152,11 @@ export const Comments = (props: any) => {
       }
     };
   }, [data]);
-
   useEffect(() => {
     const setInitialData = async () => {
-      setIsLoading(true);
-      try {
-        const currentTypes = await getCommentsTypes();
-        setTypes(currentTypes.data);
-
-        const initialData = await getCommentsData({
-          sort: 'dateDesc',
-          startIndex: 0,
-          type: 0,
-          userId: props.userId,
-          sensorId: '',
-        });
-        setData(initialData.data);
-        setHasMore(initialData.data.length > 0);
-      } catch (error) {
-        console.error('Error loading initial data:', error);
-      } finally {
-        setIsLoading(false);
-      }
+      const currentTypes = await getCommentsTypes();
+      setTypes(currentTypes.data);
+      await updateData('initial')
     };
     setInitialData();
   }, []);
@@ -138,87 +164,19 @@ export const Comments = (props: any) => {
   const onTypeChange = async (value: any) => {
     if (value !== currentType) {
       setCurrentType(value);
-      setIsLoading(true);
-      try {
-        const newData = await getCommentsData({
-          type: value,
-          sort: currentSort,
-          sensorId: currentSensorId,
-          startIndex: 0,
-          userId: props.userId
-        });
-        setData(newData.data);
-        setHasMore(true);
-      } catch (error) {
-        console.error('Error changing type:', error);
-      } finally {
-        setIsLoading(false);
-      }
+      await updateData('types', value)
     }
   }
   const onSensorIdChange = async (value: any) => {
     if (value !== currentSensorId) {
       setCurrentSensorId(value);
-      setIsLoading(true);
-      try {
-        const newData = await getCommentsData({
-          type: currentType,
-          sort: currentSort,
-          sensorId: value,
-          startIndex: 0,
-          userId: props.userId
-        });
-        setData(newData.data);
-        setHasMore(true);
-      } catch (error) {
-        console.error('Error changing sensor ID:', error);
-      } finally {
-        setIsLoading(false);
-      }
+      await updateData('sensorId', value)
     }
   }
   const onSortChangeChange = async (value: any) => {
     setCurrentSort(value);
-    setIsLoading(true);
-    try {
-      const newData = await getCommentsData({
-        type: currentType,
-        sort: value,
-        sensorId: currentSensorId,
-        startIndex: 0,
-        userId: props.userId
-      });
-      setData(newData.data);
-      setHasMore(true);
-    } catch (error) {
-      console.error('Error changing sort:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    await updateData('sort', value)
   }
-
-  const sortOptions = [
-    {name: "dateDesc", label: "By Date, newest first"},
-    {name: "dateAsc", label: "By Date, oldest first"},
-    {name: "type", label: "By Type"},
-    {name: "field", label: "By Field"},
-    {name: "chartKind", label: "By Chart"},
-  ]
-
-  const chartKinds: any = [
-    {code: "M", name: "Soil Moisture"},
-    {code: "MSum", name: "Sum of Soil Moisture"},
-    {code: "SMT", name: "Soil Temperature"},
-    {code: "T", name: "Temperature RH"},
-    {code: "BandDiff", name: "Band Difference"},
-    {code: "BFlow", name: "BFlow"},
-    {code: "disease", name: "Disease"},
-    {code: "InfraRed", name: "Infra Red"},
-    {code: "S", name: "Other"},
-    {code: "SRS", name: "SRS"},
-    {code: "WL", name: "Weather Station"}
-  ];
-
   const onEditCLick = (currentItem: any) => {
     const values = {
       chart: currentItem.chartKind,
@@ -227,8 +185,9 @@ export const Comments = (props: any) => {
       date: new Date(currentItem.date).toISOString(),
       text: currentItem.text
     }
+
     setIsEditModalOpen(true)
-    setModalCurrentItem(currentItem)
+    setModalField(currentItem.field)
     setModalId(currentItem.id)
     setModalChart(values.chart)
     setModalType(values.type)
@@ -238,22 +197,19 @@ export const Comments = (props: any) => {
     setFormValues(values)
     setInitialValues(values)
   }
-
   const hasChanges = () => {
     return formValues.chart !== initialValues.chart ||
            formValues.type !== initialValues.type ||
            formValues.sensorId !== initialValues.sensorId ||
-           formValues.date !== initialValues.date ||
+           formValues.date.replace('.000Z', '') !== initialValues.date.replace('.000Z', '') ||
            formValues.text !== initialValues.text
   }
-
   const updateFormValue = (field: string, value: any) => {
     setFormValues(prev => ({
       ...prev,
       [field]: value
     }))
   }
-
   const onCommentDelete = () => {
     presentAlert({
       header: 'Delete confirmation',
@@ -268,19 +224,10 @@ export const Comments = (props: any) => {
           role: 'confirm',
           handler: () => {
             const deleteCommentFunction = async () => {
-              setIsLoading(true)
               setIsEditModalOpen(false)
               const result: any = await deleteComment(modalId)
               if (result.status === 200) {
-                const newData = await getCommentsData({
-                  sort: currentSort,
-                  startIndex: 0,
-                  type: currentType,
-                  userId: props.userId,
-                  sensorId: currentSensorId,
-                });
-                setData(newData.data);
-                setIsLoading(false)
+                await updateData()
               }
             }
             deleteCommentFunction()
@@ -289,12 +236,66 @@ export const Comments = (props: any) => {
       ]
     })
   }
-
-  const onCommentSave = () => {
+  const onCommentSave = async () => {
     if (!modalText.trim()) {
-
+      presentAlert({
+        header: 'Validation Error',
+        message: 'Text should not be empty',
+        buttons: [
+          {
+            text: 'Close',
+            role: 'cancel',
+          }
+        ]
+      })
     } else {
-      console.log('ok')
+      setIsEditModalOpen(false)
+
+      const inputDate = new Date(modalDate.replace('.000Z', '') + '.000Z').toLocaleString()
+      const [datePart, timePart] = inputDate.split(", ");
+      const [day, month, year] = datePart.split(".");
+      const [hours, minutes] = timePart.split(":");
+      const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}`;
+
+      const body: any = {
+        id: modalId,
+        chartKind: modalChart,
+        sensorId: modalSensorId,
+        field: modalField,
+        date: formattedDate,
+        type: modalType,
+        text: modalText,
+        opts: {
+          cssClass: "edit-comment",
+          showBackdrop: true,
+          enableBackdropDismiss: true
+        }
+      }
+      const saveResult = await saveComment(body)
+      if (saveResult.status === 200) {
+        await updateData()
+      }
+    }
+  }
+  const onCancelClick = () => {
+    if (!hasChanges()) {
+      setIsEditModalOpen(false)
+    } else {
+      presentAlert({
+        header: 'Dismiss changes',
+        message: 'Are you sure want to dismiss all changes?',
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel',
+          },
+          {
+            text: 'Dismiss',
+            role: 'confirm',
+            handler: () => setIsEditModalOpen(false)
+          }
+        ]
+      })
     }
   }
 
@@ -422,9 +423,8 @@ export const Comments = (props: any) => {
                     id="datetime" 
                     value={modalDate} 
                     onIonChange={(e: any) => {
-                      const newDate = getDatetime(new Date(e.detail.value))
-                      setModalDate(newDate)
-                      updateFormValue('date', newDate)
+                      setModalDate(e.detail.value)
+                      updateFormValue('date', e.detail.value)
                     }}
                   ></IonDatetime>
                 </IonModal>
@@ -453,7 +453,7 @@ export const Comments = (props: any) => {
                   </IonButtons>
                   <IonButtons slot='end'>
                     {hasChanges() && <IonButton color='primary' onClick={onCommentSave}>Save</IonButton>}
-                    <IonButton onClick={() => setIsEditModalOpen(false)}>Cancel</IonButton>
+                    <IonButton onClick={onCancelClick}>Cancel</IonButton>
                   </IonButtons>
                 </IonToolbar>
               </IonFooter>
@@ -461,6 +461,9 @@ export const Comments = (props: any) => {
           </div>
         </IonContent>
       </IonModal>
+      <IonButton shape='round' className={s.comments_refreshButton} onClick={async () => await updateData()}>
+        <IonIcon slot="icon-only" icon={refreshOutline}></IonIcon>
+      </IonButton>
     </div>
   )
 }

@@ -235,14 +235,14 @@
   --inner-border-width: 0;
 }
 
+.settingsInputWrapper:has(.settingsInput:global(.has-focus)) {
+  border-color: var(--ion-color-primary);
+  border-width: 2px;
+}
+
 .settingsInput > label > div:nth-child(1) {
   color: #999;
   min-width: 175px;
-}
-
-.settingsInputWrapper:has(.settingsInput:global(.has-focus)) {
-  border-color: #05a55a;
-  border-width: 2px;
 }
 
 .settingsWrongInput {

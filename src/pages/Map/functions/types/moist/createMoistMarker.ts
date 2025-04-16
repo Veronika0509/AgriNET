@@ -1,6 +1,7 @@
 import {createMoistDataContainers} from "./createMoistDataContainers";
 import axios from "axios";
 import {getMoistMarkerChartData} from "../../../data/types/moist/getMoistMarkerChartData";
+import {logoFacebook} from "ionicons/icons";
 
 export const createMoistMarker = async (
   moistChartsAmount: any,

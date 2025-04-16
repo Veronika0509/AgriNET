@@ -5,6 +5,9 @@ import wxetOverlayMoon from '../../../../../assets/images/icons/wxetOverlayMoon.
 import wxetOverlaySun from '../../../../../assets/images/icons/wxetOverlaySun.svg'
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {onWxetSensorClick} from "../../../functions/types/wxet/onWxetSensorClick";
+import {getOptions} from "../../../data/getOptions";
+import {logoFacebook} from "ionicons/icons";
+import skull from "../../../../../assets/images/skull.svg";
 
 export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
@@ -19,11 +22,13 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
       private isValidData: boolean;
       private chartData: any;
       private setChartPageType: any
+      private borderColor: any
 
       private layerName: string
       private root: any;
       private offset: { x: number; y: number };
       private div?: any;
+      private isTextTruncated: boolean
 
       constructor(
         setChartData: any,
@@ -52,6 +57,8 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
 
         this.layerName = data.layerName
         this.offset = { x: 0, y: 0 };
+        this.isTextTruncated = this.isValidData ? this.chartData.name.length > 20 : this.chartData.name.length > 7
+        this.borderColor = 'gray'
       }
 
       update() {
@@ -76,22 +83,25 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         }
         const isBattery: boolean = this.chartData.data.battery !== undefined && this.chartData.data.battery !== null
         const isBatteryPercentage: boolean = this.chartData.data.batteryPercentage !== undefined && this.chartData.data.batteryPercentage !== null
+        if (this.isValidData && !this.chartData.freshness) {
+          console.log('chart data is valid but freshness id undefined', this.chartData.sensorId, this.chartData.freshness)
+        }
         return (
-          <div className={s.overlay_wxetOverlay}>
+          <div className={s.overlay_wxetOverlay}  onClick={() => onWxetSensorClick(
+            this.history,
+            this.chartData.sensorId,
+            this.chartData.name,
+            this.setChartData,
+            this.setPage,
+            this.setSiteId,
+            this.setSiteName,
+            this.setAdditionalChartData,
+            this.setChartPageType
+          )}>
             {
               this.isValidData ? (
-                <div onClick={() => onWxetSensorClick(
-                  this.history,
-                  this.chartData.sensorId,
-                  this.chartData.name,
-                  this.setChartData,
-                  this.setPage,
-                  this.setSiteId,
-                  this.setSiteName,
-                  this.setAdditionalChartData,
-                  this.setChartPageType
-                  )}>
-                  <div className={s.overlay_wxetOverlayContainer}>
+                <div>
+                  <div className={s.overlay_wxetOverlayContainer} style={{ background: this.borderColor }}>
                     <div className={s.overlay_wxetOverlayInnerContainer} style={{backgroundColor: this.chartData.data.bgColor}}>
                       <img src={this.chartData.data.solar ? wxetOverlaySun : wxetOverlayMoon} className={s.overlay_wxetOverlayImage}
                            alt=""/>
@@ -106,9 +116,10 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
                         <p className={s.wxetOverlayDataText}>Solar rad: {this.chartData.data.solar} W/m2</p>
                       </div>
                     </div>
-                    <p className={s.overlay_underInformationOverlayText}>{this.chartData.name}</p>
+                    <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name, 'wxet')}</p>
                   </div>
                   <div className={`${s.overlay_info} ${s.overlay_validWxetOverlayInfo}`}>
+                    {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
                     {isBattery && (
                       <div>
                         {isBatteryPercentage && (
@@ -121,23 +132,25 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
                   </div>
                 </div>
               ) : (
-                <div
-                  className={`${s.overlay_container} ${s.overlay_invalidOverlayContainer}`}
-                >
-                  <div className={s.overlay_wxetNotValidData}>
-                    <div className={s.overlay_wxetNotValidDataRectangle}>
-                      <p className={s.overlay_wxetNotValidDataRectangleText}>no data</p>
-                    </div>
-                    <p className={`${s.overlay_wxetNotValidName} ${s.overlay_underInformationOverlayText}`}>{truncateText(this.chartData.name)}</p>
+                <div className={s.overlay_skullImage}>
+                  <div className={s.overlay_skullImageContent}>
+                    <img src={skull} alt=""/>
+                    <p>{truncateText(this.chartData.name)}</p>
                   </div>
                   <div className={s.overlay_info}>
-                    <p className={s.overlay_text}>{this.chartData.sensorId}</p>
+                    {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
+                    <p className={s.chartName}>{this.chartData.sensorId}</p>
                   </div>
                 </div>
               )
             }
           </div>
         );
+      }
+
+      async setBorderColor() {
+        const options = await getOptions()
+        this.borderColor = options.data[`freshness.${this.chartData.freshness}.color`]
       }
 
       onAdd() {
@@ -167,9 +180,10 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
           if (!this.root) {
             this.root = createRoot(this.div);
           }
-          this.root.render(this.renderContent());
-
-          this.draw()
+          this.setBorderColor().then(() => {
+            this.root.render(this.renderContent());
+            this.draw();
+          });
         }
       }
 

@@ -5,21 +5,26 @@ export const pushAllCoordinates = (
   allCoordinatesOfMarkers: any,
   siteList: any,
   setCoordinatesForFitting: any,
-  siteName: string
+  siteName: string,
+  type: string
 ) => {
   const lat = sensorItem.lat
   const lng = sensorItem.lng
   const id = sensorItem.sensorId
   const mainId = sensorItem.id
-  const type: string = sensorItem.markerType
-  const allSensorItems = getSensorItems(undefined, siteList, siteName)
   let neededSensorItemsArray: any = []
-  allSensorItems.map((neededSensorItem: any) => {
-    if (neededSensorItem.markerType === 'moist-fuel' || neededSensorItem.markerType === 'wxet' || neededSensorItem.markerType === 'temp-rh-v2' || neededSensorItem.markerType === 'valve') {
-      neededSensorItemsArray.push(neededSensorItem)
+  siteList.map((site: any) => {
+    if (site.name === siteName) {
+      site.layers.map((layer: any) => {
+        if (layer.name === 'Moist' || layer.name === 'moist' || layer.name === 'SoilTemp' || layer.name === 'WXET' || layer.name === 'Valve') {
+          layer.markers.map((marker: any) => {
+            neededSensorItemsArray.push(marker)
+          })
+        }
+      })
     }
   })
-  if (type === 'moist-fuel' || type === 'wxet' || type === 'temp-rh-v2' || type === 'valve') {
+  if (type === 'Moist' || type === 'WXET' || type === 'SoilTemp' || type === 'Valve') {
     const exists = allCoordinatesOfMarkers.some((marker: any) => marker.id === id);
 
     if (!exists) {

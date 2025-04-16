@@ -4,6 +4,7 @@ import React from "react";
 import {onValveSensorClick} from "../../../functions/types/valve/onValveSensorClick";
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {simpleColors} from "../../../../../assets/getColors";
+import skull from "../../../../../assets/images/skull.svg";
 // import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
 
 export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
@@ -27,6 +28,7 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
       private root: any;
       private offset: { x: number; y: number };
       private div?: any;
+      private isTextTruncated: boolean
 
       constructor(
         bounds: google.maps.LatLngBounds,
@@ -59,6 +61,7 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
 
         this.layerName = chartData.layerName
         this.offset = { x: 0, y: 0 };
+        this.isTextTruncated = this.chartData.name.length > 7
       }
 
       update() {
@@ -85,7 +88,7 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
           )}>
             {this.isValidChartData ? (
               <div>
-                <div className={`${s.overlay_chartContainer} ${s.overlay_valveChartContainer}`}>
+                <div className={`${s.overlay_chartContainer} ${s.overlay_valveChartContainer}`} style={{background: '#96fd66'}}>
                   <div className={s.overlay_chartWrapper} style={this.chartData.bgColor && {background: `#${this.bgColor}`}}>
                     <div style={{
                       display: this.isValveMarkerChartDrawn ? 'block' : 'none',
@@ -102,21 +105,19 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
                      className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlay_info}>
-                  <p className={s.chartName}>{this.chartData.name}</p>
+                  {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
                   <p>{this.chartData.sensorId}</p>
                 </div>
               </div>
             ) : (
-              <div className={`${s.overlay_container} ${s.overlay_invalidOverlayContainer}`}>
-                <div className={s.overlay_wxetNotValidData}>
-                  <div className={s.overlay_wxetNotValidDataRectangle}>
-                    <p className={s.overlay_wxetNotValidDataRectangleText}>no data</p>
-                  </div>
-                  <p
-                    className={`${s.overlay_wxetNotValidName} ${s.overlay_underInformationOverlayText}`}>{truncateText(this.chartData.name)}</p>
+              <div className={s.overlay_skullImage}>
+                <div className={s.overlay_skullImageContent}>
+                  <img src={skull} alt=""/>
+                  <p>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlay_info}>
-                  <p className={s.overlay_text}>{this.chartData.sensorId}</p>
+                  {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
+                  <p className={s.chartName}>{this.chartData.sensorId}</p>
                 </div>
               </div>
             )}

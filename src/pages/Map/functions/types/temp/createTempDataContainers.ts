@@ -20,14 +20,15 @@ export const createTempDataContainers = async (props: any) => {
     batteryPercentage: props.response.data.batteryPercentage,
     metric: props.response.data.metric,
     temp: props.response.data.temp,
-    data: props.response.data.data
+    data: props.response.data.data,
+    freshness: props.response.data.freshness
   }
   props.tempChartData.push(tempChartDataItem)
   props.boundsArray.push(props.bounds)
   if (props.tempChartsAmount.length === props.tempChartData.length) {
     let updatedTempChartData: any = []
     props.boundsArray.map((bounds: any, index: number) => {
-      if (props.tempChartData[index].data !== undefined && props.tempChartData[index].data.length !== 0 && props.tempChartData[index].data.length !== 1) {
+      if (props.tempChartData[index].data !== undefined && props.tempChartData[index].data.length !== 0 && props.tempChartData[index].data.length !== 1 && props.response.data.freshness !== '24h' && props.response.data.freshness !== '1d') {
         const exists = updatedTempChartData.some(
           (updatedTempChartDataItem: any) => updatedTempChartDataItem[0].sensorId === props.tempChartData[index].sensorId
         );
@@ -43,6 +44,7 @@ export const createTempDataContainers = async (props: any) => {
         }
       }
       new Promise((resolve: any) => {
+        // console.log(props.invalidChartData.length, updatedTempChartData.length)
         if (props.invalidChartData.length + updatedTempChartData.length === props.countTemp) {
           props.setInvalidTempChartDataContainer(props.invalidChartData)
           props.setTempChartDataContainer(updatedTempChartData)

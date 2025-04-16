@@ -362,7 +362,7 @@
 
 .budget_secondHalf {
   width: 100%;
-  height: 94%;
+  height: 100%;
 }
 
 .budget_map {
@@ -372,40 +372,6 @@
 
 .budget_lineInput {
   padding-top: 0 !important;
-}
-
-@media (max-width: 800px) {
-  .budget_firstHalfWrapper {
-    display: block;
-  }
-
-  .budget_chart, .budget_noData {
-    width: 100%;
-  }
-
-  .budget_settings {
-    display: grid;
-    grid-template-columns: max-content max-content;
-    column-gap: 4px;
-    row-gap: 8px;
-    justify-content: start;
-  }
-
-  .budget_setting {
-    display: flex;
-    gap: 4px;
-    max-width: 100%;
-  }
-
-  .budget_map {
-    width: 100%;
-    height: 35.5%;
-  }
-
-  .budget_secondHalf {
-    width: 100%;
-    height: 89%;
-  }
 }
 
 /*   Comments   */
@@ -467,7 +433,164 @@
   width: 50%;
 }
 
-@media screen and (max-width: 545px) {
+.comments_tableRow {
+  cursor: pointer;
+}
+
+.comments_tableRow:hover {
+  background: #add8e6;
+}
+
+.comments_tableCommentValue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.comments_tableEdit {
+  display: none;
+  min-width: 12px;
+  height: 12px;
+}
+
+.comments_tableRow:hover .comments_tableEdit {
+  display: block;
+}
+
+.comments_modalItem {
+  --padding-start: 0;
+}
+
+.comments_modalWrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.comments_modalBody {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-top: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.comments_modalItemWrapper {
+  border-bottom: 2px solid #33db64;
+  outline: none;
+}
+
+.comments_modalItemWrapper::part(native) {
+  --inner-border-width: 0;
+}
+
+.comments_modalItemWrapper:has(.comments_modalInput:global(.has-focus)) {
+  border-color: #05a55a;
+  border-width: 2px;
+}
+
+.comments_modalDateModal {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.comments_modalItemTextarea {
+  --padding-bottom: 0 !important;
+}
+
+.comments_modalFooter {
+  position: static;
+}
+
+.comments_modalFooterButtons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.comments_refreshButton {
+  cursor: pointer;
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+}
+
+.comments_refreshButton::part(native) {
+  padding: 5px;
+  position: absolute;
+  width: 35px;
+  height: 36px;
+}
+
+@media (max-width: 800px) {
+  .budget_firstHalfWrapper {
+    display: block;
+  }
+
+  .budget_chart, .budget_noData {
+    width: 100%;
+  }
+
+  .budget_settings {
+    display: grid;
+    grid-template-columns: max-content max-content;
+    column-gap: 4px;
+    row-gap: 8px;
+    justify-content: start;
+  }
+
+  .budget_setting {
+    display: flex;
+    gap: 4px;
+    max-width: 100%;
+  }
+
+  .budget_map {
+    width: 100%;
+    height: 35.5%;
+  }
+
+  .budget_secondHalf {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  .budget_settings, .budget_menu {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .budget_settings {
+    display: block;
+  }
+
+  .budget_map {
+    display: none;
+  }
+
+  .budget_menu {
+    background: transparent;
+    justify-content: left;
+    display: block;
+  }
+
+  .budget_settingValue {
+    --padding-start: 5px;
+    --padding-end: 5px;
+    width: 80px;
+  }
+
+  .budget_settingLabel {
+    --padding-start: 5px;
+    --padding-end: 5px;
+  }
+
+  .comments_settings {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media screen and (max-width: 640px) {
   .comments_table {
     min-width: 320px;
     font-size: 13px;
@@ -518,7 +641,19 @@
   }
 }
 
-@media screen and (max-width: 420px) {
+@media (max-width: 450px) {
+  .appMenu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .appMenuButton {
+    max-width: 75px !important;
+    min-width: 75px !important;
+  }
+}
+
+@media screen and (max-width: 440px) {
   .comments_table td {
     padding: 6px 3px;
     font-size: 0.85em;
@@ -534,7 +669,7 @@
   }
 }
 
-@media screen and (max-width: 375px) {
+@media screen and (max-width: 420px) {
   .comments_table {
     min-width: 320px;
   }
@@ -584,7 +719,7 @@
   }
 }
 
-@media screen and (max-width: 320px) {
+@media screen and (max-width: 390px) {
   .comments_table {
     min-width: 300px;
   }
@@ -631,53 +766,5 @@
   .comments_table th:nth-child(5) {
     max-width: 55px;
     min-width: 40px;
-  }
-}
-
-@media (max-width: 700px) {
-  .budget_settings, .budget_menu {
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-
-  .budget_settings {
-    display: block;
-  }
-
-  .budget_map {
-    display: none;
-  }
-
-  .budget_menu {
-    background: transparent;
-    justify-content: left;
-    display: block;
-  }
-
-  .budget_settingValue {
-    --padding-start: 5px;
-    --padding-end: 5px;
-    width: 80px;
-  }
-
-  .budget_settingLabel {
-    --padding-start: 5px;
-    --padding-end: 5px;
-  }
-
-  .comments_settings {
-    grid-template-columns: repeat(1, 1fr);
-  }
-}
-
-@media (max-width: 450px) {
-  .appMenu {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .appMenuButton {
-    max-width: 75px !important;
-    min-width: 75px !important;
   }
 }

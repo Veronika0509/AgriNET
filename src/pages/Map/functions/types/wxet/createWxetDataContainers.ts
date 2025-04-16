@@ -1,5 +1,3 @@
-import axios from "axios";
-
 export const createWxetDataContainers = async (props: any) => {
   const wxetDataItem = {
     mainId: props.mainId,
@@ -7,14 +5,15 @@ export const createWxetDataContainers = async (props: any) => {
     sensorId: props.sensorId,
     name: props.name,
     data: props.response.data,
-    layerName: 'WXET'
+    layerName: 'WXET',
+    freshness: props.response.data.freshness
   }
   props.wxetData.push(wxetDataItem)
   props.boundsArray.push(props.bounds)
   if (props.wxetChartsAmount.length === props.wxetData.length) {
     let updatedWxetData: any = []
     props.boundsArray.map((bounds: any, index: number) => {
-      if (props.wxetData[index].data.temp !== undefined && props.wxetData[index].data.temp !== null) {
+      if (props.wxetData[index].data.temp !== undefined && props.wxetData[index].data.temp !== null && props.response.data.freshness !== 'outdated') {
         const exists = updatedWxetData.some(
           (updatedWxetChartDataItem: any) => updatedWxetChartDataItem[0].sensorId === props.wxetData[index].sensorId
         );

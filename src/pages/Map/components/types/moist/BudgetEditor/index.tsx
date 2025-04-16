@@ -103,6 +103,7 @@ const BudgetEditor = (props: any) => {
           ...marker,
           budgetLines: overlayChartData.data.budgetLines,
           data: overlayChartData.data.data,
+          freshness: overlayChartData.data.freshness
         };
         const MoistCustomOverlayExport: any = initializeMoistCustomOverlay(props.isGoogleApiLoaded);
         const overlay = new MoistCustomOverlayExport(

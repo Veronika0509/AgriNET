@@ -3,6 +3,8 @@ import {createRoot} from "react-dom/client";
 import React from "react";
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {onTempSensorClick} from "../../../functions/types/temp/onTempSensorClick";
+import {getOptions} from "../../../data/getOptions";
+import skull from "../../../../../assets/images/skull.svg";
 
 export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
@@ -26,6 +28,8 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
       private root: any;
       private offset: { x: number; y: number };
       private div?: any;
+      private isTextTruncated: boolean
+      private borderColor: any
 
       constructor(
         bounds: google.maps.LatLngBounds,
@@ -62,6 +66,8 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
 
         this.layerName = chartData.layerName
         this.offset = { x: 0, y: 0 };
+        this.isTextTruncated = this.chartData.name.length > 7
+        this.borderColor = 'gray'
       }
 
       update() {
@@ -74,6 +80,9 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       renderContent() {
+        if (this.isValidChartData && !this.chartData.freshness) {
+          console.log('chart data is valid but freshness id undefined', this.chartData.sensorId, this.chartData.freshness)
+        }
         return (
           <div className={s.overlay_container}>
             {this.isValidChartData ? (
@@ -90,7 +99,7 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
                 this.userId,
                 this.present
               )}>
-                <div className={s.overlay_chartContainer}>
+                <div className={s.overlay_chartContainer} style={{background: this.borderColor}}>
                   <div id={this.chartData.id} className={s.overlay_chart} style={{ display: this.isTempMarkerChartDrawn ? 'block' : 'none' }}></div>
                   {this.isTempMarkerChartDrawn ? null : (
                     <div className={s.overlay_loader}></div>
@@ -98,21 +107,20 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
                   <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlay_info}>
-                  <p className={s.chartName}>{this.chartData.name}</p>
+                  {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
                   {this.chartData.batteryPercentage && <p className={s.chartName}>Battery: {this.chartData.batteryPercentage}%</p>}
                   <p>{this.chartData.sensorId}</p>
                 </div>
               </div>
             ) : (
-              <div className={`${s.overlay_container} ${s.overlay_invalidOverlayContainer}`}>
-                <div className={s.overlay_wxetNotValidData}>
-                  <div className={s.overlay_wxetNotValidDataRectangle}>
-                    <p className={s.overlay_wxetNotValidDataRectangleText}>no data</p>
-                  </div>
-                  <p className={`${s.overlay_wxetNotValidName} ${s.overlay_underInformationOverlayText}`}>{truncateText(this.chartData.name)}</p>
+              <div className={s.overlay_skullImage}>
+                <div className={s.overlay_skullImageContent}>
+                  <img src={skull} alt=""/>
+                  <p>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlay_info}>
-                  <p className={s.overlay_text}>{this.chartData.sensorId}</p>
+                  {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
+                  <p className={s.chartName}>{this.chartData.sensorId}</p>
                 </div>
               </div>
             )}
@@ -120,12 +128,24 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
         );
       }
 
+      async setBorderColor() {
+        const freshnessColors: any = {
+          '30m': 'yellow',
+          '60m': 'green',
+          '1h': 'green',
+          '6h': 'yellow',
+          '12h': 'red',
+        };
+        this.borderColor = freshnessColors[this.chartData.freshness]
+      }
+
       onAdd() {
-        new Promise((resolve: any) => {
+        new Promise(async (resolve: any) => {
           const divId = `overlay-${this.chartData.id}`;
           this.div = document.getElementById(divId);
 
           if (!this.div) {
+            await this.setBorderColor()
             this.div = document.createElement("div");
             this.div.id = divId;
             this.div.style.borderStyle = "none";
@@ -149,6 +169,7 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: any) => {
               this.root = createRoot(this.div);
             }
             this.root.render(this.renderContent());
+
           }
           resolve()
         }).then(() => {

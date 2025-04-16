@@ -3,7 +3,8 @@ import {getNewData} from "./getNewData";
 export const getFreshSiteList = async (props: any) => {
   let checkedSites: any = props.siteList.filter((site: any) => {
     return site.layers.find((layer: any) =>
-      (layer.name == "Moist" || layer.name == "Nprobe" || layer.name == "moist")
+      //layer.name === "Nprobe"
+      (layer.name === "Moist" || layer.name === "moist")
     ) != null
   })
 

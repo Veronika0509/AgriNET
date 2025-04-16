@@ -50,6 +50,18 @@ const Header = (props: any) => {
             <IonTitle>Budget Lines Editor</IonTitle>
           </>
         )}
+        {props.activeTab === 'comments' && (
+          <>
+            <IonIcon
+              onClick={onBudgetEditorBack}
+              className={`${s.header_backIcon} ${'ion-margin-start'}`}
+              slot='start'
+              size='large'
+              icon={arrowBackOutline}
+            ></IonIcon>
+            <IonTitle>Comments</IonTitle>
+          </>
+        )}
       </IonToolbar>
     </IonHeader>
   )

@@ -31,10 +31,11 @@ import {initializeValveCustomOverlay} from "./components/types/valve/ValveCustom
 import {createValveChartForOverlay} from "./functions/types/valve/createValveChartForOverlay";
 import s from './style.module.css';
 import {addOverlayToOverlaysArray} from "./functions/types/moist/addOverlayToOverlaysArray";
-import {cloudUpload, home, informationCircle, settings, water} from "ionicons/icons";
+import {cloudUpload, documentText, home, informationCircle, settings, water} from "ionicons/icons";
 import Info from "../Info";
 import Index from "./components/types/moist/BudgetEditor";
 import BudgetEditor from "./components/types/moist/BudgetEditor";
+import {Comments} from "./components/Comments";
 
 interface MapProps {
   page: any
@@ -54,6 +55,9 @@ interface MapProps {
 }
 
 const MapPage: React.FC<MapProps> = (props) => {
+  if (!props.reloadMapPage) {
+    console.log(props.reloadMapPage)
+  }
   const present = useIonToast()
   const [activeTab, setActiveTab] = useState("map");
   const [isMarkerClicked, setIsMarkerClicked] = useState(false)
@@ -468,6 +472,14 @@ const MapPage: React.FC<MapProps> = (props) => {
             </section>
           </div>
         );
+      case 'comments':
+        return (
+          <div style={{height: '100%', padding: '16px'}}>
+            <section>
+              <Comments userId={props.userId} />
+            </section>
+          </div>
+        )
       default:
         return null;
     }
@@ -485,7 +497,7 @@ const MapPage: React.FC<MapProps> = (props) => {
       />
       <IonContent className={s.ionContent}>
         <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-          <div className={activeTab === 'map' ? undefined : s.contentWrapper} style={{flex: 1, overflow: 'hidden'}}>
+          <div className={activeTab === 'map' ? undefined : s.contentWrapper} style={{flex: 1, marginBottom: '48px'}}>
             {renderContent()}
           </div>
           <IonSegment value={activeTab} className={s.appMenu}>
@@ -497,12 +509,8 @@ const MapPage: React.FC<MapProps> = (props) => {
               <IonIcon icon={settings}/>
             </IonSegmentButton>
 
-            <IonSegmentButton className={s.appMenuButton} value="valveControl">
-              <IonIcon icon={water}/>
-            </IonSegmentButton>
-
-            <IonSegmentButton className={s.appMenuButton} value="upload">
-              <IonIcon icon={cloudUpload}/>
+            <IonSegmentButton className={s.appMenuButton} value="comments" onClick={() => setActiveTab('comments')}>
+              <IonIcon icon={documentText} />
             </IonSegmentButton>
 
             <IonSegmentButton className={s.appMenuButton} value="info" onClick={() => setActiveTab('info')}>

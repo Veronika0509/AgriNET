@@ -3,8 +3,9 @@ import {createRoot} from "react-dom/client";
 import React from "react";
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
-import {logoFacebook} from "ionicons/icons";
-import {loadGoogleApi} from "../../../../../functions/loadGoogleApiFunc";
+import {getOptions} from "../../../data/getOptions";
+import skull from '../../../../../assets/images/skull.svg'
+
 export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
     return class CustomOverlayExport extends google.maps.OverlayView {
@@ -26,6 +27,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
       private moistOverlaysRef: any
       private currentSensorId: any
       private setCurrentSensorId: any
+      private borderColor: any
       private toUpdate: boolean
 
       private div?: any;
@@ -34,6 +36,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
       private offset: { x: number; y: number };
       private prefix: any;
       private isCurrentOverlay: any;
+      private isTextTruncated: boolean
 
       constructor(
         isBudgetEditorMap: any,
@@ -78,9 +81,11 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         this.toUpdate = toUpdate
 
         this.layerName = chartData.layerName
-        this.offset = { x: 0, y: 0 };
+        this.offset = {x: 0, y: 0};
         this.prefix = this.isBudgetEditorMap ? 'b' : 'm'
         this.isCurrentOverlay = this.chartData.sensorId === this.currentSensorId
+        this.borderColor = 'gray'
+        this.isTextTruncated = this.chartData.name.length > 7
       }
 
       update(currentSensorId?: any) {
@@ -104,6 +109,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
           if (this.div && this.root) {
             const shouldRender = !this.isValidChartData || (this.isValidChartData && this.isMoistMarkerChartDrawn);
             if (shouldRender) {
+              console.log('rerendered')
               this.root.render(this.renderContent());
             }
           }
@@ -111,8 +117,10 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         });
       }
 
-      private _onMouseEnter: () => void = () => {};
-      private _onMouseLeave: () => void = () => {};
+      private _onMouseEnter: () => void = () => {
+      };
+      private _onMouseLeave: () => void = () => {
+      };
 
       renderContent() {
         const onMarkerClick = () => {
@@ -136,8 +144,12 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
             )
           }
         }
+        if (this.isValidChartData && !this.chartData.freshness) {
+          console.log('chart data is valid but freshness id undefined', this.chartData.sensorId, this.chartData.freshness)
+        }
         return (
-          <div className={s.overlay_container} onClick={onMarkerClick} style={{width: this.isCurrentOverlay ? '62px' : '58px'}}>
+          <div className={s.overlay_container} onClick={onMarkerClick}
+               style={{width: this.isCurrentOverlay ? '62px' : '58px'}}>
             {this.isValidChartData ? (
               <div className={s.mainContainer}>
                 <div className={s.overlay_chartContainer} style={{
@@ -145,31 +157,34 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
                     ? '0 0 20px 10px rgba(255, 255, 0, 0.8)'
                     : 'none',
                   border: this.isCurrentOverlay ? '3px solid #ffff00' : '1px solid #000',
+                  background: this.borderColor
                 }}>
-                  <div style={{ display: this.isMoistMarkerChartDrawn ? 'block' : 'none' }} id={`${this.prefix}-${this.chartData.id}`} className={s.overlay_chart}></div>
+                  <div style={{display: this.isMoistMarkerChartDrawn ? 'block' : 'none'}}
+                       id={`${this.prefix}-${this.chartData.id}`} className={s.overlay_chart}></div>
                   {this.isMoistMarkerChartDrawn ? null : (
                     <div className={s.overlay_loader}></div>
                   )}
                   <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlay_info}>
-                  <p className={s.chartName}>{this.chartData.name}</p>
+                  {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
                   {this.chartData.battery && <p className={s.chartName}>{this.chartData.battery}</p>}
                   <p>{this.chartData.sensorId}</p>
                 </div>
               </div>
             ) : (
-              <div className={`${s.overlay_container} ${s.overlay_invalidOverlayContainer}`}>
-                <div className={s.overlay_invalidMoistChartDataImgContainer} style={{
+              <div className={s.overlay_skullImage}>
+                <div className={s.overlay_skullImageContent} style={{
                   boxShadow: this.isCurrentOverlay
                     ? '0 0 20px 10px rgba(255, 255, 0, 0.8)'
                     : 'none',
-                  border: this.isCurrentOverlay ? '3px solid #ffff00' : '1px solid #000',
+                  border: this.isCurrentOverlay ? '3px solid #ffff00' : 'none',
                 }}>
-                  <img src={this.invalidChartDataImage} className={s.overlay_invalidChartDataImg} alt='Invalid Chart Data'/>
-                  <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
+                  <img src={skull} alt=""/>
+                  <p>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlay_info}>
+                  {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
                   <p className={s.chartName}>{this.chartData.sensorId}</p>
                 </div>
               </div>
@@ -178,17 +193,24 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         );
       }
 
+      async setBorderColor() {
+        const options = await getOptions()
+        this.borderColor = options.data[`freshness.${this.chartData.freshness}.color`]
+      }
+
       onAdd() {
-        new Promise((resolve: any) => {
+        new Promise(async (resolve: any) => {
           const divId = `overlay-${this.prefix}-${this.chartData.id}`;
           this.div = document.getElementById(divId);
 
           if (this.div) return resolve();
 
+          await this.setBorderColor()
           this.div = document.createElement("div");
           this.div.id = divId;
           this.div.style.position = "absolute";
           this.div.style.WebkitTransform = 'translateZ(0)';
+          this.div.style.borderRadius = '12px';
 
           const setupZIndex = () => {
             if (this.prefix === 'b') {

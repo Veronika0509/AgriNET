@@ -56,6 +56,7 @@ const App: React.FC = () => {
   const history = useHistory();
 
   const reloadMapPage = () => {
+    console.log('reload map page')
     setMapPageKey(prevKey => prevKey + 1);
   };
 

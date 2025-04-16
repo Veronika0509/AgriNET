@@ -71,7 +71,7 @@ const LayerList = (props: any) => {
                     justify="space-between"
                     onIonChange={(checkbox) => toggleLayer(checkbox, layer)}
                   >
-                    {layer}
+                    {layer === 'SoilTemp' ? 'Temp/RH' : layer}
                   </IonCheckbox>
                 </IonItem>
             ))
