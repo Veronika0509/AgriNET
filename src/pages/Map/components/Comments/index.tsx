@@ -39,7 +39,20 @@ export const Comments = (props: any) => {
   const [modalSensorId, setModalSensorId] = useState()
   const [modalDate, setModalDate] = useState<any>()
   const [modalText, setModalText] = useState<any>('')
-  const [areChanges, setAreChanges] = useState(false)
+  const [formValues, setFormValues] = useState({
+    chart: '',
+    type: 0,
+    sensorId: '',
+    date: '',
+    text: ''
+  })
+  const [initialValues, setInitialValues] = useState({
+    chart: '',
+    type: 0,
+    sensorId: '',
+    date: '',
+    text: ''
+  })
 
   const [presentAlert] = useIonAlert();
 
@@ -207,14 +220,38 @@ export const Comments = (props: any) => {
   ];
 
   const onEditCLick = (currentItem: any) => {
+    const values = {
+      chart: currentItem.chartKind,
+      type: currentItem.type,
+      sensorId: currentItem.sensorId,
+      date: new Date(currentItem.date).toISOString(),
+      text: currentItem.text
+    }
     setIsEditModalOpen(true)
     setModalCurrentItem(currentItem)
     setModalId(currentItem.id)
-    setModalChart(currentItem.chartKind)
-    setModalType(currentItem.type)
-    setModalSensorId(currentItem.sensorId)
-    setModalDate(new Date(currentItem.date).toISOString())
-    setModalText(currentItem.text)
+    setModalChart(values.chart)
+    setModalType(values.type)
+    setModalSensorId(values.sensorId)
+    setModalDate(values.date)
+    setModalText(values.text)
+    setFormValues(values)
+    setInitialValues(values)
+  }
+
+  const hasChanges = () => {
+    return formValues.chart !== initialValues.chart ||
+           formValues.type !== initialValues.type ||
+           formValues.sensorId !== initialValues.sensorId ||
+           formValues.date !== initialValues.date ||
+           formValues.text !== initialValues.text
+  }
+
+  const updateFormValue = (field: string, value: any) => {
+    setFormValues(prev => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
   const onCommentDelete = () => {
@@ -348,12 +385,8 @@ export const Comments = (props: any) => {
             <div className={s.comments_modalBody}>
               <IonItem className={s.comments_modalItem}>
                 <IonSelect label="Chart" value={modalChart} onIonChange={(e: any) => {
-                  if (e.detail.value !== modalCurrentItem.chartKind) {
-                    setAreChanges(true)
-                  } else {
-                    setAreChanges(false)
-                  }
                   setModalChart(e.detail.value)
+                  updateFormValue('chart', e.detail.value)
                 }}>
                   {chartKinds && chartKinds.map((chartKind: any) => (
                     <IonSelectOption key={chartKind.code} value={chartKind.code}>{chartKind.name}</IonSelectOption>
@@ -363,11 +396,7 @@ export const Comments = (props: any) => {
               <IonItem className={s.comments_modalItem}>
                 <IonSelect label="Type" value={modalType} onIonChange={(e: any) => {
                   setModalType(e.detail.value)
-                  if (e.detail.value !== modalCurrentItem.type) {
-                    setAreChanges(true)
-                  } else {
-                    setAreChanges(false)
-                  }
+                  updateFormValue('type', e.detail.value)
                 }}>
                   {types && types.map((type: any) => (
                     <IonSelectOption key={type.id} value={type.id}>{type.name}</IonSelectOption>
@@ -375,17 +404,42 @@ export const Comments = (props: any) => {
                 </IonSelect>
               </IonItem>
               <IonItem className={`${s.comments_modalItem} ${s.comments_modalItemWrapper}`}>
-                <IonInput onIonChange={(e: any) => setModalSensorId(e.detail.value)} className={s.comments_modalInput} label="Sensor ID" value={modalSensorId}></IonInput>
+                <IonInput 
+                  onIonChange={(e: any) => {
+                    setModalSensorId(e.detail.value)
+                    updateFormValue('sensorId', e.detail.value)
+                  }} 
+                  className={s.comments_modalInput} 
+                  label="Sensor ID" 
+                  value={modalSensorId}
+                ></IonInput>
               </IonItem>
               <IonItem className={s.comments_modalItem}>
                 <IonLabel>Date</IonLabel>
                 <IonDatetimeButton datetime="datetime"></IonDatetimeButton>
                 <IonModal keepContentsMounted={true} className={s.comments_modalDateModal}>
-                  <IonDatetime id="datetime" value={modalDate} onIonChange={(e: any) => setModalDate(getDatetime(new Date(e.detail.value)))}></IonDatetime>
+                  <IonDatetime 
+                    id="datetime" 
+                    value={modalDate} 
+                    onIonChange={(e: any) => {
+                      const newDate = getDatetime(new Date(e.detail.value))
+                      setModalDate(newDate)
+                      updateFormValue('date', newDate)
+                    }}
+                  ></IonDatetime>
                 </IonModal>
               </IonItem>
               <IonItem className={s.comments_modalItem}>
-                <IonTextarea className={s.comments_modalItemTextarea} label="Text" value={modalText} autoGrow={true} onIonChange={(e: any) => setModalText(e.detail.value)}></IonTextarea>
+                <IonTextarea 
+                  className={s.comments_modalItemTextarea} 
+                  label="Text" 
+                  value={modalText} 
+                  autoGrow={true} 
+                  onIonChange={(e: any) => {
+                    setModalText(e.detail.value)
+                    updateFormValue('text', e.detail.value)
+                  }}
+                ></IonTextarea>
               </IonItem>
             </div>
             <div className={s.comments_modalFooterWrapper}>
@@ -398,7 +452,7 @@ export const Comments = (props: any) => {
                     </IonButton>
                   </IonButtons>
                   <IonButtons slot='end'>
-                    <IonButton style={{display: areChanges ? 'block' : 'none' }} color='primary' onClick={onCommentSave}>Save</IonButton>
+                    {hasChanges() && <IonButton color='primary' onClick={onCommentSave}>Save</IonButton>}
                     <IonButton onClick={() => setIsEditModalOpen(false)}>Cancel</IonButton>
                   </IonButtons>
                 </IonToolbar>
