@@ -1,9 +1,23 @@
-import {useEffect, useState, useRef} from "react";
+import React, {useEffect, useState, useRef} from "react";
 import {getCommentsTypes} from "./data/getCommentsTypes";
 import {getCommentsData} from "./data/getCommentsData";
-import {IonButton, IonIcon, IonInput, IonSelect, IonSelectOption, IonSpinner} from "@ionic/react";
+import {
+  IonContent, IonDatetime, IonDatetimeButton,
+  IonHeader,
+  IonIcon,
+  IonInput, IonItem, IonLabel,
+  IonModal,
+  IonSelect,
+  IonSelectOption,
+  IonSpinner, IonTitle, IonToolbar, IonTextarea, IonButtons, IonButton, IonFooter, useIonAlert
+} from "@ionic/react";
 import s from '../../style.module.css'
-import {closeOutline} from "ionicons/icons";
+import {closeOutline, pencilOutline, trashOutline} from "ionicons/icons";
+import {getDatetime} from "../../../Chart/components/DateTimePicker/functions/getDatetime";
+import login from "../../../Login";
+import {onRemoveTelOrEmailSubmit} from "../../../Chart/components/Alarm/functions/telOrEmail/onRemoveTelOrEmailSubmit";
+import {deleteComment} from "./data/deleteComment";
+import {resolveConfig} from "vite";
 
 export const Comments = (props: any) => {
   const [types, setTypes] = useState<any>()
@@ -11,15 +25,28 @@ export const Comments = (props: any) => {
   const [currentType, setCurrentType] = useState(0)
   const [currentSort, setCurrentSort] = useState('dateDesc')
   const [currentSensorId, setCurrentSensorId] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [isMoreLoading, setIsMoreLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const observer = useRef<IntersectionObserver | null>(null)
   const lastElementRef = useRef<HTMLTableRowElement | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  // Modal
+  const [modalCurrentItem, setModalCurrentItem] = useState<any>()
+  const [modalId, setModalId] = useState()
+  const [modalChart, setModalChart] = useState()
+  const [modalType, setModalType] = useState()
+  const [modalSensorId, setModalSensorId] = useState()
+  const [modalDate, setModalDate] = useState<any>()
+  const [modalText, setModalText] = useState<any>('')
+  const [areChanges, setAreChanges] = useState(false)
+
+  const [presentAlert] = useIonAlert();
 
   const loadMoreData = async () => {
-    if (isLoading || !hasMore) return;
+    if (isMoreLoading || !hasMore) return;
     
-    setIsLoading(true);
+    setIsMoreLoading(true);
     try {
       const newData = await getCommentsData({
         sort: currentSort,
@@ -37,7 +64,7 @@ export const Comments = (props: any) => {
     } catch (error) {
       console.error('Error loading more data:', error);
     } finally {
-      setIsLoading(false);
+      setIsMoreLoading(false);
     }
   };
 
@@ -179,6 +206,61 @@ export const Comments = (props: any) => {
     {code: "WL", name: "Weather Station"}
   ];
 
+  const onEditCLick = (currentItem: any) => {
+    setIsEditModalOpen(true)
+    setModalCurrentItem(currentItem)
+    setModalId(currentItem.id)
+    setModalChart(currentItem.chartKind)
+    setModalType(currentItem.type)
+    setModalSensorId(currentItem.sensorId)
+    setModalDate(new Date(currentItem.date).toISOString())
+    setModalText(currentItem.text)
+  }
+
+  const onCommentDelete = () => {
+    presentAlert({
+      header: 'Delete confirmation',
+      message: 'Are you sure want to delete this comment?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Delete',
+          role: 'confirm',
+          handler: () => {
+            const deleteCommentFunction = async () => {
+              setIsLoading(true)
+              setIsEditModalOpen(false)
+              const result: any = await deleteComment(modalId)
+              if (result.status === 200) {
+                const newData = await getCommentsData({
+                  sort: currentSort,
+                  startIndex: 0,
+                  type: currentType,
+                  userId: props.userId,
+                  sensorId: currentSensorId,
+                });
+                setData(newData.data);
+                setIsLoading(false)
+              }
+            }
+            deleteCommentFunction()
+          }
+        },
+      ]
+    })
+  }
+
+  const onCommentSave = () => {
+    if (!modalText.trim()) {
+
+    } else {
+      console.log('ok')
+    }
+  }
+
   return (
     <div>
       <div className={s.comments_settings}>
@@ -204,7 +286,6 @@ export const Comments = (props: any) => {
           ))}
         </IonSelect>
       </div>
-
       <div className={s.comments_tableWrapper}>
         <table className={s.comments_table}>
         <thead>
@@ -218,8 +299,15 @@ export const Comments = (props: any) => {
         </tr>
         </thead>
         <tbody>
-        {data && data.length > 0 && data.map((item: any, index: number) => (
-          <tr key={index} ref={index === data.length - 1 ? lastElementRef : null}>
+        {isLoading && (
+          <tr>
+            <td colSpan={6} style={{textAlign: 'center', padding: '20px'}}>
+              <IonSpinner name="crescent"/>
+            </td>
+          </tr>
+        )}
+        {!isLoading && data && data.length > 0 && data.map((item: any, index: number) => (
+          <tr key={index} ref={index === data.length - 1 ? lastElementRef : null} className={s.comments_tableRow} onClick={() => onEditCLick(item)}>
             <td>{chartKinds.find((chartKindObj: any) => chartKindObj.code === item.chartKind)?.name}</td>
             <td>{item.sensorId}</td>
             <td>{item.field}</td>
@@ -231,10 +319,15 @@ export const Comments = (props: any) => {
             }}>
               {types?.find((t: any) => t.id === item.type)?.name}
             </td>
-            <td className={s.comments_tableComment}>{item.text}</td>
+            <td className={s.comments_tableComment}>
+              <div className={s.comments_tableCommentValue}>
+                <span>{item.text}</span>
+                <IonIcon icon={pencilOutline} className={s.comments_tableEdit}></IonIcon>
+              </div>
+            </td>
           </tr>
         ))}
-        {isLoading && (
+        {isMoreLoading && (
           <tr>
             <td colSpan={6} style={{textAlign: 'center', padding: '20px'}}>
               <IonSpinner name="crescent" />
@@ -244,6 +337,76 @@ export const Comments = (props: any) => {
         </tbody>
         </table>
       </div>
+      <IonModal isOpen={isEditModalOpen} onWillDismiss={() => setIsEditModalOpen(false)}>
+        <IonContent className={s.comments_modalContent}>
+          <div className={s.comments_modalWrapper}>
+            <IonHeader>
+              <IonToolbar>
+                <IonTitle>Edit Comment</IonTitle>
+              </IonToolbar>
+            </IonHeader>
+            <div className={s.comments_modalBody}>
+              <IonItem className={s.comments_modalItem}>
+                <IonSelect label="Chart" value={modalChart} onIonChange={(e: any) => {
+                  if (e.detail.value !== modalCurrentItem.chartKind) {
+                    setAreChanges(true)
+                  } else {
+                    setAreChanges(false)
+                  }
+                  setModalChart(e.detail.value)
+                }}>
+                  {chartKinds && chartKinds.map((chartKind: any) => (
+                    <IonSelectOption key={chartKind.code} value={chartKind.code}>{chartKind.name}</IonSelectOption>
+                  ))}
+                </IonSelect>
+              </IonItem>
+              <IonItem className={s.comments_modalItem}>
+                <IonSelect label="Type" value={modalType} onIonChange={(e: any) => {
+                  setModalType(e.detail.value)
+                  if (e.detail.value !== modalCurrentItem.type) {
+                    setAreChanges(true)
+                  } else {
+                    setAreChanges(false)
+                  }
+                }}>
+                  {types && types.map((type: any) => (
+                    <IonSelectOption key={type.id} value={type.id}>{type.name}</IonSelectOption>
+                  ))}
+                </IonSelect>
+              </IonItem>
+              <IonItem className={`${s.comments_modalItem} ${s.comments_modalItemWrapper}`}>
+                <IonInput onIonChange={(e: any) => setModalSensorId(e.detail.value)} className={s.comments_modalInput} label="Sensor ID" value={modalSensorId}></IonInput>
+              </IonItem>
+              <IonItem className={s.comments_modalItem}>
+                <IonLabel>Date</IonLabel>
+                <IonDatetimeButton datetime="datetime"></IonDatetimeButton>
+                <IonModal keepContentsMounted={true} className={s.comments_modalDateModal}>
+                  <IonDatetime id="datetime" value={modalDate} onIonChange={(e: any) => setModalDate(getDatetime(new Date(e.detail.value)))}></IonDatetime>
+                </IonModal>
+              </IonItem>
+              <IonItem className={s.comments_modalItem}>
+                <IonTextarea className={s.comments_modalItemTextarea} label="Text" value={modalText} autoGrow={true} onIonChange={(e: any) => setModalText(e.detail.value)}></IonTextarea>
+              </IonItem>
+            </div>
+            <div className={s.comments_modalFooterWrapper}>
+              <IonFooter className={s.comments_modalFooter}>
+                <IonToolbar className={s.comments_modalFooterButtons}>
+                  <IonButtons slot='start'>
+                    <IonButton onClick={onCommentDelete}>
+                      <IonIcon slot="start" icon={trashOutline}></IonIcon>
+                      Delete
+                    </IonButton>
+                  </IonButtons>
+                  <IonButtons slot='end'>
+                    <IonButton style={{display: areChanges ? 'block' : 'none' }} color='primary' onClick={onCommentSave}>Save</IonButton>
+                    <IonButton onClick={() => setIsEditModalOpen(false)}>Cancel</IonButton>
+                  </IonButtons>
+                </IonToolbar>
+              </IonFooter>
+            </div>
+          </div>
+        </IonContent>
+      </IonModal>
     </div>
   )
 }
