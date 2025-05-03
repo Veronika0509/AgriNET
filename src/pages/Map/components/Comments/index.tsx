@@ -12,11 +12,12 @@ import {
   IonSpinner, IonTitle, IonToolbar, IonTextarea, IonButtons, IonButton, IonFooter, useIonAlert
 } from "@ionic/react";
 import s from '../../style.module.css'
-import {closeOutline, pencilOutline, refreshOutline, trashOutline} from "ionicons/icons";
+import {closeOutline, pencilOutline, refreshOutline, trashOutline, arrowBack} from "ionicons/icons";
+import { handleBackNavigation } from '../../functions/handleBackNavigation';
 import {deleteComment} from "./data/deleteComment";
 import {saveComment} from "./data/saveComment";
 
-export const Comments = (props: any) => {
+export const Comments = ({ previousPage, ...props }: { previousPage?: string } & any) => {
   const [types, setTypes] = useState<any>()
   const [data, setData] = useState<any[]>([])
   const [currentType, setCurrentType] = useState(0)

@@ -4,7 +4,8 @@ import {getSumChartData} from "../../../../../Chart/data/types/moist/getSumChart
 import {getSensorItems} from "../../../../data/getSensorItems";
 import {createBudgetChart} from "../../../../functions/types/moist/createBudgetChart";
 import {IonButton, IonIcon, IonSelect, IonSelectOption, useIonAlert} from "@ionic/react";
-import {briefcase, copyOutline, logoFacebook} from "ionicons/icons";
+import {briefcase, copyOutline, logoFacebook, arrowBack} from "ionicons/icons";
+import { handleBackNavigation } from '../../../../functions/handleBackNavigation';
 import BudgetEditorLine from "./components/BudgetEditorLine";
 import {getSiteList} from "../../../../data/getSiteList";
 import {getMoistMarkerChartData} from "../../../../data/types/moist/getMoistMarkerChartData";
@@ -21,7 +22,7 @@ import {updateSite} from "./functions/updateSite";
 import {setDays} from "./functions/setDays";
 import {onIncreaseDaysCountClick} from "./functions/onIncreaseDaysCountClick";
 
-const BudgetEditor = (props: any) => {
+const BudgetEditor = ({ previousPage, ...props }: { previousPage?: string } & any) => {
   const [sites, setSites] = useState<any>([])
   const [currentSite, setCurrentSite] = useState()
   const [moistSensors, setMoistSensors] = useState<any>([])
