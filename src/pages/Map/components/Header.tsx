@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import s from "../style.module.css";
 import {IonHeader, IonIcon, IonTitle, IonToolbar} from "@ionic/react";
 import {arrowBackOutline} from "ionicons/icons";
@@ -17,7 +17,7 @@ const Header = (props: any) => {
     }
   };
   const onBudgetEditorBack = () => {
-    props.setActiveTab('map')
+    props.setActiveTab(props.previousActiveTab)
   }
 
   return (
@@ -32,7 +32,7 @@ const Header = (props: any) => {
               size='large'
               icon={arrowBackOutline}
             ></IonIcon>
-            <IonTitle>List</IonTitle>
+            <IonTitle>{props.isMarkerClicked ? `Fields of ${props.isMarkerClicked}` : 'Site Map'}</IonTitle>
           </>
         )}
         {props.activeTab === 'info' && (
