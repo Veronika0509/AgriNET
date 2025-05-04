@@ -31,11 +31,15 @@ import {initializeValveCustomOverlay} from "./components/types/valve/ValveCustom
 import {createValveChartForOverlay} from "./functions/types/valve/createValveChartForOverlay";
 import s from './style.module.css';
 import {addOverlayToOverlaysArray} from "./functions/types/moist/addOverlayToOverlaysArray";
-import {cloudUpload, documentText, home, informationCircle, settings, water} from "ionicons/icons";
+import {cloudUpload, documentText, home, informationCircle, logoFacebook, settings, water} from "ionicons/icons";
 import Info from "../Info";
 import Index from "./components/types/moist/BudgetEditor";
 import BudgetEditor from "./components/types/moist/BudgetEditor";
 import {Comments} from "./components/Comments";
+import {initializeExtlCustomOverlay} from "./components/types/extl/ExtlCustomOverlay";
+import {initializeFuelCustomOverlay} from "./components/types/wxet/FuelCustomOverlay";
+import {createFuelChartForOverlay} from "./functions/types/wxet/createFuelChartForOverlay";
+import {getSensorItems} from "./data/getSensorItems";
 
 interface MapProps {
   page: any
@@ -60,6 +64,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   }
   const present = useIonToast()
   const [activeTab, setActiveTab] = useState("map");
+  const [previousActiveTab, setPreviousActiveTab] = useState('');
   const [isMarkerClicked, setIsMarkerClicked] = useState(false)
 
   // Moist type
@@ -84,9 +89,15 @@ const MapPage: React.FC<MapProps> = (props) => {
   let valveChartsAmount: any = []
 
   // Wxet type
+  let isFuelMarkerChartDrawn: boolean = false
   const [wxetDataContainer, setWxetDataContainer] = useState<any>([])
   const [invalidWxetDataContainer, setInvalidWxetDataContainer] = useState([])
+  const [fuelOverlays, setFuelOverlays] = useState([])
   let wxetChartsAmount: any = []
+
+  // EXTl type
+  const [extlDataContainer, setExtlDataContainer] = useState<any>([])
+  let extlChartsAmount: any = []
 
   // All Types
   let allCoordinatesOfMarkers: any = [];
@@ -152,7 +163,9 @@ const MapPage: React.FC<MapProps> = (props) => {
         setIsMarkerClicked,
         setAreArraysUpdated,
         setInitialZoom,
-        initialZoom
+        initialZoom,
+        extlChartsAmount,
+        setExtlDataContainer
       })
     }
   }, [map, props.siteList]);
@@ -225,19 +238,37 @@ const MapPage: React.FC<MapProps> = (props) => {
   useEffect(() => {
     if (wxetDataContainer.length !== 0) {
       wxetDataContainer.map((data: any) => {
-        const WxetCustomOverlayExport: any = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
-        const overlay = new WxetCustomOverlayExport(
-          props.setChartData,
-          props.setPage,
-          props.setSiteId,
-          props.setSiteName,
-          props.setAdditionalChartData,
-          history,
-          data[1],
-          true,
-          data[0],
-          props.setChartPageType
-        )
+        let overlay: any
+        if (data[0].markerType === 'wxet') {
+          const WxetCustomOverlayExport: any = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
+          overlay = new WxetCustomOverlayExport(
+            props.setChartData,
+            props.setPage,
+            props.setSiteId,
+            props.setSiteName,
+            props.setAdditionalChartData,
+            history,
+            data[1],
+            true,
+            data[0],
+            props.setChartPageType
+          )
+        } else if (data[0].markerType === 'fuel') {
+          const FuelCustomOverlayExport: any = initializeFuelCustomOverlay(props.isGoogleApiLoaded)
+          overlay = new FuelCustomOverlayExport(
+            props.setChartData,
+            props.setPage,
+            props.setSiteId,
+            props.setSiteName,
+            history,
+            data[1],
+            true,
+            data[0],
+            props.setChartPageType,
+            isFuelMarkerChartDrawn,
+            setFuelOverlays
+          )
+        }
         addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
       })
     }
@@ -245,23 +276,54 @@ const MapPage: React.FC<MapProps> = (props) => {
   useEffect(() => {
     if (invalidWxetDataContainer.length !== 0) {
       invalidWxetDataContainer.map((data: any) => {
-        const WxetCustomOverlayExport: any = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
-        const overlay = new WxetCustomOverlayExport(
-          props.setChartData,
-          props.setPage,
-          props.setSiteId,
-          props.setSiteName,
-          props.setAdditionalChartData,
-          history,
-          data[1],
-          false,
-          data[0],
-          props.setChartPageType
-        )
+        let overlay: any
+        if (data[0].markerType === 'wxet') {
+          const WxetCustomOverlayExport: any = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
+          overlay = new WxetCustomOverlayExport(
+            props.setChartData,
+            props.setPage,
+            props.setSiteId,
+            props.setSiteName,
+            props.setAdditionalChartData,
+            history,
+            data[1],
+            false,
+            data[0],
+            props.setChartPageType
+          )
+        } else if (data[0].markerType === 'fuel') {
+          const FuelCustomOverlayExport: any = initializeFuelCustomOverlay(props.isGoogleApiLoaded)
+          overlay = new FuelCustomOverlayExport(
+            props.setChartData,
+            props.setPage,
+            props.setSiteId,
+            props.setSiteName,
+            history,
+            data[1],
+            true,
+            data[0],
+            props.setChartPageType,
+            isFuelMarkerChartDrawn,
+            setFuelOverlays
+          )
+        }
+
         addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
       })
     }
   }, [invalidWxetDataContainer])
+  useEffect(() => {
+    if (fuelOverlays.length !== 0) {
+      const roots: any[] = [];
+      fuelOverlays.map((fuelOverlay: any) => {
+        createFuelChartForOverlay(fuelOverlay.chartData, roots, fuelOverlays)
+      })
+
+      return () => {
+        roots.forEach(root => root.dispose());
+      };
+    }
+  }, [fuelOverlays]);
 
   // Temp Marker
   useEffect(() => {
@@ -383,6 +445,20 @@ const MapPage: React.FC<MapProps> = (props) => {
     }
   }, [valveOverlays]);
 
+  // EXTL Marker
+  useEffect(() => {
+    if (extlDataContainer.length !== 0) {
+      extlDataContainer.map((data: any) => {
+        const ExtlCustomOverlayExport: any = initializeExtlCustomOverlay(props.isGoogleApiLoaded)
+        const overlay = new ExtlCustomOverlayExport(
+          data[1],
+          data[0]
+        )
+        addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
+      })
+    }
+  }, [extlDataContainer]);
+
   useEffect(() => {
     if (activeOverlays.length !== 0 && activeOverlays.length === amountOfSensors && !areBoundsFitted) {
       CollisionResolver.resolve(activeOverlays);
@@ -432,8 +508,9 @@ const MapPage: React.FC<MapProps> = (props) => {
       }
     }
   }, [activeTab, map]);
+
   const renderContent = () => {
-    switch(activeTab) {
+    switch (activeTab) {
       case 'map':
         return (
           <div
@@ -460,7 +537,8 @@ const MapPage: React.FC<MapProps> = (props) => {
         return (
           <div style={{height: '100%'}}>
             <section style={{height: '100%'}}>
-              <BudgetEditor siteList={props.siteList} userId={props.userId} isGoogleApiLoaded={props.isGoogleApiLoaded} />
+              <BudgetEditor siteList={props.siteList} userId={props.userId}
+                            isGoogleApiLoaded={props.isGoogleApiLoaded}/>
             </section>
           </div>
         );
@@ -468,7 +546,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         return (
           <div style={{height: '100%', padding: '16px'}}>
             <section>
-              <Info />
+              <Info/>
             </section>
           </div>
         );
@@ -476,7 +554,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         return (
           <div style={{height: '100%', padding: '16px'}}>
             <section>
-              <Comments userId={props.userId} />
+              <Comments userId={props.userId}/>
             </section>
           </div>
         )
@@ -494,26 +572,42 @@ const MapPage: React.FC<MapProps> = (props) => {
         reloadMapPage={props.reloadMapPage}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        previousActiveTab={previousActiveTab}
       />
       <IonContent className={s.ionContent}>
         <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
-          <div className={activeTab === 'map' ? undefined : s.contentWrapper} style={{flex: 1, marginBottom: '48px'}}>
+          <div className={activeTab === 'map' ? undefined : s.contentWrapper}
+               style={{flex: 1, marginBottom: '48px'}}>
             {renderContent()}
           </div>
           <IonSegment value={activeTab} className={s.appMenu}>
-            <IonSegmentButton className={s.appMenuButton} value="map" onClick={() => setActiveTab('map')}>
+            <IonSegmentButton className={s.appMenuButton} value="map" onClick={() => {
+              setPreviousActiveTab(activeTab)
+              setActiveTab('map')
+            }}>
               <IonIcon icon={home}/>
             </IonSegmentButton>
 
-            <IonSegmentButton className={s.appMenuButton} value="budgetEditor" onClick={() => setActiveTab('budgetEditor')}>
+            <IonSegmentButton className={s.appMenuButton} value="budgetEditor"
+                              onClick={() => {
+                                setPreviousActiveTab(activeTab)
+                                setActiveTab('budgetEditor')
+                              }}>
               <IonIcon icon={settings}/>
             </IonSegmentButton>
 
-            <IonSegmentButton className={s.appMenuButton} value="comments" onClick={() => setActiveTab('comments')}>
-              <IonIcon icon={documentText} />
+            <IonSegmentButton className={s.appMenuButton} value="comments"
+                              onClick={() => {
+                                setPreviousActiveTab(activeTab)
+                                setActiveTab('comments')
+                              }}>
+              <IonIcon icon={documentText}/>
             </IonSegmentButton>
 
-            <IonSegmentButton className={s.appMenuButton} value="info" onClick={() => setActiveTab('info')}>
+            <IonSegmentButton className={s.appMenuButton} value="info" onClick={() => {
+              setPreviousActiveTab(activeTab)
+              setActiveTab('info')
+            }}>
               <IonIcon icon={informationCircle}/>
             </IonSegmentButton>
           </IonSegment>
