@@ -64,7 +64,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   }
   const present = useIonToast()
   const [activeTab, setActiveTab] = useState("map");
-  const [previousActiveTab, setPreviousActiveTab] = useState('');
+  const [navigationHistory, setNavigationHistory] = useState(['map']);
   const [isMarkerClicked, setIsMarkerClicked] = useState(false)
 
   // Moist type
@@ -572,7 +572,8 @@ const MapPage: React.FC<MapProps> = (props) => {
         reloadMapPage={props.reloadMapPage}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        previousActiveTab={previousActiveTab}
+        navigationHistory={navigationHistory}
+        setNavigationHistory={setNavigationHistory}
       />
       <IonContent className={s.ionContent}>
         <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
@@ -582,7 +583,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           </div>
           <IonSegment value={activeTab} className={s.appMenu}>
             <IonSegmentButton className={s.appMenuButton} value="map" onClick={() => {
-              setPreviousActiveTab(activeTab)
+              setNavigationHistory(prev => [...prev, 'map']);
               setActiveTab('map')
             }}>
               <IonIcon icon={home}/>
@@ -590,7 +591,7 @@ const MapPage: React.FC<MapProps> = (props) => {
 
             <IonSegmentButton className={s.appMenuButton} value="budgetEditor"
                               onClick={() => {
-                                setPreviousActiveTab(activeTab)
+                                setNavigationHistory(prev => [...prev, 'budgetEditor']);
                                 setActiveTab('budgetEditor')
                               }}>
               <IonIcon icon={settings}/>
@@ -598,14 +599,14 @@ const MapPage: React.FC<MapProps> = (props) => {
 
             <IonSegmentButton className={s.appMenuButton} value="comments"
                               onClick={() => {
-                                setPreviousActiveTab(activeTab)
+                                setNavigationHistory(prev => [...prev, 'comments']);
                                 setActiveTab('comments')
                               }}>
               <IonIcon icon={documentText}/>
             </IonSegmentButton>
 
             <IonSegmentButton className={s.appMenuButton} value="info" onClick={() => {
-              setPreviousActiveTab(activeTab)
+              setNavigationHistory(prev => [...prev, 'info']);
               setActiveTab('info')
             }}>
               <IonIcon icon={informationCircle}/>
