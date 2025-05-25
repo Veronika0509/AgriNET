@@ -1,7 +1,7 @@
 import React from 'react'
 import {IonButton, IonButtons, IonHeader, IonIcon, IonTitle, IonToolbar} from "@ionic/react";
-import {back} from "../../functions/back";
-import s from "../../style.module.css";
+import {back} from "../functions/back";
+import s from "../style.module.css";
 import {arrowBackOutline} from "ionicons/icons";
 import {useHistory} from "react-router-dom";
 import {addOutline} from "ionicons/icons";
@@ -37,7 +37,7 @@ const Header = (props: any) => {
   }
 
   return (
-    <IonHeader>
+    <IonHeader data-chart-section="mainHeader">
       <IonToolbar className={s.header_mainToolbar}>
         <div className={s.header_contentWrapper}>
           <div className={s.header_titleSection}>
@@ -51,8 +51,13 @@ const Header = (props: any) => {
             </IonButtons>
             <IonTitle className={s.header_title}>
               {props.type === 'chartPage' && (
-                <>{props.chartType !== 'valve' ? <p className={s.header_titleText}><span>{props.siteName} / </span><span>{props.sensorId}</span></p> : <>{props.sensorId} Valve
-                  Scheduler</>}</>
+                <>{props.chartType !== 'valve' ? props.chartType === 'fuel' ? (
+                      <p>Graphs for<br />{props.siteName} ({props.sensorId})</p>
+                    ) :
+                    <p className={s.header_titleText}><span>{props.siteName} / </span><span>{props.sensorId}</span></p>
+                  : <>{props.sensorId} Valve
+                    Scheduler</>}
+                </>
               )}
               {props.type === 'alarmPage' && (
                 <>Alarm Configuration</>

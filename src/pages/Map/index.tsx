@@ -124,6 +124,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         props.setSiteList(sites.data)
 
         if (mapRef.current) {
+          console.log(mapRef.current, map)
           createMap(map, setMap, mapRef);
           setMapInitialized(true);
         }
@@ -173,6 +174,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Moist Marker Chart
   useEffect(() => {
     if (moistChartDataContainer.length !== 0) {
+      console.log('moist valid', moistChartDataContainer)
       moistChartDataContainer.map((chartData: any) => {
         const MoistCustomOverlayExport: any = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
         const overlay = new MoistCustomOverlayExport(
@@ -198,6 +200,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   }, [moistChartDataContainer]);
   useEffect(() => {
     if (invalidMoistChartDataContainer.length !== 0) {
+      console.log('moist invalid', moistChartDataContainer)
       invalidMoistChartDataContainer.map((chartData: any) => {
         const CustomOverlayExport: any = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
         const overlay: any = new CustomOverlayExport(
@@ -237,6 +240,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Wxet Marker
   useEffect(() => {
     if (wxetDataContainer.length !== 0) {
+      console.log('wxet valid', wxetDataContainer)
       wxetDataContainer.map((data: any) => {
         let overlay: any
         if (data[0].markerType === 'wxet') {
@@ -275,6 +279,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   }, [wxetDataContainer]);
   useEffect(() => {
     if (invalidWxetDataContainer.length !== 0) {
+      console.log('wxet invalid', invalidWxetDataContainer)
       invalidWxetDataContainer.map((data: any) => {
         let overlay: any
         if (data[0].markerType === 'wxet') {
@@ -328,6 +333,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Temp Marker
   useEffect(() => {
     if (tempChartDataContainer.length !== 0) {
+      console.log('temp valid', tempChartDataContainer)
       tempChartDataContainer.map((chartData: any) => {
         const TempCustomOverlayExport: any = initializeTempCustomOverlay(props.isGoogleApiLoaded)
         const overlay = new TempCustomOverlayExport(
@@ -352,6 +358,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   }, [tempChartDataContainer]);
   useEffect(() => {
     if (invalidTempChartDataContainer.length !== 0) {
+      console.log('temp invalid', invalidTempChartDataContainer)
       invalidTempChartDataContainer.map((chartData: any) => {
         const CustomOverlayExport: any = initializeTempCustomOverlay(props.isGoogleApiLoaded)
         const overlay: any = new CustomOverlayExport(
@@ -390,6 +397,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Valve Marker
   useEffect(() => {
     if (valveChartDataContainer.length !== 0) {
+      console.log('valve valid', valveChartDataContainer)
       valveChartDataContainer.map((chartData: any) => {
         const ValveCustomOverlayExport: any = initializeValveCustomOverlay(props.isGoogleApiLoaded)
         const overlay = new ValveCustomOverlayExport(
@@ -412,6 +420,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   }, [valveChartDataContainer]);
   useEffect(() => {
     if (invalidValveChartDataContainer.length !== 0) {
+      console.log('valve invalid', invalidValveChartDataContainer)
       invalidValveChartDataContainer.map((chartData: any) => {
         const ValveCustomOverlayExport: any = initializeValveCustomOverlay(props.isGoogleApiLoaded)
         const overlay = new ValveCustomOverlayExport(
@@ -448,6 +457,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   // EXTL Marker
   useEffect(() => {
     if (extlDataContainer.length !== 0) {
+      console.log('extl valid', extlDataContainer)
       extlDataContainer.map((data: any) => {
         const ExtlCustomOverlayExport: any = initializeExtlCustomOverlay(props.isGoogleApiLoaded)
         const overlay = new ExtlCustomOverlayExport(
@@ -469,6 +479,8 @@ const MapPage: React.FC<MapProps> = (props) => {
       });
       setAreBoundsFitted(true);
       map.fitBounds(bounds);
+    } else {
+      console.log(activeOverlays, amountOfSensors)
     }
   }, [activeOverlays]);
   useEffect(() => {

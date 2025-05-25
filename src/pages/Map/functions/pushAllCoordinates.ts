@@ -16,7 +16,7 @@ export const pushAllCoordinates = (
   siteList.map((site: any) => {
     if (site.name === siteName) {
       site.layers.map((layer: any) => {
-        if (layer.name === 'Moist' || layer.name === 'moist' || layer.name === 'SoilTemp' || layer.name === 'WXET' || layer.name === 'Valve') {
+        if (layer.name === 'Moist' || layer.name === 'moist' || layer.name === 'SoilTemp' || layer.name === 'WXET' || layer.name === 'Valve' || layer.name === 'EXTL') {
           layer.markers.map((marker: any) => {
             neededSensorItemsArray.push(marker)
           })
@@ -24,7 +24,7 @@ export const pushAllCoordinates = (
       })
     }
   })
-  if (type === 'Moist' || type === 'WXET' || type === 'SoilTemp' || type === 'Valve') {
+  if (type === 'Moist' || type === 'WXET' || type === 'SoilTemp' || type === 'Valve' || type === 'EXTL') {
     const exists = allCoordinatesOfMarkers.some((marker: any) => marker.id === id);
 
     if (!exists) {

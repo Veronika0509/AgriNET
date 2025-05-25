@@ -1,5 +1,5 @@
 import s from "../style.module.css"
-import Header from "../../../Header"
+import Header from "../../.././Header"
 import {
   IonButton,
   IonCheckbox,

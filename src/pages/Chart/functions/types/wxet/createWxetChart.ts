@@ -195,10 +195,11 @@ export const createWxetChart = (
     cursor.lineY.set("visible", false);
 
 // Add legend
+    const legendHeight = dataLabels.length * 29
     let legend = chart.children.push(am5.Legend.new(root.current, {
       width: 200,
       paddingLeft: 15,
-      height: am5.percent(100)
+      height: legendHeight
     }));
 
 

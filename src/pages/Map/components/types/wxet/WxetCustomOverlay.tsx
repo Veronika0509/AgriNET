@@ -6,8 +6,8 @@ import wxetOverlaySun from '../../../../../assets/images/icons/wxetOverlaySun.sv
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {onWxetSensorClick} from "../../../functions/types/wxet/onWxetSensorClick";
 import {getOptions} from "../../../data/getOptions";
-import {logoFacebook} from "ionicons/icons";
 import skull from "../../../../../assets/images/skull.svg";
+import alarm from '../../../../../assets/images/icons/wxetAlarm.png'
 
 export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
   if (isGoogleApiLoaded) {
@@ -87,33 +87,35 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
           console.log('chart data is valid but freshness id undefined', this.chartData.sensorId, this.chartData.freshness)
         }
         return (
-          <div className={s.overlay_wxetOverlay}  onClick={() => onWxetSensorClick(
-            this.history,
-            this.chartData.sensorId,
-            this.chartData.name,
-            this.setChartData,
-            this.setPage,
-            this.setSiteId,
-            this.setSiteName,
-            this.setAdditionalChartData,
-            this.setChartPageType
-          )}>
+          <div className={s.overlay_wxetOverlay}>
             {
               this.isValidData ? (
-                <div>
+                <div onClick={() => onWxetSensorClick(
+                  this.history,
+                  this.chartData.sensorId,
+                  this.chartData.name,
+                  this.setChartData,
+                  this.setPage,
+                  this.setSiteId,
+                  this.setSiteName,
+                  this.setAdditionalChartData,
+                  this.setChartPageType
+                )}>
                   <div className={s.overlay_wxetOverlayContainer} style={{ background: this.borderColor }}>
                     <div className={s.overlay_wxetOverlayInnerContainer} style={{backgroundColor: this.chartData.data.bgColor}}>
                       <img src={this.chartData.data.solar ? wxetOverlaySun : wxetOverlayMoon} className={s.overlay_wxetOverlayImage}
                            alt=""/>
-                      <div className={s.wxetOverlayData}>
-                        <p className={s.wxetOverlayDataText}>Temp: {this.chartData.data.temp} {tempMetric} {termRendArrow}</p>
-                        <p className={s.wxetOverlayDataText}>Hi: {this.chartData.data.tempHi} {tempMetric}</p>
-                        <p className={s.wxetOverlayDataText}>Lo: {this.chartData.data.tempLo} {tempMetric}</p>
-                        <p className={s.wxetOverlayDataText}>RH: {this.chartData.data.rh} %</p>
-                        <p className={s.wxetOverlayDataText}>Rain: {this.chartData.data.totalRain} {rainMetric}</p>
-                        <p
-                          className={s.wxetOverlayDataText}>Wind: {this.chartData.data.wind} {windMetric} {this.chartData.data.windDirection}</p>
-                        <p className={s.wxetOverlayDataText}>Solar rad: {this.chartData.data.solar} W/m2</p>
+                      <div>
+                        <p>Temp: {this.chartData.data.temp} {tempMetric} {termRendArrow}</p>
+                        <p>Hi: {this.chartData.data.tempHi} {tempMetric}</p>
+                        <p>Lo: {this.chartData.data.tempLo} {tempMetric}</p>
+                        <p>RH: {this.chartData.data.rh} %</p>
+                        <p>Rain: {this.chartData.data.totalRain} {rainMetric}</p>
+                        <p>Wind: {this.chartData.data.wind} {windMetric} {this.chartData.data.windDirection}</p>
+                        <p>Solar rad: {this.chartData.data.solar} W/m2</p>
+                        {this.chartData.data.alarmEnabled && <div className={s.overlay_wxetOverlayAlarm}>
+                            <img src={alarm} alt="Alarm Image"/>
+                        </div>}
                       </div>
                     </div>
                     <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name, 'wxet')}</p>

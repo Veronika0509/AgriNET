@@ -6,7 +6,6 @@ import {checkOverlay} from "../../checkOverlay";
 export const createMoistChartForOverlay = async (type: any, chartData: any, roots: any, moistOverlays: any) => {
   const chartId = `${type}-${chartData.id}`
   await checkOverlay(chartId, moistOverlays);
-  console.log(document.getElementById(chartId))
   const root: any = am5.Root.new(chartId)
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);

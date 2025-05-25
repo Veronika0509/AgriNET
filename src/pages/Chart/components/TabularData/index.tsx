@@ -1,9 +1,10 @@
 import React, {useEffect, useRef, useState} from "react";
-import { TempTable } from "./components/types/temp/TempTable";
+import {TempTable} from "./components/types/temp/TempTable";
 import {onDataSet} from "./functions/onDataSet";
 import {ButtonAndSpinner} from "./components/ButtonAndSpinner";
 import {WxetModalTable} from "./components/types/wxet/WxetModalTable";
 import {MoistTable} from "./components/types/moist/MoistTable";
+import {FuelModalTable} from "./components/types/wxet/FuelModalTable";
 
 interface TabularData {
   type: any,
@@ -16,7 +17,16 @@ interface TabularData {
   chartCode: string
 }
 
-export const TabularData: React.FC<TabularData> = ({type, colors, sensorId, data, setData, isLoading, setIsLoading, chartCode}) => {
+export const TabularData: React.FC<TabularData> = ({
+                                                     type,
+                                                     colors,
+                                                     sensorId,
+                                                     data,
+                                                     setData,
+                                                     isLoading,
+                                                     setIsLoading,
+                                                     chartCode
+                                                   }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 750);
   const [firstRowColor, setFirstRowColor] = useState<string | undefined>(undefined);
 
@@ -32,7 +42,9 @@ export const TabularData: React.FC<TabularData> = ({type, colors, sensorId, data
   // Wxet
   const [isWxetModalOpen, setIsWxetModalOpen] = useState(false);
   const [isWxetMobile, setIsWxetMobile] = useState(window.innerWidth < 425);
-  const modal = useRef<HTMLIonModalElement>(null);
+  const wxetModal = useRef<HTMLIonModalElement>(null);
+  const [isFuelModalOpen, setIsFuelModalOpen] = useState(false);
+  const fuelModal = useRef<HTMLIonModalElement>(null);
 
   // Wxet
   const freshnessColors: any = {
@@ -53,11 +65,11 @@ export const TabularData: React.FC<TabularData> = ({type, colors, sensorId, data
         isWxetMobile,
         setData,
         setIsWxetModalOpen,
+        setIsFuelModalOpen,
         setFirstRowColor,
         freshnessColors,
         setIsLoading
       )
-
     }
   }, [data]);
 
@@ -70,23 +82,25 @@ export const TabularData: React.FC<TabularData> = ({type, colors, sensorId, data
               {data.length ? (
                 <div>
                   {data.map((tabularData: any, index: number) => (
-                    <TempTable key={index} tabularData={tabularData} colors={colors} isMobile={isMobile} freshnessColors={freshnessColors} />
+                    <TempTable key={index} tabularData={tabularData} colors={colors} isMobile={isMobile}
+                               freshnessColors={freshnessColors}/>
                   ))}
                 </div>
               ) : (
                 <div>
-                  <TempTable tabularData={data} colors={colors} isMobile={isMobile} freshnessColors={freshnessColors} />
+                  <TempTable tabularData={data} colors={colors} isMobile={isMobile} freshnessColors={freshnessColors}/>
                 </div>
               )}
             </div>
+          ) : type === 'wxet' ? (
+            <WxetModalTable setData={setData} setIsWxetModalOpen={setIsWxetModalOpen} modal={wxetModal}
+                            isWxetModalOpen={isWxetModalOpen} data={data} isWxetMobile={isWxetMobile}/>
+          ) : type === 'fuel' ? (
+            <FuelModalTable setData={setData} setIsFuelModalOpen={setIsFuelModalOpen} modal={fuelModal}
+                            isFuelModalOpen={isFuelModalOpen} data={data} isWxetMobile={isWxetMobile}/>
           ) : (
-            <div>
-              {type === 'wxet' ? (
-                <WxetModalTable setData={setData} setIsWxetModalOpen={setIsWxetModalOpen} modal={modal} isWxetModalOpen={isWxetModalOpen} data={data} isWxetMobile={isWxetMobile} />
-              ) : (
-                <MoistTable type={type} data={data} colors={colors} firstRowColor={firstRowColor} isWxetMobile={isWxetMobile} />
-              )}
-            </div>
+            <MoistTable type={type} data={data} colors={colors} firstRowColor={firstRowColor}
+                        isWxetMobile={isWxetMobile}/>
           )
           }
         </div>

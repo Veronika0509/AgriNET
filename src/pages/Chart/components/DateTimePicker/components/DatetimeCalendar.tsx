@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import s from "../../../style.module.css";
 import {IonDatetime, IonDatetimeButton, IonLabel, IonModal} from "@ionic/react";
 import {getDatetime} from "../functions/getDatetime";
@@ -18,13 +18,14 @@ const DatetimeCalendar = (props: any) => {
       props.setStartDate(getDatetime(fromDate))
     }
   };
+
   return (
     <div className={s.datetimePicker_container}>
       <IonLabel className={s.datetimePicker_title}>{props.title}</IonLabel>
       <div className={s.datetimePicker_item}>
         <IonDatetimeButton datetime={props.title}></IonDatetimeButton>
         <IonModal keepContentsMounted={true}>
-          <IonDatetime id={props.title} presentation='date' value={props.title === 'From' ? props.startDate : props.endDate} onIonChange={handleDateChange} show-default-buttons="true"></IonDatetime>
+          <IonDatetime key={props.title} id={props.title} presentation='date' value={props.title === 'From' ? props.startDate : props.endDate} onIonChange={handleDateChange} show-default-buttons="true"></IonDatetime>
         </IonModal>
       </div>
     </div>

@@ -1,15 +1,15 @@
 import React, {useEffect, useState} from 'react'
 import s from "../../style.module.css";
 import {IonButton, IonIcon, IonInput, IonSegment, IonSegmentButton, useIonToast} from "@ionic/react";
-import {refreshOutline} from "ionicons/icons";
+import {logoPwa, refreshOutline} from "ionicons/icons";
 import DatetimeCalendar from "./components/DatetimeCalendar";
 import {getDatetime} from "./functions/getDatetime";
 import {updateChartsWithNewDatetime} from "./functions/updateChartsWithNewDatetime";
 
 const DateTimePicker = (props: any) => {
-  const [selectedTab, setSelectedTab] = React.useState('days');
   const [wasYearsMode, setWasYearsMode] = useState(false)
   const [present] = useIonToast();
+  const [selectedTab, setSelectedTab] = React.useState('days');
 
   const presentToast = () => {
     present({
@@ -22,16 +22,22 @@ const DateTimePicker = (props: any) => {
   const onDaysClick = () => {
     if (wasYearsMode) {
       const newDaysDifference: string = (365 * Number(props.dateDifferenceInDays)).toString()
-      props.setDateDifferenceInDays(newDaysDifference)
+      setNewDates(newDaysDifference)
       setWasYearsMode(false)
     }
   }
   const onDaysNumberChange = (e: any) => {
-    if (e.detail.value !== 0 && !isNaN(parseFloat(e.detail.value)) && e.detail.value >= 0) {
-      props.setDateDifferenceInDays(e.detail.value!)
+    if (!isNaN(Number(e.detail.value)) && Number(e.detail.value) >= 0) {
+      setNewDates(e.detail.value!)
     } else {
-      props.setDateDifferenceInDays('0')
+      setNewDates('0')
     }
+  }
+  const setNewDates = (days: any) => {
+    props.setDateDifferenceInDays(days)
+    const toDate = new Date(props.endDate)
+    const fromDate: any = new Date(toDate).setDate(toDate.getDate() - Number(days));
+    props.setStartDate(getDatetime(new Date(fromDate)))
   }
   useEffect(() => {
     if (selectedTab === 'years') {
@@ -46,11 +52,6 @@ const DateTimePicker = (props: any) => {
       setWasYearsMode(true)
     }
   }, [selectedTab]);
-  useEffect(() => {
-    const toDate = new Date(props.endDate)
-    const fromDate: any = new Date(toDate).setDate(toDate.getDate() - Number(props.dateDifferenceInDays));
-    props.setStartDate(getDatetime(new Date(fromDate)))
-  }, [props.dateDifferenceInDays]);
 
   return (
     <div>
@@ -58,7 +59,7 @@ const DateTimePicker = (props: any) => {
         <div className={s.datetimePicker_wrapperContainer}>
           <div className={s.datetimePicker_tabs}>
             <IonInput
-              type="number"
+              aria-label='days'
               value={props.dateDifferenceInDays}
               onIonInput={(e) => onDaysNumberChange(e)}
               className={s.datetimePicker_tabsInput}
@@ -82,9 +83,6 @@ const DateTimePicker = (props: any) => {
           selectedTab,
           presentToast,
           props.setCurrentDates,
-          props.fullDatesArray,
-          props.setDisableNextButton,
-          props.setDisablePrevButton,
           props.setShowForecast,
           props.updateChart,
           props.dateDifferenceInDays,

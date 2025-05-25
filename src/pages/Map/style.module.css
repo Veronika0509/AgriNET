@@ -47,13 +47,34 @@
   text-align: center;
 }
 
-.overlay_container {
+.overlay_container, .overlay_fuelContainer {
   cursor: pointer;
   width: 58px;
 }
 
+.overlay_fuelContainer {
+  width: 68px;
+}
+
+.overlay_fuelInfo {
+  width: 76px;
+}
+
+.overlay_extlOverlayWrapper {
+  width: 68px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+}
+
 .overlay_container:hover .overlay_info,
-.overlay_wxetOverlay:hover .overlay_info {
+.overlay_wxetOverlay:hover .overlay_info,
+.overlay_extlOverlayWrapper:hover .overlay_info,
+.overlay_fuelContainer:hover .overlay_info
+{
   display: block;
 }
 
@@ -71,18 +92,20 @@
 }
 
 .overlay_chart {
-  width: 45px;
+  width: 100%;
   height: 50px;
   background: #fff;
   display: flex;
   align-items: center;
   justify-items: center;
   border: 1px solid #000;
+  position: relative;
 }
 
 .overlay_chart__valve {
   border: none;
   background: #96fd66;
+  position: relative;
 }
 
 .overlay_chartWrapper {
@@ -125,11 +148,29 @@
   height: 5px;
   border: 1px solid #000;
   background: #000;
-  margin: -6px 3px 5px auto;
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
 
 .overlay_valveEnabled__enabled {
   background: #fff;
+}
+
+.overlay_extlOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.overlay_extlName {
+  background: #00b800;
+  font-weight: 600;
+  color: #000;
+  font-size: 11px;
+  padding: 2px;
+  margin-top: 5px;
+  border-radius: 3px;
 }
 
 @keyframes l20-1 {
@@ -192,7 +233,6 @@
 .overlay_wxetOverlayInnerContainer {
   border: 1px solid #000;
   width: 100%;
-  height: 110px;
   border-radius: 2px;
   padding: 5px;
   position: relative;
@@ -252,6 +292,24 @@
   text-align: center;
   border-radius: 3px;
   font-weight: bold;
+}
+
+.overlay_fuelContainer {
+  width: 68px;
+}
+
+.overlay_wxetOverlayAlarm > img {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  right: 2px;
+  bottom: 5px;
+}
+
+.overlay_tempOverlayAlarm > img {
+  left: 2px;
+  bottom: 2px;
+  z-index: 1;
 }
 
 /*  Layer List  */

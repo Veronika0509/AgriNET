@@ -1,25 +1,15 @@
 import React, {useEffect, useRef, useState} from 'react';
 import s from '../../../../style.module.css'
-import {getSumChartData} from "../../../../../Chart/data/types/moist/getSumChartData";
-import {getSensorItems} from "../../../../data/getSensorItems";
 import {createBudgetChart} from "../../../../functions/types/moist/createBudgetChart";
 import {IonButton, IonIcon, IonSelect, IonSelectOption, useIonAlert} from "@ionic/react";
-import {briefcase, copyOutline, logoFacebook, arrowBack} from "ionicons/icons";
-import { handleBackNavigation } from '../../../../functions/handleBackNavigation';
 import BudgetEditorLine from "./components/BudgetEditorLine";
-import {getSiteList} from "../../../../data/getSiteList";
 import {getMoistMarkerChartData} from "../../../../data/types/moist/getMoistMarkerChartData";
 import {initializeMoistCustomOverlay} from "../MoistCustomOverlay";
 import invalidChartDataImage from "../../../../../../assets/images/invalidChartData.png";
 import {createMoistChartForOverlay} from "../../../../functions/types/moist/createMoistChartForOverlay";
-import {onTelOrEmailSubmit} from "../../../../../Chart/components/Alarm/functions/telOrEmail/onTelOrEmailSubmit";
-import {formatDate} from "../../../../../Chart/functions/formatDate";
-import chart from "../../../../../Chart";
 import {getNewData} from "./functions/getNewData";
 import {getFreshSiteList} from "./functions/getFreshSiteList";
-import {deleteMoistOverlays} from "./functions/deleteMoistOverlays";
 import {updateSite} from "./functions/updateSite";
-import {setDays} from "./functions/setDays";
 import {onIncreaseDaysCountClick} from "./functions/onIncreaseDaysCountClick";
 
 const BudgetEditor = ({ previousPage, ...props }: { previousPage?: string } & any) => {

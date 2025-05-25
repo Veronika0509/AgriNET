@@ -13,7 +13,6 @@ import {
 } from "@ionic/react";
 import s from '../../style.module.css'
 import {closeOutline, pencilOutline, refreshOutline, trashOutline, arrowBack} from "ionicons/icons";
-import { handleBackNavigation } from '../../functions/handleBackNavigation';
 import {deleteComment} from "./data/deleteComment";
 import {saveComment} from "./data/saveComment";
 

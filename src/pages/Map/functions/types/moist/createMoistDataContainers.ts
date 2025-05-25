@@ -1,4 +1,5 @@
 import {getOptions} from "../../../data/getOptions";
+import {logoFacebook} from "ionicons/icons";
 
 export const createMoistDataContainers = async (props: any) => {
   const moistChartDataItem = {
@@ -12,6 +13,9 @@ export const createMoistDataContainers = async (props: any) => {
     layerName: 'Moist',
     freshness: props.response.data.freshness
   }
+  if (props.response.data.alarmEnabled) {
+    console.log('Moist Alarm Enabled!')
+  }
   props.moistChartData.push(moistChartDataItem)
   props.boundsArray.push(props.bounds)
   if (props.moistChartsAmount.length === props.moistChartData.length) {
@@ -22,6 +26,7 @@ export const createMoistDataContainers = async (props: any) => {
           (updatedMoistChartDataItem: any) => updatedMoistChartDataItem[0].sensorId === props.moistChartData[index].sensorId
         );
         if (!exists) {
+          console.log([props.moistChartData[index], bounds])
           updatedMoistChartData.push([props.moistChartData[index], bounds]);
         }
       } else {
@@ -29,10 +34,12 @@ export const createMoistDataContainers = async (props: any) => {
           (invalidChartDataItem: any) => invalidChartDataItem[0].sensorId === props.moistChartData[index].sensorId
         );
         if (!exists) {
+          console.log([props.moistChartData[index], bounds])
           props.invalidChartData.push([props.moistChartData[index], bounds]);
         }
       }
       new Promise((resolve: any) => {
+        console.log(props.invalidChartData.length, updatedMoistChartData.length, props.countMoistFuel)
         if (props.invalidChartData.length + updatedMoistChartData.length === props.countMoistFuel) {
           props.setInvalidMoistChartDataContainer(props.invalidChartData)
           props.setMoistChartDataContainer(updatedMoistChartData)

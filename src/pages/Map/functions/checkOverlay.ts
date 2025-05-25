@@ -15,13 +15,9 @@ export const checkOverlay = async (id: string, overlays: any[]): Promise<void> =
         }
         if (overlay) {
           overlay.update().then(() => {
-            console.log('already rerendered', id)
             setTimeout(checkElement, 0)
           })
         } else {
-          overlays.map((overlay: any) => {
-            console.log(overlay.chartData.id.toString(), id.slice(2))
-          })
           resolve()
         }
       }

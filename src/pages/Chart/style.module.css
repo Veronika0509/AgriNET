@@ -60,56 +60,230 @@
     max-width: 200px;
   }
 }
-
-/*  Top Section  */
+/* Top Section */
 .topSection_mainContainer {
   max-width: 80vw;
   margin: 0 auto;
 }
 
-.topSection_wrapper {
+.topSection_primaryRow {
   display: flex;
   align-items: center;
-}
-
-.topSection_configurations {
-  display: flex;
-  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #e0e0e0;
   flex-wrap: wrap;
 }
 
-.topSection_nwsForecast {
+.topSection_dateTimeWrapper {
+  flex: 1;
+  min-width: 300px;
+}
+
+.topSection_addAlarm {
+  height: 36px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  white-space: nowrap;
+}
+
+.topSection_secondaryRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  min-height: 40px;
+}
+
+.topSection_sectionLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+}
+
+/* Charts Section - Now in primary row */
+.topSection_chartsSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.topSection_chartsButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.topSection_chartButton {
+  height: 32px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  font-size: 12px;
+  min-width: 70px;
+}
+
+/* Modes Section */
+.topSection_modesSection {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topSection_togglesGroup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.topSection_compactToggle {
+  --handle-width: 20px;
+  --handle-height: 20px;
+  --track-width: 40px;
+  --track-height: 24px;
+  font-size: 13px;
+}
+
+/* Forecast Section */
+.topSection_forecastSection {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.topSection_forecastControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.topSection_daysInput {
+  width: 80px;
+  min-height: 32px !important;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  font-size: 13px;
+}
+
+/* Fuel Section */
+.topSection_fuelSection {
   display: flex;
   align-items: center;
 }
 
-.topSection_tempWxetInput {
-  margin-left: 10px;
-  width: 100px;
-}
-
-.topSection_tempWxetToggle {
-  border-right: 1px solid #d2d2d2;
-  padding-right: 10px;
-}
-
-.topSection_tempWxetToggleLeft {
-  margin-left: 10px;
-}
-
-.topSection_moistTopSectionItem {
-  --padding-start: 0;
-  width: 500px;
-}
-
-.topSection_chartsButtonsContainer {
+.topSection_fuelControls {
   display: flex;
-  margin-top: 5px;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
 }
 
-.topSection_addAlarm {
-  margin-left: 25px;
+.topSection_locationSelect {
+  min-width: 150px;
+  max-width: 150px;
+  height: 32px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  font-size: 13px;
 }
+
+.topSection_moistAddAlarm, .topSection_wxetAddAlarm {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 1190px) {
+  .topSection_wxetPrimaryRow {
+    display: block;
+  }
+}
+
+@media (max-width: 1024px) {
+  .topSection_primaryRow {
+    gap: 12px;
+  }
+
+  .topSection_chartsSection {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .topSection_addAlarm {
+    order: 2;
+  }
+
+  .topSection_moistPrimaryRow {
+    display: block;
+  }
+}
+
+@media (max-width: 820px) {
+  .topSection_fuelPrimaryRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .topSection_primaryRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .topSection_dateTimeWrapper {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .topSection_addAlarm {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 610px) {
+  .topSection_tempForecastSection {
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .topSection_togglesGroup {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+  .topSection_wxetAddAlarm {
+    display: block;
+  }
+  .topSection_wxetForecastSection {
+    margin-top: 16px;
+  }
+  .topSection_secondaryRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .topSection_moistCompactToggle {
+    width: 100%;
+  }
+}
+
+@media (max-width: 395px) {
+  .topSection_moistAddAlarm {
+    display: block;
+  }
+}
+
 
 /*  Datetime Picker  */
 .datetimePicker_wrapper {
@@ -153,6 +327,7 @@
 .datetimePicker_tabsInput {
   max-width: 50px;
   min-width: 50px;
+  min-height: 46px !important;
   --background: #fff;
   --padding-start: 0;
   --padding-end: 0;

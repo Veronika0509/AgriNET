@@ -4,20 +4,17 @@
 
 .wrapper {
   max-width: 80vw;
-  margin: 40px auto 0 auto;
+  margin: 20px auto 0 auto;
 }
 
-.chart, .additionalChart {
+.chart,
+.additionalChart {
   width: 100%;
-  margin-top: 20px;
-}
-
-.chart {
-  height: 400px;
 }
 
 .additionalChart {
   height: 300px;
+  margin-top: 20px;
 }
 
 .sumChart {
@@ -67,7 +64,8 @@
   font-size: 12px;
 }
 
-.mainTabularDataTableTh, .mainTabularDataTableTd {
+.mainTabularDataTableTh,
+.mainTabularDataTableTd {
   border: 1px solid black;
   text-align: center;
   padding: 4px;
@@ -261,6 +259,16 @@
     text-align: left;
     white-space: nowrap;
   }
+}
+
+.fuelTable_text {
+  font-weight: 700;
+  font-size: 20px;
+  text-align: center;
+}
+
+.fuelTable_content {
+  --padding-top: 20px;
 }
 
 @media (max-width: 640px) {

@@ -1,218 +1,360 @@
-import s from './style.module.css'
-import React, {useCallback, useEffect, useRef, useState} from "react";
-import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentDatetime";
-import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
-import {handleResize} from "../../../functions/handleResize";
-import {getIrrigationDates} from "../../../data/types/moist/getIrrigationDates";
-import {getSumChartData} from "../../../data/types/moist/getSumChartData";
-import {IonButton, IonContent, IonModal, IonSpinner, IonText, IonTitle, useIonViewDidEnter} from "@ionic/react";
-import TopSection from "../../TopSection";
-import IrrigationButtons from "./components/IrrigationButtons";
-import {createMainChart} from "../../../functions/types/moist/createMainChart";
-import {getMoistMainChartData} from "../../../../Map/data/types/moist/getMoistMainChartData";
-import {createAdditionalChart} from "../../../functions/types/moist/createAdditionalChart";
-import {TabularData} from "../../TabularData";
-import {Export} from "../../Export";
-import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
-import {AddCommentButton} from "../../AddComment/components/AddCommentButton";
-import {AddCommentMessage} from "../../AddComment/components/AddCommentMessage";
-import AddCommentModal from "../../AddComment/components/AddCommentModal";
-import {getComments} from "../../AddComment/data/getComments";
-import {getSoilTempChartData} from "../../../data/types/moist/getSoilTempChartData";
-import {getBatteryChartData} from "../../../data/types/moist/getBatteryChartData";
-import {Autowater} from "./components/Autowater";
-import {updateCommentsArray} from "../../../functions/types/moist/updateCommentsArray";
-import {compareDates} from "../../../functions/types/moist/compareDates";
-import {getSetAddCommentItemShowed} from "../../../functions/types/moist/getSetAddCommentItemShowed";
-import {getAddCommentItemShowed} from "../../../functions/types/moist/getAddCommentItemShowed";
-import {getDatetime} from "../../DateTimePicker/functions/getDatetime";
-import {formatDate} from "../../../functions/formatDate";
-import {logoFacebook} from "ionicons/icons";
-import {handleResizeForChartLegend} from "../../../functions/types/moist/handleResizeForChartLegend";
+import s from "./style.module.css"
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { getCurrentDatetime } from "../../DateTimePicker/functions/getCurrentDatetime"
+import { getStartDate } from "../../DateTimePicker/functions/getStartDate"
+import { getIrrigationDates } from "../../../data/types/moist/getIrrigationDates"
+import { getSumChartData } from "../../../data/types/moist/getSumChartData"
+import { IonButton, IonContent } from "@ionic/react"
+import TopSection from "../../TopSection"
+import IrrigationButtons from "./components/IrrigationButtons"
+import { createMainChart } from "../../../functions/types/moist/createMainChart"
+import { getMoistMainChartData } from "../../../../Map/data/types/moist/getMoistMainChartData"
+import { createAdditionalChart } from "../../../functions/types/moist/createAdditionalChart"
+import { TabularData } from "../../TabularData"
+import { Export } from "../../Export"
+import { ButtonAndSpinner } from "../../TabularData/components/ButtonAndSpinner"
+import { AddCommentButton } from "../../AddComment/components/AddCommentButton"
+import { AddCommentMessage } from "../../AddComment/components/AddCommentMessage"
+import AddCommentModal from "../../AddComment/components/AddCommentModal"
+import { getComments } from "../../AddComment/data/getComments"
+import { getSoilTempChartData } from "../../../data/types/moist/getSoilTempChartData"
+import { getBatteryChartData } from "../../../data/types/moist/getBatteryChartData"
+import { Autowater } from "./components/Autowater"
+import { updateCommentsArray } from "../../../functions/types/moist/updateCommentsArray"
+import { compareDates } from "../../../functions/types/moist/compareDates"
+import { getSetAddCommentItemShowed } from "../../../functions/types/moist/getSetAddCommentItemShowed"
+import { getAddCommentItemShowed } from "../../../functions/types/moist/getAddCommentItemShowed"
+import { handleResizeForChartLegend } from "../../../functions/types/moist/handleResizeForChartLegend"
+import {getDaysFromChartData} from "../../../functions/getDaysFromChartData";
+import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
+
+// Define TypeScript interfaces
+interface ChartData {
+  data: any[]
+  budgetLines?: any[]
+  metric?: string
+}
+
+interface ChartResponse {
+  data: ChartData
+  status?: number
+}
+
+interface CommentsResponse {
+  data: Comment[]
+  status?: number
+}
+
+interface Comment {
+  id: string
+  date: string
+  text: string
+  userId: any
+  [key: string]: any
+}
+
+interface TabularDataState {
+  data: any | null
+  isLoading: boolean
+  colors: string[]
+}
+
+interface TabularDataStateMap {
+  main: TabularDataState
+  sum: TabularDataState
+  soilTemp: TabularDataState
+}
+
+interface CommentsState {
+  main: Comment[] | undefined
+  sum: Comment[] | undefined
+  soilTemp: Comment[] | undefined
+  battery: Comment[] | undefined
+}
+
+interface AddCommentItemState {
+  main: any
+  sum: any
+  soilTemp: any
+  battery: any
+}
+
+interface ScreenSizeState {
+  small: boolean
+  middle: boolean
+  large: boolean
+}
+
+interface CommentModal {
+  type: string
+  date: string
+}
+
+// Chart type constants
+const CHART_TYPES = {
+  MAIN: "main",
+  SUM: "sum",
+  SOIL_TEMP: "soilTemp",
+  BATTERY: "battery",
+}
+
+// Chart codes
+const CHART_CODES = {
+  MAIN: "m",
+  SOIL_TEMP: "mst",
+  SUM: "mSum",
+}
 
 export const MoistChartPage = (props: any) => {
-  const root = useRef<any>(null);
-  const [currentChartData, setCurrentChartData] = useState<any>([])
-  const [disableNextButton, setDisableNextButton] = useState(true)
-  const [disablePrevButton, setDisablePrevButton] = useState(true)
-  const [irrigationDates, setIrrigationDates] = useState([])
-  const [fullDatesArray, setFullDatesArray] = useState([])
-  const [isIrrigationButtons, setIsIrrigationButtons] = useState(true)
-  const [isIrrigationDataIsLoading, setIsIrrigationDataIsLoading] = useState(false)
-  const currentDate: any = getCurrentDatetime()
-  const initialStartDate: any = getStartDate(getCurrentDatetime())
-  const [startDate, setStartDate] = useState<string>(initialStartDate);
-  const [endDate, setEndDate] = useState<string>(currentDate);
-  const [currentDates, setCurrentDates] = useState<any>([])
-  const [dateDifferenceInDays, setDateDifferenceInDays] = React.useState('14');
-  const [comparingMode, setComparingMode] = useState(false)
-  // Battery Chart
-  const batteryRoot = useRef<any>(null);
-  const [batteryChartShowed, setBatteryChartShowed] = useState(false)
-  // Soil Temperature Chart
-  const soilTempRoot = useRef<any>(null);
-  const [soilTempChartShowed, setSoilTempChartShowed] = useState(false)
-  // Sum Chart
-  const sumRoot = useRef<any>(null);
+  // Chart refs
+  const root = useRef<HTMLDivElement>(null)
+  const batteryRoot = useRef<HTMLDivElement>(null)
+  const soilTempRoot = useRef<HTMLDivElement>(null)
+  const sumRoot = useRef<HTMLDivElement>(null)
 
-  // Historic Mode
-  const [historicMode, setHistoricMode] = useState(false)
-  const [showForecast, setShowForecast] = useState(true)
+  // Date state
+  const currentDate: string = getCurrentDatetime()
+  const initialStartDate: string = getStartDate(getCurrentDatetime())
+  const [startDate, setStartDate] = useState<string>(initialStartDate)
+  const [endDate, setEndDate] = useState<string>(currentDate)
+  const [currentDates, setCurrentDates] = useState<string[]>([])
+  const [dateDifferenceInDays, setDateDifferenceInDays] = useState<string>("14")
 
-  // Tabular Data
-  // Moist Main
-  const [moistMainTabularData, setMoistMainTabularData] = useState<any>(null)
-  const [isMoistMainTabularDataLoading, setIsMoistMainTabularDataLoading] = useState(false)
-  const [moistMainTabularDataColors, setMoistMainTabularDataColors] = useState<any>([])
-  // Moist Sum
-  const [moistSumTabularData, setMoistSumTabularData] = useState<any>(null)
-  const [isMoistSumTabularDataLoading, setIsMoistSumTabularDataLoading] = useState(false)
-  const [moistSumTabularDataColors, setMoistSumTabularDataColors] = useState<any>([])
-  // Moist SoilTemp
-  const [moistSoilTempTabularData, setMoistSoilTempTabularData] = useState<any>(null)
-  const [isMoistSoilTempTabularDataLoading, setIsMoistSoilTempTabularDataLoading] = useState(false)
-  const [moistSoilTempTabularDataColors, setMoistSoilTempTabularDataColors] = useState<any>([])
+  // Chart data state
+  const [currentChartData, setCurrentChartData] = useState<any[]>([])
+  const [irrigationDates, setIrrigationDates] = useState<string[]>([])
+  const [fullDatesArray, setFullDatesArray] = useState<any>()
+  const [currentSumChartData, setCurrentSumChartData] = useState<any>([])
+  const [currentSoilTempChartData, setCurrentSoilTempChartData] = useState<any>([])
+  const [currentBatteryChartData, setCurrentBatteryChartData] = useState<any>([])
+  const [newDaysData, setNewDaysData] = useState<any>({})
 
-  // Add Comment
-  const [moistAddCommentModal, setMoistAddCommentModal] = useState<any>(undefined)
-  const [isMoistCommentsShowed, setIsMoistCommentsShowed] = useState(false)
-  // Main
-  const [moistMainComments, setMoistMainComments] = useState();
-  const [moistMainAddCommentItemShowed, setMoistMainAddCommentItemShowed] = useState<any>(false)
-  // Battery
-  const [moistBatteryAddCommentItemShowed, setMoistBatteryAddCommentItemShowed] = useState<any>(false)
-  const [moistBatteryComments, setMoistBatteryComments] = useState();
-  // Sum
-  const [moistSumAddCommentItemShowed, setMoistSumAddCommentItemShowed] = useState<any>(false)
-  const [moistSumComments, setMoistSumComments] = useState();
-  // Soil Temp
-  const [moistSoilTempAddCommentItemShowed, setMoistSoilTempAddCommentItemShowed] = useState<any>(false)
-  const [moistSoilTempComments, setMoistSoilTempComments] = useState();
+  // UI state
+  const [disableNextButton, setDisableNextButton] = useState<boolean>(true)
+  const [disablePrevButton, setDisablePrevButton] = useState<boolean>(true)
+  const [isIrrigationButtons, setIsIrrigationButtons] = useState<boolean>(true)
+  const [isIrrigationDataIsLoading, setIsIrrigationDataIsLoading] = useState<boolean>(false)
+  const [comparingMode, setComparingMode] = useState<boolean>(false)
+  const [historicMode, setHistoricMode] = useState<boolean>(false)
+  const [showForecast, setShowForecast] = useState<boolean>(true)
+  const [isMoistCommentsShowed, setIsMoistCommentsShowed] = useState<boolean>(false)
 
-  // Responsibility
-  const [smallScreen, setSmallScreen] = useState(false)
-  const [middleScreen, setMiddleScreen] = useState(false)
-  const [largeScreen, setLargeScreen] = useState(false)
+  // Chart visibility state
+  const [batteryChartShowed, setBatteryChartShowed] = useState<boolean>(false)
+  const [soilTempChartShowed, setSoilTempChartShowed] = useState<boolean>(false)
 
-  // Chart Codes
-  const mainChartCode: string = 'm'
-  const soilTempChartCode: string = 'mst'
-  const sumChartCode: string = 'mSum'
+  // Tabular data state - consolidated into objects
+  const [tabularData, setTabularData] = useState<TabularDataStateMap>({
+    main: { data: null, isLoading: false, colors: [] },
+    sum: { data: null, isLoading: false, colors: [] },
+    soilTemp: { data: null, isLoading: false, colors: [] },
+  })
 
-  const updateChart = async (
-    typeOfChart: string,
-    updateReason?: string,
-    days?: any,
-    endDateDays?: any,
-    endDatetime?: any
-  ) => {
-    const getCommentsFunc = async () => {
-      let chartType: any
-      let setData: any
+  // Comments state - consolidated into objects
+  const [comments, setComments] = useState<CommentsState>({
+    main: undefined,
+    sum: undefined,
+    soilTemp: undefined,
+    battery: undefined,
+  })
 
-      if (typeOfChart === 'main') {
-        chartType = 'M'
-        setData = setMoistMainComments
-      } else if (typeOfChart === 'soilTemp') {
-        chartType = 'MST'
-        setData = setMoistSoilTempComments
-      } else if (typeOfChart === 'sum') {
-        chartType = 'MSum'
-        setData = setMoistSumComments
-      } else {
-        chartType = 'MBattery'
-        setData = setMoistBatteryComments
+  // Comment UI state - consolidated into objects
+  const [addCommentItemShowed, setAddCommentItemShowed] = useState<AddCommentItemState>({
+    main: false,
+    sum: false,
+    soilTemp: false,
+    battery: false,
+  })
+
+  // Modal state
+  const [moistAddCommentModal, setMoistAddCommentModal] = useState<CommentModal | undefined>(undefined)
+
+  // Responsive design state
+  const [screenSize, setScreenSize] = useState<ScreenSizeState>({
+    small: false,
+    middle: false,
+    large: false,
+  })
+
+  // Helper function to update tabular data
+  const updateTabularData = (type: keyof TabularDataStateMap, updates: Partial<TabularDataState>): void => {
+    setTabularData((prev) => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        ...updates,
+      },
+    }))
+  }
+
+  // Helper function to update comments
+  const updateComments = (type: keyof CommentsState, data: Comment[] | undefined): void => {
+    setComments((prev) => ({
+      ...prev,
+      [type]: data,
+    }))
+  }
+
+  // Helper function to update comment UI state
+  const updateAddCommentItemShowed = (type: keyof AddCommentItemState, value: boolean | string): void => {
+    setAddCommentItemShowed((prev) => ({
+      ...prev,
+      [type]: value,
+    }))
+  }
+
+  // Memoized resize handler
+  const handleResize = useCallback(() => {
+    setDynamicChartHeight('mainChart')
+    handleResizeForChartLegend({
+      additionalChartData: props.additionalChartData,
+      smallScreen: screenSize.small,
+      setSmallScreen: (value: boolean) => setScreenSize((prev) => ({ ...prev, small: value })),
+      middleScreen: screenSize.middle,
+      setMiddleScreen: (value: boolean) => setScreenSize((prev) => ({ ...prev, middle: value })),
+      largeScreen: screenSize.large,
+      setLargeScreen: (value: boolean) => setScreenSize((prev) => ({ ...prev, large: value })),
+    })
+  }, [screenSize, props.additionalChartData])
+
+  const updateChart = useCallback(
+    async (
+      typeOfChart: string,
+      updateReason?: string,
+      days?: any,
+      endDateDays?: string,
+      endDatetime?: string,
+    ): Promise<void> => {
+      const fetchComments = async (chartType: string, data: any): Promise<Comment[]> => {
+        let apiChartType: string
+        let commentType: keyof CommentsState
+        let currentData: any
+
+        switch (chartType) {
+          case CHART_TYPES.MAIN:
+            apiChartType = "M"
+            commentType = "main"
+            currentData = currentChartData
+            break
+          case CHART_TYPES.SOIL_TEMP:
+            apiChartType = "MST"
+            commentType = "soilTemp"
+            currentData = currentSoilTempChartData.data
+            break
+          case CHART_TYPES.SUM:
+            apiChartType = "MSum"
+            commentType = "sum"
+            currentData = currentSumChartData.data
+            break
+          case CHART_TYPES.BATTERY:
+            apiChartType = "MBattery"
+            commentType = "battery"
+            currentData = currentBatteryChartData
+            break
+          default:
+            apiChartType = "M"
+            commentType = "main"
+        }
+        if (data) {
+          currentData = data
+        }
+        const response: CommentsResponse = await getComments(apiChartType, props.sensorId, getDaysFromChartData(currentData))
+        updateComments(commentType, response.data)
+        return response.data
       }
-      const comments: any = await getComments(chartType, props.sensorId)
-      setData(comments.data)
-      return comments.data
-    }
-    if (typeOfChart === 'main') {
-      if (updateReason === 'comments') {
-        const newCommentData = await getCommentsFunc()
-        if (moistMainAddCommentItemShowed === 'comments') {
-          setMoistMainAddCommentItemShowed(false)
+
+      if (typeOfChart === CHART_TYPES.MAIN) {
+        if (updateReason === "comments") {
+          const newCommentData: Comment[] = await fetchComments(CHART_TYPES.MAIN, days)
+
+          if (addCommentItemShowed.main === "comments") {
+            updateAddCommentItemShowed("main", false)
+          }
+
           createMainChart({
-            data: currentChartData,
+            data: days || currentChartData,
+            sensorId: props.sensorId,
+            updateComments,
             userId: props.userId,
             root,
             fullDatesArray,
             additionalChartData: props.additionalChartData,
             comparingMode,
-            isNewDates: false,
+            isNewDates: !!days,
             historicMode,
             showForecast,
             setMoistAddCommentModal,
-            moistMainAddCommentItemShowed: false,
+            moistMainAddCommentItemShowed: addCommentItemShowed.main === "comments" ? false : addCommentItemShowed.main,
             moistMainComments: newCommentData,
             updateCommentsArray,
             updateChart,
             isMoistCommentsShowed,
-            setMoistMainTabularDataColors
+            setMoistMainTabularDataColors: (colors: string[]) => updateTabularData("main", { colors }),
+            smallScreen: screenSize.small,
+            middleScreen: screenSize.middle,
+            largeScreen: screenSize.large,
           })
-        } else {
-          if (currentChartData.length !== 0) {
-            createMainChart({
-              data: currentChartData,
-              userId: props.userId,
-              root,
-              fullDatesArray,
-              additionalChartData: props.additionalChartData,
-              comparingMode,
-              isNewDates: false,
-              historicMode,
-              showForecast,
-              setMoistAddCommentModal,
-              moistMainAddCommentItemShowed,
-              moistMainComments: newCommentData,
-              updateCommentsArray,
-              updateChart,
-              isMoistCommentsShowed,
-              setMoistMainTabularDataColors
-            })
+        } else if (updateReason === "dates") {
+          const newMoistChartData: ChartResponse = await getMoistMainChartData(
+            props.sensorId,
+            historicMode,
+            days,
+            endDateDays,
+          )
+          let dataEndDate = new Date(newMoistChartData.data.data[newMoistChartData.data.data.length - 1].DateTime).getTime()
+          let dataStartDate = new Date(newMoistChartData.data.data[0].DateTime).getTime()
+          if (historicMode) {
+            const lastIndex = newMoistChartData.data.data.findIndex((dataItem: any) => dataItem['MS 1'] === undefined)
+            if (lastIndex === -1) {
+              dataEndDate = new Date(newMoistChartData.data.data[newMoistChartData.data.data.length - 1].DateTime).getTime()
+            } else {
+              dataEndDate = new Date(newMoistChartData.data.data[lastIndex - 1].DateTime).getTime()
+            }
+          }
+          if (isIrrigationButtons) {
+            if (dataEndDate < new Date(new Date(fullDatesArray[fullDatesArray.length - 1]).setHours(0, 0, 0, 0)).getTime()) {
+              setDisableNextButton(false)
+            }
+            if (dataEndDate >= new Date(new Date(fullDatesArray[fullDatesArray.length - 1]).setHours(0, 0, 0, 0)).getTime()) {
+              setDisableNextButton(true)
+            }
+            if (dataStartDate < new Date(new Date(fullDatesArray[0]).setHours(0, 0, 0, 0)).getTime()) {
+              setDisablePrevButton(true)
+            }
+            if (dataStartDate >= new Date(new Date(fullDatesArray[0]).setHours(0, 0, 0, 0)).getTime()) {
+              setDisablePrevButton(false)
+            }
+          }
+          setCurrentChartData(newMoistChartData.data.data)
+
+          if (isMoistCommentsShowed) {
+            updateChart(CHART_TYPES.MAIN, 'comments', newMoistChartData.data.data)
           } else {
             createMainChart({
-              data: props.chartData,
+              data: newMoistChartData.data.data,
+              sensorId: props.sensorId,
+              updateComments,
               userId: props.userId,
               root,
               fullDatesArray,
               additionalChartData: props.additionalChartData,
               comparingMode,
-              isNewDates: false,
+              isNewDates: true,
               historicMode,
-              showForecast,
+              showForecast: compareDates(endDatetime),
               setMoistAddCommentModal,
-              moistMainAddCommentItemShowed,
-              moistMainComments: newCommentData,
+              moistMainAddCommentItemShowed: addCommentItemShowed.main,
+              moistMainComments: comments.main,
               updateCommentsArray,
               updateChart,
               isMoistCommentsShowed,
-              setMoistMainTabularDataColors
             })
           }
-        }
-      } else if (updateReason === 'toggleComments') {
-        createMainChart({
-          data: currentChartData,
-          userId: props.userId,
-          root,
-          fullDatesArray,
-          additionalChartData: props.additionalChartData,
-          comparingMode,
-          isNewDates: false,
-          historicMode,
-          showForecast,
-          setMoistAddCommentModal,
-          moistMainAddCommentItemShowed,
-          moistMainComments,
-          updateCommentsArray,
-          updateChart,
-          isMoistCommentsShowed
-        })
-      } else if (updateReason === 'comparingMode') {
-        if (currentChartData.length !== 0) {
+        } else if (updateReason === "sameData") {
           createMainChart({
             data: currentChartData,
+            sensorId: props.sensorId,
+            updateComments,
             userId: props.userId,
             root,
             fullDatesArray,
@@ -222,97 +364,29 @@ export const MoistChartPage = (props: any) => {
             historicMode,
             showForecast,
             setMoistAddCommentModal,
-            moistMainAddCommentItemShowed,
-            moistMainComments,
-            updateCommentsArray,
-            updateChart,
-            isMoistCommentsShowed
-          })
-        } else {
-          createMainChart({
-            data: props.chartData,
-            userId: props.userId,
-            root,
-            fullDatesArray,
-            additionalChartData: props.additionalChartData,
-            comparingMode,
-            isNewDates: false,
-            historicMode,
-            showForecast,
-            setMoistAddCommentModal,
-            moistMainAddCommentItemShowed,
-            moistMainComments,
-            updateCommentsArray,
-            updateChart,
-            isMoistCommentsShowed
-          })
-        }
-      } else if (updateReason === 'dates') {
-        console.log(endDateDays)
-        const newMoistChartData = await getMoistMainChartData(props.sensorId, historicMode, days, endDateDays)
-        setCurrentChartData(newMoistChartData.data.data)
-        createMainChart({
-          data: newMoistChartData.data.data,
-          userId: props.userId,
-          root,
-          fullDatesArray,
-          additionalChartData: props.additionalChartData,
-          comparingMode,
-          isNewDates: true,
-          historicMode,
-          showForecast: compareDates(endDatetime),
-          setMoistAddCommentModal,
-          moistMainAddCommentItemShowed,
-          moistMainComments,
-          updateCommentsArray,
-          updateChart,
-          isMoistCommentsShowed
-        })
-      } else if (updateReason === 'historic') {
-        const historicData = await getMoistMainChartData(props.sensorId, historicMode, currentDates[0], currentDates[1])
-        createMainChart({
-          data: historicData.data.data,
-          userId: props.userId,
-          root,
-          fullDatesArray,
-          additionalChartData: props.additionalChartData,
-          comparingMode,
-          isNewDates: false,
-          historicMode,
-          showForecast,
-          setMoistAddCommentModal,
-          moistMainAddCommentItemShowed,
-          moistMainComments,
-          updateCommentsArray,
-          updateChart,
-          isMoistCommentsShowed
-        })
-      } else {
-        if (currentChartData.length !== 0) {
-          createMainChart({
-            data: currentChartData,
-            userId: props.userId,
-            root,
-            fullDatesArray,
-            additionalChartData: props.additionalChartData,
-            comparingMode,
-            isNewDates: false,
-            historicMode,
-            showForecast,
-            setMoistAddCommentModal,
-            moistMainAddCommentItemShowed,
-            moistMainComments,
+            moistMainAddCommentItemShowed: addCommentItemShowed.main,
+            moistMainComments: comments.main,
             updateCommentsArray,
             updateChart,
             isMoistCommentsShowed,
-            setMoistMainTabularDataColors,
-            smallScreen,
-            middleScreen,
-            largeScreen
+            setMoistMainTabularDataColors: (colors: string[]) => updateTabularData("main", { colors }),
+            smallScreen: screenSize.small,
+            middleScreen: screenSize.middle,
+            largeScreen: screenSize.large,
           })
         } else {
+          const newData: ChartResponse = await getMoistMainChartData(
+            props.sensorId,
+            historicMode,
+            currentDates[0],
+            currentDates[1],
+          )
+          setCurrentChartData(newData.data.data)
+
           createMainChart({
-            data: props.chartData,
+            data: newData.data.data,
+            sensorId: props.sensorId,
+            updateComments,
             userId: props.userId,
             root,
             fullDatesArray,
@@ -322,247 +396,432 @@ export const MoistChartPage = (props: any) => {
             historicMode,
             showForecast,
             setMoistAddCommentModal,
-            moistMainAddCommentItemShowed,
-            moistMainComments,
+            moistMainAddCommentItemShowed: addCommentItemShowed.main,
+            moistMainComments: comments.main,
             updateCommentsArray,
             updateChart,
             isMoistCommentsShowed,
-            setMoistMainTabularDataColors,
-            smallScreen,
-            middleScreen,
-            largeScreen
+            setMoistMainTabularDataColors: (colors: string[]) => updateTabularData("main", { colors }),
+            smallScreen: screenSize.small,
+            middleScreen: screenSize.middle,
+            largeScreen: screenSize.large,
           })
         }
       }
-    } else if (typeOfChart === 'sum') {
-      if (updateReason === 'comments') {
-        const data = await getSumChartData(props.sensorId, historicMode, currentDates[0], currentDates[1])
-        const newComments = await getCommentsFunc()
-        if (moistSumAddCommentItemShowed === 'comments') {
-          setMoistSumAddCommentItemShowed(false)
+
+      else if (typeOfChart === CHART_TYPES.SUM) {
+        if (updateReason === "comments") {
+          const newComments: Comment[] = await fetchComments(CHART_TYPES.SUM, days)
+
+          if (addCommentItemShowed.sum === "comments") {
+            updateAddCommentItemShowed("sum", false)
+          }
+
           createAdditionalChart(
-            'sum', data.data.data, sumRoot,
-            setMoistAddCommentModal, updateCommentsArray, false,
-            newComments, props.userId, updateChart, isMoistCommentsShowed, data.data.budgetLines,
-            historicMode
+            "sum",
+            days || currentSumChartData.data,
+            sumRoot,
+            setMoistAddCommentModal,
+            updateCommentsArray,
+            props.sensorId,
+            updateComments,
+            addCommentItemShowed.sum === "comments" ? false : addCommentItemShowed.sum,
+            newComments,
+            props.userId,
+            updateChart,
+            isMoistCommentsShowed,
+            currentSumChartData.budgetLines,
+            historicMode,
+            showForecast,
+            (colors: string[]) => updateTabularData("sum", { colors })
+          )
+        } else if (updateReason === "dates") {
+          const newSumChartData: any = await getSumChartData(props.sensorId, historicMode, days, endDateDays)
+          setCurrentSumChartData(newSumChartData.data)
+
+          if (isMoistCommentsShowed) {
+            updateChart(CHART_TYPES.SUM, 'comments', newSumChartData.data.data)
+          } else {
+            createAdditionalChart(
+              "sum",
+              newSumChartData.data.data,
+              sumRoot,
+              setMoistAddCommentModal,
+              updateCommentsArray,
+              props.sensorId,
+              updateComments,
+              addCommentItemShowed.sum,
+              comments.sum,
+              props.userId,
+              updateChart,
+              isMoistCommentsShowed,
+              newSumChartData.data.budgetLines,
+              historicMode,
+              showForecast,
+              (colors: string[]) => updateTabularData("sum", { colors }),
+            )
+          }
+        } else if (updateReason === "sameData") {
+          createAdditionalChart(
+            "sum",
+            currentSumChartData.data,
+            sumRoot,
+            setMoistAddCommentModal,
+            updateCommentsArray,
+            props.sensorId,
+            updateComments,
+            addCommentItemShowed.sum,
+            comments.sum,
+            props.userId,
+            updateChart,
+            isMoistCommentsShowed,
+            currentSumChartData.budgetLines,
+            historicMode,
+            showForecast,
+            (colors: string[]) => updateTabularData("sum", { colors })
           )
         } else {
+          const newData: any = await getSumChartData(
+            props.sensorId,
+            historicMode,
+            currentDates[0],
+            currentDates[1],
+          )
+          setCurrentSumChartData(newData.data)
           createAdditionalChart(
-            'sum', data.data.data, sumRoot,
-            setMoistAddCommentModal, updateCommentsArray, moistSumAddCommentItemShowed,
-            newComments, props.userId, updateChart, isMoistCommentsShowed, data.data.budgetLines,
-            historicMode
+            "sum",
+            newData.data.data,
+            sumRoot,
+            setMoistAddCommentModal,
+            updateCommentsArray,
+            props.sensorId,
+            updateComments,
+            addCommentItemShowed.sum,
+            comments.sum,
+            props.userId,
+            updateChart,
+            isMoistCommentsShowed,
+            newData.data.budgetLines,
+            historicMode,
+            showForecast,
+            (colors: string[]) => updateTabularData("sum", { colors })
           )
         }
-      } else if (updateReason === 'historic') {
-        const historicData = await getSumChartData(props.sensorId, historicMode, currentDates[0], currentDates[1])
-        createAdditionalChart(
-          'sum', historicData.data.data, sumRoot,
-          setMoistAddCommentModal, updateCommentsArray, moistSumAddCommentItemShowed,
-          moistSumComments, props.userId, updateChart, isMoistCommentsShowed, historicData.data.budgetLines,
-          historicMode
-        )
-      } else if (updateReason === 'dates') {
-        const newSumChartData = await getSumChartData(props.sensorId, historicMode, days, endDateDays)
-        createAdditionalChart(
-          'sum', newSumChartData.data.data, sumRoot,
-          setMoistAddCommentModal, updateCommentsArray, moistSumAddCommentItemShowed,
-          moistSumComments, props.userId, updateChart, isMoistCommentsShowed, newSumChartData.data.budgetLines,
-          historicMode, setMoistSumTabularDataColors
-        )
-      } else {
-        const data = await getSumChartData(props.sensorId, historicMode, currentDates[0], currentDates[1])
-        createAdditionalChart(
-          'sum', data.data.data, sumRoot,
-          setMoistAddCommentModal, updateCommentsArray, moistSumAddCommentItemShowed,
-          moistSumComments, props.userId, updateChart, isMoistCommentsShowed, data.data.budgetLines,
-          historicMode
-        )
       }
-    } else if (typeOfChart === 'soilTemp') {
-      if (updateReason === 'comments') {
-        const comments: any = await getCommentsFunc()
-        const newSoilTempChartData = await getSoilTempChartData(props.sensorId, currentDates[0], currentDates[1])
-        if (moistSoilTempAddCommentItemShowed === 'comments') {
-          setMoistSoilTempAddCommentItemShowed(false)
+
+      else if (typeOfChart === CHART_TYPES.SOIL_TEMP) {
+        if (updateReason === "comments") {
+          const newComments: Comment[] = await fetchComments(CHART_TYPES.SOIL_TEMP, days)
+
+          if (addCommentItemShowed.soilTemp === "comments") {
+            updateAddCommentItemShowed("soilTemp", false)
+          }
+
           createAdditionalChart(
-            'soilTemp',
-            newSoilTempChartData.data.data,
+            "soilTemp",
+            days || currentSoilTempChartData.data,
             soilTempRoot,
             setMoistAddCommentModal,
             updateCommentsArray,
-            false,
-            comments,
+            props.sensorId,
+            updateComments,
+            addCommentItemShowed.soilTemp === "comments" ? false : addCommentItemShowed.soilTemp,
+            newComments,
             props.userId,
             updateChart,
             isMoistCommentsShowed,
             undefined,
             undefined,
             undefined,
+            undefined,
             props.additionalChartData.linesCount,
-            newSoilTempChartData.data.metric,
-            setMoistSoilTempTabularDataColors
+            currentSoilTempChartData.metric,
+            (colors: string[]) => updateTabularData("soilTemp", { colors }),
           )
-        } else {
+        } else if (updateReason === "dates") {
+          const newSoilTempChartData: ChartResponse = await getSoilTempChartData(props.sensorId, days, endDateDays)
+          setCurrentSoilTempChartData(newSoilTempChartData.data)
+
+          if (isMoistCommentsShowed) {
+            updateChart(CHART_TYPES.SOIL_TEMP, 'comments', newSoilTempChartData.data.data)
+          } else {
+            createAdditionalChart(
+              "soilTemp",
+              newSoilTempChartData.data.data,
+              soilTempRoot,
+              setMoistAddCommentModal,
+              updateCommentsArray,
+              props.sensorId,
+              updateComments,
+              addCommentItemShowed.soilTemp,
+              comments.soilTemp,
+              props.userId,
+              updateChart,
+              isMoistCommentsShowed,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              props.additionalChartData.linesCount,
+              newSoilTempChartData.data.metric,
+              (colors: string[]) => updateTabularData("soilTemp", { colors }),
+            )
+          }
+        } else if (updateReason === "sameData") {
           createAdditionalChart(
-            'soilTemp',
-            newSoilTempChartData.data.data,
+            "soilTemp",
+            currentSoilTempChartData.data,
             soilTempRoot,
             setMoistAddCommentModal,
             updateCommentsArray,
-            moistSoilTempAddCommentItemShowed,
-            comments,
+            props.sensorId,
+            updateComments,
+            addCommentItemShowed.soilTemp,
+            comments.soilTemp,
             props.userId,
             updateChart,
             isMoistCommentsShowed,
             undefined,
             undefined,
             undefined,
+            undefined,
             props.additionalChartData.linesCount,
-            newSoilTempChartData.data.metric,
-            setMoistSoilTempTabularDataColors
-          )
-        }
-      } else if (updateReason === 'dates') {
-        const newSoilTempChartData = await getSoilTempChartData(props.sensorId, days, endDateDays)
-        createAdditionalChart(
-          'soilTemp',
-          newSoilTempChartData.data.data,
-          soilTempRoot,
-          setMoistAddCommentModal,
-          updateCommentsArray,
-          moistSoilTempAddCommentItemShowed,
-          moistSoilTempComments,
-          props.userId,
-          updateChart,
-          isMoistCommentsShowed,
-          undefined,
-          undefined,
-          undefined,
-          props.additionalChartData.linesCount,
-          newSoilTempChartData.data.metric,
-          setMoistSoilTempTabularDataColors
-        )
-      } else {
-        const newSoilTempChartData = await getSoilTempChartData(props.sensorId, currentDates[0], currentDates[1])
-        createAdditionalChart(
-          'soilTemp',
-          newSoilTempChartData.data.data,
-          soilTempRoot,
-          setMoistAddCommentModal,
-          updateCommentsArray,
-          moistSoilTempAddCommentItemShowed,
-          moistSoilTempComments,
-          props.userId,
-          updateChart,
-          isMoistCommentsShowed,
-          undefined,
-          undefined,
-          undefined,
-          props.additionalChartData.linesCount,
-          newSoilTempChartData.data.metric,
-          setMoistSoilTempTabularDataColors
-        )
-      }
-    } else if (typeOfChart === 'battery') {
-      if (updateReason === 'comments') {
-        const comments: any = await getCommentsFunc()
-        const newBatteryChartData = await getBatteryChartData(props.sensorId, currentDates[0], currentDates[1])
-        if (moistBatteryAddCommentItemShowed === 'comments') {
-          setMoistBatteryAddCommentItemShowed(false)
-          createAdditionalChart(
-            'battery', newBatteryChartData.data, batteryRoot,
-            setMoistAddCommentModal, updateCommentsArray, false,
-            comments, props.userId, updateChart, isMoistCommentsShowed
+            currentSoilTempChartData.metric,
+            (colors: string[]) => updateTabularData("soilTemp", { colors }),
           )
         } else {
+          const newSoilTempChartData: ChartResponse = await getSoilTempChartData(
+            props.sensorId,
+            currentDates[0],
+            currentDates[1],
+          )
+          setCurrentSoilTempChartData(newSoilTempChartData.data)
+
           createAdditionalChart(
-            'battery', newBatteryChartData.data, batteryRoot,
-            setMoistAddCommentModal, updateCommentsArray, moistBatteryAddCommentItemShowed,
-            comments, props.userId, updateChart, isMoistCommentsShowed
+            "soilTemp",
+            newSoilTempChartData.data.data,
+            soilTempRoot,
+            setMoistAddCommentModal,
+            updateCommentsArray,
+            props.sensorId,
+            updateComments,
+            addCommentItemShowed.soilTemp,
+            comments.soilTemp,
+            props.userId,
+            updateChart,
+            isMoistCommentsShowed,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            props.additionalChartData.linesCount,
+            newSoilTempChartData.data.metric,
+            (colors: string[]) => updateTabularData("soilTemp", { colors }),
           )
         }
-      } else if (updateReason === 'dates') {
-        const newBatteryChartData = await getBatteryChartData(props.sensorId, days, endDateDays)
-        createAdditionalChart(
-          'battery', newBatteryChartData.data, batteryRoot,
-          setMoistAddCommentModal, updateCommentsArray, moistBatteryAddCommentItemShowed,
-          moistBatteryComments, props.userId, updateChart, isMoistCommentsShowed
-        )
-      } else {
-        const newBatteryChartData = await getBatteryChartData(props.sensorId, currentDates[0], currentDates[1])
-        createAdditionalChart(
-          'battery', newBatteryChartData.data, batteryRoot,
-          setMoistAddCommentModal, updateCommentsArray, moistBatteryAddCommentItemShowed,
-          moistBatteryComments, props.userId, updateChart, isMoistCommentsShowed
-        )
       }
-    }
-  }
+
+      else if (typeOfChart === CHART_TYPES.BATTERY) {
+        if (updateReason === "comments") {
+          const newComments: Comment[] = await fetchComments(CHART_TYPES.BATTERY, days && days.data)
+
+          if (addCommentItemShowed.battery === "comments") {
+            updateAddCommentItemShowed("battery", false)
+          }
+
+          createAdditionalChart(
+            "battery",
+            days || currentBatteryChartData,
+            batteryRoot,
+            setMoistAddCommentModal,
+            updateCommentsArray,
+            props.sensorId,
+            updateComments,
+            addCommentItemShowed.battery === "comments" ? false : addCommentItemShowed.battery,
+            newComments,
+            props.userId,
+            updateChart,
+            isMoistCommentsShowed,
+          )
+        } else if (updateReason === "dates") {
+          const newBatteryChartData: ChartResponse = await getBatteryChartData(props.sensorId, days, endDateDays)
+          setCurrentBatteryChartData(newBatteryChartData.data)
+
+          if (isMoistCommentsShowed) {
+            updateChart(CHART_TYPES.BATTERY, 'comments', newBatteryChartData.data)
+          } else {
+            createAdditionalChart(
+              "battery",
+              newBatteryChartData.data,
+              batteryRoot,
+              setMoistAddCommentModal,
+              updateCommentsArray,
+              props.sensorId,
+              updateComments,
+              addCommentItemShowed.battery,
+              comments.battery,
+              props.userId,
+              updateChart,
+              isMoistCommentsShowed,
+            )
+          }
+        } else if (updateReason === 'sameData') {
+          createAdditionalChart(
+            "battery",
+            currentBatteryChartData,
+            batteryRoot,
+            setMoistAddCommentModal,
+            updateCommentsArray,
+            props.sensorId,
+            updateComments,
+            addCommentItemShowed.battery,
+            comments.battery,
+            props.userId,
+            updateChart,
+            isMoistCommentsShowed,
+          )
+        } else {
+          const newBatteryChartData: ChartResponse = await getBatteryChartData(
+            props.sensorId,
+            currentDates[0],
+            currentDates[1],
+          )
+          setCurrentBatteryChartData(newBatteryChartData.data)
+
+          createAdditionalChart(
+            "battery",
+            newBatteryChartData.data,
+            batteryRoot,
+            setMoistAddCommentModal,
+            updateCommentsArray,
+            props.sensorId,
+            updateComments,
+            addCommentItemShowed.battery,
+            comments.battery,
+            props.userId,
+            updateChart,
+            isMoistCommentsShowed,
+          )
+        }
+      }
+    },
+    [
+      currentChartData,
+      fullDatesArray,
+      comparingMode,
+      historicMode,
+      showForecast,
+      currentDates,
+      addCommentItemShowed,
+      comments,
+      isMoistCommentsShowed,
+      screenSize,
+    ],
+  )
 
   useEffect(() => {
-    setCurrentChartData(props.chartData)
-    getIrrigationDates(setIsIrrigationDataIsLoading, setIsIrrigationButtons, props.userId, props.sensorId, setIrrigationDates, setFullDatesArray, startDate, setDisablePrevButton)
-    updateChart('main', 'comments')
-    updateChart('sum', 'comments')
-  }, []);
+    getIrrigationDates(
+      setIsIrrigationDataIsLoading,
+      setIsIrrigationButtons,
+      props.userId,
+      props.sensorId,
+      setIrrigationDates,
+      setFullDatesArray,
+      startDate,
+      setDisablePrevButton,
+    )
+    setDynamicChartHeight('mainChart')
+  }, [])
+
   useEffect(() => {
-    if (fullDatesArray) {
-      updateChart('main')
+    if (fullDatesArray !== undefined) {
+      updateChart(CHART_TYPES.MAIN)
+      updateChart(CHART_TYPES.SUM)
     }
   }, [fullDatesArray])
+
   useEffect(() => {
-    updateChart('main', 'comparingMode')
-  }, [comparingMode]);
+    if (fullDatesArray !== undefined) {
+      if (isMoistCommentsShowed) {
+        updateChart(CHART_TYPES.MAIN, 'comments')
+        updateChart(CHART_TYPES.SUM, 'comments')
+        if (soilTempChartShowed) {
+          updateChart(CHART_TYPES.SOIL_TEMP, 'comments')
+        }
+        if (batteryChartShowed) {
+          updateChart(CHART_TYPES.BATTERY, 'comments')
+        }
+      } else {
+        updateChart(CHART_TYPES.MAIN, 'sameData')
+        updateChart(CHART_TYPES.SUM, 'sameData')
+        if (soilTempChartShowed) {
+          updateChart(CHART_TYPES.SOIL_TEMP, 'sameData')
+        }
+        if (batteryChartShowed) {
+          updateChart(CHART_TYPES.BATTERY, 'sameData')
+        }
+      }
+    }
+  }, [isMoistCommentsShowed])
+
   useEffect(() => {
-    updateChart('main', 'historic')
-    updateChart('sum', 'historic')
+    if (fullDatesArray !== undefined) {
+      setDynamicChartHeight('mainChart')
+      if (addCommentItemShowed.main === "comments") {
+        updateChart(CHART_TYPES.MAIN, "comments")
+      } else {
+        updateChart(CHART_TYPES.MAIN, 'sameData')
+      }
+    }
+  }, [addCommentItemShowed.main])
+  useEffect(() => {
+    if (fullDatesArray !== undefined) {
+      if (addCommentItemShowed.sum === "comments") {
+        updateChart(CHART_TYPES.SUM, "comments")
+      } else {
+        updateChart(CHART_TYPES.SUM, 'sameData')
+      }
+    }
+  }, [addCommentItemShowed.sum])
+  useEffect(() => {
+    if (fullDatesArray !== undefined) {
+      if (addCommentItemShowed.soilTemp === "comments") {
+        updateChart(CHART_TYPES.SOIL_TEMP, "comments")
+      } else {
+        updateChart(CHART_TYPES.SOIL_TEMP, 'sameData')
+      }
+    }
+  }, [addCommentItemShowed.soilTemp])
+  useEffect(() => {
+    if (fullDatesArray !== undefined) {
+      if (addCommentItemShowed.battery === "comments") {
+        updateChart(CHART_TYPES.BATTERY, "comments")
+      } else {
+        updateChart(CHART_TYPES.BATTERY, 'sameData')
+      }
+    }
+  }, [addCommentItemShowed.battery])
+
+  useEffect(() => {
+    if (fullDatesArray !== undefined) {
+      updateChart(CHART_TYPES.MAIN)
+      updateChart(CHART_TYPES.SUM)
+    }
   }, [historicMode]);
   useEffect(() => {
-    if (moistMainAddCommentItemShowed === 'comments') {
-      updateChart('main', 'comments')
-    } else {
-      updateChart('main')
+    if (fullDatesArray !== undefined) {
+      updateChart(CHART_TYPES.MAIN, 'sameData')
     }
-  }, [moistMainAddCommentItemShowed]);
+  }, [comparingMode]);
   useEffect(() => {
-    if (moistSumAddCommentItemShowed === 'comments') {
-      updateChart('sum', 'comments')
-    } else {
-      updateChart('sum')
+    if (newDaysData.days) {
+      updateChart('main', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
+      updateChart('sum', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
+      updateChart('soilTemp', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
+      updateChart('battery', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
     }
-  }, [moistSumAddCommentItemShowed]);
-  useEffect(() => {
-    if (moistSoilTempAddCommentItemShowed === 'comments') {
-      updateChart('soilTemp', 'comments')
-    } else {
-      updateChart('soilTemp')
-    }
-  }, [moistSoilTempAddCommentItemShowed]);
-  useEffect(() => {
-    if (moistBatteryAddCommentItemShowed === 'comments') {
-      updateChart('battery', 'comments')
-    } else {
-      updateChart('battery')
-    }
-  }, [moistBatteryAddCommentItemShowed]);
-  useEffect(() => {
-    updateChart('main')
-    updateChart('sum')
-    updateChart('soilTemp')
-    updateChart('battery')
-  }, [isMoistCommentsShowed]);
-  const handleResize = useCallback(() => {
-    handleResizeForChartLegend({
-      additionalChartData: props.additionalChartData,
-      smallScreen,
-      setSmallScreen,
-      middleScreen,
-      setMiddleScreen,
-      largeScreen,
-      setLargeScreen
-    })
-  }, [smallScreen, middleScreen, largeScreen])
+  }, [showForecast, newDaysData]);
+
   useEffect(() => {
     handleResize()
     window.addEventListener("resize", handleResize)
@@ -571,122 +830,157 @@ export const MoistChartPage = (props: any) => {
     }
   }, [handleResize])
   useEffect(() => {
-    updateChart('main')
-  }, [smallScreen, middleScreen, largeScreen]);
-
-  let chartAdditionalClass: any
+    updateChart(CHART_TYPES.MAIN)
+  }, [screenSize])
+  useEffect(() => {
+    setDynamicChartHeight('mainChart')
+  }, [tabularData.main]);
 
   return (
     <IonContent className={s.container}>
       <div className={s.wrapper}>
-        <TopSection
-          userId={props.userId}
-          sensorId={props.sensorId}
-          root={root}
-          fullDatesArray={fullDatesArray}
-          setCurrentChartData={setCurrentChartData}
-          setDisableNextButton={setDisableNextButton}
-          setDisablePrevButton={setDisablePrevButton}
-          startDate={startDate}
-          setStartDate={setStartDate}
-          endDate={endDate}
-          setEndDate={setEndDate}
-          additionalChartData={props.additionalChartData}
-          type={'moist'}
-          setBatteryChartShowed={setBatteryChartShowed}
-          batteryChartShowed={batteryChartShowed}
-          batteryRoot={batteryRoot}
-          sumRoot={sumRoot}
-          setCurrentDates={setCurrentDates}
-          setComparingMode={setComparingMode}
-          setHistoricMode={setHistoricMode}
-          setAlarm={props.setAlarm}
-          setSoilTempChartShowed={setSoilTempChartShowed}
-          soilTempChartShowed={soilTempChartShowed}
-          updateChart={updateChart}
-          setIsCommentsShowed={setIsMoistCommentsShowed}
-          isCommentsShowed={isMoistCommentsShowed}
-          dateDifferenceInDays={dateDifferenceInDays}
-          setDateDifferenceInDays={setDateDifferenceInDays}
-          setShowForecast={setShowForecast}
-        />
+        <div data-chart-section="top">
+          <TopSection
+            userId={props.userId}
+            sensorId={props.sensorId}
+            root={root}
+            fullDatesArray={fullDatesArray}
+            setCurrentChartData={setCurrentChartData}
+            setDisableNextButton={setDisableNextButton}
+            setDisablePrevButton={setDisablePrevButton}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            additionalChartData={props.additionalChartData}
+            type={"moist"}
+            setBatteryChartShowed={setBatteryChartShowed}
+            batteryChartShowed={batteryChartShowed}
+            batteryRoot={batteryRoot}
+            sumRoot={sumRoot}
+            setCurrentDates={setCurrentDates}
+            setComparingMode={setComparingMode}
+            setHistoricMode={setHistoricMode}
+            setAlarm={props.setAlarm}
+            setSoilTempChartShowed={setSoilTempChartShowed}
+            soilTempChartShowed={soilTempChartShowed}
+            updateChart={updateChart}
+            setIsCommentsShowed={setIsMoistCommentsShowed}
+            isCommentsShowed={isMoistCommentsShowed}
+            dateDifferenceInDays={dateDifferenceInDays}
+            setDateDifferenceInDays={setDateDifferenceInDays}
+            setShowForecast={setShowForecast}
+            setNewDaysData={setNewDaysData}
+          />
+        </div>
+
         <div>
-          <div className='ion-margin-top' style={{display: soilTempChartShowed ? 'block' : 'none'}}>
-            <h2 className='ion-text-center'>Soil Temperature</h2>
+          {/* Soil Temperature Chart Section */}
+          <div style={{display: soilTempChartShowed ? 'block' : 'none'}} className="ion-margin-top">
+            <h2 className="ion-text-center">Soil Temperature</h2>
             <div className={s.additionalButtons}>
-              <ButtonAndSpinner data={moistSoilTempTabularData} setData={setMoistSoilTempTabularData}
-                                setIsLoading={setIsMoistSoilTempTabularDataLoading} sensorId={props.sensorId}
-                                chartCode={soilTempChartCode} isLoading={isMoistSoilTempTabularDataLoading}/>
-              <Export chartCode={soilTempChartCode} sensorId={props.sensorId} userId={props.userId}/>
-              <AddCommentButton addCommentItemShowed={moistSoilTempAddCommentItemShowed}
-                                setAddCommentItemShowed={setMoistSoilTempAddCommentItemShowed}
-                                isCommentsShowed={isMoistCommentsShowed}
-                                setIsCommentsShowed={setIsMoistCommentsShowed}/>
-            </div>
-            <AddCommentMessage type={'soilTemp'} addCommentItemShowed={moistSoilTempAddCommentItemShowed}
-                               setAddCommentModal={setMoistAddCommentModal}/>
-            {moistAddCommentModal && <AddCommentModal
-                type={moistAddCommentModal.type}
-                userId={props.userId}
+              <ButtonAndSpinner
+                data={tabularData.soilTemp.data}
+                setData={(data: any) => updateTabularData("soilTemp", {data})}
+                setIsLoading={(isLoading: any) => updateTabularData("soilTemp", {isLoading})}
                 sensorId={props.sensorId}
-                addCommentModal={moistAddCommentModal.date}
-                setMoistAddCommentModal={setMoistAddCommentModal}
-                setMoistMainComments={setMoistMainComments}
-                setAddCommentItemShowed={getSetAddCommentItemShowed(moistAddCommentModal.type, setMoistMainAddCommentItemShowed, setMoistSoilTempAddCommentItemShowed, setMoistSumAddCommentItemShowed, setMoistBatteryAddCommentItemShowed)}
-                addCommentItemShowed={getAddCommentItemShowed(moistAddCommentModal.type, moistMainAddCommentItemShowed, moistSoilTempAddCommentItemShowed, moistSumAddCommentItemShowed, moistBatteryAddCommentItemShowed)}
+                chartCode={CHART_CODES.SOIL_TEMP}
+                isLoading={tabularData.soilTemp.isLoading}
+              />
+              <Export chartCode={CHART_CODES.SOIL_TEMP} sensorId={props.sensorId} userId={props.userId}/>
+              <AddCommentButton
+                addCommentItemShowed={addCommentItemShowed.soilTemp}
+                setAddCommentItemShowed={(value: any) => updateAddCommentItemShowed("soilTemp", value)}
+                isCommentsShowed={isMoistCommentsShowed}
+                setIsCommentsShowed={setIsMoistCommentsShowed}
+              />
+            </div>
+
+            <AddCommentMessage
+              type={CHART_TYPES.SOIL_TEMP}
+              addCommentItemShowed={addCommentItemShowed.soilTemp}
+              setAddCommentModal={setMoistAddCommentModal}
+            />
+
+            <TabularData
+              type="moistSoilTemp"
+              sensorId={props.sensorId}
+              colors={tabularData.soilTemp.colors}
+              data={tabularData.soilTemp.data}
+              setData={(data: any) => updateTabularData("soilTemp", {data})}
+              chartCode={CHART_CODES.SOIL_TEMP}
+              isLoading={tabularData.soilTemp.isLoading}
+              setIsLoading={(isLoading: any) => updateTabularData("soilTemp", {isLoading})}
+            />
+
+            <div className={s.additionalChart} id="soilTempChart"></div>
+          </div>
+          {/* Battery Chart Section */}
+          <div style={{display: batteryChartShowed ? 'block' : 'none'}} className="ion-margin-top">
+            <h2 className="ion-text-center">Battery Volts</h2>
+            <div className={s.additionalButtons}>
+              <AddCommentButton
+                addCommentItemShowed={addCommentItemShowed.battery}
+                setAddCommentItemShowed={(value: any) => updateAddCommentItemShowed("battery", value)}
+                isCommentsShowed={isMoistCommentsShowed}
+                setIsCommentsShowed={setIsMoistCommentsShowed}
+              />
+            </div>
+
+            <AddCommentMessage
+              type={CHART_TYPES.BATTERY}
+              addCommentItemShowed={addCommentItemShowed.battery}
+              setAddCommentModal={setMoistAddCommentModal}
+            />
+
+            <div className={s.additionalChart} id="batteryChart"></div>
+          </div>
+
+          {/* Main Soil Moisture Chart Section */}
+          <div>
+            <div data-chart-section="main-header">
+              <h2 className="ion-text-center">Soil Moisture</h2>
+              <div className={s.additionalButtons}>
+                <ButtonAndSpinner
+                  data={tabularData.main.data}
+                  setData={(data: any) => updateTabularData("main", {data})}
+                  setIsLoading={(isLoading: any) => updateTabularData("main", {isLoading})}
+                  sensorId={props.sensorId}
+                  chartCode={CHART_CODES.MAIN}
+                  isLoading={tabularData.main.isLoading}
+                />
+                <Export chartCode={CHART_CODES.MAIN} sensorId={props.sensorId} userId={props.userId}/>
+                <AddCommentButton
+                  addCommentItemShowed={addCommentItemShowed.main}
+                  setAddCommentItemShowed={(value: any) => updateAddCommentItemShowed("main", value)}
+                  isCommentsShowed={isMoistCommentsShowed}
+                  setIsCommentsShowed={setIsMoistCommentsShowed}
+                />
+                <IonButton className={s.autowaterButton} onClick={() => props.setAutowater(true)}>
+                  Autowater
+                </IonButton>
+              </div>
+
+              <AddCommentMessage
+                type={CHART_TYPES.MAIN}
+                addCommentItemShowed={addCommentItemShowed.main}
                 setAddCommentModal={setMoistAddCommentModal}
-                updateChart={updateChart}
-            />}
-            <TabularData
-              type='moistSoilTemp'
-              sensorId={props.sensorId}
-              colors={moistSoilTempTabularDataColors}
-              data={moistSoilTempTabularData}
-              setData={setMoistSoilTempTabularData}
-              chartCode={soilTempChartCode}
-              isLoading={isMoistSoilTempTabularDataLoading}
-              setIsLoading={setIsMoistSoilTempTabularDataLoading}
-            />
-            <div className={s.additionalChart} id='soilTempChart'></div>
-          </div>
-          <div className='ion-margin-top' style={{display: batteryChartShowed ? 'block' : 'none'}}>
-            <h2 className='ion-text-center'>Battery Volts</h2>
-            <div className={s.additionalButtons}>
-              <AddCommentButton addCommentItemShowed={moistBatteryAddCommentItemShowed}
-                                setAddCommentItemShowed={setMoistBatteryAddCommentItemShowed}
-                                isCommentsShowed={isMoistCommentsShowed}
-                                setIsCommentsShowed={setIsMoistCommentsShowed}/>
+              />
+
+              <TabularData
+                type="moistMain"
+                sensorId={props.sensorId}
+                colors={tabularData.main.colors}
+                data={tabularData.main.data}
+                setData={(data: any) => updateTabularData("main", {data})}
+                chartCode={CHART_CODES.MAIN}
+                isLoading={tabularData.main.isLoading}
+                setIsLoading={(isLoading: any) => updateTabularData("main", {isLoading})}
+              />
             </div>
-            <AddCommentMessage type={'battery'} addCommentItemShowed={moistBatteryAddCommentItemShowed}
-                               setAddCommentModal={setMoistAddCommentModal}/>
-            <div className={s.additionalChart} id='batteryChart'></div>
-          </div>
-          <div className='ion-margin-top'>
-            <h2 className='ion-text-center'>Soil Moisture</h2>
-            <div className={s.additionalButtons}>
-              <ButtonAndSpinner data={moistMainTabularData} setData={setMoistMainTabularData}
-                                setIsLoading={setIsMoistMainTabularDataLoading} sensorId={props.sensorId}
-                                chartCode={mainChartCode} isLoading={isMoistMainTabularDataLoading}/>
-              <Export chartCode={mainChartCode} sensorId={props.sensorId} userId={props.userId}/>
-              <AddCommentButton addCommentItemShowed={moistMainAddCommentItemShowed}
-                                setAddCommentItemShowed={setMoistMainAddCommentItemShowed}
-                                isCommentsShowed={isMoistCommentsShowed}
-                                setIsCommentsShowed={setIsMoistCommentsShowed}/>
-              <IonButton className={s.autowaterButton} onClick={() => props.setAutowater(true)}>Autowater</IonButton>
-            </div>
-            <AddCommentMessage type={'main'} addCommentItemShowed={moistMainAddCommentItemShowed}
-                               setAddCommentModal={setMoistAddCommentModal}/>
-            <TabularData
-              type='moistMain'
-              sensorId={props.sensorId}
-              colors={moistMainTabularDataColors}
-              data={moistMainTabularData}
-              setData={setMoistMainTabularData}
-              chartCode={mainChartCode}
-              isLoading={isMoistMainTabularDataLoading}
-              setIsLoading={setIsMoistMainTabularDataLoading}
-            />
-            <div className={`${s.chart} ${chartAdditionalClass}`} id='mainChart'></div>
+
+            <div className={s.chart} id="mainChart"></div>
+
             <Autowater
               autowater={props.autowater}
               setValveSettings={props.setValveSettings}
@@ -697,6 +991,8 @@ export const MoistChartPage = (props: any) => {
               sensorId={props.sensorId}
             />
           </div>
+
+          {/* Irrigation Buttons Section */}
           <IrrigationButtons
             isIrrigationDataIsLoading={isIrrigationDataIsLoading}
             isIrrigationButtons={isIrrigationButtons}
@@ -718,35 +1014,79 @@ export const MoistChartPage = (props: any) => {
             setDateDifferenceInDays={setDateDifferenceInDays}
             setCurrentDates={setCurrentDates}
             setShowForecast={setShowForecast}
+            updateChartsWithDates={setNewDaysData}
+            setHistoricMode={setHistoricMode}
+          />
+        </div>
+
+        {/* Sum Chart Section */}
+        <div>
+          <h2 className="ion-text-center ion-margin-top">Sum of Soil Moisture</h2>
+          <div className={s.additionalButtons}>
+            <ButtonAndSpinner
+              data={tabularData.sum.data}
+              setData={(data: any) => updateTabularData("sum", {data})}
+              setIsLoading={(isLoading: any) => updateTabularData("sum", {isLoading})}
+              sensorId={props.sensorId}
+              chartCode={CHART_CODES.SUM}
+              isLoading={tabularData.sum.isLoading}
+            />
+            <Export chartCode={CHART_CODES.SUM} sensorId={props.sensorId} userId={props.userId}/>
+            <AddCommentButton
+              addCommentItemShowed={addCommentItemShowed.sum}
+              setAddCommentItemShowed={(value: any) => updateAddCommentItemShowed("sum", value)}
+              isCommentsShowed={isMoistCommentsShowed}
+              setIsCommentsShowed={setIsMoistCommentsShowed}
+            />
+          </div>
+
+          <AddCommentMessage
+            type={CHART_TYPES.SUM}
+            addCommentItemShowed={addCommentItemShowed.sum}
+            setAddCommentModal={setMoistAddCommentModal}
+          />
+
+          <TabularData
+            type="moistSum"
+            sensorId={props.sensorId}
+            colors={tabularData.sum.colors}
+            data={tabularData.sum.data}
+            setData={(data: any) => updateTabularData("sum", {data})}
+            chartCode={CHART_CODES.SUM}
+            isLoading={tabularData.sum.isLoading}
+            setIsLoading={(isLoading: any) => updateTabularData("sum", {isLoading})}
+          />
+
+          <div id="sumChart" className={s.sumChart}></div>
+        </div>
+
+        {/* Comment Modal */}
+        {moistAddCommentModal && (
+          <AddCommentModal
+            type={moistAddCommentModal.type}
+            userId={props.userId}
+            sensorId={props.sensorId}
+            addCommentModal={moistAddCommentModal.date}
+            setMoistAddCommentModal={setMoistAddCommentModal}
+            setMoistMainComments={(data: any) => updateComments("main", data)}
+            setAddCommentItemShowed={getSetAddCommentItemShowed(
+              moistAddCommentModal.type,
+              (value: any) => updateAddCommentItemShowed("main", value),
+              (value: any) => updateAddCommentItemShowed("soilTemp", value),
+              (value: any) => updateAddCommentItemShowed("sum", value),
+              (value: any) => updateAddCommentItemShowed("battery", value),
+            )}
+            addCommentItemShowed={getAddCommentItemShowed(
+              moistAddCommentModal.type,
+              addCommentItemShowed.main,
+              addCommentItemShowed.soilTemp,
+              addCommentItemShowed.sum,
+              addCommentItemShowed.battery,
+            )}
+            setAddCommentModal={setMoistAddCommentModal}
             updateChart={updateChart}
           />
-        </div>
-        <div>
-          <h2 className='ion-text-center ion-margin-top'>Sum of Soil Moisture</h2>
-          <div className={s.additionalButtons}>
-            <ButtonAndSpinner data={moistSumTabularData} setData={setMoistSumTabularData}
-                              setIsLoading={setIsMoistSumTabularDataLoading} sensorId={props.sensorId}
-                              chartCode={sumChartCode} isLoading={isMoistSumTabularDataLoading}/>
-            <Export chartCode={sumChartCode} sensorId={props.sensorId} userId={props.userId}/>
-            <AddCommentButton addCommentItemShowed={moistSumAddCommentItemShowed}
-                              setAddCommentItemShowed={setMoistSumAddCommentItemShowed}
-                              isCommentsShowed={isMoistCommentsShowed}
-                              setIsCommentsShowed={setIsMoistCommentsShowed}/>
-          </div>
-          <AddCommentMessage type={'sum'} addCommentItemShowed={moistSumAddCommentItemShowed}
-                             setAddCommentModal={setMoistAddCommentModal}/>
-          <TabularData
-            type='moistSum'
-            sensorId={props.sensorId}
-            colors={moistSumTabularDataColors}
-            data={moistSumTabularData}
-            setData={setMoistSumTabularData}
-            chartCode={sumChartCode}
-            isLoading={isMoistSumTabularDataLoading}
-            setIsLoading={setIsMoistSumTabularDataLoading}
-          />
-          <div id='sumChart' className={s.sumChart}></div>
-        </div>
+        )}
       </div>
     </IonContent>
   )

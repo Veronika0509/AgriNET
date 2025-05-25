@@ -1,5 +1,7 @@
 import {getDatetime} from "../../../components/DateTimePicker/functions/getDatetime";
 import {updateMoistChartWithNewDates} from "./updateMoistChartWithNewDates";
+import {loadGoogleApi} from "../../../../../functions/loadGoogleApiFunc";
+import {getCurrentDatetime} from "../../../components/DateTimePicker/functions/getCurrentDatetime";
 
 export const onIrrigationButtonClick = async (
   buttonProps: number,
@@ -9,16 +11,17 @@ export const onIrrigationButtonClick = async (
   setEndDate: any,
   setDateDifferenceInDays: any,
   setCurrentDates: any,
-  fullDatesArray: any,
-  setDisableNextButton: any,
-  setDisablePrevButton: any,
   setShowForecast: any,
-  updateChart: any
+  updateChartsWithDates: any,
 ) => {
   let currentDate: any
-
   if (buttonProps === 1) {
-    currentDate = currentChartData[currentChartData.length - 1].DateTime.substring(0, 10)
+    if (!currentChartData[currentChartData.length - 1]['MS 1']) {
+      const lastIndex = currentChartData.findIndex((dataItem: any) => dataItem['MS 1'] === undefined)
+      currentDate = currentChartData[lastIndex - 1].DateTime.substring(0, 10)
+    } else {
+      currentDate = currentChartData[currentChartData.length - 1].DateTime.substring(0, 10)
+    }
   } else {
     currentDate = currentChartData[0].DateTime.substring(0, 10)
   }
@@ -39,13 +42,18 @@ export const onIrrigationButtonClick = async (
   }
 
   const endDateTimeDefault = new Date(findNearestDate(currentDate, irrigationDates))
-  const endDatetime = getDatetime(new Date(endDateTimeDefault.setDate(endDateTimeDefault.getDate() - 1)))
-  setEndDate(endDatetime)
+  let endDatetime = getDatetime(new Date(endDateTimeDefault.setDate(endDateTimeDefault.getDate() - 1)))
+  if (new Date(endDatetime).getTime() > new Date().getTime()) {
+    setEndDate(getCurrentDatetime())
+    endDatetime = getCurrentDatetime()
+  } else {
+    setEndDate(endDatetime)
+  }
 
   const startDatetimeDefault = new Date(endDatetime)
   const startDatetime = getDatetime(new Date(startDatetimeDefault.setDate(startDatetimeDefault.getDate() - 14)))
   setStartDate(startDatetime)
 
   setDateDifferenceInDays('14')
-  updateMoistChartWithNewDates(startDatetime, endDatetime, setCurrentDates, fullDatesArray, setDisableNextButton, setDisablePrevButton, setShowForecast, updateChart)
+  updateMoistChartWithNewDates(startDatetime, endDatetime, setCurrentDates, setShowForecast, updateChartsWithDates)
 }

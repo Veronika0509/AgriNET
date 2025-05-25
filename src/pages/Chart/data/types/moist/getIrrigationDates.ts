@@ -24,6 +24,7 @@ export const getIrrigationDates = async (
       if (idForIrrigationDataRequest.data === '') {
         setIsIrrigationButtons(false)
         setIsIrrigationDataIsLoading(false)
+        setFullDatesArray(true)
       } else {
         setIsIrrigationDataIsLoading(false)
         const idForIrrigationData = idForIrrigationDataRequest.data.valve.sensorId
@@ -51,7 +52,10 @@ export const getIrrigationDates = async (
               }
             }
             if (fullDatesArrayNs.length === index) {
-              setFullDatesArray(fullDatesArrayNs)
+              const sortedDates = fullDatesArrayNs.sort((a: string, b: string) => {
+                return new Date(a).getTime() - new Date(b).getTime();
+              });
+              setFullDatesArray(sortedDates)
             }
           }
         })

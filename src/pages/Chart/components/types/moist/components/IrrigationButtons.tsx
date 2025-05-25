@@ -21,12 +21,9 @@ const IrrigationButtons = (props: any) => {
                            props.setEndDate,
                            props.setDateDifferenceInDays,
                            props.setCurrentDates,
-                           props.fullDatesArray,
-                           props.setDisableNextButton,
-                           props.setDisablePrevButton,
                            props.setShowForecast,
-                           props.updateChart
-                         )}>Prev Irigation Event</IonButton>
+                           props.updateChartsWithDates
+                         )}>Prev Irrigation Event</IonButton>
               <IonButton disabled={props.disableNextButton}
                          onClick={() => onIrrigationButtonClick(
                            1,
@@ -36,12 +33,9 @@ const IrrigationButtons = (props: any) => {
                            props.setEndDate,
                            props.setDateDifferenceInDays,
                            props.setCurrentDates,
-                           props.fullDatesArray,
-                           props.setDisableNextButton,
-                           props.setDisablePrevButton,
                            props.setShowForecast,
-                           props.updateChart
-                         )}>Next Irigation Event</IonButton>
+                           props.updateChartsWithDates
+                         )}>Next Irrigation Event</IonButton>
             </div>
           )}
         </div>

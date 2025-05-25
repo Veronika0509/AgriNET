@@ -4,6 +4,7 @@ export const onDataSet = (
   isWxetMobile: boolean,
   setData: any,
   setIsWxetModalOpen: any,
+  setIsFuelModalOpen: any,
   setFirstRowColor: any,
   freshnessColors: any[],
   setIsLoading: any
@@ -27,6 +28,8 @@ export const onDataSet = (
       })
     }
     setIsWxetModalOpen(true)
+  } else if (type === 'fuel') {
+    setIsFuelModalOpen(true)
   } else {
     if (data.label) {
       setFirstRowColor(freshnessColors[data.freshness] || undefined);

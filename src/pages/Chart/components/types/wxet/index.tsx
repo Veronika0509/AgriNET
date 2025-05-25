@@ -15,10 +15,12 @@ import {AddCommentButton} from "../../AddComment/components/AddCommentButton";
 import {AddCommentMessage} from "../../AddComment/components/AddCommentMessage";
 import {compareDates} from "../../../functions/types/moist/compareDates";
 import {formatDate} from "../../../functions/formatDate";
+import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
+import login from "../../../../Login";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
-  const [currentChartData, setCurrentChartData] = useState()
+  const [currentChartData, setCurrentChartData] = useState<any>()
   const currentDate: any = getCurrentDatetime()
   const initialStartDate: any = getStartDate(getCurrentDatetime())
   const [startDate, setStartDate] = useState<string>(initialStartDate);
@@ -33,84 +35,97 @@ export const WxetChartPage = (props: any) => {
   const [dateDifferenceInDays, setDateDifferenceInDays] = React.useState('14');
 
   useEffect(() => {
-    setCurrentChartData(props.chartData)
-    createWxetChart(props.chartData, root, props.isMobile, props.additionalChartData, nwsForecastData)
+    setCurrentChartData({
+      data: props.chartData,
+      initialData: true
+    })
     handleResize(props.setIsMobile)
+    setDynamicChartHeight('wxetChartDiv')
   }, []);
   useEffect(() => {
-    const updateCharts = async () => {
-      const endDatetime = new Date(currentDates[1]).setHours(0, 0, 0, 0)
-      if (endDatetime) {
-        if (nwsForecast && compareDates(endDatetime)) {
-          setNwsForecast(compareDates(endDatetime))
-        }
-      }
-
-      const days = (endDatetime - new Date(currentDates[0]).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000)
-      const newChartData = await getWxetMainChartData(props.sensorId, days, formatDate(new Date(endDatetime + (1000 * 60 * 60 * 24))))
-      createWxetChart(newChartData.data.data, root, props.isMobile, props.additionalChartData, nwsForecastData)
-      setCurrentChartData(newChartData.data.data)
+    if (currentChartData && currentChartData.initialData) {
+      createWxetChart(currentChartData.data, root, props.isMobile, props.additionalChartData, nwsForecastData)
+      setCurrentChartData(currentChartData.data)
     }
-    updateCharts()
-  }, [props.isMobile, currentDates]);
+  }, [currentChartData]);
   useEffect(() => {
-    if (nwsForecast) {
-      const updateChart = async () => {
-        const newChartData = await getNwsForecastData(props.sensorId, props.userId, nwsForecastDays)
-        setNwsForecastData(newChartData.data[0])
-        if (currentChartData) {
+    if (currentChartData && !currentChartData.initialData) {
+      const updateCharts = async () => {
+        const endDatetime = new Date(currentDates[1]).setHours(0, 0, 0, 0)
+        const days = (endDatetime - new Date(currentDates[0]).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000)
+        const newChartData = await getWxetMainChartData(props.sensorId, days, formatDate(new Date(endDatetime + (1000 * 60 * 60 * 24))))
+        createWxetChart(newChartData.data.data, root, props.isMobile, props.additionalChartData, nwsForecastData)
+        setCurrentChartData(newChartData.data.data)
+      }
+      updateCharts()
+    }
+  }, [currentDates]);
+  useEffect(() => {
+    if (currentChartData && !currentChartData.initialData) {
+      if (nwsForecast) {
+        const updateChart = async () => {
+          const newChartData = await getNwsForecastData(props.sensorId, props.userId, nwsForecastDays)
+          setNwsForecastData(newChartData.data[0])
           createWxetChart(currentChartData, root, props.isMobile, props.additionalChartData, newChartData.data[0])
-        } else {
-          createWxetChart(props.chartData, root, props.isMobile, props.additionalChartData, newChartData.data[0])
+        }
+        updateChart()
+      } else {
+        if (nwsForecastData) {
+          setNwsForecastData(undefined)
+          createWxetChart(currentChartData, root, props.isMobile, props.additionalChartData, nwsForecast)
         }
       }
-      updateChart()
-    } else {
-      setNwsForecastData(undefined)
-      if (currentChartData) {
-        createWxetChart(currentChartData, root, props.isMobile, props.additionalChartData, nwsForecast)
-      } else {
-        createWxetChart(props.chartData, root, props.isMobile, props.additionalChartData, nwsForecast)
-      }
     }
-  }, [props.isMobile, nwsForecast, nwsForecastDays]);
+  }, [nwsForecast, nwsForecastDays]);
+  useEffect(() => {
+    if (currentChartData && !currentChartData.initialData) {
+      createWxetChart(currentChartData, root, props.isMobile, props.additionalChartData, nwsForecastData)
+    }
+  }, [props.isMobile]);
+  window.addEventListener("resize", () => setDynamicChartHeight('wxetChartDiv'))
 
   return (
     <IonContent>
       <div className={s.wrapper}>
-        <TopSection
-          sensorId={props.sensorId}
-          root={root}
-          isMobile={props.isMobile}
-          setCurrentChartData={setCurrentChartData}
-          endDate={endDate}
-          startDate={startDate}
-          setEndDate={setEndDate}
-          setStartDate={setStartDate}
-          additionalChartData={props.additionalChartData}
-          type={'wxet'}
-          setCurrentDates={setCurrentDates}
-          setNwsForecast={setNwsForecast}
-          nwsForecastDays={nwsForecastDays}
-          setNwsForecastDays={setNwsForecastDays}
-          setAlarm={props.setAlarm}
-          dateDifferenceInDays={dateDifferenceInDays}
-          setDateDifferenceInDays={setDateDifferenceInDays}
-        />
-        <h2 className='ion-text-center'>Weather Station</h2>
-        <div className={s.additionalButtons}>
-          <ButtonAndSpinner data={wxetTabularData} setData={setWxetTabularData} setIsLoading={setIsWxetTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode} isLoading={isWxetTabularDataLoading} />
-          <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId} />
+        <div data-chart-section="top">
+          <TopSection
+            sensorId={props.sensorId}
+            root={root}
+            isMobile={props.isMobile}
+            setCurrentChartData={setCurrentChartData}
+            endDate={endDate}
+            startDate={startDate}
+            setEndDate={setEndDate}
+            setStartDate={setStartDate}
+            additionalChartData={props.additionalChartData}
+            type={'wxet'}
+            setCurrentDates={setCurrentDates}
+            setNwsForecast={setNwsForecast}
+            nwsForecastDays={nwsForecastDays}
+            setNwsForecastDays={setNwsForecastDays}
+            setAlarm={props.setAlarm}
+            dateDifferenceInDays={dateDifferenceInDays}
+            setDateDifferenceInDays={setDateDifferenceInDays}
+          />
         </div>
-        <TabularData
-          type={'wxet'}
-          sensorId={props.sensorId}
-          data={wxetTabularData}
-          setData={setWxetTabularData}
-          isLoading={isWxetTabularDataLoading}
-          setIsLoading={setIsWxetTabularDataLoading}
-          chartCode={chartCode}
-        />
+        <div data-chart-section="main-header">
+          <h2 className='ion-text-center ion-margin-top'>Weather Station</h2>
+          <div className={s.additionalButtons}>
+            <ButtonAndSpinner data={wxetTabularData} setData={setWxetTabularData}
+                              setIsLoading={setIsWxetTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode}
+                              isLoading={isWxetTabularDataLoading}/>
+            <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId}/>
+          </div>
+          <TabularData
+            type={'wxet'}
+            sensorId={props.sensorId}
+            data={wxetTabularData}
+            setData={setWxetTabularData}
+            isLoading={isWxetTabularDataLoading}
+            setIsLoading={setIsWxetTabularDataLoading}
+            chartCode={chartCode}
+          />
+        </div>
         <div id='wxetChartDiv' className={s.chart}></div>
       </div>
     </IonContent>

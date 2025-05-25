@@ -19,7 +19,7 @@ const Header = (props: any) => {
   const onBudgetEditorBack = () => {
     if (props.navigationHistory.length > 1) {
       const newHistory = [...props.navigationHistory];
-      newHistory.pop(); // Remove current page
+      newHistory.pop()
       const previousPage = newHistory[newHistory.length - 1];
       props.setNavigationHistory(newHistory);
       props.setActiveTab(previousPage);

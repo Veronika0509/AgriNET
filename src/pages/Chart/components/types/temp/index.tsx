@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentDatetime";
 import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import TopSection from "../../TopSection";
-import s from "./style.module.css";
+import s from "../wxet/style.module.css";
 import {IonContent, useIonToast} from "@ionic/react";
 import {createTempChart} from "../../../functions/types/temp/createTempChart";
 import {handleResize} from "../../../functions/handleResize";
@@ -17,10 +17,12 @@ import {getComments} from "../../AddComment/data/getComments";
 import AddCommentModal from "../../AddComment/components/AddCommentModal";
 import {compareDates} from "../../../functions/types/moist/compareDates";
 import {formatDate} from "../../../functions/formatDate";
+import {getDaysFromChartData} from "../../../functions/getDaysFromChartData";
+import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
 
 export const TempChartPage = (props: any) => {
   const root = useRef<any>(null);
-  const [currentChartData, setCurrentChartData] = useState()
+  const [currentChartData, setCurrentChartData] = useState<any>()
   const currentDate: any = getCurrentDatetime()
   const initialStartDate: any = getStartDate(getCurrentDatetime())
   const [startDate, setStartDate] = useState<string>(initialStartDate);
@@ -42,123 +44,79 @@ export const TempChartPage = (props: any) => {
   const [isTempCommentsShowed, setIsTempCommentsShowed] = useState(false)
 
   const updateCommentsArray = async (type: string) => {
-    const newComments: any = await getComments(type, props.sensorId)
+    const newComments: any = await getComments(type, props.sensorId, getDaysFromChartData(currentChartData))
     setTempComments(newComments.data)
   }
   const updateChart = async (updateReason?: string, days?: any, endDateDays?: any) => {
     if (updateReason === 'comments') {
-      const comments: any = await getComments('T', props.sensorId)
+      const data = days ? days : currentChartData
+      const comments: any = await getComments('T', props.sensorId, getDaysFromChartData(data))
       setTempComments(comments.data)
       if (tempAddCommentItemShowed === 'comments') {
         setTempAddCommentItemShowed(false)
-        createTempChart(
-          props.chartData,
-          root,
-          props.isMobile,
-          props.additionalChartData,
-          nwsForecastData,
-          setTempAddCommentModal,
-          false,
-          comments.data,
-          updateCommentsArray,
-          props.userId,
-          updateChart,
-          isTempCommentsShowed,
-          setTabularDataColors
-        )
+      }
+      createTempChart(
+        data,
+        root,
+        props.isMobile,
+        props.additionalChartData,
+        nwsForecastData,
+        setTempAddCommentModal,
+        tempAddCommentItemShowed === 'comments' ? false : tempAddCommentItemShowed,
+        comments.data,
+        updateCommentsArray,
+        props.userId,
+        props.sensorId,
+        isTempCommentsShowed,
+        setTabularDataColors
+      )
+    } else if (updateReason === 'nwsForecast') {
+      let newChartData: any
+      if (nwsForecast) {
+        newChartData = await getNwsForecastData(props.sensorId, props.userId, nwsForecastDays)
+        setNwsForecastData(newChartData.data[0])
+      } else {
+        setNwsForecastData(undefined)
+      }
+      createTempChart(
+        currentChartData,
+        root,
+        props.isMobile,
+        props.additionalChartData,
+        nwsForecast ? newChartData.data[0] : undefined,
+        setTempAddCommentModal,
+        tempAddCommentItemShowed,
+        tempComments,
+        updateCommentsArray,
+        props.userId,
+        props.sensorId,
+        isTempCommentsShowed
+      )
+    } else if (updateReason === 'dates') {
+      const newChartData: any = await getTempMainChartData(present, props.sensorId, props.userId, days, endDateDays)
+      setCurrentChartData(newChartData.data.data)
+
+      if (isTempCommentsShowed) {
+        updateChart('comments', newChartData.data.data)
       } else {
         createTempChart(
-          props.chartData,
+          newChartData.data.data,
           root,
           props.isMobile,
           props.additionalChartData,
           nwsForecastData,
           setTempAddCommentModal,
           tempAddCommentItemShowed,
-          comments.data,
+          tempComments,
           updateCommentsArray,
           props.userId,
-          updateChart,
-          isTempCommentsShowed,
-          setTabularDataColors
+          props.sensorId,
+          isTempCommentsShowed
         )
       }
-    } else if (updateReason === 'nwsForecast') {
-      if (nwsForecast) {
-        const updateChart = async () => {
-          const newChartData = await getNwsForecastData(props.sensorId, props.userId, nwsForecastDays)
-          setNwsForecastData(newChartData.data[0])
-          if (currentChartData) {
-            createTempChart(
-              currentChartData,
-              root,
-              props.isMobile,
-              props.additionalChartData,
-              newChartData.data[0],
-              setTempAddCommentModal,
-              tempAddCommentItemShowed,
-              tempComments,
-              updateCommentsArray,
-              props.userId,
-              updateChart,
-              isTempCommentsShowed
-            )
-          } else {
-            createTempChart(
-              props.chartData,
-              root,
-              props.isMobile,
-              props.additionalChartData,
-              newChartData.data[0],
-              setTempAddCommentModal,
-              tempAddCommentItemShowed,
-              tempComments,
-              updateCommentsArray,
-              props.userId,
-              updateChart,
-              isTempCommentsShowed
-            )
-          }
-        }
-        updateChart()
-      } else {
-        setNwsForecastData(undefined)
-        if (currentChartData) {
-          createTempChart(
-            currentChartData,
-            root,
-            props.isMobile,
-            props.additionalChartData,
-            nwsForecast,
-            setTempAddCommentModal,
-            tempAddCommentItemShowed,
-            tempComments,
-            updateCommentsArray,
-            props.userId,
-            updateChart,
-            isTempCommentsShowed
-          )
-        } else {
-          createTempChart(
-            props.chartData,
-            root,
-            props.isMobile,
-            props.additionalChartData,
-            nwsForecast,
-            setTempAddCommentModal,
-            tempAddCommentItemShowed,
-            tempComments,
-            updateCommentsArray,
-            props.userId,
-            updateChart,
-            isTempCommentsShowed
-          )
-        }
-      }
-    } else if (updateReason === 'dates') {
-      const newChartData: any = await getTempMainChartData(present, props.sensorId, props.userId, days, endDateDays)
+    } else if (updateReason === 'sameData') {
       createTempChart(
-        newChartData.data.data,
+        currentChartData.initialData ? currentChartData.data : currentChartData,
         root,
         props.isMobile,
         props.additionalChartData,
@@ -168,142 +126,154 @@ export const TempChartPage = (props: any) => {
         tempComments,
         updateCommentsArray,
         props.userId,
-        updateChart,
-        isTempCommentsShowed
+        props.sensorId,
+        isTempCommentsShowed,
+        setTabularDataColors
       )
-      setCurrentChartData(newChartData.data.data)
     } else {
-      if (currentChartData) {
-        createTempChart(
-          currentChartData,
-          root,
-          props.isMobile,
-          props.additionalChartData,
-          nwsForecastData,
-          setTempAddCommentModal,
-          tempAddCommentItemShowed,
-          tempComments,
-          updateCommentsArray,
-          props.userId,
-          updateChart,
-          isTempCommentsShowed,
-          setTabularDataColors
-        )
-      } else {
-        createTempChart(
-          props.chartData,
-          root,
-          props.isMobile,
-          props.additionalChartData,
-          nwsForecastData,
-          setTempAddCommentModal,
-          tempAddCommentItemShowed,
-          tempComments,
-          updateCommentsArray,
-          props.userId,
-          updateChart,
-          isTempCommentsShowed,
-          setTabularDataColors
-        )
-      }
+      const newData: any = await getTempMainChartData(present, props.sensorId, props.userId, currentDates[0], currentDates[1])
+      setCurrentChartData(newData.data.data)
+      createTempChart(
+        newData.data.data,
+        root,
+        props.isMobile,
+        props.additionalChartData,
+        nwsForecastData,
+        setTempAddCommentModal,
+        tempAddCommentItemShowed,
+        tempComments,
+        updateCommentsArray,
+        props.userId,
+        props.sensorId,
+        isTempCommentsShowed,
+        setTabularDataColors
+      )
     }
   }
+
   useEffect(() => {
-    setCurrentChartData(props.chartData)
+    setCurrentChartData({
+      data: props.chartData,
+      initialData: true
+    })
     handleResize(props.setIsMobile)
-    updateChart('comments')
+    setDynamicChartHeight('tempChartDiv')
   }, []);
   useEffect(() => {
-    const updateCharts = async () => {
-      const endDatetime = new Date(currentDates[1]).setHours(0, 0, 0, 0)
-      if (endDatetime) {
-        if (nwsForecast && compareDates(endDatetime)) {
-          setNwsForecast(compareDates(endDatetime))
-        }
-      }
-      const days = (endDatetime - new Date(currentDates[0]).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000)
-      updateChart('dates', days, formatDate(new Date(endDatetime + (1000 * 60 * 60 * 24))))
+    if (currentChartData && currentChartData.initialData) {
+      updateChart('sameData')
+      setCurrentChartData(currentChartData.data)
     }
-    updateCharts()
+  }, [currentChartData])
+  useEffect(() => {
+    if (currentChartData && !currentChartData.initialData) {
+      const updateCharts = async () => {
+        const endDatetime = new Date(currentDates[1]).setHours(0, 0, 0, 0)
+        if (endDatetime) {
+          if (nwsForecast && compareDates(endDatetime)) {
+            setNwsForecast(compareDates(endDatetime))
+          }
+        }
+        const days = (endDatetime - new Date(currentDates[0]).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000)
+        updateChart('dates', days, formatDate(new Date(endDatetime + (1000 * 60 * 60 * 24))))
+      }
+      updateCharts()
+    }
   }, [props.isMobile, currentDates]);
   useEffect(() => {
-    updateChart('nwsForecast')
+    if (currentChartData && !currentChartData.initialData) {
+      updateChart('nwsForecast')
+    }
   }, [props.isMobile, nwsForecast, nwsForecastDays]);
   useEffect(() => {
-    if (tempAddCommentItemShowed === 'comments') {
-      updateChart('comments')
-    } else {
-      updateChart()
+    if (currentChartData && !currentChartData.initialData) {
+      setDynamicChartHeight('tempChartDiv')
+      if (tempAddCommentItemShowed === 'comments') {
+        updateChart('comments')
+      } else {
+        updateChart('sameData')
+      }
     }
   }, [tempAddCommentItemShowed])
   useEffect(() => {
-    updateChart()
+    if (currentChartData && !currentChartData.initialData) {
+      if (isTempCommentsShowed) {
+        updateChart('comments')
+      } else {
+        updateChart('sameData')
+      }
+    }
   }, [isTempCommentsShowed]);
+  window.addEventListener("resize", () => setDynamicChartHeight('tempChartDiv'))
 
   return (
     <IonContent>
       <div className={s.wrapper}>
-        <TopSection
-          sensorId={props.sensorId}
-          root={root}
-          isMobile={props.isMobile}
-          setCurrentChartData={setCurrentChartData}
-          endDate={endDate}
-          startDate={startDate}
-          setEndDate={setEndDate}
-          setStartDate={setStartDate}
-          additionalChartData={props.additionalChartData}
-          type={'temp'}
-          userId={props.userId}
-          setCurrentDates={setCurrentDates}
-          setNwsForecast={setNwsForecast}
-          nwsForecastDays={nwsForecastDays}
-          setNwsForecastDays={setNwsForecastDays}
-          setAlarm={props.setAlarm}
-          isCommentsShowed={isTempCommentsShowed}
-          setIsCommentsShowed={setIsTempCommentsShowed}
-          dateDifferenceInDays={dateDifferenceInDays}
-          setDateDifferenceInDays={setDateDifferenceInDays}
-        />
-        <h2 className='ion-text-center'>Temperature RH</h2>
-        <div className={s.additionalButtons}>
-          <ButtonAndSpinner data={tempTabularData} setData={setTempTabularData}
-                            setIsLoading={setIsTempTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode}
-                            isLoading={isTempTabularDataLoading}/>
-          <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId}/>
-          <AddCommentButton
-            addCommentItemShowed={tempAddCommentItemShowed}
-            setAddCommentItemShowed={setTempAddCommentItemShowed}
+        <div data-chart-section="top">
+          <TopSection
+            sensorId={props.sensorId}
+            root={root}
+            isMobile={props.isMobile}
+            setCurrentChartData={setCurrentChartData}
+            endDate={endDate}
+            startDate={startDate}
+            setEndDate={setEndDate}
+            setStartDate={setStartDate}
+            additionalChartData={props.additionalChartData}
+            type={'temp'}
+            userId={props.userId}
+            setCurrentDates={setCurrentDates}
+            setNwsForecast={setNwsForecast}
+            nwsForecastDays={nwsForecastDays}
+            setNwsForecastDays={setNwsForecastDays}
+            setAlarm={props.setAlarm}
             isCommentsShowed={isTempCommentsShowed}
             setIsCommentsShowed={setIsTempCommentsShowed}
+            dateDifferenceInDays={dateDifferenceInDays}
+            setDateDifferenceInDays={setDateDifferenceInDays}
           />
         </div>
-        <AddCommentMessage
-          type='temp'
-          addCommentItemShowed={tempAddCommentItemShowed}
-          setAddCommentModal={setTempAddCommentModal}
-        ></AddCommentMessage>
-        {tempAddCommentModal && <AddCommentModal
-          type={'temp'}
-          userId={props.userId}
-          sensorId={props.sensorId}
-          addCommentModal={tempAddCommentModal}
-          setAddCommentModal={setTempAddCommentModal}
-          setComments={setTempComments}
-          setAddCommentItemShowed={setTempAddCommentItemShowed}
-          addCommentItemShowed={tempAddCommentItemShowed}
-          updateChart={updateChart}
-        />}
-        <TabularData
-          type={'temp'}
-          sensorId={props.sensorId}
-          colors={tabularDataColors}
-          data={tempTabularData}
-          setData={setTempTabularData}
-          isLoading={isTempTabularDataLoading}
-          setIsLoading={setIsTempTabularDataLoading}
-          chartCode={chartCode}
-        />
+        <div data-chart-section="main-header">
+          <h2 className='ion-text-center ion-margin-top'>Temperature RH</h2>
+          <div className={s.additionalButtons}>
+            <ButtonAndSpinner data={tempTabularData} setData={setTempTabularData}
+                              setIsLoading={setIsTempTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode}
+                              isLoading={isTempTabularDataLoading}/>
+            <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId}/>
+            <AddCommentButton
+              addCommentItemShowed={tempAddCommentItemShowed}
+              setAddCommentItemShowed={setTempAddCommentItemShowed}
+              isCommentsShowed={isTempCommentsShowed}
+              setIsCommentsShowed={setIsTempCommentsShowed}
+            />
+          </div>
+          <AddCommentMessage
+            type='temp'
+            addCommentItemShowed={tempAddCommentItemShowed}
+            setAddCommentModal={setTempAddCommentModal}
+          ></AddCommentMessage>
+          {tempAddCommentModal && <AddCommentModal
+              type={'temp'}
+              userId={props.userId}
+              sensorId={props.sensorId}
+              addCommentModal={tempAddCommentModal}
+              setAddCommentModal={setTempAddCommentModal}
+              setComments={setTempComments}
+              setAddCommentItemShowed={setTempAddCommentItemShowed}
+              addCommentItemShowed={tempAddCommentItemShowed}
+              updateChart={updateChart}
+          />}
+          <TabularData
+            type={'temp'}
+            sensorId={props.sensorId}
+            colors={tabularDataColors}
+            data={tempTabularData}
+            setData={setTempTabularData}
+            isLoading={isTempTabularDataLoading}
+            setIsLoading={setIsTempTabularDataLoading}
+            chartCode={chartCode}
+          />
+        </div>
         <div id='tempChartDiv' className={s.chart}></div>
       </div>
     </IonContent>

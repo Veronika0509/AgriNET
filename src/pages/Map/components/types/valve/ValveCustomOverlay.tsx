@@ -92,11 +92,12 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
                   <div className={s.overlay_chartWrapper} style={this.chartData.bgColor && {background: `#${this.bgColor}`}}>
                     <div style={{
                       display: this.isValveMarkerChartDrawn ? 'block' : 'none',
-                      ...(this.bgColor && { background: `#${this.bgColor}` })
+                      ...(this.bgColor && {background: `#${this.bgColor}`})
                     }} id={`${this.chartData.id}`}
-                         className={`${s.overlay_chart} ${s.overlay_chart__valve}`}></div>
-                    <div
-                      className={`${s.overlay_valveEnabled} ${this.chartData.enabled && s.overlay_valveEnabled__enabled}`}></div>
+                         className={`${s.overlay_chart} ${s.overlay_chart__valve}`}>
+                      <div
+                        className={`${s.overlay_valveEnabled} ${this.chartData.enabled && s.overlay_valveEnabled__enabled}`}></div>
+                    </div>
                   </div>
                   {this.isValveMarkerChartDrawn ? null : (
                     <div className={s.overlay_loader}></div>

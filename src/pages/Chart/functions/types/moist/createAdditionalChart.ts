@@ -11,6 +11,8 @@ export const createAdditionalChart = (
   root: any,
   setMoistAddCommentModal: any,
   updateCommentsArray: any,
+  sensorId: any,
+  updateComments: any,
   moistAddCommentItemShowed: any,
   moistComments: any,
   userId: any,
@@ -19,6 +21,7 @@ export const createAdditionalChart = (
 // sum
   budgetLines?: any,
   historicMode?: boolean,
+  showForecast?: any,
   setSumColor?: any,
 // soilTemp
   linesCount?: number,
@@ -101,9 +104,11 @@ export const createAdditionalChart = (
       function createSumChartDataArray(prefix: string) {
         let data: any = [];
         chartData.map((chartDataItem: any) => {
-          const chartDate = new Date(chartDataItem.DateTime).getTime()
-          const chartData = createSumChartData(chartDate, chartDataItem[prefix + 'SumAve']);
-          data.push(chartData);
+          if (chartDataItem[prefix + 'SumAve'] !== undefined && chartDataItem[prefix + 'SumAve'] !== null) {
+            const chartDate = new Date(chartDataItem.DateTime).getTime()
+            const chartData = createSumChartData(chartDate, chartDataItem[prefix + 'SumAve']);
+            data.push(chartData);
+          }
         });
         return data;
       }
@@ -112,8 +117,10 @@ export const createAdditionalChart = (
         {name: 'ordinarySeries', prefix: ''}
       ]
       if (historicMode) {
-        listOfSeries.push({name: 'historicSeries', prefix: 'H_'})
-        listOfSeries.push({name: 'futureSeries', prefix: 'P_'})
+        listOfSeries.push({ name: "historicSeries", prefix: "H_" })
+      }
+      if (historicMode && showForecast) {
+        listOfSeries.push({ name: "futureSeries", prefix: "P_" })
       }
 
       listOfSeries.map((seriesItem: any, index: number) => {
@@ -526,6 +533,31 @@ export const createAdditionalChart = (
           cursor.set('behavior', 'none')
         })
         container.events.on("dragstop", function () {
+          const icon = dragButton.children.getIndex(0) as am5.Picture
+          icon?.set("src", "https://img.icons8.com/ios/50/000000/loading.png")
+
+          // Store the original position of the icon
+          const originalX = icon?.get("x") || 0
+          const originalY = icon?.get("y") || 0
+
+          // Create a rotation animation that ONLY affects rotation
+          const rotationAnimation = icon?.animate({
+            key: "rotation",
+            from: 0,
+            to: 360,
+            duration: 1000,
+            loops: Number.POSITIVE_INFINITY,
+            easing: am5.ease.linear,
+          })
+
+          // Add a listener to ensure position doesn't change during animation
+          icon?.on("rotation", (rotation) => {
+            // Force the position to stay fixed during rotation
+            icon.set("x", originalX)
+            icon.set("y", originalY)
+            icon.set("dx", 20)
+            icon.set("dy", 7)
+          })
           isContainerDragging = false
           cursor.set('behavior', 'zoomX')
           const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
@@ -533,7 +565,10 @@ export const createAdditionalChart = (
           new Promise((resolve: any) => {
             updateCommentDate(moistMainComment.id, newDate, userId, resolve)
           }).then(() => {
-            updateCommentsArray(chartCode)
+            updateCommentsArray(chartCode, sensorId, updateComments, chartData)
+            rotationAnimation?.stop()
+            icon?.set("src", "https://img.icons8.com/?size=100&id=98070&format=png&color=000000")
+            icon?.set("rotation", 0)
           })
         })
         xAxis.topGridContainer.children.push(container)
@@ -590,7 +625,8 @@ export const createAdditionalChart = (
           width: 12,
           height: 12,
           centerX: am5.p50,
-          centerY: am5.p50
+          centerY: am5.p50,
+          marginLeft: 3
         }));
         dragButton.events.on('pointerdown', () => {
           isContainerDragging = true
@@ -613,11 +649,30 @@ export const createAdditionalChart = (
         }));
         closeButton.events.on('click', () => {
           if (window.confirm('Are you sure want to delete this message?')) {
+            const icon = closeButton.children.getIndex(0) as am5.Picture
+            icon?.set("src", " https://img.icons8.com/ios/50/000000/loading.png")
+            const originalX = icon?.get("x") || 0
+            const originalY = icon?.get("y") || 0
+            const rotationAnimation = icon?.animate({
+              key: "rotation",
+              from: 0,
+              to: 360,
+              duration: 1000,
+              loops: Number.POSITIVE_INFINITY,
+              easing: am5.ease.linear,
+            })
+            icon?.on("rotation", (rotation) => {
+              icon.set("x", originalX)
+              icon.set("y", originalY)
+              icon.set("dx", 17)
+              icon.set("dy", 7)
+            })
             new Promise((resolve: any) => {
               removeComment(moistMainComment.id, userId, resolve)
             }).then(() => {
-              updateCommentsArray(chartCode)
-              updateChart(chartType, 'comments')
+              rotationAnimation?.stop()
+              icon?.set("src", "https://img.icons8.com/?size=100&id=8112&format=png&color=000000")
+              icon?.set("rotation", 0)
               label.dispose()
               rangeDataItem.dispose()
             })

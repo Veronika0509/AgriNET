@@ -7,7 +7,6 @@ export const createSites = (props: any) => {
   props.setAreArraysUpdated(false)
   if (props.markers.length === 0) {
     const newMarkers = props.siteList.map((sensorsGroupData: any) => {
-      // console.log(google.maps.marker.AdvancedMarkerElement)
       let groupMarker: any = new google.maps.marker.AdvancedMarkerElement({
         map: props.map,
         position: { lat: sensorsGroupData.lat, lng: sensorsGroupData.lng },
@@ -23,7 +22,7 @@ export const createSites = (props: any) => {
       markers.push(groupMarker)
       if (props.siteList.length === 1) {
         setTimeout(() => {
-          props.setIsMarkerClicked(true)
+          props.setIsMarkerClicked(props.siteList[0].name)
           onSiteClick({
             page: props.page,
             userId: props.userId,
@@ -48,12 +47,14 @@ export const createSites = (props: any) => {
             amountOfSensors: props.amountOfSensors,
             setAmountOfSensors: props.setAmountOfSensors,
             markers,
+            extlChartsAmount: props.extlChartsAmount,
+            setExtlDataContainer: props.setExtlDataContainer
           })
         }, 2000)
       }
 
       groupMarker.addListener('click', async () => {
-        props.setIsMarkerClicked(true)
+        props.setIsMarkerClicked(groupMarker.title)
         onSiteClick({
           page: props.page,
           userId: props.userId,
@@ -77,7 +78,9 @@ export const createSites = (props: any) => {
           setValveChartDataContainer: props.setValveChartDataContainer,
           amountOfSensors: props.amountOfSensors,
           setAmountOfSensors: props.setAmountOfSensors,
-          markers
+          markers,
+          extlChartsAmount: props.extlChartsAmount,
+          setExtlDataContainer: props.setExtlDataContainer,
         })
       })
       if (markers.length === props.siteList.length) {

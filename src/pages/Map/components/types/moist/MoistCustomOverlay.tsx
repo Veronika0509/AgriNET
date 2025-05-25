@@ -109,7 +109,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
           if (this.div && this.root) {
             const shouldRender = !this.isValidChartData || (this.isValidChartData && this.isMoistMarkerChartDrawn);
             if (shouldRender) {
-              console.log('rerendered')
               this.root.render(this.renderContent());
             }
           }

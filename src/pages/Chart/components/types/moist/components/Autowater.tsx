@@ -21,9 +21,11 @@ export const Autowater = (props: any) => {
     }
   }, [props.autowater, autowaterData]);
   useEffect(() => {
-    if (autowaterData.length !== 0 && isAutowaterLoading) {
+    if (isAutowaterLoading) {
       setIsAutowaterLoading(false)
-      setIrrigationNeeded(autowaterData.averageMoisture < autowaterData.valve.msetPoint)
+      if (autowaterData.length !== 0) {
+        setIrrigationNeeded(autowaterData.averageMoisture < autowaterData.valve.msetPoint)
+      }
       adjustModalHeight()
     }
   }, [autowaterData])

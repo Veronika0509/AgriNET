@@ -7,9 +7,6 @@ export const updateChartsWithNewDatetime = async (
   selectedTab: any,
   presentToast: any,
   setCurrentDates: any,
-  fullDatesArray: any,
-  setDisableNextButton: any,
-  setDisablePrevButton: any,
   setShowForecast: any,
   updateChart: any,
   dateDifferenceInDays: any,
@@ -19,15 +16,15 @@ export const updateChartsWithNewDatetime = async (
     if (selectedTab === 'years') {
       const newEndDate = new Date().setHours(0, 0, 0, 0)
       const newStartDate = new Date(newEndDate - ((365 * dateDifferenceInDays) * 24 * 60 * 60 * 1000))
-      updateMoistChartWithNewDates(newStartDate, newEndDate, setCurrentDates, fullDatesArray, setDisableNextButton, setDisablePrevButton, setShowForecast, updateChart)
+      updateMoistChartWithNewDates(newStartDate, newEndDate, setCurrentDates, setShowForecast, updateChart)
     } else {
       if (checkDateValidity(startDate, endDate)) {
         presentToast()
       } else {
-        updateMoistChartWithNewDates(startDate, endDate, setCurrentDates, fullDatesArray, setDisableNextButton, setDisablePrevButton, setShowForecast, updateChart)
+        updateMoistChartWithNewDates(startDate, endDate, setCurrentDates, setShowForecast, updateChart)
       }
     }
-  } else if (type === 'wxet' || type === 'temp') {
+  } else if (type === 'wxet' || type === 'temp' || type === 'fuel') {
     if (selectedTab === 'years') {
       const newEndDate = new Date().setHours(0, 0, 0, 0)
       const newStartDate = new Date(newEndDate - ((365 * dateDifferenceInDays) * 24 * 60 * 60 * 1000))

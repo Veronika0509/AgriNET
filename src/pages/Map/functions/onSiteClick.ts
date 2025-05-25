@@ -4,6 +4,7 @@ import {createMoistMarker} from "./types/moist/createMoistMarker";
 import {createWxetMarker} from "./types/wxet/createWxetMarker";
 import {createTempMarker} from "./types/temp/createTempMarker";
 import {createValveMarker} from "./types/valve/createValveMarker";
+import {createExtlMarker} from "./types/extl/createExtlMarker";
 
 export const onSiteClick = async (props: any) => {
   props.markers.map((marker: any) => {
@@ -32,6 +33,12 @@ export const onSiteClick = async (props: any) => {
   let wxetBoundsArray: any = []
   let wxetInvalidChartData: any = []
   let countWxet: any = []
+  // extl props
+  let extlId: any = { value: 0 };
+  let extlData: any = []
+  let extlBoundsArray: any = []
+  let extlInvalidChartData: any = []
+  let countExtl: any = []
   // valve props
   let valveId: any = { value: 0 };
   let valveChartData: any = []
@@ -63,6 +70,12 @@ export const onSiteClick = async (props: any) => {
           layer.markers.map((marker: any) => {
             if (!countValve.some((item: any) => item.sensorId === marker.sensorId)) {
               countValve.push(marker)
+            }
+          })
+        } else if (layer.name === 'EXTL') {
+          layer.markers.map((marker: any) => {
+            if (!countExtl.some((item: any) => item.sensorId === marker.sensorId)) {
+              countExtl.push(marker)
             }
           })
         }
@@ -115,6 +128,27 @@ export const onSiteClick = async (props: any) => {
       props.setCoordinatesForFitting,
       props.groupMarker.title,
       'WXET'
+    )
+  })
+  countExtl.length !== 0 && countExtl.map((marker: any) => {
+    props.setAmountOfSensors(props.amountOfSensors += 1)
+    createExtlMarker(
+      props.extlChartsAmount,
+      marker,
+      props.page,
+      props.setExtlDataContainer,
+      extlId,
+      extlData,
+      extlBoundsArray,
+      countExtl.length
+    )
+    pushAllCoordinates(
+      marker,
+      props.allCoordinatesOfMarkers,
+      props.siteList,
+      props.setCoordinatesForFitting,
+      props.groupMarker.title,
+      'EXTL'
     )
   })
   countTemp.length !== 0 && countTemp.map((marker: any) => {

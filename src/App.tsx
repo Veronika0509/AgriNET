@@ -55,10 +55,14 @@ const App: React.FC = () => {
   const [mapPageKey, setMapPageKey] = useState(0);
   const history = useHistory();
 
-  const reloadMapPage = () => {
+  const reloadMapPage = async () => {
     console.log('reload map page')
     setMapPageKey(prevKey => prevKey + 1);
   };
+
+  useEffect(() => {
+    console.log(mapPageKey)
+  }, [mapPageKey]);
 
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);

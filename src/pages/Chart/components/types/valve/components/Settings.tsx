@@ -1,6 +1,6 @@
 import {IonButton, IonContent, IonInput, IonItem, IonModal, useIonAlert, useIonToast} from "@ionic/react";
 import s from '../style.module.css'
-import Header from "../../../Header";
+import Header from "../../.././Header";
 import React, {useEffect, useState} from "react";
 import {getValveSettingsData} from "../../../../data/types/valve/getValveSettingsData";
 import {postValveSettings} from "../../../../data/types/valve/postValveSettings";

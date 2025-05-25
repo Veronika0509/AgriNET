@@ -11,6 +11,7 @@ import {getAlarmData} from "./components/Alarm/data/getAlarmData";
 import {getFieldLabels} from "./components/Alarm/data/getFieldLabels";
 import {alarmDataProcessing} from "./functions/alarmDataProcessing";
 import {ValveChartPage} from "./components/types/valve";
+import {FuelChartPage} from "./components/types/wxet/components/fuel";
 
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -159,6 +160,20 @@ const Chart = (props: ChartProps) => {
             settingsOddBack={settingsOddBack}
             setSettingsOddBack={setSettingsOddBack}
             setAutowater={setAutowater}
+          />
+        )
+      case 'fuel':
+        return (
+          <FuelChartPage
+            chartData={props.chartData}
+            sensorId={props.siteId}
+            setIsMobile={setIsMobile}
+            userId={props.userId}
+            alarm={alarm}
+            setAlarm={setAlarm}
+            siteList={props.siteList}
+            setSiteName={props.setSiteName}
+            setSiteId={props.setSiteId}
           />
         )
       default:

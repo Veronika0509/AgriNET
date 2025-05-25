@@ -1,21 +1,20 @@
 import {getComments} from "../../../components/AddComment/data/getComments";
+import {getDaysFromChartData} from "../../getDaysFromChartData";
 
 export const updateCommentsArray = async (
   type: string,
   sensorId: any,
-  setMoistMainComments: any,
-  setMoistSumComments: any,
-  setMoistSoilTempComments: any,
-  setMoistBatteryComments: any
+  updateComments: any,
+  data: any
 ) => {
-  const newComments: any = await getComments(type, sensorId)
+  const newComments: any = await getComments(type, sensorId, getDaysFromChartData(data))
   if (type === 'M') {
-    setMoistMainComments(newComments.data)
+    updateComments('main', newComments.data)
   } else if (type === 'MSum') {
-    setMoistSumComments(newComments.data)
+    updateComments('sum', newComments.data)
   } else if (type === 'MST') {
-    setMoistSoilTempComments(newComments.data)
+    updateComments('soilTemp', newComments.data)
   } else {
-    setMoistBatteryComments(newComments.data)
+    updateComments('battery', newComments.data)
   }
 }

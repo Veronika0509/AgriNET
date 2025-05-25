@@ -21,7 +21,8 @@ export const createTempDataContainers = async (props: any) => {
     metric: props.response.data.metric,
     temp: props.response.data.temp,
     data: props.response.data.data,
-    freshness: props.response.data.freshness
+    freshness: props.response.data.freshness,
+    alarmEnabled: props.response.data.alarmEnabled
   }
   props.tempChartData.push(tempChartDataItem)
   props.boundsArray.push(props.bounds)

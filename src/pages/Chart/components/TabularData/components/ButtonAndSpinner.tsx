@@ -11,14 +11,15 @@ interface ButtonAndSpinnerProps {
   sensorId: string,
   chartCode: any,
   isLoading: boolean,
+  type?: any,
 }
 
-export const ButtonAndSpinner: React.FC<ButtonAndSpinnerProps> = ({data, setData, setIsLoading, sensorId, chartCode, isLoading}) => {
+export const ButtonAndSpinner: React.FC<ButtonAndSpinnerProps> = ({data, setData, setIsLoading, sensorId, chartCode, isLoading, type}) => {
   return (
     <div>
       <IonButton
         fill={data ? 'outline' : 'solid'}
-        onClick={() => onTabularDataClick(data, setData, setIsLoading, sensorId, chartCode)}
+        onClick={() => onTabularDataClick(type, data, setData, setIsLoading, sensorId, chartCode)}
         className={s.tabularButton}
         disabled={isLoading}
         id={'tabularDataTrigger'}
