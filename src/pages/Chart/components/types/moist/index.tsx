@@ -206,6 +206,7 @@ export const MoistChartPage = (props: any) => {
   // Memoized resize handler
   const handleResize = useCallback(() => {
     setDynamicChartHeight('mainChart')
+    setDynamicChartHeight('sumChart')
     handleResizeForChartLegend({
       additionalChartData: props.additionalChartData,
       smallScreen: screenSize.small,
@@ -437,6 +438,7 @@ export const MoistChartPage = (props: any) => {
           )
         } else if (updateReason === "dates") {
           const newSumChartData: any = await getSumChartData(props.sensorId, historicMode, days, endDateDays)
+          console.log(newSumChartData.data)
           setCurrentSumChartData(newSumChartData.data)
 
           if (isMoistCommentsShowed) {
@@ -731,6 +733,7 @@ export const MoistChartPage = (props: any) => {
       setDisablePrevButton,
     )
     setDynamicChartHeight('mainChart')
+    setDynamicChartHeight('sumChart')
   }, [])
 
   useEffect(() => {
@@ -776,6 +779,7 @@ export const MoistChartPage = (props: any) => {
   }, [addCommentItemShowed.main])
   useEffect(() => {
     if (fullDatesArray !== undefined) {
+      setDynamicChartHeight('sumChart')
       if (addCommentItemShowed.sum === "comments") {
         updateChart(CHART_TYPES.SUM, "comments")
       } else {
@@ -835,6 +839,9 @@ export const MoistChartPage = (props: any) => {
   useEffect(() => {
     setDynamicChartHeight('mainChart')
   }, [tabularData.main]);
+  useEffect(() => {
+    setDynamicChartHeight('sumChart')
+  }, [tabularData.sum]);
 
   return (
     <IonContent className={s.container}>
@@ -979,7 +986,7 @@ export const MoistChartPage = (props: any) => {
               />
             </div>
 
-            <div className={s.chart} id="mainChart"></div>
+            <div className={s.chart} id="mainChart" ></div>
 
             <Autowater
               autowater={props.autowater}
@@ -1020,7 +1027,7 @@ export const MoistChartPage = (props: any) => {
         </div>
 
         {/* Sum Chart Section */}
-        <div>
+        <div data-chart-section="sumHeader">
           <h2 className="ion-text-center ion-margin-top">Sum of Soil Moisture</h2>
           <div className={s.additionalButtons}>
             <ButtonAndSpinner
@@ -1056,9 +1063,8 @@ export const MoistChartPage = (props: any) => {
             isLoading={tabularData.sum.isLoading}
             setIsLoading={(isLoading: any) => updateTabularData("sum", {isLoading})}
           />
-
-          <div id="sumChart" className={s.sumChart}></div>
         </div>
+        <div id="sumChart" className={s.sumChart}></div>
 
         {/* Comment Modal */}
         {moistAddCommentModal && (

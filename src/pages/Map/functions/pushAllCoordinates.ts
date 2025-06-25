@@ -18,7 +18,9 @@ export const pushAllCoordinates = (
       site.layers.map((layer: any) => {
         if (layer.name === 'Moist' || layer.name === 'moist' || layer.name === 'SoilTemp' || layer.name === 'WXET' || layer.name === 'Valve' || layer.name === 'EXTL') {
           layer.markers.map((marker: any) => {
-            neededSensorItemsArray.push(marker)
+            if (!neededSensorItemsArray.some((item: any) => item.sensorId === marker.sensorId)) {
+              neededSensorItemsArray.push(marker);
+            }
           })
         }
       })

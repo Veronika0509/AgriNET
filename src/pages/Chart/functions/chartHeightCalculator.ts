@@ -1,5 +1,5 @@
 export const calculateDynamicChartHeight = (chartId?: any): number => {
-  const viewportHeight = window.innerHeight
+  let viewportHeight = window.innerHeight
 
   const getElementHeight = (selector: string): number => {
     const element = document.querySelector(selector)
@@ -9,6 +9,7 @@ export const calculateDynamicChartHeight = (chartId?: any): number => {
   const topSectionHeight = getElementHeight('[data-chart-section="top"]')
   const headerHeight = getElementHeight('[data-chart-section="mainHeader"]')
   const mainChartHeaderHeight = getElementHeight('[data-chart-section="main-header"]') || 0
+  const sumChartHeaderHeight = getElementHeight('[data-chart-section="sumHeader"]') || 0
 
   let margins = 20
   if (chartId === 'wxetChartDiv' || chartId === 'tempChartDiv') {
@@ -17,18 +18,19 @@ export const calculateDynamicChartHeight = (chartId?: any): number => {
   if (chartId === 'fuelChartDiv') {
     margins = 30
   }
-  const totalUsedHeight =
+  let totalUsedHeight =
     topSectionHeight +
     mainChartHeaderHeight +
     headerHeight +
     margins
-
+  if (chartId === 'sumChart') {
+    totalUsedHeight = sumChartHeaderHeight + headerHeight + 10
+  }
   const availableHeight = viewportHeight - totalUsedHeight
   let minHeight = 300
   if (chartId === 'wxetChartDiv' || chartId === 'tempChartDiv') {
     minHeight = 365
   }
-  console.log(availableHeight, minHeight)
   return Math.max(availableHeight, minHeight)
 }
 
