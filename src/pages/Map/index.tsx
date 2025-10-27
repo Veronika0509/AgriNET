@@ -764,15 +764,38 @@ const MapPage: React.FC<MapProps> = (props) => {
     if (activeTab === 'add') {
       // Fetch user site groups from API
       fetch('https://app.agrinet.us/api/add-unit/user-site-groups')
-        .then(response => response.json())
+        .then(response => {
+          // Check if response is OK before trying to parse JSON
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          // First check the content type
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            return response.json();
+          } else {
+            // If not JSON, get text and log it
+            return response.text().then(text => {
+              console.log('Response is not JSON. Raw response:', text);
+              return { error: 'Invalid response format', rawResponse: text };
+            });
+          }
+        })
         .then(data => {
           console.log('User site groups:', data);
         })
         .catch(error => {
           console.error('Error fetching user site groups:', error);
+          // Show toast notification for better user feedback
+          present({
+            message: 'Failed to load site groups. Please try again later.',
+            duration: 3000,
+            color: 'warning',
+            position: 'top'
+          });
         });
     }
-  }, [activeTab]);
+  }, [activeTab, present]);
 
   // Initialize Add Unit map when tab is active and API is loaded
   useEffect(() => {
