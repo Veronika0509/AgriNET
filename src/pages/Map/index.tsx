@@ -762,13 +762,28 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Fetch user site groups when navigating to Add Unit page
   useEffect(() => {
     if (activeTab === 'add') {
-      // Fetch user site groups from API
-      fetch('https://app.agrinet.us/api/add-unit/user-site-groups')
+      // Define default site groups to use if API fails
+      const defaultSiteGroups = [
+        { id: 1, name: 'Default Group', sites: [] }
+      ];
+      
+      // Track if we've already shown an error to avoid duplicate messages
+      let errorShown = false;
+      
+      // Fetch user site groups from API with timeout
+      const fetchPromise = fetch('https://app.agrinet.us/api/add-unit/user-site-groups')
         .then(response => {
           // Check if response is OK before trying to parse JSON
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
+          
+          // Check if response is empty
+          if (response.headers.get('content-length') === '0') {
+            console.log('API returned empty response, using default site groups');
+            return defaultSiteGroups;
+          }
+          
           // First check the content type
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
@@ -776,23 +791,63 @@ const MapPage: React.FC<MapProps> = (props) => {
           } else {
             // If not JSON, get text and log it
             return response.text().then(text => {
+              if (!text || text.trim() === '') {
+                console.log('Empty response from API, using default site groups');
+                return defaultSiteGroups;
+              }
               console.log('Response is not JSON. Raw response:', text);
-              return { error: 'Invalid response format', rawResponse: text };
+              return defaultSiteGroups;
             });
           }
         })
         .then(data => {
-          console.log('User site groups:', data);
+          // If data is valid, use it
+          if (data && (Array.isArray(data) || typeof data === 'object')) {
+            console.log('User site groups loaded successfully:', data);
+            return data;
+          }
+          // Otherwise use defaults
+          return defaultSiteGroups;
         })
         .catch(error => {
-          console.error('Error fetching user site groups:', error);
-          // Show toast notification for better user feedback
-          present({
-            message: 'Failed to load site groups. Please try again later.',
-            duration: 3000,
-            color: 'warning',
-            position: 'top'
-          });
+          if (!errorShown) {
+            console.error('Error fetching user site groups:', error);
+            // Show toast notification for better user feedback
+            present({
+              message: 'Using default site groups. Server may be unavailable.',
+              duration: 3000,
+              color: 'warning',
+              position: 'top'
+            });
+            errorShown = true;
+          }
+          return defaultSiteGroups;
+        });
+      
+      // Add timeout to fetch
+      const timeoutPromise = new Promise(resolve => {
+        setTimeout(() => {
+          if (!errorShown) {
+            console.log('API request timed out, using default site groups');
+            present({
+              message: 'Request timed out. Using default site groups.',
+              duration: 3000,
+              color: 'warning',
+              position: 'top'
+            });
+            errorShown = true;
+          }
+          resolve(defaultSiteGroups);
+        }, 5000); // 5 second timeout
+      });
+      
+      // Race between fetch and timeout
+      Promise.race([fetchPromise, timeoutPromise])
+        .then(data => {
+          // Use the data (either from API or defaults)
+          console.log('Final site groups data:', data);
+          // Here you would update your state with the site groups
+          // For example: setSiteGroups(data);
         });
     }
   }, [activeTab, present]);
