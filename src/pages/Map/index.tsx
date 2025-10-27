@@ -767,15 +767,12 @@ const MapPage: React.FC<MapProps> = (props) => {
         { id: 1, name: 'Default Group', sites: [] }
       ];
       
-      // Track if we've already shown an error to avoid duplicate messages
-      let errorShown = false;
-      
-      // Fetch user site groups from API with timeout
-      const fetchPromise = fetch('https://app.agrinet.us/api/add-unit/user-site-groups')
+      // Fetch user site groups from API without showing error messages
+      fetch('https://app.agrinet.us/api/add-unit/user-site-groups')
         .then(response => {
           // Check if response is OK before trying to parse JSON
           if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            return defaultSiteGroups;
           }
           
           // Check if response is empty
@@ -810,67 +807,11 @@ const MapPage: React.FC<MapProps> = (props) => {
           return defaultSiteGroups;
         })
         .catch(error => {
-          if (!errorShown) {
-            console.error('Error fetching user site groups:', error);
-            // Show toast notification for better user feedback
-            // Fix: present is an array, so we need to use the first element
-            if (typeof present === 'function') {
-              present({
-                message: 'Using default site groups. Server may be unavailable.',
-                duration: 3000,
-                color: 'warning',
-                position: 'top'
-              });
-            } else if (Array.isArray(present) && typeof present[0] === 'function') {
-              present[0]({
-                message: 'Using default site groups. Server may be unavailable.',
-                duration: 3000,
-                color: 'warning',
-                position: 'top'
-              });
-            }
-            errorShown = true;
-          }
+          console.error('Error fetching user site groups:', error);
           return defaultSiteGroups;
         });
-      
-      // Add timeout to fetch
-      const timeoutPromise = new Promise(resolve => {
-        setTimeout(() => {
-          if (!errorShown) {
-            console.log('API request timed out, using default site groups');
-            // Fix: present is an array, so we need to use the first element
-            if (typeof present === 'function') {
-              present({
-                message: 'Request timed out. Using default site groups.',
-                duration: 3000,
-                color: 'warning',
-                position: 'top'
-              });
-            } else if (Array.isArray(present) && typeof present[0] === 'function') {
-              present[0]({
-                message: 'Request timed out. Using default site groups.',
-                duration: 3000,
-                color: 'warning',
-                position: 'top'
-              });
-            }
-            errorShown = true;
-          }
-          resolve(defaultSiteGroups);
-        }, 5000); // 5 second timeout
-      });
-      
-      // Race between fetch and timeout
-      Promise.race([fetchPromise, timeoutPromise])
-        .then(data => {
-          // Use the data (either from API or defaults)
-          console.log('Final site groups data:', data);
-          // Here you would update your state with the site groups
-          // For example: setSiteGroups(data);
-        });
     }
-  }, [activeTab, present]);
+  }, [activeTab]);
 
   // Initialize Add Unit map when tab is active and API is loaded
   useEffect(() => {
