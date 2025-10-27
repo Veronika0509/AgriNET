@@ -765,58 +765,34 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Fetch user site groups when navigating to Add Unit page
   useEffect(() => {
     if (activeTab === 'add') {
-      // Define default site groups to use if API fails
-      const defaultSiteGroups = [
-        { id: 1, name: 'Default Group', sites: [] }
-      ];
-      
-      // Fetch user site groups from API without showing error messages
+      // Simple fetch request to get user site groups
       fetch('https://app.agrinet.us/api/add-unit/user-site-groups')
         .then(response => {
-          // Check if response is OK before trying to parse JSON
-          if (!response.ok) {
-            return defaultSiteGroups;
-          }
+          console.log('Site groups API response status:', response.status);
+          console.log('Site groups API response headers:', response.headers);
           
-          // Check if response is empty
-          if (response.headers.get('content-length') === '0') {
-            console.log('API returned empty response, using default site groups');
-            return defaultSiteGroups;
-          }
-          
-          // First check the content type
+          // Try to parse as JSON if possible
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
             return response.json();
           } else {
-            // If not JSON, get text and log it
+            // If not JSON, get text
             return response.text().then(text => {
-              if (!text || text.trim() === '') {
-                console.log('Empty response from API, using default site groups');
-                return defaultSiteGroups;
-              }
-              console.log('Response is not JSON. Raw response:', text);
-              return defaultSiteGroups;
+              console.log('Site groups API raw text response:', text);
+              return text;
             });
           }
         })
         .then(data => {
-          // If data is valid, use it
-          if (data && (Array.isArray(data) || typeof data === 'object')) {
-            console.log('User site groups loaded successfully:', data);
-            // Store site groups in state
-
-            setSiteGroups(Array.isArray(data) ? data : defaultSiteGroups);
-            return data;
+          console.log('Site groups API response data:', data);
+          
+          // Set site groups if data is valid
+          if (data && Array.isArray(data)) {
+            setSiteGroups(data);
           }
-          // Otherwise use defaults
-          setSiteGroups(defaultSiteGroups);
-          return defaultSiteGroups;
         })
         .catch(error => {
           console.error('Error fetching user site groups:', error);
-          setSiteGroups(defaultSiteGroups);
-          return defaultSiteGroups;
         });
     }
   }, [activeTab]);
