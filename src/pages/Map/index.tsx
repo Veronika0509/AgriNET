@@ -786,13 +786,18 @@ const MapPage: React.FC<MapProps> = (props) => {
         .then(data => {
           console.log('Site groups API response data:', data);
           
-          // Set site groups if data is valid
-          if (data && Array.isArray(data)) {
+          // Set site groups if data is valid and not empty
+          if (data && Array.isArray(data) && data.length > 0) {
             setSiteGroups(data);
+          } else {
+            // Clear site groups if data is empty
+            setSiteGroups([]);
           }
         })
         .catch(error => {
           console.error('Error fetching user site groups:', error);
+          // Clear site groups on error
+          setSiteGroups([]);
         });
     }
   }, [activeTab]);
@@ -2096,37 +2101,38 @@ const MapPage: React.FC<MapProps> = (props) => {
                   </IonButton>
                 </IonItem>
 
-                {/* Site Group Selection */}
-                <IonItem 
-                  className={s.addUnitFormItem}
-                  style={{
-                    '--background': 'transparent',
-                    '--background-hover': 'transparent',
-                    '--background-activated': 'transparent',
-                    '--background-focused': 'transparent',
-                    '--border-radius': '8px',
-                    '--padding-start': '0 !important',
-                    '--padding-end': '0 !important',
-                    '--padding-top': '0',
-                    '--padding-bottom': '0',
-                    '--inner-padding-start': '0 !important',
-                    '--transition': 'all 0.3s ease',
-                    '--border': '1px solid #666666',
-                    '--highlight-color-invalid': 'transparent',
-                    '--highlight-color-valid': 'transparent',
-                    '--highlight-color-focused': 'transparent',
-                    '--color': 'inherit',
-                    '--ripple-color': 'transparent',
-                    '--inner-padding-top': '0',
-                    '--inner-padding-bottom': '0',
-                    '--inner-border-width': '0',
-                    '--inner-padding-end': '0 !important',
-                    'display': 'flex',
-                    'flex-direction': 'column',
-                    'align-items': 'stretch',
-                    'margin': '0',
-                  }}
-                >
+                {/* Site Group Selection - Only show when there are site groups */}
+                {siteGroups.length > 0 && (
+                  <IonItem 
+                    className={s.addUnitFormItem}
+                    style={{
+                      '--background': 'transparent',
+                      '--background-hover': 'transparent',
+                      '--background-activated': 'transparent',
+                      '--background-focused': 'transparent',
+                      '--border-radius': '8px',
+                      '--padding-start': '0 !important',
+                      '--padding-end': '0 !important',
+                      '--padding-top': '0',
+                      '--padding-bottom': '0',
+                      '--inner-padding-start': '0 !important',
+                      '--transition': 'all 0.3s ease',
+                      '--border': '1px solid #666666',
+                      '--highlight-color-invalid': 'transparent',
+                      '--highlight-color-valid': 'transparent',
+                      '--highlight-color-focused': 'transparent',
+                      '--color': 'inherit',
+                      '--ripple-color': 'transparent',
+                      '--inner-padding-top': '0',
+                      '--inner-padding-bottom': '0',
+                      '--inner-border-width': '0',
+                      '--inner-padding-end': '0 !important',
+                      'display': 'flex',
+                      'flex-direction': 'column',
+                      'align-items': 'stretch',
+                      'margin': '0',
+                    }}
+                  >
                   <div style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -2212,6 +2218,7 @@ const MapPage: React.FC<MapProps> = (props) => {
                     </div>
                   </div>
                 </IonItem>
+                )}
 
                 {/* Unit Name Field */}
                 <IonItem className={`${s.addUnitFormItem} ${formErrors.unitName ? s.addUnitFormItemError : ''}`}>
