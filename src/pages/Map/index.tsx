@@ -795,6 +795,11 @@ const MapPage: React.FC<MapProps> = (props) => {
               name: group
             }));
             setSiteGroups(formattedGroups);
+            
+            // Automatically select the first site group
+            if (formattedGroups.length > 0) {
+              setSelectedSiteGroup(formattedGroups[0].name);
+            }
           } else {
             // Clear site groups if data is empty
             setSiteGroups([]);
