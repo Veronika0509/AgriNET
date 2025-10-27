@@ -1894,7 +1894,25 @@ const MapPage: React.FC<MapProps> = (props) => {
                         width: '100%',
                         height: '36px'
                       }} onClick={() => {
-                      
+                        presentAlert({
+                          header: 'Error',
+                          message: 'App met some problems during taking picture, please try again',
+                          buttons: [
+                            {
+                              text: 'Cancel',
+                              role: 'cancel',
+                              cssClass: 'alert-button-cancel'
+                            },
+                            {
+                              text: 'Retry',
+                              cssClass: 'alert-button-confirm',
+                              handler: () => {
+                                // This will close the alert and then we could implement actual camera functionality here
+                                // For now, it just closes the alert
+                              }
+                            }
+                          ]
+                        });
                       }}>
                       <IonIcon icon={cameraOutline} slot="start" />
                       TAKE A PICTURE
