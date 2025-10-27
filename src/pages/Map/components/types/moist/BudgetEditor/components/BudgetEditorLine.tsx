@@ -1,11 +1,33 @@
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import s from "../../../../../style.module.css";
 import {IonButton, useIonAlert} from "@ionic/react";
 import {updateBudgetLine} from "../../../../../data/types/moist/updateBudgetLine";
 import {getNewData} from "../functions/getNewData";
 import {updateChart} from "../functions/updateChart";
 
-function BudgetEditorLine(props: any) {
+interface BudgetLine {
+  value: number;
+  label: string;
+}
+
+interface ChartData {
+  budgetLines: BudgetLine[];
+}
+
+interface BudgetEditorLineProps {
+  chartData: ChartData;
+  index: number;
+  currentSensorId: string | number;
+  userId: string | number;
+  currentAmountOfDays: number;
+  setChartData: (data: unknown) => void;
+  setDataExists: (exists: boolean) => void;
+  moistOverlays: unknown[];
+  setMoistOverlays: (overlays: unknown[]) => void;
+  moistOverlaysRef: React.MutableRefObject<unknown[]>;
+}
+
+function BudgetEditorLine(props: BudgetEditorLineProps) {
   const [value, setValue] = useState(props.chartData.budgetLines[props.index - 1]?.value)
   const [label, setLabel] = useState(props.index === 1 ? 'Top' : props.index === 6 ? 'Bottom' : props.chartData.budgetLines[props.index - 1].label)
   const [presentAlert] = useIonAlert();
@@ -17,7 +39,7 @@ function BudgetEditorLine(props: any) {
       inputs: [
         {
           cssClass: s.budget_lineInput,
-          value: type === 'value' ? value === 0 || value === '0' ? '' : value : label,
+          value: type === 'value' ? (value === 0 || String(value) === '0' ? '' : String(value)) : label,
         }
       ],
       buttons: [
@@ -28,23 +50,23 @@ function BudgetEditorLine(props: any) {
         {
           text: 'Update',
           role: 'confirm',
-          handler: (event: any) => {
+          handler: (event: string[]) => {
             onUpdateSubmit(type, event[0])
           }
         },
       ]
     })
   }
-  const onUpdateSubmit = (type: any, newValue: any) => {
+  const onUpdateSubmit = (type: string, newValue: string | number) => {
     if (type === 'value') {
-      new Promise((resolve: any, reject) => {
+      new Promise((resolve: (value?: unknown) => void, reject: (reason?: string) => void) => {
         if (((props.index != 3 && props.index != 4) || newValue) && !/^\d+(\.\d+)?$/.test(String(newValue))) {
           reject(`Invalid number value: ${newValue}`)
           return
         }
 
-        let prev = props.index > 1 && props.chartData.budgetLines[props.index - 2].value;
-        let next = props.index < 6 && props.chartData.budgetLines[props.index].value;
+        const prev = props.index > 1 && props.chartData.budgetLines[props.index - 2].value;
+        const next = props.index < 6 && props.chartData.budgetLines[props.index].value;
         switch (props.index) {
           case 1: {
             if (newValue <= next) {
@@ -78,7 +100,7 @@ function BudgetEditorLine(props: any) {
         resolve()
       })
         .then(async () => {
-          setValue(newValue)
+          setValue(Number(newValue))
           const data = {value: newValue, label}
           await updateBudgetLine(props.currentSensorId, props.index, data, props.userId)
           getNewData(
@@ -97,15 +119,15 @@ function BudgetEditorLine(props: any) {
           })
         });
     } else {
-      new Promise((resolve: any, reject) => {
-        if (newValue.length > 50) {
+      new Promise((resolve: (value?: unknown) => void, reject: (reason?: string) => void) => {
+        if (String(newValue).length > 50) {
           reject(`Too long name`);
           return
         }
         resolve()
       })
         .then(async () => {
-          setLabel(newValue)
+          setLabel(String(newValue))
           const data = {value, label: newValue}
           await updateBudgetLine(props.currentSensorId, props.index, data, props.userId)
           getNewData(
@@ -138,7 +160,7 @@ function BudgetEditorLine(props: any) {
   return (
     <div className={s.budget_setting}>
       <IonButton fill='clear' onClick={() => onSettingClick('value')}
-                 className={s.budget_settingValue}>{!value || value === '0' ? "No" : value}</IonButton>
+                 className={s.budget_settingValue}>{!value || String(value) === '0' ? "No" : value}</IonButton>
       <IonButton fill='clear' onClick={() => onSettingClick('label')}
                  disabled={props.index === 1 || props.index === 6 && true}
                  className={s.budget_settingLabel}>{!label || label.length === 0 ? "Unset" : truncateText(label)}</IonButton>

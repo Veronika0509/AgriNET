@@ -4,8 +4,24 @@ import {IonContent, IonModal, IonSpinner} from "@ionic/react";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {getValveArchiveData} from "../../../../data/types/valve/getValveArchiveData";
 
-export const Archive = (props: any) => {
-  const [archiveData, setArchiveData] = useState<any[]>([])
+interface ArchiveProps {
+  sensorId: string | number;
+  valveArchive: boolean;
+  setValveArchive: (open: boolean) => void;
+  [key: string]: unknown;
+}
+
+interface ArchiveItem {
+  id: string | number;
+  fieldName: string;
+  sensorId: string | number;
+  localTime: string;
+  duration: string;
+  [key: string]: unknown;
+}
+
+export const Archive = (props: ArchiveProps) => {
+  const [archiveData, setArchiveData] = useState<ArchiveItem[]>([])
   const [loading, setLoading] = useState(false)
   const lastElementRef = useRef(null);
   const observer = useRef<IntersectionObserver | null>(null);
@@ -15,10 +31,10 @@ export const Archive = (props: any) => {
     setLoading(true);
     try {
       const newData = await getValveArchiveData(props.sensorId, archiveData.length);
-      const uniqueNewData = newData.data.filter((newItem: any) =>
-        !archiveData.some((existingItem: any) => existingItem.id === newItem.id)
+      const uniqueNewData = newData.data.filter((newItem: ArchiveItem) =>
+        !archiveData.some((existingItem: ArchiveItem) => existingItem.id === newItem.id)
       );
-      setArchiveData((prevData: any[]) => [...prevData, ...uniqueNewData]);
+      setArchiveData((prevData: ArchiveItem[]) => [...prevData, ...uniqueNewData]);
     } catch (error) {
       console.error("Error loading more data:", error);
     } finally {
@@ -76,7 +92,7 @@ export const Archive = (props: any) => {
             </tr>
             </thead>
             <tbody>
-            {archiveData.map((item: any, index: number) => (
+            {archiveData.map((item: ArchiveItem, index: number) => (
               <tr
                 key={index}
                 className={s.tableItem}

@@ -10,19 +10,61 @@ import {onSensorSelect} from "../../../Alarm/functions/setpoints/onSensorSelect"
 import {onSetpointSubmit} from "../../../Alarm/functions/setpoints/onSetpointSubmit";
 import {onEnableCLick} from "../../../Alarm/functions/setpoints/onEnableClick";
 
-export const Settings = (props: any) => {
-  const [settingsData, setSettingsData] = useState<any>([])
-  const [valveName, setValveName] = useState<any>()
-  const [probeId, setProbeId] = useState<any>()
-  const [enabled, setEnabled] = useState<any>()
-  const [priority, setPriority] = useState<any>()
-  const [setpointSensor, setSetpointSensor] = useState<any>()
-  const [moistureSetpoint, setMoistureSetpoint] = useState<any>()
-  const [duration, setDuration] = useState<any>()
-  const [hoursAve, setHoursAve] = useState<any>()
-  const [startDelay, setStartDelay] = useState<any>()
-  const [waterDrainTime, setWaterDrainTime] = useState<any>()
-  const [concurrent, setConcurrent] = useState<any>()
+// Типы
+import type { ValveSettings } from '../../../../../../types';
+
+// Интерфейсы для типизации
+interface SiteMarker {
+  sensorId: string | number;
+  [key: string]: unknown;
+}
+
+interface SiteLayer {
+  markers: SiteMarker[];
+  [key: string]: unknown;
+}
+
+interface Site {
+  layers: SiteLayer[];
+  [key: string]: unknown;
+}
+
+interface SettingsProps {
+  sensorId: string;
+  userId: number;
+  siteList: Site[];
+  valveSettings?: ValveSettings;
+  setValveSettings?: React.Dispatch<React.SetStateAction<ValveSettings | undefined>>;
+  setAlarm?: (value: boolean) => void;
+  setLowSelectedSensor?: (sensor: string) => void;
+  setLowSetpoint?: (setpoint: number) => void;
+  isSetpointEnabled?: boolean;
+  setIsSetpointEnabled?: (enabled: boolean) => void;
+  setIsEnabledToastOpen?: (open: boolean) => void;
+  setIsDisabledToastOpen?: (open: boolean) => void;
+  setIsEnableActionSheet?: (open: boolean) => void;
+  setChartPageType?: (type: string) => void;
+  setAlarmOddBack?: (value: boolean) => void;
+  settingsOddBack?: boolean;
+  setSettingsOddBack?: (value: boolean) => void;
+  setOddBack?: (value: boolean) => void;
+  setSiteId?: (id: string | number) => void;
+  setAutowater?: (value: boolean) => void;
+}
+
+export const Settings: React.FC<SettingsProps> = (props) => {
+  const [settingsData, setSettingsData] = useState<ValveSettings | null>(null)
+  const [valveName, setValveName] = useState<string>('')
+  const [probeId, setProbeId] = useState<string>('')
+  const [enabled, setEnabled] = useState<boolean>(false)
+  const [priority, setPriority] = useState<number>(1)
+  const [setpointSensor, setSetpointSensor] = useState<string>('')
+  const [moistureSetpoint, setMoistureSetpoint] = useState<number>(0)
+  const [duration, setDuration] = useState<string>('06:00')
+  const [hoursAve, setHoursAve] = useState<number>(1)
+  const [startDelay, setStartDelay] = useState<number>(0)
+  const [waterDrainTime, setWaterDrainTime] = useState<number>(0)
+  const [concurrent, setConcurrent] = useState<boolean>(false)
   const [hasChanges, setHasChanges] = useState<boolean>(false)
 
   const [presentAlert] = useIonAlert();
@@ -53,7 +95,8 @@ export const Settings = (props: any) => {
   }, [props.valveSettings]);
 
   useEffect(() => {
-    // console.log(probeId !== settingsData.probeId)
+    if (!settingsData) return;
+    
     const hasAnyChange: boolean =
       valveName !== settingsData.valvename ||
       probeId !== settingsData.probeId ||
@@ -68,7 +111,7 @@ export const Settings = (props: any) => {
       concurrent !== settingsData.concurrent;
 
     setHasChanges(hasAnyChange)
-  }, [valveName, probeId, enabled, priority, setpointSensor, moistureSetpoint, duration, hoursAve, startDelay, waterDrainTime, concurrent]);
+  }, [valveName, probeId, enabled, priority, setpointSensor, moistureSetpoint, duration, hoursAve, startDelay, waterDrainTime, concurrent, settingsData]);
 
   const validateAndPrepareInputs = () => {
     // Set default values for empty fields
@@ -111,7 +154,17 @@ export const Settings = (props: any) => {
     };
   };
 
+
   const save = async () => {
+    if (!settingsData) {
+      presentAlert({
+        header: 'Error',
+        message: 'Settings data not loaded',
+        buttons: ['Close'],
+      })
+      return;
+    }
+    
     const validatedInputs = validateAndPrepareInputs();
     if (validatedInputs) {
       const updatedSettings = {
@@ -154,10 +207,19 @@ export const Settings = (props: any) => {
   }
 
   const setAutowaterAlarm = async () => {
+    if (!settingsData) {
+      presentAlert({
+        header: 'Error',
+        message: 'Settings data not loaded',
+        buttons: ['Close'],
+      })
+      return;
+    }
+    
     let markerDescriptor
-    props.siteList.forEach((site: any) => site.layers.forEach((layer: any) => layer.markers.forEach((d: any) => {
-      if (d.sensorId == settingsData.probeId) {
-        markerDescriptor = d
+    props.siteList.forEach((site: Site) => site.layers.forEach((layer: SiteLayer) => layer.markers.forEach((marker: SiteMarker) => {
+      if (marker.sensorId == settingsData.probeId) {
+        markerDescriptor = marker
       }
     })))
     if (!markerDescriptor) {
@@ -193,70 +255,79 @@ export const Settings = (props: any) => {
   }
 
   const setLowSetpoint = async () => {
+    if (!settingsData) return;
+    
     props.setAlarm(true)
     const fieldsLabelsData = await getFieldLabels(settingsData.probeId)
     const depthSetpointSensor = `Depth ${settingsData.setPointSensor}`
     onSensorSelect(fieldsLabelsData.data, 'Low', settingsData.probeId, props.setLowSelectedSensor,  presentSensorSelectToast, depthSetpointSensor)
     onSetpointSubmit('Low', settingsData.probeId, props.setLowSetpoint, presentSetpointSubmitToast, settingsData.msetPoint)
-    onEnableCLick(settingsData.probeId, 'Low', props.isSetpointEnabled, props.setIsSetpointEnabled, props.setIsEnabledToastOpen, props.setIsDisabledToastOpen, props.setIsEnableActionSheet)
+    onEnableCLick(settingsData.probeId, 'Low', props.isSetpointEnabled ?? false, props.setIsSetpointEnabled, props.setIsEnabledToastOpen, props.setIsDisabledToastOpen, props.setIsEnableActionSheet)
 
     props.setChartPageType('moist')
     props.setAlarmOddBack(true)
   }
 
   return (
-    <IonModal isOpen={props.valveSettings} className={s.settingsModal}>
-      <Header type='valveSettingsModal' sensorId={props.sensorId} setValveSettings={props.setValveSettings} settingsOddBack={props.settingsOddBack} setSettingsOddBack={props.setSettingsOddBack} setOddBack={props.setOddBack} setChartPageType={props.setChartPageType} setSiteId={props.setSiteId} moistSensorId={settingsData.probeId} setAutowater={props.setAutowater} />
+    <IonModal isOpen={!!props.valveSettings} className={s.settingsModal}>
+      <Header type='valveSettingsModal' sensorId={props.sensorId} setValveSettings={props.setValveSettings} settingsOddBack={props.settingsOddBack} setSettingsOddBack={props.setSettingsOddBack} setOddBack={props.setOddBack} setChartPageType={props.setChartPageType} setSiteId={props.setSiteId} moistSensorId={settingsData?.probeId || ''} setAutowater={props.setAutowater} />
       {settingsData && (
         <IonContent className={s.settingsWrapper}>
           <IonItem className={s.settingsInputWrapper}>
             <IonInput className={s.settingsInput} label="Valve Name" value={valveName}
-                      onIonInput={(event: any) => setValveName(event.detail.value)}></IonInput>
+                      onIonInput={(event: CustomEvent) => setValveName(event.detail.value)}></IonInput>
           </IonItem>
           <IonItem className={s.settingsInputWrapper}>
             <IonInput className={s.settingsInput} label="Probe ID" value={probeId}
-                      onIonInput={(event: any) => setProbeId(event.detail.value)}></IonInput>
+                      onIonInput={(event: CustomEvent) => setProbeId(event.detail.value)}></IonInput>
           </IonItem>
           <IonItem className={`${isNaN(Number(enabled)) && s.settingsWrongInput} ${s.settingsInputWrapper}`}>
-            <IonInput className={s.settingsInput} label="Enabled" value={enabled}
-                      onIonInput={(event: any) => setEnabled(event.detail.value)}></IonInput>
+            <IonInput className={s.settingsInput} label="Enabled" value={enabled.toString()}
+                      onIonInput={(event: CustomEvent) => setEnabled(Boolean(event.detail.value))}></IonInput>
           </IonItem>
           <IonItem className={s.settingsInputWrapper}>
             <IonInput className={s.settingsInput} label="Priority" value={priority}
-                      onIonInput={(event: any) => setPriority(event.detail.value)}></IonInput>
+                      onIonInput={(event: CustomEvent) => setPriority(Number(event.detail.value))}></IonInput>
           </IonItem>
           <IonItem className={s.settingsInputWrapper}>
             <IonInput className={s.settingsInput} label="Set Point Sensor" value={setpointSensor}
-                      onIonInput={(event: any) => setSetpointSensor(event.detail.value)}></IonInput>
+                      onIonInput={(event: CustomEvent) => setSetpointSensor(event.detail.value)}></IonInput>
           </IonItem>
           <IonItem className={s.settingsInputWrapper}>
-            <IonInput className={s.settingsInput} label="Moisture Setpoint (%)" value={moistureSetpoint}
-                      onIonInput={(event: any) => setMoistureSetpoint(event.detail.value)}></IonInput>
+            <IonInput className={s.settingsInput} label="Moisture Setpoint (%)" value={moistureSetpoint.toString()}
+                      onIonInput={(event: CustomEvent) => setMoistureSetpoint(Number(event.detail.value))}></IonInput>
           </IonItem>
           <IonItem className={s.settingsInputWrapper}>
             <IonInput className={s.settingsInput} label="Duration (Min)" value={duration}
-                      onIonInput={(event: any) => setDuration(event.detail.value)}></IonInput>
+                      onIonInput={(event: CustomEvent) => setDuration(event.detail.value)}></IonInput>
           </IonItem>
           <IonItem className={s.settingsInputWrapper}>
             <IonInput className={s.settingsInput} label="Hours Ave" value={hoursAve}
-                      onIonInput={(event: any) => setHoursAve(event.detail.value)}></IonInput>
+                      onIonInput={(event: CustomEvent) => setHoursAve(Number(event.detail.value))}></IonInput>
           </IonItem>
           <IonItem className={s.settingsInputWrapper}>
             <IonInput className={s.settingsInput} label="Start Delay (Min)" value={startDelay}
-                      onIonInput={(event: any) => setStartDelay(event.detail.value)}></IonInput>
+                      onIonInput={(event: CustomEvent) => setStartDelay(Number(event.detail.value))}></IonInput>
           </IonItem>
           <IonItem className={s.settingsInputWrapper}>
             <IonInput className={s.settingsInput} label="Water Drain Time (Min)" value={waterDrainTime}
-                      onIonInput={(event: any) => setWaterDrainTime(event.detail.value)}></IonInput>
+                      onIonInput={(event: CustomEvent) => setWaterDrainTime(Number(event.detail.value))}></IonInput>
           </IonItem>
           <IonItem className={`${s.settingsInputWrapper} ${s.settingsInputConcurrentWrapper}`}>
-            <IonInput className={s.settingsInput} label="Concurrent" value={concurrent}
-                      onIonInput={(event: any) => setConcurrent(event.detail.value)}></IonInput>
+            <IonInput className={s.settingsInput} label="Concurrent" value={concurrent.toString()}
+                      onIonInput={(event: CustomEvent) => setConcurrent(Boolean(event.detail.value))}></IonInput>
           </IonItem>
           <IonButton className={s.settingsButton} onClick={save} disabled={!hasChanges}>Save</IonButton>
-          {settingsData.probeId &&
-              <IonButton className={s.settingsButton} disabled={hasChanges} fill='outline' onClick={setAutowaterAlarm}>Set
-                  AutoWATER Alarm</IonButton>}
+          {settingsData.probeId && (
+            <IonButton 
+              className={s.settingsButton} 
+              disabled={hasChanges || !settingsData.probeId} 
+              fill='outline' 
+              onClick={setAutowaterAlarm}
+            >
+              Set AutoWATER Alarm
+            </IonButton>
+          )}
         </IonContent>
       )}
     </IonModal>

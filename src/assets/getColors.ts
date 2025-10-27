@@ -1,4 +1,4 @@
-export const simpleColors: any = {
+export const simpleColors: Record<string, string> = {
   aliceblue: 'f0f8ff',
   antiquewhite: 'faebd7',
   aqua: '00ffff',

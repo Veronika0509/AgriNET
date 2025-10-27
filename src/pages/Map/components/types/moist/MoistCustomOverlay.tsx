@@ -1,68 +1,102 @@
 import s from "../../../style.module.css";
 import {createRoot} from "react-dom/client";
-import React from "react";
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
 import {getOptions} from "../../../data/getOptions";
 import skull from '../../../../../assets/images/skull.svg'
 
-export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
+// Интерфейсы для типизации
+interface MoistChartData {
+  id: string | number;
+  layerName: string;
+  name: string;
+  sensorId: string | number;
+  mainId: string | number;
+  battery?: string;
+  freshness?: string;
+  [key: string]: unknown;
+}
+
+interface History {
+  push: (path: string) => void;
+  [key: string]: unknown;
+}
+
+interface SiteList {
+  [key: string]: unknown;
+}
+
+interface MoistOverlayRef {
+  current: MoistCustomOverlayInstance[];
+}
+
+interface MoistCustomOverlayInstance {
+  chartData: MoistChartData;
+  isValidChartData: boolean;
+  toUpdate: boolean;
+  show: () => void;
+  hide: () => void;
+  [key: string]: unknown;
+}
+
+interface AdditionalChartData {
+  [key: string]: unknown;
+}
+
+export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
   if (isGoogleApiLoaded) {
     return class CustomOverlayExport extends google.maps.OverlayView {
-      private isBudgetEditorMap: any
+      private isBudgetEditorMap: boolean
       private bounds: google.maps.LatLngBounds;
-      private invalidChartDataImage: any;
       private isValidChartData: boolean;
-      private chartData: any;
-      private setChartData: any
-      private setPage: any
-      private setSiteId: any
-      private setSiteName: any
-      private history: any
+      private chartData: MoistChartData;
+      private setChartData: (data: unknown[]) => void
+      private setPage: (page: number) => void
+      private setSiteId: (id: string | number) => void
+      private setSiteName: (name: string) => void
+      private history: History
       private isMoistMarkerChartDrawn: boolean
-      private setAdditionalChartData: any
-      private siteList: any
-      private setMoistOverlays: any
-      private setChartPageType: any
-      private moistOverlaysRef: any
-      private currentSensorId: any
-      private setCurrentSensorId: any
-      private borderColor: any
+      private setAdditionalChartData: (data: AdditionalChartData) => void
+      private siteList: SiteList
+      private setMoistOverlays: (overlays: MoistCustomOverlayInstance[] | ((prev: MoistCustomOverlayInstance[]) => MoistCustomOverlayInstance[])) => void
+      private setChartPageType: (type: string) => void
+      private moistOverlaysRef: MoistOverlayRef
+      private currentSensorId: string | number
+      private setCurrentSensorId: (id: string | number) => void
+      private borderColor: string
       private toUpdate: boolean
 
-      private div?: any;
-      private layerName: string
-      private root: any;
+      private div?: HTMLElement | null;
+      private root: ReturnType<typeof createRoot> | null;
       private offset: { x: number; y: number };
-      private prefix: any;
-      private isCurrentOverlay: any;
+      private prefix: string;
+      private isCurrentOverlay: boolean;
       private isTextTruncated: boolean
 
       constructor(
-        isBudgetEditorMap: any,
+        isBudgetEditorMap: boolean,
         bounds: google.maps.LatLngBounds,
-        invalidChartDataImage: any,
+        _invalidChartDataImage: string,
         isValidChartData: boolean,
-        chartData: any,
-        setChartData: any,
-        setPage: any,
-        setSiteId: any,
-        setSiteName: any,
-        history: any,
+        chartData: MoistChartData,
+        setChartData: (data: unknown[]) => void,
+        setPage: (page: number) => void,
+        setSiteId: (id: string | number) => void,
+        setSiteName: (name: string) => void,
+        history: History,
         isMoistMarkerChartDrawn: boolean,
-        setAdditionalChartData: any,
-        siteList: any,
-        setMoistOverlays: any,
-        setChartPageType: any,
-        moistOverlaysRef: any,
-        currentSensorId: any,
-        setCurrentSensorId: any,
-        toUpdate: boolean
+        setAdditionalChartData: (data: AdditionalChartData) => void,
+        siteList: SiteList,
+        setMoistOverlays: (overlays: MoistCustomOverlayInstance[] | ((prev: MoistCustomOverlayInstance[]) => MoistCustomOverlayInstance[])) => void,
+        setChartPageType: (type: string) => void,
+        moistOverlaysRef: MoistOverlayRef,
+        currentSensorId: string | number,
+        setCurrentSensorId: (id: string | number) => void,
+        _toUpdate: boolean
       ) {
         super();
         this.isBudgetEditorMap = isBudgetEditorMap
         this.bounds = bounds;
-        this.invalidChartDataImage = invalidChartDataImage;
         this.isValidChartData = isValidChartData;
         this.chartData = chartData;
         this.setChartData = setChartData
@@ -78,28 +112,32 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         this.moistOverlaysRef = moistOverlaysRef
         this.currentSensorId = currentSensorId
         this.setCurrentSensorId = setCurrentSensorId
-        this.toUpdate = toUpdate
+        this.toUpdate = _toUpdate
 
-        this.layerName = chartData.layerName
         this.offset = {x: 0, y: 0};
         this.prefix = this.isBudgetEditorMap ? 'b' : 'm'
         this.isCurrentOverlay = this.chartData.sensorId === this.currentSensorId
         this.borderColor = 'gray'
         this.isTextTruncated = this.chartData.name.length > 7
+        this.root = null
       }
 
-      update(currentSensorId?: any) {
+      update(currentSensorId?: string | number) {
         return new Promise<void>((resolve) => {
-          if (currentSensorId) {
+          if (currentSensorId && this.div) {
             this.currentSensorId = currentSensorId;
             this.isCurrentOverlay = this.chartData.sensorId === currentSensorId;
             this.div.removeEventListener('mouseenter', this._onMouseEnter);
             this.div.removeEventListener('mouseleave', this._onMouseLeave);
             this._onMouseEnter = () => {
-              this.div.style.zIndex = "10000";
+              if (this.div) {
+                this.div.style.zIndex = "10000";
+              }
             };
             this._onMouseLeave = () => {
-              this.div.style.zIndex = this.isCurrentOverlay ? "9999" : "0";
+              if (this.div) {
+                this.div.style.zIndex = this.isCurrentOverlay ? "9999" : "0";
+              }
             };
             this.div.style.zIndex = this.isCurrentOverlay ? "9999" : "0";
             this.div.addEventListener('mouseenter', this._onMouseEnter);
@@ -112,6 +150,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
               this.root.render(this.renderContent());
             }
           }
+          this.draw()
           resolve();
         });
       }
@@ -130,7 +169,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
           } else {
             onMoistSensorClick(
               this.history,
-              this.chartData.sensorId,
+              String(this.chartData.sensorId),
               this.chartData.mainId,
               this.chartData.name,
               this.setChartData,
@@ -159,7 +198,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
                   background: this.borderColor
                 }}>
                   <div style={{display: this.isMoistMarkerChartDrawn ? 'block' : 'none'}}
-                       id={`${this.prefix}-${this.chartData.id}`} className={s.overlay_chart}></div>
+                       id={`${this.prefix}-${String(this.chartData.id)}`} className={s.overlay_chart}></div>
                   {this.isMoistMarkerChartDrawn ? null : (
                     <div className={s.overlay_loader}></div>
                   )}
@@ -168,7 +207,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
                 <div className={s.overlay_info}>
                   {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
                   {this.chartData.battery && <p className={s.chartName}>{this.chartData.battery}</p>}
-                  <p>{this.chartData.sensorId}</p>
+                  <p>{String(this.chartData.sensorId)}</p>
                 </div>
               </div>
             ) : (
@@ -184,7 +223,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
                 </div>
                 <div className={s.overlay_info}>
                   {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
-                  <p className={s.chartName}>{this.chartData.sensorId}</p>
+                  <p className={s.chartName}>{String(this.chartData.sensorId)}</p>
                 </div>
               </div>
             )}
@@ -198,21 +237,21 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       onAdd() {
-        new Promise(async (resolve: any) => {
-          const divId = `overlay-${this.prefix}-${this.chartData.id}`;
-          this.div = document.getElementById(divId);
+        new Promise<void>(async (resolve) => {
+          const divId = `overlay-${this.prefix}-${String(this.chartData.id)}`;
+          this.div = document.getElementById(divId) as HTMLElement | null;
 
           if (this.div) return resolve();
 
           await this.setBorderColor()
           this.div = document.createElement("div");
-          this.div.id = divId;
+          this.div.id = String(divId);
           this.div.style.position = "absolute";
-          this.div.style.WebkitTransform = 'translateZ(0)';
+          this.div.style.webkitTransform = 'translateZ(0)';
           this.div.style.borderRadius = '12px';
 
           const setupZIndex = () => {
-            if (this.prefix === 'b') {
+            if (this.prefix === 'b' && this.div) {
               this.div.style.zIndex = this.isCurrentOverlay ? "9999" : "0";
               if (!this.isCurrentOverlay) addHoverEffect();
             } else {
@@ -221,12 +260,18 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
           }
 
           const addHoverEffect = () => {
-            this.div.addEventListener('mouseenter', () => {
-              this.div.style.zIndex = "10000";
-            });
-            this.div.addEventListener('mouseleave', () => {
-              this.div.style.zIndex = "0";
-            });
+            if (this.div) {
+              this.div.addEventListener('mouseenter', () => {
+                if (this.div) {
+                  this.div.style.zIndex = "10000";
+                }
+              });
+              this.div.addEventListener('mouseleave', () => {
+                if (this.div) {
+                  this.div.style.zIndex = "0";
+                }
+              });
+            }
           }
 
           setupZIndex();
@@ -240,42 +285,49 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
             y: (Math.random() - 0.5) * 20
           };
 
-          const panes: any = this.getPanes();
-          panes.floatPane.appendChild(this.div);
+          const panes = this.getPanes();
+          if (panes && this.div) {
+            panes.floatPane.appendChild(this.div);
+          }
 
-          if (!this.root) {
+          if (!this.root && this.div) {
             this.root = createRoot(this.div);
           }
-          this.root.render(this.renderContent());
+          if (this.root) {
+            this.root.render(this.renderContent());
+          }
 
           resolve();
         }).then(() => {
           if (this.isValidChartData) {
-            this.setMoistOverlays((overlays: any[]) => {
+            this.setMoistOverlays((overlays: MoistCustomOverlayInstance[]) => {
+              const newOverlayId = this.chartData.id;
+              const overlayExists = overlays.some(overlay => overlay.chartData.id === newOverlayId);
+              
+              if (!overlayExists) {
+                if (this.prefix === 'b') {
+                  if (!this.moistOverlaysRef.current.some((overlay: MoistCustomOverlayInstance) => overlay.chartData.id === this.chartData.id)) {
+                    this.moistOverlaysRef.current.push(this as unknown as MoistCustomOverlayInstance);
+                  }
+                }
+
+                return [...overlays, this as unknown as MoistCustomOverlayInstance];
+              }
+              return overlays;
+            });
+          } else {
+            // Add invalid overlays to state as well
+            this.setMoistOverlays((overlays: MoistCustomOverlayInstance[]) => {
               const newOverlayId = this.chartData.id;
               const overlayExists = overlays.some(overlay => overlay.chartData.id === newOverlayId);
 
               if (!overlayExists) {
                 if (this.prefix === 'b') {
-                  if (!this.moistOverlaysRef.current.some((overlay: any) => overlay.chartData.id === this.chartData.id)) {
-                    this.moistOverlaysRef.current.push(this);
+                  if (!this.moistOverlaysRef.current.some((overlay: MoistCustomOverlayInstance) => overlay.chartData.id === this.chartData.id)) {
+                    this.moistOverlaysRef.current.push(this as unknown as MoistCustomOverlayInstance);
                   }
                 }
-                return [...overlays, this];
-              }
-
-              return overlays;
-            });
-          } else if (this.prefix === 'b') {
-            this.setMoistOverlays((overlays: any[]) => {
-              const newOverlayId = this.chartData.id;
-              const overlayExists = overlays.some(overlay => overlay.chartData.id === newOverlayId);
-
-              if (!overlayExists) {
-                if (!this.moistOverlaysRef.current.some((overlay: any) => overlay.chartData.id === this.chartData.id)) {
-                  this.moistOverlaysRef.current.push(this);
-                }
-                return [...overlays, this];
+                return [...overlays, this as unknown as MoistCustomOverlayInstance];
               }
 
               return overlays;
@@ -325,12 +377,13 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: any) => {
         }
       }
 
-      setMap(map: any) {
-        return new Promise((resolve: any) => {
+      setMap(map: google.maps.Map | null) {
+        return new Promise<void>((resolve: () => void) => {
           super.setMap(map);
           resolve();
         });
       }
     }
   }
+  return undefined;
 }

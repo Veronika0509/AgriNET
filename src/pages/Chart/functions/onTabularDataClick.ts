@@ -1,34 +1,50 @@
 import {getTabularData} from "../data/getTabularData";
+import { SensorType } from '../../../types';
+
+// Интерфейс для табличных данных
+interface TabularDataItem {
+  label: string;
+  sensorCount?: number;
+  data: unknown[];
+  freshness: string;
+}
+
+interface TabularDataResponse {
+  data: {
+    items: TabularDataItem[];
+  } | TabularDataItem[];
+}
 
 export const onTabularDataClick = (
-  type: any,
-  data: any,
-  setData: any,
-  setLoading: any,
+  type: SensorType,
+  data: TabularDataItem[] | TabularDataItem | null,
+  setData: (value: TabularDataItem[] | TabularDataItem | { data: TabularDataItem[] } | null) => void,
+  setLoading: (value: boolean) => void,
   sensorId: string,
   chartCode: string,
 ) => {
   if (!data) {
     setLoading(true)
-    new Promise(async (resolve: any) => {
+    new Promise(async (resolve: (value: TabularDataResponse) => void) => {
       const tabularData = await getTabularData(sensorId, chartCode)
-      resolve(tabularData)
-    }).then((tabularData: any) => {
+      resolve(tabularData as TabularDataResponse)
+    }).then((tabularData: TabularDataResponse) => {
       if (type === 'fuel') {
-        setData(tabularData.data)
+        setData(tabularData.data as TabularDataItem[])
       } else {
-        if (tabularData.data.items.length !== 1) {
+        const items = Array.isArray(tabularData.data) ? tabularData.data : tabularData.data.items;
+        if (items.length !== 1) {
           setLoading(false)
           setData({
-            data: tabularData.data.items
+            data: items
           })
         } else {
           // setLoading(false)
-          let dataToSet: any = {
-            label: tabularData.data.items[0].label,
-            sensorCount: tabularData.data.items[0].sensorCount ? tabularData.data.items[0].sensorCount : 1,
-            data: tabularData.data.items[0].data,
-            freshness: tabularData.data.items[0].freshness
+          const dataToSet: TabularDataItem = {
+            label: items[0].label,
+            sensorCount: items[0].sensorCount ? items[0].sensorCount : 1,
+            data: items[0].data,
+            freshness: items[0].freshness
           }
           setData(dataToSet)
         }

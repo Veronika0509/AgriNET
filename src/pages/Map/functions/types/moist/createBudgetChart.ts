@@ -2,7 +2,24 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
-export const createBudgetChart = (props: any) => {
+interface BudgetLine {
+  value: number;
+  label: string;
+}
+
+interface ChartDataItem {
+  DateTime: string;
+  SumAve: number;
+  [key: string]: unknown;
+}
+
+interface CreateBudgetChartProps {
+  chartRoot: { current: am5.Root | null };
+  chartData: ChartDataItem[];
+  budgetLines: BudgetLine[];
+}
+
+export const createBudgetChart = (props: CreateBudgetChartProps) => {
   if (props.chartRoot.current) {
     props.chartRoot.current.dispose();
     props.chartRoot.current = null;
@@ -31,14 +48,14 @@ export const createBudgetChart = (props: any) => {
     ]);
 
     // Create chart
-    let chart = props.chartRoot.current.container.children.push(am5xy.XYChart.new(props.chartRoot.current, {
+    const chart = props.chartRoot.current.container.children.push(am5xy.XYChart.new(props.chartRoot.current, {
       wheelY: "zoomX",
       maxTooltipDistance: 0,
       paddingLeft: 0
     }));
 
 // Create axes
-    let xAxis = chart.xAxes.push(am5xy.DateAxis.new(props.chartRoot.current, {
+    const xAxis = chart.xAxes.push(am5xy.DateAxis.new(props.chartRoot.current, {
       maxDeviation: 0.2,
       baseInterval: {
         timeUnit: "minute",
@@ -52,12 +69,12 @@ export const createBudgetChart = (props: any) => {
 
     xAxis.get("renderer").labels.template.set("visible", false);
 
-    let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(props.chartRoot.current, {
+    const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(props.chartRoot.current, {
       renderer: am5xy.AxisRendererY.new(props.chartRoot.current, {})
     }));
 
 // Add series
-    function createSumChartData(chartDate: any, chartCount: number) {
+    function createSumChartData(chartDate: number, chartCount: number) {
       return {
         date: chartDate,
         value: chartCount
@@ -65,8 +82,8 @@ export const createBudgetChart = (props: any) => {
     }
 
     function createSumChartDataArray() {
-      let data: any = [];
-      props.chartData.map((chartDataItem: any) => {
+      const data: Array<{ date: number; value: number }> = [];
+      props.chartData.map((chartDataItem: ChartDataItem) => {
         const chartDate = new Date(chartDataItem.DateTime).getTime()
         const chartData = createSumChartData(chartDate, chartDataItem['SumAve']);
         data.push(chartData);
@@ -74,7 +91,7 @@ export const createBudgetChart = (props: any) => {
       return data;
     }
 
-    let series: any = chart.series.push(am5xy.SmoothedXLineSeries.new(props.chartRoot.current, {
+    const series = chart.series.push(am5xy.SmoothedXLineSeries.new(props.chartRoot.current!, {
       xAxis: xAxis,
       yAxis: yAxis,
       valueYField: "value",
@@ -90,13 +107,13 @@ export const createBudgetChart = (props: any) => {
     series.strokes.template.setAll({
       strokeWidth: 2,
     });
-    let data = createSumChartDataArray()
+    const data = createSumChartDataArray()
     series.data.setAll(data)
     series.appear();
 
     // Budget Sections
     if (props.budgetLines[2].value) {
-      let seriesRangeDataItem = yAxis.makeDataItem({
+      const seriesRangeDataItem = yAxis.makeDataItem({
         value: props.budgetLines[2].value
       });
       series.createAxisRange(seriesRangeDataItem);
@@ -121,7 +138,7 @@ export const createBudgetChart = (props: any) => {
       });
     }
     if (props.budgetLines[3].value) {
-      let seriesRangeDataItem = yAxis.makeDataItem({
+      const seriesRangeDataItem = yAxis.makeDataItem({
         value: props.budgetLines[3].value
       });
       series.createAxisRange(seriesRangeDataItem);
@@ -145,7 +162,7 @@ export const createBudgetChart = (props: any) => {
       });
     }
 
-    let middleBottomLine = yAxis.makeDataItem({
+    const middleBottomLine = yAxis.makeDataItem({
       value: props.budgetLines[4].value
     });
     series.createAxisRange(middleBottomLine);
@@ -168,7 +185,7 @@ export const createBudgetChart = (props: any) => {
       visible: true
     });
 
-    let topMiddleLine = yAxis.makeDataItem({
+    const topMiddleLine = yAxis.makeDataItem({
       value: props.budgetLines[1].value
     });
     series.createAxisRange(topMiddleLine);
@@ -192,7 +209,7 @@ export const createBudgetChart = (props: any) => {
     });
 
     // Regions
-    let topBudgetRegion = yAxis.makeDataItem({
+    const topBudgetRegion = yAxis.makeDataItem({
       value: props.budgetLines[1].value,
       endValue: 100
     });
@@ -222,7 +239,7 @@ export const createBudgetChart = (props: any) => {
       visible: true
     });
 
-    let middleBudgetRegion = yAxis.makeDataItem({
+    const middleBudgetRegion = yAxis.makeDataItem({
       value: props.budgetLines[1].value,
       endValue: props.budgetLines[4].value
     });
@@ -239,7 +256,7 @@ export const createBudgetChart = (props: any) => {
       visible: true
     });
 
-    let bottomBudgetRegion = yAxis.makeDataItem({
+    const bottomBudgetRegion = yAxis.makeDataItem({
       value: props.budgetLines[4].value,
       endValue: 0
     });
@@ -270,7 +287,7 @@ export const createBudgetChart = (props: any) => {
     });
 
     // Add cursor
-    let cursor = chart.set("cursor", am5xy.XYCursor.new(props.chartRoot.current, {
+    const cursor = chart.set("cursor", am5xy.XYCursor.new(props.chartRoot.current, {
       behavior: "zoomX",
       xAxis: xAxis,
     }));

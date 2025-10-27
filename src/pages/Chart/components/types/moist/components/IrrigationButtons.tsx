@@ -3,7 +3,22 @@ import s from "../style.module.css";
 import {IonButton, IonText} from "@ionic/react";
 import {onIrrigationButtonClick} from "../../../../functions/types/moist/onIrrigationButtonClick";
 
-const IrrigationButtons = (props: any) => {
+interface IrrigationButtonsProps {
+  isIrrigationDataIsLoading: boolean;
+  isIrrigationButtons: boolean;
+  disablePrevButton: boolean;
+  disableNextButton: boolean;
+  currentChartData: unknown;
+  irrigationDates: unknown;
+  setStartDate: (date: unknown) => void;
+  setEndDate: (date: unknown) => void;
+  setDateDifferenceInDays: (days: number) => void;
+  setCurrentDates: (dates: unknown) => void;
+  setShowForecast: (show: boolean) => void;
+  updateChartsWithDates: (params: unknown) => void;
+}
+
+const IrrigationButtons = (props: IrrigationButtonsProps) => {
   return (
     <div>
       {props.isIrrigationDataIsLoading ? (

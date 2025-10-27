@@ -1,18 +1,25 @@
 import {onRemoveTelOrEmailSubmit} from "./onRemoveTelOrEmailSubmit";
 
+interface ActionSheetButton {
+  text: string;
+  role?: string;
+  data?: { action: string };
+  handler?: () => void;
+}
+
 export const updateButtons = (
-  setTextRef: any,
-  presentAlert: any,
+  setTextRef: { current: string },
+  presentAlert: (options: unknown) => void,
   sensorId: string,
-  name: any,
-  setEmailOrTel: any,
-  setIsLowSetpointEnabled: any,
-  setIsHighSetpointEnabled: any,
-  presentRemoveAlert: any,
-  buttons: any
+  name: number,
+  setEmailOrTel: (value: string) => void,
+  setIsLowSetpointEnabled: (enabled: boolean) => void,
+  setIsHighSetpointEnabled: (enabled: boolean) => void,
+  presentRemoveAlert: (options: unknown) => void,
+  buttons: ActionSheetButton[]
 ) => {
-  const hasRemove = buttons.some((button: any) => button.role === 'remove');
-  const hasCancel = buttons.some((button: any) => button.role === 'cancel');
+  const hasRemove = buttons.some((button: ActionSheetButton) => button.role === 'remove');
+  const hasCancel = buttons.some((button: ActionSheetButton) => button.role === 'cancel');
 
   if (hasRemove && hasCancel) {
     return buttons;

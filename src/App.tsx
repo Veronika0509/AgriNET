@@ -1,4 +1,4 @@
-import {Redirect, Route, useLocation} from 'react-router-dom';
+import {Route} from 'react-router-dom';
 import {
   IonApp,
   IonIcon,
@@ -9,9 +9,12 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import {home, informationCircle, logoFacebook} from 'ionicons/icons';
+import {home, informationCircle} from 'ionicons/icons';
 import {loadGoogleApi} from "./functions/loadGoogleApiFunc";
 import {useHistory} from 'react-router-dom';
+
+// Типы
+import type { Site, SensorData, ChartPageType, UserId, SiteId } from './types';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -38,31 +41,31 @@ import Login from "./pages/Login";
 import Info from "./pages/Info";
 import Map from "./pages/Map";
 import Chart from "./pages/Chart";
+import TestOverlays from "./pages/TestOverlays";
+import VirtualValve from "./pages/VirtualValve";
+import AddValvePage from "./pages/AddValvePage";
 import './App.css'
 
 setupIonicReact();
 
 const App: React.FC = () => {
-  const [page, setPage] = useState(0)
-  const [userId, setUserId] = useState(0)
-  const [siteList, setSiteList] = useState<any[]>([]);
-  const [siteId, setSiteId] = useState('')
-  const [siteName, setSiteName] = useState('')
-  const [chartData, setChartData] = useState([])
-  const [additionalChartData, setAdditionalChartData] = useState([])
-  const [chartPageType, setChartPageType] = useState('')
-  const [isGoogleApiLoaded, setGoogleApiLoaded] = useState(false);
-  const [mapPageKey, setMapPageKey] = useState(0);
+  const [page, setPage] = useState<number>(0);
+  const [userId, setUserId] = useState<UserId>(0 as UserId);
+  const [siteList, setSiteList] = useState<Site[]>([]);
+  const [siteId, setSiteId] = useState<SiteId>('' as SiteId);
+  const [siteName, setSiteName] = useState<string>('');
+  const [chartData, setChartData] = useState<SensorData[]>([]);
+  const [additionalChartData, setAdditionalChartData] = useState<SensorData[]>([]);
+  const [chartPageType, setChartPageType] = useState<ChartPageType>('moist');
+  const [isGoogleApiLoaded, setGoogleApiLoaded] = useState<boolean>(false);
+  const [mapPageKey, setMapPageKey] = useState<number>(0);
+  const [selectedSiteForAddUnit, setSelectedSiteForAddUnit] = useState<string>('');
+  const [selectedMoistureSensor, setSelectedMoistureSensor] = useState<any>(null);
   const history = useHistory();
 
-  const reloadMapPage = async () => {
-    console.log('reload map page')
+  const reloadMapPage = async (): Promise<void> => {
     setMapPageKey(prevKey => prevKey + 1);
   };
-
-  useEffect(() => {
-    console.log(mapPageKey)
-  }, [mapPageKey]);
 
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);
@@ -86,22 +89,28 @@ const App: React.FC = () => {
                       <Route exact path="/info">
                         <Info showHeader={true} />
                       </Route>
+                      <Route exact path="/test-overlays">
+                        <TestOverlays />
+                      </Route>
                       <Route path="/map">
                         <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData}
                              setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId}
                              setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData}
+                             selectedSiteForAddUnit={selectedSiteForAddUnit} setSelectedSiteForAddUnit={setSelectedSiteForAddUnit}
                              setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage} />
                       </Route>
                       <Route path="/layers">
                         <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData}
                              setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId}
                              setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData}
+                             selectedSiteForAddUnit={selectedSiteForAddUnit} setSelectedSiteForAddUnit={setSelectedSiteForAddUnit}
                              setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage} />
                       </Route>
                       <Route path="/settings">
                         <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData}
                              setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId}
                              setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData}
+                             selectedSiteForAddUnit={selectedSiteForAddUnit} setSelectedSiteForAddUnit={setSelectedSiteForAddUnit}
                              setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage} />
                       </Route>
                     </IonRouterOutlet>
@@ -116,8 +125,8 @@ const App: React.FC = () => {
                   </IonTabs>
                 </IonReactRouter>
               </div>
-              : page === 2 &&
-                <div>
+              : page === 2 
+                ? <div>
                     <IonReactRouter basename="/AgriNET">
                         <Route path="/chart">
                             <Chart additionalChartData={additionalChartData} chartData={chartData} setPage={setPage}
@@ -127,14 +136,36 @@ const App: React.FC = () => {
                                    setSiteId={setSiteId} setSiteName={setSiteName} setChartPageType={setChartPageType}/>
                         </Route>
                     </IonReactRouter>
-                </div>
+                  </div>
+                : page === 3 
+                  ? <div>
+                      <VirtualValve 
+                        setPage={setPage} 
+                        siteList={siteList} 
+                        selectedSite={selectedSiteForAddUnit}
+                        selectedMoistureSensor={selectedMoistureSensor}
+                        setSelectedMoistureSensor={setSelectedMoistureSensor}
+                      />
+                    </div>
+                  : page === 4
+                    ? <div>
+                        <AddValvePage 
+                          setPage={setPage} 
+                          siteList={siteList} 
+                          selectedSite={selectedSiteForAddUnit}
+                          selectedMoistureSensor={selectedMoistureSensor}
+                        />
+                      </div>
+                    : null
             }
           </div>
           <div style={{display: page === 1 ? 'block' : 'none'}}>
             <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData}
                  setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId}
                  setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData}
-                 setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage} />
+                 selectedSiteForAddUnit={selectedSiteForAddUnit} setSelectedSiteForAddUnit={setSelectedSiteForAddUnit}
+                 setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage}
+                 setSelectedMoistureSensor={setSelectedMoistureSensor} />
           </div>
         </IonApp>
       )}

@@ -4,9 +4,9 @@ import React from "react";
 
 interface AddCommentButtonProps {
   addCommentItemShowed: boolean,
-  setAddCommentItemShowed: any,
+  setAddCommentItemShowed: (value: boolean) => void,
   isCommentsShowed: boolean,
-  setIsCommentsShowed: any
+  setIsCommentsShowed: (value: boolean) => void
 }
 
 export const AddCommentButton: React.FC<AddCommentButtonProps> = ({addCommentItemShowed,

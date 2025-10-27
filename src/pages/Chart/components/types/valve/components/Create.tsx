@@ -20,7 +20,15 @@ import {addOutline, removeOutline} from "ionicons/icons"
 import {getDatetime} from "../../../DateTimePicker/functions/getDatetime"
 import {createScheduler} from "../../../../data/types/valve/createScheduler";
 
-export const Create = (props: any) => {
+interface CreateProps {
+  sensorId: string | number;
+  userId: string | number;
+  isCreateOpen: boolean;
+  setIsCreateOpen: (open: boolean) => void;
+  [key: string]: unknown;
+}
+
+export const Create = (props: CreateProps) => {
   const [isPulseIrrigation, setIsPulseIrrigation] = useState(false)
   const [pulseCount, setPulseCount] = useState(2)
   const [pulseOffMinutes, setPulseOffMinutes] = useState(60)
@@ -90,7 +98,7 @@ export const Create = (props: any) => {
   }
 
   const onCreateClick = async () => {
-    const updatedStartTime: any = updateStartTime()
+    const updatedStartTime: Date = updateStartTime()
 
     const offsetMinutes = -updatedStartTime.getTimezoneOffset();
     const sign = offsetMinutes >= 0 ? '+' : '-';
@@ -183,7 +191,7 @@ export const Create = (props: any) => {
               label={"Current timezone"}
               placeholder="Timezone"
               value={timezone}
-              onIonChange={(e: any) => setTimezone(e.detail.value)}
+              onIonChange={(e: CustomEvent) => setTimezone(e.detail.value)}
             >
               {Intl.supportedValuesOf("timeZone").map((timezone: string) => (
                 <IonSelectOption key={timezone} value={timezone}>

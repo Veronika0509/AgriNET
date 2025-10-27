@@ -1,30 +1,44 @@
 import s from "../../../style.module.css";
 import {createRoot} from "react-dom/client";
-import React from "react";
-import {truncateText} from "../../../functions/truncateTextFunc";
-import {logoFacebook} from "ionicons/icons";
 
-export const initializeExtlCustomOverlay = (isGoogleApiLoaded: any) => {
+import {truncateText} from "../../../functions/truncateTextFunc";
+
+// Интерфейсы для типизации
+interface ExtlChartData {
+  id: string | number;
+  layerName: string;
+  name: string;
+  graphic: string;
+  chartType: string;
+  width: number;
+  height: number;
+  sensorId: string | number;
+  [key: string]: unknown;
+}
+
+
+
+export const initializeExtlCustomOverlay = (isGoogleApiLoaded: boolean) => {
   if (isGoogleApiLoaded) {
     return class CustomOverlayExport extends google.maps.OverlayView {
       private bounds: google.maps.LatLngBounds;
-      private chartData: any
+      private chartData: ExtlChartData
 
-      private layerName: string
-      private root: any;
+
+      private root: ReturnType<typeof createRoot> | null = null;
       private offset: { x: number; y: number };
-      private div?: any;
+      private div?: HTMLElement;
       private isTextTruncated: boolean
 
       constructor(
-        bounds: any,
-        data: any
+        bounds: google.maps.LatLngBounds,
+        data: ExtlChartData
       ) {
         super();
         this.bounds = bounds
         this.chartData = data
 
-        this.layerName = data.layerName
+
         this.offset = {x: 0, y: 0};
         this.isTextTruncated = this.chartData.name.length > 7
       }
@@ -38,8 +52,9 @@ export const initializeExtlCustomOverlay = (isGoogleApiLoaded: any) => {
 
       renderContent() {
         const img = 'https://app.agrinet.us/' + this.chartData.graphic
+    
         return (
-          <a target='_blank' href={this.chartData.chartType.substring(this.chartData.chartType.indexOf("https"))} className={s.overlay_extlOverlayWrapper}>
+          <a target='_blank' href={this.chartData.chartType.substring(this.chartData.chartType.indexOf("https"))} className={s.overlay_extlOverlayWrapper} rel="noreferrer">
             <div className={s.overlay_extlOverlay}>
               <img src={img} alt="EXTL Image"
                    style={{width: `${this.chartData.width}px`, height: `${this.chartData.height}px`}}/>
@@ -55,7 +70,7 @@ export const initializeExtlCustomOverlay = (isGoogleApiLoaded: any) => {
 
       onAdd() {
         const divId = `overlay-extl-${this.chartData.id}`;
-        this.div = document.getElementById(divId);
+        this.div = document.getElementById(divId) as HTMLElement | null;
 
         if (!this.div) {
           this.div = document.createElement("div");
@@ -63,20 +78,22 @@ export const initializeExtlCustomOverlay = (isGoogleApiLoaded: any) => {
           this.div.style.borderStyle = "none";
           this.div.style.borderWidth = "0px";
           this.div.style.position = "absolute";
-          this.div.style.WebkitTransform = 'translateZ(0)';
+          this.div.style.webkitTransform = 'translateZ(0)';
           this.div.addEventListener('mouseenter', () => {
-            this.div.style.zIndex = "9999";
+            this.div!.style.zIndex = "9999";
           });
           this.div.addEventListener('mouseleave', () => {
-            this.div.style.zIndex = "0";
+            this.div!.style.zIndex = "0";
           });
 
           this.offset = {
             x: (Math.random() - 0.5) * 20,
             y: (Math.random() - 0.5) * 20
           };
-          const panes: any = this.getPanes();
-          panes.floatPane.appendChild(this.div);
+          const panes = this.getPanes();
+          if (panes) {
+            panes.floatPane.appendChild(this.div);
+          }
           if (!this.root) {
             this.root = createRoot(this.div);
             this.root.render(this.renderContent());
@@ -122,8 +139,8 @@ export const initializeExtlCustomOverlay = (isGoogleApiLoaded: any) => {
         }
       }
 
-      setMap(map: any) {
-        return new Promise((resolve: any) => {
+      setMap(map: google.maps.Map | null) {
+        return new Promise<void>((resolve: () => void) => {
           super.setMap(map);
           resolve();
         });

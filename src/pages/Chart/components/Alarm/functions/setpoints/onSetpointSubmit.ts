@@ -1,16 +1,16 @@
 import {onSetpointChange} from "../../data/setpoints/onSetpointChange";
 
 export const onSetpointSubmit = (
-  name: any,
+  name: string,
   sensorId: string,
-  setSetpoint: any,
-  presentToast: any,
-  event: any
+  setSetpoint: (value: number) => void,
+  presentToast: (options: unknown) => void,
+  event: number
 ) => {
   const setpointName = name === 'Low' ? 'low-setpoint' : 'high-setpoint'
-  new Promise((resolve: any) => {
+  new Promise<number>((resolve) => {
     onSetpointChange(sensorId, setpointName, event, resolve)
-  }).then((response: any) => {
+  }).then((response: number) => {
     setSetpoint(response)
     presentToast({
       message: `${name} Setpoint Updated`,

@@ -1,19 +1,23 @@
 import {getAlarmData} from "../components/Alarm/data/getAlarmData";
 import {getFieldLabels} from "../components/Alarm/data/getFieldLabels";
+import { SiteId } from '../../../types';
+
+// Типы для setter функций
+type SetterFunction<T> = (value: T) => void;
 
 export const alarmDataProcessing = async (
-  siteId: any,
-  setAlarmData: any,
-  setAlarmEmailOrTel1: any,
-  setAlarmEmailOrTel2: any,
-  setAlarmEmailOrTel3: any,
-  setAlarmLowSetpoint: any,
-  setAlarmHighSetpoint: any,
-  setAlarmFieldLabelsData: any,
-  setAlarmLowSelectedSensor: any,
-  setAlarmHighSelectedSensor: any,
-  setIsAlarmLowSetpointEnabled: any,
-  setIsAlarmHighSetpointEnabled: any
+  siteId: SiteId,
+  setAlarmData: SetterFunction<unknown>,
+  setAlarmEmailOrTel1: SetterFunction<string>,
+  setAlarmEmailOrTel2: SetterFunction<string>,
+  setAlarmEmailOrTel3: SetterFunction<string>,
+  setAlarmLowSetpoint: SetterFunction<number>,
+  setAlarmHighSetpoint: SetterFunction<number>,
+  setAlarmFieldLabelsData: SetterFunction<unknown>,
+  setAlarmLowSelectedSensor: SetterFunction<string>,
+  setAlarmHighSelectedSensor: SetterFunction<string>,
+  setIsAlarmLowSetpointEnabled: SetterFunction<boolean>,
+  setIsAlarmHighSetpointEnabled: SetterFunction<boolean>
 ) => {
   const alarmDataResponse = await getAlarmData(siteId)
   setAlarmData(alarmDataResponse.data)

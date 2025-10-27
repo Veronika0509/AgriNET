@@ -12,7 +12,30 @@ import {
 } from "@ionic/react";
 import s from "../style.module.css";
 
-const ModalWindow = (props: any) => {
+interface ModalWindowProps {
+  isModalOpen: boolean;
+  setIsModalOpen: (isOpen: boolean) => void;
+  sensorName: string;
+  sensorId: string | number;
+  sensorChartType: string;
+  isChartDataIsLoading: boolean;
+  isSelectDisabled: boolean;
+  onSensorClick: (
+    sensorId: string | number,
+    sensorName: string,
+    sensorIdParam: string | number,
+    setChartData: (data: unknown) => void,
+    setPage: (page: number) => void,
+    setSiteId: (id: string | number) => void,
+    setSiteName: (name: string) => void
+  ) => void;
+  setChartData: (data: unknown) => void;
+  setPage: (page: number) => void;
+  setSiteId: (id: string | number) => void;
+  setSiteName: (name: string) => void;
+}
+
+const ModalWindow = (props: ModalWindowProps) => {
   return (
     <IonModal isOpen={props.isModalOpen}>
       <IonHeader>

@@ -23,24 +23,24 @@ import {formatDateToISO} from "./functions/formatDate";
 interface ExportProps {
   chartCode: string,
   sensorId: string,
-  userId: any
+  userId: string | number
 }
 
 export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => {
-  const toDateValue: any = formatDateToISO(new Date())
-  let fromDateValue = new Date(toDateValue)
+  const toDateValue: string = formatDateToISO(new Date())
+  const fromDateValue = new Date(toDateValue)
   const [fromDate, setFromDate] = useState(formatDateToISO(new Date(fromDateValue.setDate(new Date(toDateValue).getDate() - 30))))
   const [toDate, setToDate] = useState(toDateValue)
   const [reportDuration, setRepostDuration] = useState(30)
   const [format, setFormat] = useState('Comma-separated')
-  const [validationResult, setValidationResult] = useState<any>('')
+  const [validationResult, setValidationResult] = useState<string | null>(null)
   const mModal = useRef<HTMLIonModalElement>(null);
   const mstModal = useRef<HTMLIonModalElement>(null);
   const mSumModal = useRef<HTMLIonModalElement>(null);
   const tempRhModal = useRef<HTMLIonModalElement>(null);
   const weather_leafModal = useRef<HTMLIonModalElement>(null);
 
-  const modalRefs: any = {
+  const modalRefs: Record<string, React.RefObject<HTMLIonModalElement>> = {
     m: mModal,
     mst: mstModal,
     mSum: mSumModal,
@@ -53,11 +53,11 @@ export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => 
       setRepostDuration(0)
       setValidationResult(validateDates(fromDate, toDate))
     } else {
-      const fromDateTime: any = new Date(fromDate)
-      const toDateTime: any = new Date(toDate)
+      const fromDateTime: Date = new Date(fromDate)
+      const toDateTime: Date = new Date(toDate)
       fromDateTime.setHours(0, 0, 0, 0);
       toDateTime.setHours(0, 0, 0, 0);
-      const differenceInDays = Math.ceil((toDateTime - fromDateTime) / (1000 * 60 * 60 * 24));
+      const differenceInDays = Math.ceil((toDateTime.getTime() - fromDateTime.getTime()) / (1000 * 60 * 60 * 24));
       setRepostDuration(differenceInDays)
       setValidationResult(null)
     }
@@ -66,7 +66,7 @@ export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => 
   const onDownloadClick = async () => {
     const fromDateForFile = fromDate.replace('T', '%20').substring(0, 18)
     const toDateForFile = toDate.replace('T', '%20').substring(0, 18)
-    let url = `https://app.agrinet.us/api/chart/export?sensorId=${sensorId}`
+    const url = `https://app.agrinet.us/api/chart/export?sensorId=${sensorId}`
       + `&chartCode=${chartCode}`
       + `&fromDate=${fromDateForFile}`
       + `&toDate=${toDateForFile}`
@@ -116,7 +116,7 @@ export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => 
                 <IonToolbar className={s.mixed_bottomButtons}>
                   <IonButtons slot='end'>
                     <IonButton onClick={() => modalRefs[chartCode].current?.dismiss()}>Cancel</IonButton>
-                    <IonButton onClick={onDownloadClick} disabled={validationResult}>Download</IonButton>
+                    <IonButton onClick={onDownloadClick} disabled={!!validationResult}>Download</IonButton>
                   </IonButtons>
                 </IonToolbar>
               </IonFooter>

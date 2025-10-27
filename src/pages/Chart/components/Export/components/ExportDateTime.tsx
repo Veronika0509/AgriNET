@@ -3,9 +3,9 @@ import {IonDatetime, IonDatetimeButton, IonItem, IonModal, IonText} from "@ionic
 import s from '../../../style.module.css'
 
 interface ExportDateTimeProps {
-  type: string,
-  value: any,
-  setValue: any
+  type: string;
+  value: string | null;
+  setValue: (value: string | null) => void;
 }
 
 export const ExportDateTime: React.FC<ExportDateTimeProps> = ({type, value, setValue}) => {
@@ -14,7 +14,7 @@ export const ExportDateTime: React.FC<ExportDateTimeProps> = ({type, value, setV
       <IonText color='light'>{type === 'to' ? 'To' : 'From'} Time (UTC)</IonText>
       <IonDatetimeButton datetime={`${type}-datetime`}></IonDatetimeButton>
       <IonModal keepContentsMounted={true} className={s.datetimePicker_modal}>
-        <IonDatetime id={`${type}-datetime`} value={value} onIonChange={(e: any) => setValue(e.detail.value)}  show-default-buttons="true"></IonDatetime>
+        <IonDatetime id={`${type}-datetime`} value={value} onIonChange={(e) => setValue(e.detail.value as string)}  show-default-buttons="true"></IonDatetime>
       </IonModal>
     </div>
   )

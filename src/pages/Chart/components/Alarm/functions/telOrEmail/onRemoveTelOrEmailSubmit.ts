@@ -4,11 +4,11 @@ import {enableSetpoint} from "../../data/setpoints/enableSetpoint";
 
 export const onRemoveTelOrEmailSubmit = async (
   sensorId: string,
-  name: any,
-  setEmailOrTel: any,
-  setIsLowSetpointEnabled: any,
-  setIsHighSetpointEnabled: any,
-  presentRemoveAlert: any
+  name: number,
+  setEmailOrTel: (value: string) => void,
+  setIsLowSetpointEnabled: (enabled: boolean) => void,
+  setIsHighSetpointEnabled: (enabled: boolean) => void,
+  presentRemoveAlert: (options: { header: string; message: string; buttons: Array<{ text: string; role: string; handler?: () => void }> }) => void
 ) => {
   const alarmData = await getAlarmData(sensorId)
 
@@ -16,7 +16,7 @@ export const onRemoveTelOrEmailSubmit = async (
   const isNoEmailsOrTelMore: boolean = indicesToCheck.every(index => !alarmData.data.emailsAndPhoneNumbers[index]);
 
   const removeTelOrEmailFunc = () => {
-    new Promise((resolve: any) => {
+    new Promise<void>((resolve) => {
       removeTelOrEmail(sensorId, name, resolve)
     }).then(() => {
       setEmailOrTel('Unset')
@@ -24,12 +24,12 @@ export const onRemoveTelOrEmailSubmit = async (
   }
 
   const disableSetpointFunc = () => {
-    new Promise((resolve: any) => {
+    new Promise<void>((resolve) => {
       const labelsToDisable: string[] = ['low', 'high'].filter(label => alarmData.data[`${label}Enabled`])
       labelsToDisable.map((labelToDisable: string) => {
-        new Promise((resolve: any) => {
+        new Promise<boolean>((resolve) => {
           enableSetpoint(sensorId, labelToDisable, false, resolve)
-        }).then((response: any) => {
+        }).then((response: boolean) => {
           const functionToDisable = labelToDisable === 'low' ? setIsLowSetpointEnabled : setIsHighSetpointEnabled
           functionToDisable(response)
         })

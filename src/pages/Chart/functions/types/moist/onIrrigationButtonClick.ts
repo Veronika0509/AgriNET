@@ -3,21 +3,28 @@ import {updateMoistChartWithNewDates} from "./updateMoistChartWithNewDates";
 import {loadGoogleApi} from "../../../../../functions/loadGoogleApiFunc";
 import {getCurrentDatetime} from "../../../components/DateTimePicker/functions/getCurrentDatetime";
 
+// Интерфейсы для данных графика
+interface ChartDataItem {
+  DateTime: string;
+  'MS 1'?: number;
+  [key: string]: string | number | undefined;
+}
+
 export const onIrrigationButtonClick = async (
   buttonProps: number,
-  currentChartData: any,
-  irrigationDates: any,
-  setStartDate: any,
-  setEndDate: any,
-  setDateDifferenceInDays: any,
-  setCurrentDates: any,
-  setShowForecast: any,
-  updateChartsWithDates: any,
-) => {
-  let currentDate: any
+  currentChartData: ChartDataItem[],
+  irrigationDates: string[],
+  setStartDate: (value: string) => void,
+  setEndDate: (value: string) => void,
+  setDateDifferenceInDays: (value: number) => void,
+  setCurrentDates: (value: unknown) => void,
+  setShowForecast: (value: boolean) => void,
+  updateChartsWithDates: (startDate: string, endDate: string) => void,
+): Promise<void> => {
+  let currentDate: string
   if (buttonProps === 1) {
     if (!currentChartData[currentChartData.length - 1]['MS 1']) {
-      const lastIndex = currentChartData.findIndex((dataItem: any) => dataItem['MS 1'] === undefined)
+      const lastIndex = currentChartData.findIndex((dataItem: ChartDataItem) => dataItem['MS 1'] === undefined)
       currentDate = currentChartData[lastIndex - 1].DateTime.substring(0, 10)
     } else {
       currentDate = currentChartData[currentChartData.length - 1].DateTime.substring(0, 10)

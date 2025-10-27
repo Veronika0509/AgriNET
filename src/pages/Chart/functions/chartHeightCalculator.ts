@@ -1,5 +1,5 @@
-export const calculateDynamicChartHeight = (chartId?: any): number => {
-  let viewportHeight = window.innerHeight
+export const calculateDynamicChartHeight = (chartId?: string): number => {
+  const viewportHeight = window.innerHeight
 
   const getElementHeight = (selector: string): number => {
     const element = document.querySelector(selector)

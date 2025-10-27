@@ -1,14 +1,27 @@
+interface DataItem {
+  DateTime: string;
+  [key: string]: unknown;
+}
+
+interface TableData {
+  data: DataItem[];
+  sensorCount?: number;
+  label?: string;
+  isFiltered?: boolean;
+  freshness?: string;
+}
+
 export const onDataSet = (
   type: string,
-  data: any,
+  data: TableData | { data: TableData[] },
   isWxetMobile: boolean,
-  setData: any,
-  setIsWxetModalOpen: any,
-  setIsFuelModalOpen: any,
-  setFirstRowColor: any,
-  freshnessColors: any[],
-  setIsLoading: any
-) => {
+  setData: (data: unknown, flag?: boolean) => void,
+  setIsWxetModalOpen: (open: boolean) => void,
+  setIsFuelModalOpen: (open: boolean) => void,
+  setFirstRowColor: (color: string | undefined) => void,
+  freshnessColors: Record<string, string>,
+  setIsLoading: (loading: boolean) => void
+): void => {
   if (type === 'wxet') {
     if (!data.isFiltered && isWxetMobile) {
       const dataArray = data.data
@@ -34,7 +47,7 @@ export const onDataSet = (
     if (data.label) {
       setFirstRowColor(freshnessColors[data.freshness] || undefined);
     } else {
-      let dataWithColors: any[] = []
+      const dataWithColors: any[] = []
       if (data.data) {
         data.data.map((table: any) => {
           dataWithColors.push({

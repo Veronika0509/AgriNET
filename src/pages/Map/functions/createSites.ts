@@ -2,12 +2,35 @@ import {onSiteClick} from "./onSiteClick";
 import {logoFacebook} from "ionicons/icons";
 import {getSiteList} from "../data/getSiteList";
 
-export const createSites = (props: any) => {
-  let markers: any = []
+interface SensorsGroupData {
+  lat: number;
+  lng: number;
+  name: string;
+  layers: unknown[];
+}
+
+interface CreateSitesProps {
+  setAreArraysUpdated: (updated: boolean) => void;
+  markers: unknown[];
+  siteList: SensorsGroupData[];
+  map: google.maps.Map;
+  setMarkers: (markers: unknown[]) => void;
+  userId: string | number;
+  setPage: (page: number) => void;
+  setSiteId: (id: string | number) => void;
+  setSiteName: (name: string) => void;
+  setChartData: (data: unknown) => void;
+  setAdditionalChartData: (data: unknown) => void;
+  setChartPageType: (type: string) => void;
+  history: { push: (path: string) => void };
+}
+
+export const createSites = (props: CreateSitesProps): void => {
+  const markers: google.maps.marker.AdvancedMarkerElement[] = []
   props.setAreArraysUpdated(false)
   if (props.markers.length === 0) {
-    const newMarkers = props.siteList.map((sensorsGroupData: any) => {
-      let groupMarker: any = new google.maps.marker.AdvancedMarkerElement({
+    const newMarkers = props.siteList.map((sensorsGroupData: SensorsGroupData) => {
+      const groupMarker = new google.maps.marker.AdvancedMarkerElement({
         map: props.map,
         position: { lat: sensorsGroupData.lat, lng: sensorsGroupData.lng },
         title: sensorsGroupData.name,
@@ -88,7 +111,7 @@ export const createSites = (props: any) => {
       }
     });
     const bounds = new google.maps.LatLngBounds();
-    props.siteList.forEach((marker: any) => {
+    props.siteList.forEach((marker: SensorsGroupData) => {
       bounds.extend({
         lat: marker.lat,
         lng: marker.lng

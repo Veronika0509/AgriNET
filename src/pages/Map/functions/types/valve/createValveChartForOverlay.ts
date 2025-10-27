@@ -15,13 +15,13 @@ export const createValveChartForOverlay = async (
   const container: any = document.getElementById(chartData.id);
   if (!container.style.width) container.style.width = "42px";
   if (!container.style.height) container.style.height = "48px";
-  let root = am5.Root.new(chartData.id);
+  const root = am5.Root.new(chartData.id);
   roots.push(root);
 
   // Set themes
   root.setThemes([am5themes_Animated.new(root)]);
   // Create chart
-  let chart = root.container.children.push(
+  const chart = root.container.children.push(
     am5radar.RadarChart.new(root, {
       panX: false,
       panY: false,
@@ -44,7 +44,7 @@ export const createValveChartForOverlay = async (
   );
 
   // Create axis renderer
-  let axisRenderer = am5radar.AxisRendererCircular.new(root, {
+  const axisRenderer = am5radar.AxisRendererCircular.new(root, {
     strokeOpacity: 1,
     strokeWidth: 0.1,
     minGridDistance: 10,
@@ -69,7 +69,7 @@ export const createValveChartForOverlay = async (
   })
 
   // Create axis
-  let xAxis = chart.xAxes.push(
+  const xAxis = chart.xAxes.push(
     am5xy.ValueAxis.new(root, {
       maxDeviation: 0,
       min: 0,
@@ -81,7 +81,7 @@ export const createValveChartForOverlay = async (
 
   // Function to create a clock hand
   const createClockHand = (color: number, type: string) => {
-    let hand = am5radar.ClockHand.new(root, {
+    const hand = am5radar.ClockHand.new(root, {
       pinRadius: 0.1,
       radius: am5.percent(100),
       bottomWidth: 1,
@@ -105,8 +105,8 @@ export const createValveChartForOverlay = async (
   };
 
   // Create and animate the main minute hand
-  let minuteHand = createClockHand(0xcccccc, 'main');
-  let minuteDataItem = xAxis.makeDataItem({});
+  const minuteHand = createClockHand(0xcccccc, 'main');
+  const minuteDataItem = xAxis.makeDataItem({});
   minuteDataItem.set("bullet", am5xy.AxisBullet.new(root, {
     sprite: minuteHand,
     location: 0.5,
@@ -121,8 +121,8 @@ export const createValveChartForOverlay = async (
     const options = await getOptions();
     chartData.events.forEach((event: any, index: number) => {
       const color = options.data[`valve-marker.colors.${event.status}`] || 0x962e40
-      let eventMinuteHand = createClockHand(color, 'event');
-      let eventMinuteDataItem = xAxis.makeDataItem({});
+      const eventMinuteHand = createClockHand(color, 'event');
+      const eventMinuteDataItem = xAxis.makeDataItem({});
       eventMinuteDataItem.set("bullet", am5xy.AxisBullet.new(root, {
         sprite: eventMinuteHand,
         location: 0.5,
@@ -190,7 +190,8 @@ export const createValveChartForOverlay = async (
 
   // Update overlays
   valveOverlays.forEach((overlay: any) => {
-    if (overlay.layerName === 'Valve' && overlay.chartData.mainId === chartData.mainId) {
+    if (overlay.chartData.mainId === chartData.mainId) {
+
       overlay.isValveMarkerChartDrawn = true;
       overlay.update();
     }

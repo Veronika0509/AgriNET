@@ -18,3 +18,32 @@ p, h1, h2, h3, h4, h5, h6, div, img, a, button {
 .infoWindowText {
   color: #000;
 }
+
+/* Sensor ID Validation Alert Styles */
+.sensor-id-validation-alert .alert-button {
+  color: #04a65b !important;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.sensor-id-validation-alert .alert-button-confirm {
+  color: #04a65b !important;
+}
+
+.sensor-id-validation-alert .alert-button-cancel {
+  color: #04a65b !important;
+}
+
+/* Sensor ID Duplicate Alert Styles */
+.sensor-id-duplicate-alert .alert-button {
+  color: #04a65b !important;
+  font-weight: 500;
+}
+
+.sensor-id-duplicate-alert .alert-button-confirm {
+  color: #04a65b !important;
+}
+
+.sensor-id-duplicate-alert .alert-button-cancel {
+  color: #04a65b !important;
+}

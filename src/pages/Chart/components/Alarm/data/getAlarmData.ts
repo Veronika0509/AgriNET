@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const getAlarmData = async (sensorId: any) => {
+export const getAlarmData = async (sensorId: string | number) => {
   return await axios.get('https://app.agrinet.us/api/alarm?v=43', {
     params: {
       sensorId: sensorId

@@ -1,24 +1,30 @@
 import {updateButtons} from "./updateButtons";
 
+interface ActionSheetButton {
+  text: string;
+  role?: string;
+  data?: { action: string };
+}
+
 export const onEmailOrTelChange = (
-  emailOrTel: any,
-  setActionSheetButtons: any,
-  setTextRef: any,
-  presentAlert: any,
+  emailOrTel: string,
+  setActionSheetButtons: (buttons: ActionSheetButton[] | ((prev: ActionSheetButton[]) => ActionSheetButton[])) => void,
+  setTextRef: (ref: unknown) => void,
+  presentAlert: (alert: unknown) => void,
   sensorId: string,
-  name: any,
-  setEmailOrTel: any,
-  setIsLowSetpointEnabled: any,
-  setIsHighSetpointEnabled: any,
-  presentRemoveAlert: any,
-  actionSheetButtons: any
+  name: string,
+  setEmailOrTel: (value: string) => void,
+  setIsLowSetpointEnabled: (enabled: boolean) => void,
+  setIsHighSetpointEnabled: (enabled: boolean) => void,
+  presentRemoveAlert: (alert: unknown) => void,
+  actionSheetButtons: ActionSheetButton[]
 ) => {
   if (emailOrTel === 'Unset') {
-    setActionSheetButtons((buttons: any) => {
-      const hasCancel = buttons.some((button: any) => button.role === 'cancel');
-      const hasRemove = buttons.some((button: any) => button.role === 'remove');
+    setActionSheetButtons((buttons: ActionSheetButton[]) => {
+      const hasCancel = buttons.some((button: ActionSheetButton) => button.role === 'cancel');
+      const hasRemove = buttons.some((button: ActionSheetButton) => button.role === 'remove');
       const updatedButtons = hasRemove
-        ? buttons.filter((button: any) => button.role !== 'remove')
+        ? buttons.filter((button: ActionSheetButton) => button.role !== 'remove')
         : buttons;
 
       if (hasCancel) {

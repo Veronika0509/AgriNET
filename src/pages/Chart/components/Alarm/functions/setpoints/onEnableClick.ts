@@ -4,32 +4,32 @@ import login from "../../../../../Login";
 
 export const onEnableCLick = async (
   sensorId: string,
-  name: any,
+  name: string,
   isSetpointEnabled: boolean,
-  setIsSetpointEnabled: any,
-  setIsEnabledToastOpen: any,
-  setIsDisabledToastOpen: any,
-  setIsEnableActionSheet: any
+  setIsSetpointEnabled?: (enabled: boolean) => void,
+  setIsEnabledToastOpen?: (open: boolean) => void,
+  setIsDisabledToastOpen?: (open: boolean) => void,
+  setIsEnableActionSheet?: (open: boolean) => void
 ) => {
   const setSetpointEnabled = () => {
-    new Promise((resolve: any) => {
+    new Promise<boolean>((resolve) => {
       enableSetpoint(sensorId, name.toLowerCase(), !isSetpointEnabled, resolve)
-    }).then((response: any) => {
-      setIsSetpointEnabled(response)
+    }).then((response: boolean) => {
+      setIsSetpointEnabled?.(response)
       if (!isSetpointEnabled) {
-        setIsEnabledToastOpen(true)
+        setIsEnabledToastOpen?.(true)
       } else {
-        setIsDisabledToastOpen(true)
+        setIsDisabledToastOpen?.(true)
       }
     })
   }
 
   const alarmData = await getAlarmData(sensorId)
   if (!isSetpointEnabled) {
-    const isNoEmailsOrTels = alarmData.data.emailsAndPhoneNumbers.every((emailOrPhoneNumber: any) => emailOrPhoneNumber === null)
+    const isNoEmailsOrTels = alarmData.data.emailsAndPhoneNumbers.every((emailOrPhoneNumber: string | null) => emailOrPhoneNumber === null)
 
     if (isNoEmailsOrTels) {
-      setIsEnableActionSheet(true)
+      setIsEnableActionSheet?.(true)
     } else {
       setSetpointEnabled()
     }

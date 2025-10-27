@@ -13,10 +13,11 @@ import s from './style.module.css';
 import Logo from '../../assets/images/logo.png';
 import {useState} from "react";
 import { useHistory } from 'react-router-dom';
+import type { UserId } from '../../types';
 
 interface LoginProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
-  setUserId: React.Dispatch<React.SetStateAction<number>>;
+  setUserId: React.Dispatch<React.SetStateAction<UserId>>;
 }
 
 const Login: React.FC<LoginProps> = (props) => {
@@ -26,15 +27,19 @@ const Login: React.FC<LoginProps> = (props) => {
   const history = useHistory();
   const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    axios.get('https://app.agrinet.us/api/auth/try', {
+    axios.get('https://app.agrinet.us/api/auth/try?v=43', {
       params: {
         username: usernameInputValue,
         password: passwordInputValue,
       },
     }).then(response => {
+      console.log('User role:', response.data.role);
+      if (response.data.role) {
+        localStorage.setItem('userRole', response.data.role);
+      }
       props.setPage(1);
       history.push('/map');
-      props.setUserId(response.data.id);
+      props.setUserId(response.data.id as UserId);
     }).catch(() => {
       setMessage(true)
     })
@@ -52,8 +57,8 @@ const Login: React.FC<LoginProps> = (props) => {
                 labelPlacement="floating"
                 required={true}
                 errorText="Username is empty"
-                onInput={(e: any) => {
-                  const inputValue = e.target.value;
+                onInput={(e: React.FormEvent<HTMLIonInputElement>) => {
+                  const inputValue = (e.target as HTMLIonInputElement).value as string;
                   setUsernameInputValue(inputValue)
                 }}
               ></IonInput>
@@ -63,8 +68,8 @@ const Login: React.FC<LoginProps> = (props) => {
                 type="password"
                 required={true}
                 errorText="Password is incorrect"
-                onInput={(e: any) => {
-                  const inputValue = e.target.value;
+                onInput={(e: React.FormEvent<HTMLIonInputElement>) => {
+                  const inputValue = (e.target as HTMLIonInputElement).value as string;
                   setPasswordInputValue(inputValue)
                 }}
               ></IonInput>

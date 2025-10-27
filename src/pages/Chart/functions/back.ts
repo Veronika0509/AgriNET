@@ -1,4 +1,11 @@
-export const back = (setPage: any, history: any): void => {
+interface History {
+  push: (path: string) => void;
+}
+
+export const back = (
+  setPage: (page: number) => void,
+  history: History
+): void => {
   setPage(1);
   history.push('/map');
 };

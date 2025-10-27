@@ -394,6 +394,7 @@
   }
 }
 
+
 @media (max-width: 440px) {
   /*   Main Table    */
 
@@ -401,4 +402,5 @@
   .tableRowItem {
     font-size: 14px;
   }
+
 }

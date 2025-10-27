@@ -4,7 +4,11 @@ import Logo from '../../assets/images/logo.png'
 import {star} from "ionicons/icons";
 import React from "react";
 
-const Info = (props: any) => {
+interface InfoProps {
+  showHeader?: boolean;
+}
+
+const Info = (props: InfoProps) => {
   return (
     <IonPage>
       {props.showHeader && (
@@ -17,7 +21,7 @@ const Info = (props: any) => {
       <IonContent className={s.content}>
         <IonRow class="ion-justify-content-center" className={s.content}>
           <div>
-            <a href="https://www.agrinet.us/" target='_blank' className={s.link}>
+            <a href="https://www.agrinet.us/" target='_blank' className={s.link} rel="noreferrer">
               <IonImg className={s.img} src={Logo} alt='Logo'/>
             </a>
             <a className={`${s.linkText} ${s.text} ${'ion-margin-top'}`} href="https://www.agrinet.us/">tuctronics.com</a>

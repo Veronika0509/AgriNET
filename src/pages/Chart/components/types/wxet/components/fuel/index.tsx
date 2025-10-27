@@ -15,32 +15,52 @@ import {AddCommentButton} from "../../../../AddComment/components/AddCommentButt
 import AddCommentModal from "../../../../AddComment/components/AddCommentModal";
 import {setDynamicChartHeight} from "../../../../../functions/chartHeightCalculator";
 
-export const FuelChartPage = (props: any) => {
-  const root = useRef<any>(null);
-  const [currentChartData, setCurrentChartData] = useState<any>()
-  const currentDate: any = getCurrentDatetime()
-  const initialStartDate: any = getStartDate(getCurrentDatetime())
+interface FuelChartPageProps {
+  sensorId: string;
+  userId: string | number;
+  setPage?: (page: number) => void;
+  [key: string]: unknown;
+}
+
+interface FuelComment {
+  id: string | number;
+  comment: string;
+  date: number;
+  [key: string]: unknown;
+}
+
+interface Location {
+  id: string | number;
+  name: string;
+  [key: string]: unknown;
+}
+
+export const FuelChartPage = (props: FuelChartPageProps) => {
+  const root = useRef<HTMLDivElement>(null);
+  const [currentChartData, setCurrentChartData] = useState<Record<string, unknown>[]>([])
+  const currentDate: string = getCurrentDatetime()
+  const initialStartDate: string = getStartDate(getCurrentDatetime())
   const [startDate, setStartDate] = useState<string>(initialStartDate);
   const [endDate, setEndDate] = useState<string>(currentDate);
-  const [currentDates, setCurrentDates] = useState<any>()
+  const [currentDates, setCurrentDates] = useState<[number, string]>([0, ''])
   const chartCode: string = 'single'
   const [dateDifferenceInDays, setDateDifferenceInDays] = React.useState('14');
-  const [locations, setLocations] = useState<any>([])
-  const [currentLocation, setCurrentLocation] = useState<any>()
+  const [locations, setLocations] = useState<Location[]>([])
+  const [currentLocation, setCurrentLocation] = useState<Location | undefined>()
   // Add Comment
-  const [fuelAddCommentModal, setFuelAddCommentModal] = useState<any>(undefined)
+  const [fuelAddCommentModal, setFuelAddCommentModal] = useState<{ isOpen: boolean; date?: number; type?: string } | undefined>(undefined)
   const [isFuelCommentsShowed, setIsFuelCommentsShowed] = useState(false)
-  const [fuelComments, setFuelComments] = useState();
-  const [fuelAddCommentItemShowed, setFuelAddCommentItemShowed] = useState<any>(false)
+  const [fuelComments, setFuelComments] = useState<FuelComment[]>();
+  const [fuelAddCommentItemShowed, setFuelAddCommentItemShowed] = useState<boolean>(false)
   // Tabular Data
-  const [fuelTabularData, setFuelTabularData] = useState<any>(null)
+  const [fuelTabularData, setFuelTabularData] = useState<Record<string, unknown>[] | null>(null)
   const [isFuelTabularDataLoading, setIsFuelTabularDataLoading] = useState(false)
 
   const [presentDataAlert] = useIonAlert();
   const [presentLocationAlert] = useIonAlert();
-  const locationSelectRef: any = useRef()
+  const locationSelectRef = useRef<HTMLIonSelectElement>(null)
 
-  const onLocationChange = async (value: any) => {
+  const onLocationChange = async (value: string) => {
     if (value === 'All') {
       presentLocationAlert({
         header: 'Sorry...',

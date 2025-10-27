@@ -57,7 +57,27 @@ http://ionicframework.com/docs/theming/ */
   --ion-color-light-contrast: #000000;
   --ion-color-light-contrast-rgb: 0,0,0;
   --ion-color-light-shade: #878787;
-  --ion-color-light-tint: #a3a3a3;
+  --ion-color-light-tint: #f5f6f9;
+}
+
+/* Custom Alert Styles */
+.create-site-alert .alert-message {
+  margin-bottom: 4px !important;
+  padding-bottom: 0px !important;
+}
+
+.create-site-alert .alert-input-group {
+  margin-top: 4px !important;
+  padding-top: 0px !important;
+}
+
+.create-site-alert .alert-wrapper {
+  padding-top: 8px !important;
+}
+
+.create-site-alert .alert-head {
+  padding-bottom: 0px !important;
+  margin-bottom: 0px !important;
 }
 
 html {

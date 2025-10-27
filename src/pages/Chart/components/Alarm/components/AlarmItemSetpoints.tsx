@@ -10,13 +10,32 @@ import {presentSetpointChangeAlert} from "../functions/setpoints/presentSetpoint
 import {onEnableCLick} from "../functions/setpoints/onEnableClick";
 import {presentTelOrEmail} from "../functions/telOrEmail/presentTelOrEmail";
 
-export const AlarmItemSetpoints = (props: any) => {
+interface AlarmItemSetpointsProps {
+  name: string;
+  sensorId: string | number;
+  selectedSensor: string;
+  setpoint: string | number;
+  isSetpointEnabled: boolean;
+  fieldsLabelsData: Record<string, string>;
+  setSelectedSensor: (value: string) => void;
+  setSetpoint: (value: string | number) => void;
+  setIsSetpointEnabled: (value: boolean) => void;
+  setIsEnabledToastOpen: (value: boolean) => void;
+  setIsDisabledToastOpen: (value: boolean) => void;
+  setIsEnableActionSheet: (value: boolean) => void;
+  isEnableActionSheet: boolean;
+  isEnabledToastOpen: boolean;
+  isDisabledToastOpen: boolean;
+  setEmailOrTel: (value: string) => void;
+}
+
+export const AlarmItemSetpoints = (props: AlarmItemSetpointsProps) => {
   const [presentAlert] = useIonAlert();
   const [presentSelectToast] = useIonToast();
   const [presentSetpointToast] = useIonToast();
   const [presentErrorAlert] = useIonAlert();
-  let initialSensorActionSheetButtonsArray: any = Object.values(props.fieldsLabelsData)
-  let sensorActionSheetButtons: any = []
+  const initialSensorActionSheetButtonsArray: string[] = Object.values(props.fieldsLabelsData)
+  const sensorActionSheetButtons: Array<{text: string; handler?: () => void; role?: string; data?: {action: string}}> = []
 
   initialSensorActionSheetButtonsArray.map((buttonString: string) => {
     sensorActionSheetButtons.push({

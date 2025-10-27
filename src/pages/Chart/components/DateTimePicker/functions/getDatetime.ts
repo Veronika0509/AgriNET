@@ -1,4 +1,4 @@
-export const getDatetime = (props: any) => {
+export const getDatetime = (props: Date): string => {
   const year = props.getFullYear();
   const month = props.getMonth() + 1;
   const day = props.getDate();

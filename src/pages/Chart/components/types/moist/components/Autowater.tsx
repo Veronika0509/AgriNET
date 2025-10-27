@@ -3,10 +3,16 @@ import {IonButton, IonContent, IonModal, IonSpinner, IonText, IonTitle, useIonVi
 import React, {useEffect, useRef, useState} from "react";
 import {getAutowaterData} from "../../../../data/types/moist/getAutowaterData";
 
-export const Autowater = (props: any) => {
+interface AutowaterProps {
+  autowater: boolean;
+  sensorId: string | number;
+  setAutowater: (value: boolean) => void;
+}
+
+export const Autowater = (props: AutowaterProps) => {
   const [isAutowaterLoading, setIsAutowaterLoading] = useState(false)
   const [irrigationNeeded, setIrrigationNeeded] = useState(false)
-  const [autowaterData, setAutowaterData] = useState<any>([])
+  const [autowaterData, setAutowaterData] = useState<unknown[]>([])
   const modalRef = useRef<HTMLIonModalElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +58,7 @@ export const Autowater = (props: any) => {
   }
   const getAutowaterFormattedDays = (hours: number) => {
     if (hours > 48) {
-      let days = Math.ceil(hours / 24)
+      const days = Math.ceil(hours / 24)
       hours = hours % 24
       if (hours > 0 && days < 5) {
         return `${days} days ${hours} hours`

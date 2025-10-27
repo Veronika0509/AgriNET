@@ -30,8 +30,8 @@ import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
 
 // Define TypeScript interfaces
 interface ChartData {
-  data: any[]
-  budgetLines?: any[]
+  data: Record<string, unknown>[]
+  budgetLines?: Record<string, unknown>[]
   metric?: string
 }
 
@@ -49,12 +49,12 @@ interface Comment {
   id: string
   date: string
   text: string
-  userId: any
-  [key: string]: any
+  userId: string | number
+  [key: string]: unknown
 }
 
 interface TabularDataState {
-  data: any | null
+  data: Record<string, unknown> | null
   isLoading: boolean
   colors: string[]
 }
@@ -73,10 +73,10 @@ interface CommentsState {
 }
 
 interface AddCommentItemState {
-  main: any
-  sum: any
-  soilTemp: any
-  battery: any
+  main: boolean
+  sum: boolean
+  soilTemp: boolean
+  battery: boolean
 }
 
 interface ScreenSizeState {
@@ -105,7 +105,13 @@ const CHART_CODES = {
   SUM: "mSum",
 }
 
-export const MoistChartPage = (props: any) => {
+interface MoistChartPageProps {
+  sensorId: string | number;
+  userId: string | number;
+  [key: string]: unknown;
+}
+
+export const MoistChartPage = (props: MoistChartPageProps) => {
   // Chart refs
   const root = useRef<HTMLDivElement>(null)
   const batteryRoot = useRef<HTMLDivElement>(null)
@@ -121,13 +127,13 @@ export const MoistChartPage = (props: any) => {
   const [dateDifferenceInDays, setDateDifferenceInDays] = useState<string>("14")
 
   // Chart data state
-  const [currentChartData, setCurrentChartData] = useState<any[]>([])
+  const [currentChartData, setCurrentChartData] = useState<Record<string, unknown>[]>([])
   const [irrigationDates, setIrrigationDates] = useState<string[]>([])
-  const [fullDatesArray, setFullDatesArray] = useState<any>()
-  const [currentSumChartData, setCurrentSumChartData] = useState<any>([])
-  const [currentSoilTempChartData, setCurrentSoilTempChartData] = useState<any>([])
-  const [currentBatteryChartData, setCurrentBatteryChartData] = useState<any>([])
-  const [newDaysData, setNewDaysData] = useState<any>({})
+  const [fullDatesArray, setFullDatesArray] = useState<string[] | undefined>()
+  const [currentSumChartData, setCurrentSumChartData] = useState<ChartData>({})
+  const [currentSoilTempChartData, setCurrentSoilTempChartData] = useState<ChartData>({})
+  const [currentBatteryChartData, setCurrentBatteryChartData] = useState<Record<string, unknown>[]>([])
+  const [newDaysData, setNewDaysData] = useState<{days?: number; newEndDateFormatted?: string; endDatetime?: string}>({})
 
   // UI state
   const [disableNextButton, setDisableNextButton] = useState<boolean>(true)
@@ -222,14 +228,14 @@ export const MoistChartPage = (props: any) => {
     async (
       typeOfChart: string,
       updateReason?: string,
-      days?: any,
+      days?: number,
       endDateDays?: string,
       endDatetime?: string,
     ): Promise<void> => {
-      const fetchComments = async (chartType: string, data: any): Promise<Comment[]> => {
+      const fetchComments = async (chartType: string, data: Record<string, unknown>[]): Promise<Comment[]> => {
         let apiChartType: string
         let commentType: keyof CommentsState
-        let currentData: any
+        let currentData: Record<string, unknown>[] | undefined
 
         switch (chartType) {
           case CHART_TYPES.MAIN:
@@ -303,9 +309,9 @@ export const MoistChartPage = (props: any) => {
             endDateDays,
           )
           let dataEndDate = new Date(newMoistChartData.data.data[newMoistChartData.data.data.length - 1].DateTime).getTime()
-          let dataStartDate = new Date(newMoistChartData.data.data[0].DateTime).getTime()
+          const dataStartDate = new Date(newMoistChartData.data.data[0].DateTime).getTime()
           if (historicMode) {
-            const lastIndex = newMoistChartData.data.data.findIndex((dataItem: any) => dataItem['MS 1'] === undefined)
+            const lastIndex = newMoistChartData.data.data.findIndex((dataItem: Record<string, unknown>) => dataItem['MS 1'] === undefined)
             if (lastIndex === -1) {
               dataEndDate = new Date(newMoistChartData.data.data[newMoistChartData.data.data.length - 1].DateTime).getTime()
             } else {
@@ -437,7 +443,7 @@ export const MoistChartPage = (props: any) => {
             (colors: string[]) => updateTabularData("sum", { colors })
           )
         } else if (updateReason === "dates") {
-          const newSumChartData: any = await getSumChartData(props.sensorId, historicMode, days, endDateDays)
+          const newSumChartData: ChartResponse = await getSumChartData(props.sensorId, historicMode, days, endDateDays)
           console.log(newSumChartData.data)
           setCurrentSumChartData(newSumChartData.data)
 
@@ -483,7 +489,7 @@ export const MoistChartPage = (props: any) => {
             (colors: string[]) => updateTabularData("sum", { colors })
           )
         } else {
-          const newData: any = await getSumChartData(
+          const newData: ChartResponse = await getSumChartData(
             props.sensorId,
             historicMode,
             currentDates[0],
@@ -888,8 +894,8 @@ export const MoistChartPage = (props: any) => {
             <div className={s.additionalButtons}>
               <ButtonAndSpinner
                 data={tabularData.soilTemp.data}
-                setData={(data: any) => updateTabularData("soilTemp", {data})}
-                setIsLoading={(isLoading: any) => updateTabularData("soilTemp", {isLoading})}
+                setData={(data: Record<string, unknown>) => updateTabularData("soilTemp", {data})}
+                setIsLoading={(isLoading: boolean) => updateTabularData("soilTemp", {isLoading})}
                 sensorId={props.sensorId}
                 chartCode={CHART_CODES.SOIL_TEMP}
                 isLoading={tabularData.soilTemp.isLoading}
@@ -897,7 +903,7 @@ export const MoistChartPage = (props: any) => {
               <Export chartCode={CHART_CODES.SOIL_TEMP} sensorId={props.sensorId} userId={props.userId}/>
               <AddCommentButton
                 addCommentItemShowed={addCommentItemShowed.soilTemp}
-                setAddCommentItemShowed={(value: any) => updateAddCommentItemShowed("soilTemp", value)}
+                setAddCommentItemShowed={(value: boolean | string) => updateAddCommentItemShowed("soilTemp", value)}
                 isCommentsShowed={isMoistCommentsShowed}
                 setIsCommentsShowed={setIsMoistCommentsShowed}
               />
@@ -914,10 +920,10 @@ export const MoistChartPage = (props: any) => {
               sensorId={props.sensorId}
               colors={tabularData.soilTemp.colors}
               data={tabularData.soilTemp.data}
-              setData={(data: any) => updateTabularData("soilTemp", {data})}
+              setData={(data: Record<string, unknown>[]) => updateTabularData("soilTemp", {data})}
               chartCode={CHART_CODES.SOIL_TEMP}
               isLoading={tabularData.soilTemp.isLoading}
-              setIsLoading={(isLoading: any) => updateTabularData("soilTemp", {isLoading})}
+              setIsLoading={(isLoading: boolean) => updateTabularData("soilTemp", {isLoading})}
             />
 
             <div className={s.additionalChart} id="soilTempChart"></div>
@@ -928,7 +934,7 @@ export const MoistChartPage = (props: any) => {
             <div className={s.additionalButtons}>
               <AddCommentButton
                 addCommentItemShowed={addCommentItemShowed.battery}
-                setAddCommentItemShowed={(value: any) => updateAddCommentItemShowed("battery", value)}
+                setAddCommentItemShowed={(value: boolean) => updateAddCommentItemShowed("battery", value)}
                 isCommentsShowed={isMoistCommentsShowed}
                 setIsCommentsShowed={setIsMoistCommentsShowed}
               />
@@ -950,8 +956,8 @@ export const MoistChartPage = (props: any) => {
               <div className={s.additionalButtons}>
                 <ButtonAndSpinner
                   data={tabularData.main.data}
-                  setData={(data: any) => updateTabularData("main", {data})}
-                  setIsLoading={(isLoading: any) => updateTabularData("main", {isLoading})}
+                  setData={(data: Record<string, unknown>[]) => updateTabularData("main", {data})}
+                  setIsLoading={(isLoading: boolean) => updateTabularData("main", {isLoading})}
                   sensorId={props.sensorId}
                   chartCode={CHART_CODES.MAIN}
                   isLoading={tabularData.main.isLoading}
@@ -959,7 +965,7 @@ export const MoistChartPage = (props: any) => {
                 <Export chartCode={CHART_CODES.MAIN} sensorId={props.sensorId} userId={props.userId}/>
                 <AddCommentButton
                   addCommentItemShowed={addCommentItemShowed.main}
-                  setAddCommentItemShowed={(value: any) => updateAddCommentItemShowed("main", value)}
+                  setAddCommentItemShowed={(value: boolean) => updateAddCommentItemShowed("main", value)}
                   isCommentsShowed={isMoistCommentsShowed}
                   setIsCommentsShowed={setIsMoistCommentsShowed}
                 />
@@ -979,10 +985,10 @@ export const MoistChartPage = (props: any) => {
                 sensorId={props.sensorId}
                 colors={tabularData.main.colors}
                 data={tabularData.main.data}
-                setData={(data: any) => updateTabularData("main", {data})}
+                setData={(data: Record<string, unknown>) => updateTabularData("main", {data})}
                 chartCode={CHART_CODES.MAIN}
                 isLoading={tabularData.main.isLoading}
-                setIsLoading={(isLoading: any) => updateTabularData("main", {isLoading})}
+                setIsLoading={(isLoading: boolean) => updateTabularData("main", {isLoading})}
               />
             </div>
 
@@ -1032,8 +1038,8 @@ export const MoistChartPage = (props: any) => {
           <div className={s.additionalButtons}>
             <ButtonAndSpinner
               data={tabularData.sum.data}
-              setData={(data: any) => updateTabularData("sum", {data})}
-              setIsLoading={(isLoading: any) => updateTabularData("sum", {isLoading})}
+              setData={(data: Record<string, unknown>) => updateTabularData("sum", {data})}
+              setIsLoading={(isLoading: boolean) => updateTabularData("sum", {isLoading})}
               sensorId={props.sensorId}
               chartCode={CHART_CODES.SUM}
               isLoading={tabularData.sum.isLoading}
@@ -1041,7 +1047,7 @@ export const MoistChartPage = (props: any) => {
             <Export chartCode={CHART_CODES.SUM} sensorId={props.sensorId} userId={props.userId}/>
             <AddCommentButton
               addCommentItemShowed={addCommentItemShowed.sum}
-              setAddCommentItemShowed={(value: any) => updateAddCommentItemShowed("sum", value)}
+              setAddCommentItemShowed={(value: boolean | string) => updateAddCommentItemShowed("sum", value)}
               isCommentsShowed={isMoistCommentsShowed}
               setIsCommentsShowed={setIsMoistCommentsShowed}
             />
@@ -1058,10 +1064,10 @@ export const MoistChartPage = (props: any) => {
             sensorId={props.sensorId}
             colors={tabularData.sum.colors}
             data={tabularData.sum.data}
-            setData={(data: any) => updateTabularData("sum", {data})}
+            setData={(data: Record<string, unknown>) => updateTabularData("sum", {data})}
             chartCode={CHART_CODES.SUM}
             isLoading={tabularData.sum.isLoading}
-            setIsLoading={(isLoading: any) => updateTabularData("sum", {isLoading})}
+            setIsLoading={(isLoading: boolean) => updateTabularData("sum", {isLoading})}
           />
         </div>
         <div id="sumChart" className={s.sumChart}></div>
@@ -1074,13 +1080,13 @@ export const MoistChartPage = (props: any) => {
             sensorId={props.sensorId}
             addCommentModal={moistAddCommentModal.date}
             setMoistAddCommentModal={setMoistAddCommentModal}
-            setMoistMainComments={(data: any) => updateComments("main", data)}
+            setMoistMainComments={(data: Comment[]) => updateComments("main", data)}
             setAddCommentItemShowed={getSetAddCommentItemShowed(
               moistAddCommentModal.type,
-              (value: any) => updateAddCommentItemShowed("main", value),
-              (value: any) => updateAddCommentItemShowed("soilTemp", value),
-              (value: any) => updateAddCommentItemShowed("sum", value),
-              (value: any) => updateAddCommentItemShowed("battery", value),
+              (value: boolean | string) => updateAddCommentItemShowed("main", value),
+              (value: boolean | string) => updateAddCommentItemShowed("soilTemp", value),
+              (value: boolean | string) => updateAddCommentItemShowed("sum", value),
+              (value: boolean | string) => updateAddCommentItemShowed("battery", value),
             )}
             addCommentItemShowed={getAddCommentItemShowed(
               moistAddCommentModal.type,

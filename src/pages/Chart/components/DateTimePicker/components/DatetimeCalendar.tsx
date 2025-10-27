@@ -1,15 +1,40 @@
 import React, {useEffect} from 'react'
 import s from "../../../style.module.css";
-import {IonDatetime, IonDatetimeButton, IonLabel, IonModal} from "@ionic/react";
+import {IonDatetime, IonDatetimeButton, IonLabel, IonModal, useIonAlert} from "@ionic/react";
 import {getDatetime} from "../functions/getDatetime";
 
-const DatetimeCalendar = (props: any) => {
+interface DatetimeCalendarProps {
+  title: string;
+  startDate: string;
+  endDate: string;
+  dateDifferenceInDays: number;
+  setStartDate: (value: string) => void;
+  setEndDate: (value: string) => void;
+  setDateDifferenceInDays: (value: number) => void;
+}
+
+const DatetimeCalendar = (props: DatetimeCalendarProps) => {
+  const [presentPurchaseAlert] = useIonAlert();
+
+  const showPurchaseRequest = () => {
+    presentPurchaseAlert({
+      header: 'Purchase Request',
+      message: 'This selection will place an order for equipment. Your dealer will contact you shortly. Thanks.',
+      buttons: [
+        {
+          text: 'THANKS',
+          role: 'confirm'
+        }
+      ]
+    });
+  };
+
   const handleDateChange = (event: CustomEvent) => {
     if (props.title === 'From') {
       props.setStartDate(event.detail.value);
-      const fromDate: any = new Date(event.detail.value)
-      const toDate: any = new Date(props.endDate)
-      const difference = Math.floor((toDate - fromDate) / (1000 * 60 * 60 * 24))
+      const fromDate: Date = new Date(event.detail.value)
+      const toDate: Date = new Date(props.endDate)
+      const difference = Math.floor((toDate.getTime() - fromDate.getTime()) / (1000 * 60 * 60 * 24))
       props.setDateDifferenceInDays(difference)
     } else {
       props.setEndDate(event.detail.value)

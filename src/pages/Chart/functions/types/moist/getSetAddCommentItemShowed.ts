@@ -1,10 +1,14 @@
+// Тип для комментариев
+type CommentItemType = 'main' | 'soilTemp' | 'sum' | 'battery';
+type SetterFunction = (value: boolean) => void;
+
 export const getSetAddCommentItemShowed = (
-  type: string,
-  setMoistMainAddCommentItemShowed: any,
-  setMoistSoilTempAddCommentItemShowed: any,
-  setMoistSumAddCommentItemShowed: any,
-  setMoistBatteryAddCommentItemShowed: any
-) => {
+  type: CommentItemType,
+  setMoistMainAddCommentItemShowed: SetterFunction,
+  setMoistSoilTempAddCommentItemShowed: SetterFunction,
+  setMoistSumAddCommentItemShowed: SetterFunction,
+  setMoistBatteryAddCommentItemShowed: SetterFunction
+): SetterFunction | undefined => {
   if (type === 'main') {
     return setMoistMainAddCommentItemShowed
   } else if (type === 'soilTemp') {
@@ -14,4 +18,5 @@ export const getSetAddCommentItemShowed = (
   } else if (type === 'battery') {
     return setMoistBatteryAddCommentItemShowed
   }
+  return undefined
 }

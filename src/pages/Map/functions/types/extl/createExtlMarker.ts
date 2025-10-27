@@ -1,30 +1,47 @@
 import {createExtlDataContainer} from "./createExtlDataContainer";
 
+// Интерфейсы для типизации
+interface ExtlSensorItem {
+  id: string | number;
+  sensorId: string | number;
+  lat: number;
+  lng: number;
+  [key: string]: unknown;
+}
+
+interface ExtlIdCounter {
+  value: number;
+}
+
+interface ExtlBounds {
+  [key: string]: unknown;
+}
 
 export const createExtlMarker = async (
-  extlChartsAmount: any,
-  sensorItem: any,
-  page: any,
-  setExtlChartDataContainer: any,
-  extlId: any,
-  extlData: any,
-  extlBoundsArray: any,
+  extlChartsAmount: ExtlSensorItem[],
+  sensorItem: ExtlSensorItem,
+  page: number,
+  setExtlChartDataContainer: (data: Array<[{ sensorId: string | number; layerName?: string; [key: string]: unknown; }, ExtlBounds]>) => void,
+  extlId: ExtlIdCounter,
+  extlData: ExtlSensorItem[],
+  extlBoundsArray: ExtlBounds[],
   countExtl: number
 ) => {
-  const exists = extlChartsAmount.some((secondItemTemp: any) => secondItemTemp.id === sensorItem.id);
+  const exists = extlChartsAmount.some((secondItemTemp: ExtlSensorItem) => secondItemTemp.id === sensorItem.id);
   if (!exists) {
     extlId.value++;
     extlChartsAmount.push(sensorItem);
-    const bounds: any = new google.maps.LatLngBounds(
-      new google.maps.LatLng(sensorItem.lat, sensorItem.lng),
-      new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
-    )
+    const bounds: ExtlBounds = {
+      north: sensorItem.lat + 0.0001,
+      south: sensorItem.lat,
+      east: sensorItem.lng + 0.0001,
+      west: sensorItem.lng
+    };
     if (page === 1) {
       createExtlDataContainer({
         bounds,
         setExtlChartDataContainer,
         extlChartsAmount,
-        extlId,
         extlData,
         boundsArray: extlBoundsArray,
         countExtl,

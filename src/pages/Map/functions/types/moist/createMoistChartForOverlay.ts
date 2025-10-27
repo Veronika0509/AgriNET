@@ -3,10 +3,46 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import {checkOverlay} from "../../checkOverlay";
 
-export const createMoistChartForOverlay = async (type: any, chartData: any, roots: any, moistOverlays: any) => {
+interface ChartDataItem {
+  DateTime: string;
+  SumAve: number;
+  [key: string]: unknown;
+}
+
+interface BudgetLine {
+  value: number;
+  [key: string]: unknown;
+}
+
+interface MoistChartData {
+  id: string | number;
+  mainId: string | number;
+  data: ChartDataItem[];
+  budgetLines: BudgetLine[];
+  [key: string]: unknown;
+}
+
+interface MoistOverlay {
+  layerName: string;
+  chartData: {
+    mainId: string | number;
+    id: string | number;
+    [key: string]: unknown;
+  };
+  isMoistMarkerChartDrawn?: boolean;
+  update: () => void;
+  [key: string]: unknown;
+}
+
+interface ChartDataPoint {
+  date: number;
+  value: number;
+}
+
+export const createMoistChartForOverlay = async (type: string, chartData: MoistChartData, roots: am5.Root[], moistOverlays: MoistOverlay[]) => {
   const chartId = `${type}-${chartData.id}`
   await checkOverlay(chartId, moistOverlays);
-  const root: any = am5.Root.new(chartId)
+  const root = am5.Root.new(chartId)
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);
 
@@ -20,26 +56,26 @@ export const createMoistChartForOverlay = async (type: any, chartData: any, root
   }));
 
 // Generate data
-  function createChartData(chartDate: any, chartDataValue: any) {
+  function createChartData(chartDate: number, chartDataValue: number): ChartDataPoint {
     return {
       date: chartDate,
       value: chartDataValue
     };
   }
 
-  function createChartDataArray() {
-    let data: any = [];
-    chartData.data.map((chartDataItem: any) => {
+  function createChartDataArray(): ChartDataPoint[] {
+    const data: ChartDataPoint[] = [];
+    chartData.data.map((chartDataItem: ChartDataItem) => {
       const chartDate = new Date(chartDataItem.DateTime).getTime()
-      const chartData = createChartData(chartDate, chartDataItem.SumAve);
-      data.push(chartData);
+      const chartDataPoint = createChartData(chartDate, chartDataItem.SumAve);
+      data.push(chartDataPoint);
     });
     return data;
   }
 
 // Create axes
 // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-  let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
+  const xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
     maxDeviation: 0.2,
     baseInterval: {
       timeUnit: "minute",
@@ -51,7 +87,7 @@ export const createMoistChartForOverlay = async (type: any, chartData: any, root
 
   const maximum = chartData.budgetLines[0].value > 0 ? chartData.budgetLines[0].value : undefined
   const minimum = chartData.budgetLines[5].value > 0 ? chartData.budgetLines[5].value : undefined
-  let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+  const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
     min: minimum,
     max: maximum,
     strictMinMax: true,
@@ -64,7 +100,7 @@ export const createMoistChartForOverlay = async (type: any, chartData: any, root
 
 // Add series
 // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-  let series = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
+  const series = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
     name: "Series",
     xAxis: xAxis,
     yAxis: yAxis,
@@ -83,7 +119,7 @@ export const createMoistChartForOverlay = async (type: any, chartData: any, root
   }
 
 // Regions
-  let topBudgetRegion: any = yAxis.makeDataItem({
+  const topBudgetRegion = yAxis.makeDataItem({
     value: chartData.budgetLines[1].value,
     endValue: 100
   });
@@ -94,7 +130,7 @@ export const createMoistChartForOverlay = async (type: any, chartData: any, root
     visible: true
   });
 
-  let bottomBudgetRegion: any = yAxis.makeDataItem({
+  const bottomBudgetRegion = yAxis.makeDataItem({
     value: chartData.budgetLines[4].value,
     endValue: -100
   });
@@ -108,7 +144,7 @@ export const createMoistChartForOverlay = async (type: any, chartData: any, root
   chart.zoomOutButton.set("forceHidden", true);
 
 // Set data
-  let data = createChartDataArray();
+  const data = createChartDataArray();
   series.data.setAll(data);
 
 // Make stuff animate on load
@@ -116,16 +152,17 @@ export const createMoistChartForOverlay = async (type: any, chartData: any, root
   series.appear(1000);
   chart.appear(1000, 100);
 
-  moistOverlays.map((overlay: any) => {
+  
+  moistOverlays.map((overlay: MoistOverlay) => {
     if (type === 'm') {
-      if (overlay.layerName === 'Moist') {
-        if (overlay.chartData.mainId === chartData.mainId) {
-          overlay.isMoistMarkerChartDrawn = true
-          overlay.update();
-        }
+      if (overlay.chartData.mainId === chartData.mainId) {
+
+        overlay.isMoistMarkerChartDrawn = true
+        overlay.update();
       }
     } else {
       if (overlay.chartData.id === chartData.id) {
+
         overlay.isMoistMarkerChartDrawn = true
         overlay.update();
       }

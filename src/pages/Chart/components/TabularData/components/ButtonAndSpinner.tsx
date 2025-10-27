@@ -5,13 +5,13 @@ import {gridOutline} from "ionicons/icons";
 import React from "react";
 
 interface ButtonAndSpinnerProps {
-  data: any,
-  setData: any,
-  setIsLoading: any,
-  sensorId: string,
-  chartCode: any,
-  isLoading: boolean,
-  type?: any,
+  data: unknown;
+  setData: (data: unknown) => void;
+  setIsLoading: (loading: boolean) => void;
+  sensorId: string;
+  chartCode: string;
+  isLoading: boolean;
+  type?: string;
 }
 
 export const ButtonAndSpinner: React.FC<ButtonAndSpinnerProps> = ({data, setData, setIsLoading, sensorId, chartCode, isLoading, type}) => {

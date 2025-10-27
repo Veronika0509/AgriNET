@@ -1,19 +1,19 @@
 import {onSensorChange} from "../../data/setpoints/onSensorChange";
 
 export const onSensorSelect = (
-  fieldsLabelsData: any,
-  name: any,
+  fieldsLabelsData: Record<string, string>,
+  name: string,
   sensorId: string,
-  setSelectedSensor: any,
-  presentToast: any,
+  setSelectedSensor: (sensor: string) => void,
+  presentToast: (options: unknown) => void,
   buttonString: string
 ) => {
-  const arrayLabel: any = Object.keys(fieldsLabelsData).find(key => fieldsLabelsData[key] === buttonString)
+  const arrayLabel: string | undefined = Object.keys(fieldsLabelsData).find(key => fieldsLabelsData[key] === buttonString)
   const fieldName = name === 'Low' ? 'low-field' : 'high-field'
 
-  new Promise((resolve: any) => {
+  new Promise<string>((resolve) => {
     onSensorChange(sensorId, fieldName, arrayLabel, resolve)
-  }).then((response: any) => {
+  }).then((response: string) => {
     setSelectedSensor(response)
     presentToast({
       message: `${name} Setpoint Metric Updated`,

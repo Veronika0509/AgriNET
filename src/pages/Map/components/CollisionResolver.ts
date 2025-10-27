@@ -1,10 +1,31 @@
+interface OverlayItem {
+  getBounds: () => {
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  };
+  getPosition: () => {
+    lat: () => number;
+    lng: () => number;
+  };
+  setPosition: (lat: number, lng: number) => void;
+  getDiv: () => HTMLElement | null;
+  draw: () => void;
+  offset?: {
+    x: number;
+    y: number;
+  };
+  [key: string]: unknown;
+}
+
 export class CollisionResolver {
   private static timerId: NodeJS.Timeout;
   private static readonly MAX_ITERATIONS = 30; // Increased for more thorough resolution
   private static readonly MIN_SPACING = 0.5; // Reduced to 0.5px for extremely tight packing
-  private static alreadyMoved: Map<any, boolean> = new Map();
+  private static alreadyMoved: Map<OverlayItem, boolean> = new Map();
 
-  static resolve(overlays: any[]) {
+  static resolve(overlays: OverlayItem[]) {
     if (overlays.length > 30) return;
 
     clearTimeout(this.timerId);
@@ -17,7 +38,7 @@ export class CollisionResolver {
     }, 100);
   }
 
-  private static initialPosition(overlays: any[]) {
+  private static initialPosition(overlays: OverlayItem[]) {
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
     const radius = Math.min(window.innerWidth, window.innerHeight) / 8; // Further reduced radius
@@ -30,7 +51,7 @@ export class CollisionResolver {
     });
   }
 
-  private static setOverlayPosition(overlay: any, x: number, y: number) {
+  private static setOverlayPosition(overlay: OverlayItem, x: number, y: number) {
     const div = overlay.getDiv();
     if (!div) return;
 
@@ -39,7 +60,7 @@ export class CollisionResolver {
     overlay.draw();
   }
 
-  private static resolveCollisions(overlays: any[], iteration: number = 0) {
+  private static resolveCollisions(overlays: OverlayItem[], iteration: number = 0) {
     if (iteration >= this.MAX_ITERATIONS) return;
 
     let hasCollisions = false;
@@ -63,7 +84,7 @@ export class CollisionResolver {
     }
   }
 
-  private static checkCollision(overlay1: any, overlay2: any) {
+  private static checkCollision(overlay1: OverlayItem, overlay2: OverlayItem) {
     const div1 = overlay1.getDiv();
     const div2 = overlay2.getDiv();
     if (!div1 || !div2) return null;
@@ -78,8 +99,8 @@ export class CollisionResolver {
 
     if (overlap.x > 0 && overlap.y > 0) {
       return {
-        x: overlap.x + this.MIN_SPACING,
-        y: overlap.y + this.MIN_SPACING,
+        overlapX: overlap.x + this.MIN_SPACING,
+        overlapY: overlap.y + this.MIN_SPACING,
         centerDiffX: bounds2.left + bounds2.width / 2 - (bounds1.left + bounds1.width / 2),
         centerDiffY: bounds2.top + bounds2.height / 2 - (bounds1.top + bounds1.height / 2)
       };
@@ -88,7 +109,7 @@ export class CollisionResolver {
     return null;
   }
 
-  private static resolveCollision(overlay1: any, overlay2: any, collision: any) {
+  private static resolveCollision(overlay1: OverlayItem, overlay2: OverlayItem, collision: { overlapX: number; overlapY: number; centerDiffX: number; centerDiffY: number }) {
     const div1 = overlay1.getDiv();
     const div2 = overlay2.getDiv();
     if (!div1 || !div2) return;
@@ -108,7 +129,7 @@ export class CollisionResolver {
     }
 
     // Minimal push distance for extremely tight packing
-    const pushDistance = Math.max(collision.x, collision.y) * 0.2;
+    const pushDistance = Math.max(collision.overlapX, collision.overlapY) * 0.2;
     const push = pushDistance / 2;
 
     this.moveOverlay(overlay1,
@@ -121,7 +142,7 @@ export class CollisionResolver {
     );
   }
 
-  private static attractOverlays(overlay1: any, overlay2: any) {
+  private static attractOverlays(overlay1: OverlayItem, overlay2: OverlayItem) {
     const div1 = overlay1.getDiv();
     const div2 = overlay2.getDiv();
     if (!div1 || !div2) return;
@@ -144,7 +165,7 @@ export class CollisionResolver {
     }
   }
 
-  private static compactLayout(overlays: any[]) {
+  private static compactLayout(overlays: OverlayItem[]) {
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
 
@@ -169,7 +190,7 @@ export class CollisionResolver {
     });
   }
 
-  private static moveOverlay(overlay: any, dx: number, dy: number) {
+  private static moveOverlay(overlay: OverlayItem, dx: number, dy: number) {
     const div = overlay.getDiv();
     if (!div) return;
 

@@ -5,28 +5,82 @@ import {updateCommentDate} from "../../../components/AddComment/data/updateComme
 import {removeComment} from "../../../components/AddComment/data/removeComment";
 import login from "../../../../Login";
 
+// Интерфейсы для данных графика
+interface ChartDataItem {
+  DateTime: string;
+  SumAve?: number;
+  H_SumAve?: number;
+  P_SumAve?: number;
+  Battery?: number;
+  time?: string; // For battery chart compatibility
+  value?: number; // For battery chart compatibility
+  [key: string]: string | number | undefined;
+}
+
+interface BudgetLine {
+  value: number;
+  label: string;
+}
+
+interface MoistComment {
+  key: string;
+  text: string;
+  color_id?: number;
+  id: string;
+}
+
+interface RootRef {
+  current: am5.Root | null;
+}
+
+interface SeriesItem {
+  name: string;
+  prefix: string;
+}
+
+interface ChartDataPoint {
+  date: number;
+  value: number;
+}
+
+type SetterFunction<T> = (value: T) => void;
+type UpdateCommentsArrayFunction = (type: string, data?: MoistComment) => void;
+type UpdateChartFunction = () => void;
+
+// Helper function to safely get budget line
+function getBudgetLine(budgetLines: unknown[] | undefined, index: number): BudgetLine | null {
+  if (!budgetLines || !Array.isArray(budgetLines) || index >= budgetLines.length) {
+    return null;
+  }
+  const line = budgetLines[index];
+  if (line && typeof line === 'object' && 'value' in line && 'label' in line) {
+    return line as BudgetLine;
+  }
+  return null;
+}
+
 export const createAdditionalChart = (
   chartType: string,
-  chartData: any,
-  root: any,
-  setMoistAddCommentModal: any,
-  updateCommentsArray: any,
-  sensorId: any,
-  updateComments: any,
-  moistAddCommentItemShowed: any,
-  moistComments: any,
-  userId: any,
-  updateChart: any,
-  isMoistCommentsShowed: any,
+  chartData: ChartDataItem[],
+  root: RootRef,
+  setMoistAddCommentModal: SetterFunction<{isOpen: boolean; date?: number; type?: string}>,
+  updateCommentsArray: UpdateCommentsArrayFunction,
+  sensorId: string | number,
+  updateComments: () => void,
+  moistAddCommentItemShowed: boolean,
+  moistComments: MoistComment[],
+  userId: string | number,
+  updateChart: UpdateChartFunction,
+  isMoistCommentsShowed: boolean,
 // sum
-  budgetLines?: any,
+  budgetLines?: BudgetLine[],
   historicMode?: boolean,
-  showForecast?: any,
-  setSumColor?: any,
+  showForecast?: boolean,
+  setSumColor?: SetterFunction<string[]>,
 // soilTemp
   linesCount?: number,
   metric?: string,
-  setSoilTempColor?: any,
+  setSoilTempColor?: SetterFunction<string[]>,
 ) => {
   if (root.current) {
     root.current.dispose();
@@ -68,14 +122,14 @@ export const createAdditionalChart = (
     ]);
 
     // Create chart
-    let chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
+    const chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
       wheelY: "zoomX",
       maxTooltipDistance: 0,
       paddingLeft: 0
     }));
 
 // Create axes
-    let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root.current, {
+    const xAxis = chart.xAxes.push(am5xy.DateAxis.new(root.current, {
       maxDeviation: 0.2,
       baseInterval: {
         timeUnit: "minute",
@@ -87,14 +141,14 @@ export const createAdditionalChart = (
       })
     }));
 
-    let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
+    const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
       renderer: am5xy.AxisRendererY.new(root.current, {})
     }));
 
 // Add series
-    let series: any
+    let series: am5xy.SmoothedXLineSeries
     if (chartType === 'sum') {
-      function createSumChartData(chartDate: any, chartCount: number) {
+      function createSumChartData(chartDate: number, chartCount: number): ChartDataPoint {
         return {
           date: chartDate,
           value: chartCount
@@ -102,18 +156,21 @@ export const createAdditionalChart = (
       }
 
       function createSumChartDataArray(prefix: string) {
-        let data: any = [];
-        chartData.map((chartDataItem: any) => {
+        const data: ChartDataPoint[] = [];
+        chartData.map((chartDataItem: ChartDataItem) => {
           if (chartDataItem[prefix + 'SumAve'] !== undefined && chartDataItem[prefix + 'SumAve'] !== null) {
             const chartDate = new Date(chartDataItem.DateTime).getTime()
-            const chartData = createSumChartData(chartDate, chartDataItem[prefix + 'SumAve']);
-            data.push(chartData);
+            const value = chartDataItem[prefix + 'SumAve'];
+            if (typeof value === 'number') {
+              const chartData = createSumChartData(chartDate, value);
+              data.push(chartData);
+            }
           }
         });
         return data;
       }
 
-      let listOfSeries: any = [
+      const listOfSeries: SeriesItem[] = [
         {name: 'ordinarySeries', prefix: ''}
       ]
       if (historicMode) {
@@ -123,7 +180,7 @@ export const createAdditionalChart = (
         listOfSeries.push({ name: "futureSeries", prefix: "P_" })
       }
 
-      listOfSeries.map((seriesItem: any, index: number) => {
+      listOfSeries.map((seriesItem: SeriesItem, index: number) => {
         series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
           xAxis: xAxis,
           yAxis: yAxis,
@@ -152,16 +209,17 @@ export const createAdditionalChart = (
         }
 
         if (index === 0 && setSumColor) {
-          setSumColor([series.get('stroke').r, series.get('stroke').g, series.get('stroke').b])
+          const strokeColor = series.get('stroke') as am5.Color;
+          setSumColor([strokeColor.r.toString(), strokeColor.g.toString(), strokeColor.b.toString()])
         }
 
-        let data = createSumChartDataArray(seriesItem.prefix)
+        const data = createSumChartDataArray(seriesItem.prefix)
         series.data.setAll(data)
 
         series.appear();
       })
     } else if (chartType === 'soilTemp') {
-      function createSoilTempChartData(chartDate: any, chartCount: number) {
+      function createSoilTempChartData(chartDate: number, chartCount: number): ChartDataPoint {
         return {
           date: chartDate,
           value: chartCount
@@ -169,20 +227,21 @@ export const createAdditionalChart = (
       }
 
       function createSoilTempChartDataArray(item: number) {
-        let data: any = [];
-        chartData.map((chartDataItem: any) => {
+        const data: ChartDataPoint[] = [];
+        chartData.map((chartDataItem: ChartDataItem) => {
           const chartDate = new Date(chartDataItem.DateTime).getTime()
-          const chartData = createSoilTempChartData(chartDate, chartDataItem[`MABS${item}`]);
+          const value = chartDataItem[`MABS${item}`];
+          const chartData = createSoilTempChartData(chartDate, typeof value === 'number' ? value : 0);
           data.push(chartData);
         });
         return data;
       }
 
       let count: number = 4
-      let seriesColors: any = []
+      const seriesColors: string[] = []
       if (linesCount) {
-        for (var i = 0; i < linesCount; i++) {
-          let name = count + ' inch';
+        for (let i = 0; i < linesCount; i++) {
+          const name = count + ' inch';
           const metricSign: '°F' | '°C' = metric === 'AMERICA' ? '°F' : '°C'
           series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
             name: name,
@@ -204,17 +263,20 @@ export const createAdditionalChart = (
 
           count += 4;
 
-          let data = createSoilTempChartDataArray(i)
+          const data = createSoilTempChartDataArray(i)
           series.data.setAll(data);
 
-          seriesColors.push(series.get('stroke'))
+          const strokeColor = series.get('stroke') as am5.Color;
+          seriesColors.push(`rgb(${strokeColor.r}, ${strokeColor.g}, ${strokeColor.b})`)
 
           series.appear();
         }
       }
-      setSoilTempColor(seriesColors)
+      if (setSoilTempColor) {
+        setSoilTempColor(seriesColors)
+      }
     } else {
-      function createChartData(chartDate: any, chartCount: number) {
+      function createChartData(chartDate: number, chartCount: number) {
         return {
           date: chartDate,
           value: chartCount,
@@ -223,10 +285,13 @@ export const createAdditionalChart = (
       }
 
       function createChartDataArray() {
-        let data: any = [];
-        chartData.map((chartDataItem: any) => {
-          const chartDate = new Date(chartDataItem.time).getTime()
-          const chartData = createChartData(chartDate, chartDataItem.value);
+        const data: Array<{date: number; value: number; percentValue: number}> = [];
+        chartData.map((chartDataItem: ChartDataItem) => {
+          // Battery chart uses 'time' property instead of 'DateTime'
+          const timeStr = chartDataItem.time || chartDataItem.DateTime;
+          const chartDate = new Date(timeStr).getTime();
+          const value = chartDataItem.value !== undefined ? chartDataItem.value : chartDataItem.Battery;
+          const chartData = createChartData(chartDate, typeof value === 'number' ? value : 0);
           data.push(chartData);
         });
         return data;
@@ -251,7 +316,7 @@ export const createAdditionalChart = (
         strokeWidth: 2,
       });
 
-      let data = createChartDataArray()
+      const data = createChartDataArray()
 
       series.data.setAll(data)
 
@@ -262,7 +327,7 @@ export const createAdditionalChart = (
 // Inside
       // Lines
       if (historicMode) {
-        let seriesRangeDataItem = xAxis.makeDataItem({
+        const seriesRangeDataItem = xAxis.makeDataItem({
           value: new Date().getTime()
         });
         series.createAxisRange(seriesRangeDataItem);
@@ -282,19 +347,20 @@ export const createAdditionalChart = (
           fontSize: 13,
         })
       }
-      if (budgetLines[2].value) {
-        let seriesRangeDataItem = yAxis.makeDataItem({
-          value: budgetLines[2].value
+      const budgetLine2 = getBudgetLine(budgetLines, 2);
+      if (budgetLine2 && typeof budgetLine2.value === 'number') {
+        const seriesRangeDataItem = yAxis.makeDataItem({
+          value: budgetLine2.value
         });
         series.createAxisRange(seriesRangeDataItem);
         seriesRangeDataItem.get("grid").setAll({
           strokeOpacity: 1,
           visible: true,
-          stroke: am5.color(0x000000),
-          strokeDasharray: [15, 15],
+          stroke: am5.color(0xCC0000),
+          strokeDasharray: [4, 4]
         });
-        seriesRangeDataItem.get("label").setAll({
-          text: budgetLines[2].label,
+        seriesRangeDataItem.get("label")?.setAll({
+          text: budgetLine2.label || '',
           fill: am5.color(0x000000),
           background: am5.RoundedRectangle.new(root.current, {
             fill: am5.color(0xffffff)
@@ -302,24 +368,25 @@ export const createAdditionalChart = (
           inside: true,
           fontSize: 12,
           centerX: 0,
-          centerY: "0%",
+          centerY: am5.percent(0),
           y: -10,
           visible: true
         });
       }
-      if (budgetLines[3].value) {
-        let seriesRangeDataItem = yAxis.makeDataItem({
-          value: budgetLines[3].value
+      const budgetLine3 = getBudgetLine(budgetLines, 3);
+      if (budgetLine3 && typeof budgetLine3.value === 'number') {
+        const seriesRangeDataItem = yAxis.makeDataItem({
+          value: budgetLine3.value
         });
         series.createAxisRange(seriesRangeDataItem);
         seriesRangeDataItem.get("grid").setAll({
           strokeOpacity: 1,
           visible: true,
-          stroke: am5.color(0x000000),
-          strokeDasharray: [15, 15],
+          stroke: am5.color(0xCCCC00),
+          strokeDasharray: [4, 4]
         });
-        seriesRangeDataItem.get("label").setAll({
-          text: budgetLines[3].label,
+        seriesRangeDataItem.get("label")?.setAll({
+          text: budgetLine3.label || '',
           fill: am5.color(0x000000),
           background: am5.RoundedRectangle.new(root.current, {
             fill: am5.color(0xffffff)
@@ -327,76 +394,32 @@ export const createAdditionalChart = (
           inside: true,
           fontSize: 12,
           centerX: 0,
-          centerY: 0,
+          centerY: am5.percent(0),
+          y: -10,
           visible: true
         });
       }
 
-      let middleBottomLine = yAxis.makeDataItem({
-        value: budgetLines[4].value
-      });
-      series.createAxisRange(middleBottomLine);
-      middleBottomLine.get("grid").setAll({
-        strokeOpacity: 1,
-        visible: true,
-        stroke: am5.color(0xCCCC00),
-        strokeDasharray: [4, 4],
-      });
-      middleBottomLine.get("label").setAll({
-        text: budgetLines[4].label,
-        fill: am5.color(0x000000),
-        background: am5.RoundedRectangle.new(root.current, {
-          fill: am5.color(0xffffff)
-        }),
-        inside: true,
-        fontSize: 12,
-        centerX: 0,
-        centerY: 0,
-        visible: true
-      });
-
-      let topMiddleLine = yAxis.makeDataItem({
-        value: budgetLines[1].value
-      });
-      series.createAxisRange(topMiddleLine);
-      topMiddleLine.get("grid").setAll({
-        strokeOpacity: 1,
-        visible: true,
-        stroke: am5.color(0xCCCC00),
-        strokeDasharray: [4, 4],
-      });
-      topMiddleLine.get("label").setAll({
-        text: budgetLines[1].label,
-        fill: am5.color(0x000000),
-        background: am5.RoundedRectangle.new(root.current, {
-          fill: am5.color(0xffffff)
-        }),
-        inside: true,
-        fontSize: 12,
-        centerX: 0,
-        centerY: 0,
-        visible: true
-      });
-
-      // Regions
-      let topBudgetRegion = yAxis.makeDataItem({
-        value: budgetLines[1].value,
-        endValue: 100
-      });
-      series.createAxisRange(topBudgetRegion);
-      topBudgetRegion.get("grid").setAll({
-        strokeOpacity: 1,
-        visible: true,
-        stroke: am5.color(0xCCCC00),
-        strokeDasharray: [4, 4]
-      });
-      topBudgetRegion.get("axisFill").setAll({
-        fill: am5.color(0x02c5fd),
-        fillOpacity: 0.2,
-        visible: true
-      });
-      topBudgetRegion.get("label").setAll({
-        text: budgetLines[1].label,
+  // Regions
+  const budgetLine1 = getBudgetLine(budgetLines, 1);
+  const topBudgetRegion = yAxis.makeDataItem({
+    value: budgetLine1 && typeof budgetLine1.value === 'number' ? budgetLine1.value : 0,
+    endValue: 100
+  });
+  series.createAxisRange(topBudgetRegion);
+  topBudgetRegion.get("grid").setAll({
+    strokeOpacity: 1,
+    visible: true,
+    stroke: am5.color(0xCCCC00),
+    strokeDasharray: [4, 4]
+  });
+  topBudgetRegion.get("axisFill").setAll({
+    fill: am5.color(0x02c5fd),
+    fillOpacity: 0.2,
+    visible: true
+  });
+      topBudgetRegion.get("label")?.setAll({
+        text: budgetLine1 ? budgetLine1.label || '' : '',
         fill: am5.color(0x000000),
         background: am5.RoundedRectangle.new(root.current, {
           fill: am5.color(0xffffff)
@@ -405,13 +428,14 @@ export const createAdditionalChart = (
         inside: true,
         fontSize: 12,
         centerX: 0,
-        centerY: 0,
+        centerY: am5.percent(0),
         visible: true
       });
 
-      let middleBudgetRegion = yAxis.makeDataItem({
-        value: budgetLines[1].value,
-        endValue: budgetLines[4].value
+      const budgetLine4 = getBudgetLine(budgetLines, 4);
+      const middleBudgetRegion = yAxis.makeDataItem({
+        value: budgetLine1 && typeof budgetLine1.value === 'number' ? budgetLine1.value : 0,
+        endValue: budgetLine4 && typeof budgetLine4.value === 'number' ? budgetLine4.value : 0
       });
       series.createAxisRange(middleBudgetRegion);
       middleBudgetRegion.get("grid").setAll({
@@ -426,8 +450,8 @@ export const createAdditionalChart = (
         visible: true
       });
 
-      let bottomBudgetRegion = yAxis.makeDataItem({
-        value: budgetLines[4].value,
+      const bottomBudgetRegion = yAxis.makeDataItem({
+        value: budgetLine4 && typeof budgetLine4.value === 'number' ? budgetLine4.value : 0,
         endValue: 0
       });
       series.createAxisRange(bottomBudgetRegion);
@@ -442,8 +466,8 @@ export const createAdditionalChart = (
         fillOpacity: 0.2,
         visible: true
       });
-      bottomBudgetRegion.get("label").setAll({
-        text: budgetLines[4].label,
+      bottomBudgetRegion.get("label")?.setAll({
+        text: budgetLine4 ? budgetLine4.label || '' : '',
         fill: am5.color(0x000000),
         background: am5.RoundedRectangle.new(root.current, {
           fill: am5.color(0xffffff)
@@ -458,7 +482,7 @@ export const createAdditionalChart = (
     }
 
     // Add cursor
-    let cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
+    const cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
       behavior: "zoomX",
       xAxis: xAxis,
     }));
@@ -479,16 +503,16 @@ export const createAdditionalChart = (
     // Add Comments
     if (moistAddCommentItemShowed) {
       chart.events.on("click", (ev: any) => {
-        let xAxis = chart.xAxes.getIndex(0);
+        const xAxis = chart.xAxes.getIndex(0) as am5xy.DateAxis<am5xy.AxisRendererX>;
 
-        let xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width());
+        const xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width());
 
-        let clickDate = xAxis.positionToDate(xPosition);
-        setMoistAddCommentModal({date: clickDate, type: chartType})
+        const clickDate = xAxis.positionToDate(xPosition);
+        setMoistAddCommentModal({isOpen: true, date: clickDate.getTime(), type: chartType})
       });
     }
     if (moistComments && isMoistCommentsShowed) {
-      const colors: any = {
+      const colors: Record<string, string> = {
         'Advisory': 'F08080',
         'Plant Health': '90EE90',
         'Weather': 'ADD8E6',
@@ -507,23 +531,23 @@ export const createAdditionalChart = (
         'Installation': 'FFFFFF',
       }
 
-      let labelsArray: any[] = []
-      moistComments.forEach((moistMainComment: any) => {
-        const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
+      const labelsArray: am5.Label[] = []
+      moistComments.forEach((moistMainComment: MoistComment) => {
+        const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[(moistMainComment.color_id as number) - 1]]}` : `#FBFFA6`;
         const rangeDataItem = xAxis.makeDataItem({})
         xAxis.createAxisRange(rangeDataItem)
         let isContainerDragging: boolean = false
         const container = am5.Container.new(root.current, {
           centerX: am5.p50,
           draggable: true,
-          layout: root.verticalLayout,
+          layout: root.current!.verticalLayout,
           dy: 4,
         })
         container.adapters.add("y", function () {
           return 0
         })
-        container.adapters.add("x", function (x: any) {
-          return Math.max(0, Math.min(chart.plotContainer.width(), x))
+        container.adapters.add("x", function (x: number | null | undefined) {
+          return Math.max(0, Math.min(chart.plotContainer.width(), x || 0))
         })
         container.events.on("pointerdown", function () {
           container.set('draggable', isContainerDragging)
@@ -561,11 +585,11 @@ export const createAdditionalChart = (
           isContainerDragging = false
           cursor.set('behavior', 'zoomX')
           const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
-          const newDate = root.current.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
-          new Promise((resolve: any) => {
-            updateCommentDate(moistMainComment.id, newDate, userId, resolve)
-          }).then(() => {
-            updateCommentsArray(chartCode, sensorId, updateComments, chartData)
+          const newDate = root.current!.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
+          new Promise<void>((resolve: () => void) => {
+            updateCommentDate(moistMainComment.id, newDate, userId.toString(), resolve)
+          }).then(async () => {
+            await updateCommentsArray(chartCode)
             rotationAnimation?.stop()
             icon?.set("src", "https://img.icons8.com/?size=100&id=98070&format=png&color=000000")
             icon?.set("rotation", 0)
@@ -588,7 +612,7 @@ export const createAdditionalChart = (
         container.set("background", am5.RoundedRectangle.new(root.current, {fill: am5.color(commentColor)}))
         const label = container.children.push(
           am5.Label.new(root.current, {
-            text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
+            text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[(moistMainComment.color_id as number) - 1]}\n` : ''}${moistMainComment.text}`,
             fill: am5.color(0x000000),
             maxWidth: 150,
             // minHeight: moistMainComment.color_id ? 60 : 45,
@@ -602,7 +626,7 @@ export const createAdditionalChart = (
         );
 
         labelsArray.push(label);
-        let buttonsContainer = label.children.push(am5.Container.new(root.current, {
+        const buttonsContainer = label.children.push(am5.Container.new(root.current, {
           layout: root.current.horizontalLayout,
           x: am5.p100,
           y: 0,
@@ -610,7 +634,7 @@ export const createAdditionalChart = (
           paddingTop: 3,
           paddingRight: 3,
         }));
-        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        const dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
           cursorOverStyle: "ew-resize",
@@ -631,7 +655,7 @@ export const createAdditionalChart = (
         dragButton.events.on('pointerdown', () => {
           isContainerDragging = true
         })
-        let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        const closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
           cursorOverStyle: "pointer",
@@ -667,9 +691,9 @@ export const createAdditionalChart = (
               icon.set("dx", 17)
               icon.set("dy", 7)
             })
-            new Promise((resolve: any) => {
-              removeComment(moistMainComment.id, userId, resolve)
-            }).then(() => {
+            new Promise<void>((resolve: () => void) => {
+              removeComment(moistMainComment.id, userId.toString(), resolve)
+            }).then(async () => {
               rotationAnimation?.stop()
               icon?.set("src", "https://img.icons8.com/?size=100&id=8112&format=png&color=000000")
               icon?.set("rotation", 0)
@@ -679,7 +703,7 @@ export const createAdditionalChart = (
           }
         })
 
-        function updateLabel(value?: any) {
+        function updateLabel(value?: number) {
           const x = container.x()
           const position = xAxis.toAxisPosition(x / chart.plotContainer.width())
 
@@ -687,26 +711,26 @@ export const createAdditionalChart = (
             value = xAxis.positionToValue(position)
           }
 
-          label.set("text", `${root.current.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`)
+          label.set("text", `${root.current!.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[(moistMainComment.color_id as number) - 1]}\n` : ''}${moistMainComment.text}`)
 
           rangeDataItem.set("value", value)
         }
         function positionLabels() {
-          let labels = labelsArray;
+          const labels = labelsArray;
 
-          labels.sort((a: any, b: any) => {
+          labels.sort((a: am5.Label, b: am5.Label) => {
             const aParent = a.parent;
             const bParent = b.parent;
             if (!aParent || !bParent) return 0;
             return aParent.x() - bParent.x();
           });
 
-          labels.forEach((label: any) => {
+          labels.forEach((label: am5.Label) => {
             label.set("y", 0);
           });
 
           for (let i = 0; i < labels.length; i++) {
-            let currentLabel = labels[i];
+            const currentLabel = labels[i];
             let yOffset = 0;
             let overlap = true;
 
@@ -714,7 +738,7 @@ export const createAdditionalChart = (
               overlap = false;
 
               for (let j = 0; j < i; j++) {
-                let otherLabel = labels[j];
+                const otherLabel = labels[j];
 
                 if (doLabelsOverlap(currentLabel, otherLabel)) {
                   overlap = true;
@@ -732,7 +756,7 @@ export const createAdditionalChart = (
           }
         }
 
-        function doLabelsOverlap(label1: any, label2: any) {
+        function doLabelsOverlap(label1: am5.Label, label2: am5.Label) {
           const parent1 = label1.parent;
           const parent2 = label2.parent;
           if (!parent1 || !parent2) return false;
@@ -752,7 +776,7 @@ export const createAdditionalChart = (
 
         root.current.events.on("frameended", positionLabels)
         series.events.on("datavalidated", () => {
-          const commentDate = new Date(moistMainComment.key).getTime()
+          const commentDate = new Date(moistMainComment.key as string).getTime()
           rangeDataItem.set("value", commentDate)
           updateLabel(commentDate)
         })

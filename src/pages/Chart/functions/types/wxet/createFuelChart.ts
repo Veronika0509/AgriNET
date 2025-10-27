@@ -2,14 +2,38 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
+interface FuelChartDataItem {
+  time: string;
+  value: number;
+}
+
+interface FuelComment {
+  id: string;
+  key: string;
+  text: string;
+  color_id?: number;
+  [key: string]: unknown;
+}
+
+interface RootRef {
+  current: am5.Root | null;
+}
+
+interface SetCommentModalParams {
+  date: Date;
+  type: string;
+}
+
+type SetterFunction<T> = (value: T) => void;
+
 export const createFuelChart = (
-  chartData: any,
-  root: any,
-  fuelAddCommentItemShowed: any,
-  setFuelAddCommentModal: any,
-  fuelComments: any,
-  isFuelCommentsShowed: any,
-) => {
+  chartData: FuelChartDataItem[],
+  root: RootRef,
+  fuelAddCommentItemShowed: boolean,
+  setFuelAddCommentModal: (params: SetCommentModalParams) => void,
+  fuelComments: FuelComment[],
+  isFuelCommentsShowed: boolean,
+): void => {
   if (root.current) {
     root.current.dispose();
     root.current = null;
@@ -39,7 +63,7 @@ export const createFuelChart = (
     ]);
 
 // Create chart
-    let chart: any = root.current.container.children.push(am5xy.XYChart.new(root.current, {
+    const chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
       wheelY: "zoomX",
       maxTooltipDistance: 0,
       layout: root.current.horizontalLayout,
@@ -50,7 +74,7 @@ export const createFuelChart = (
     }));
 
 // Create axes
-    let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root.current, {
+    const xAxis = chart.xAxes.push(am5xy.DateAxis.new(root.current, {
       maxDeviation: 0.2,
       baseInterval: {
         timeUnit: "minute",
@@ -62,14 +86,14 @@ export const createFuelChart = (
       })
     }));
 
-    let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
+    const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
       renderer: am5xy.AxisRendererY.new(root.current, {})
     }));
 
 // Add series
     function createChartDataArray() {
-      let data: any = [];
-      chartData.map((chartDataItem: any) => {
+      const data: Array<{ date: number; value: number }> = [];
+      chartData.forEach((chartDataItem: FuelChartDataItem) => {
         const chartDate = new Date(chartDataItem.time).getTime()
         const chartData = {
           date: chartDate,
@@ -80,7 +104,7 @@ export const createFuelChart = (
       return data;
     }
 
-    let series: any = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
+    const series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
       name: 'Fuel Series',
       xAxis: xAxis,
       yAxis: yAxis,
@@ -98,7 +122,7 @@ export const createFuelChart = (
       strokeWidth: 2,
     });
 
-    let data = createChartDataArray()
+    const data = createChartDataArray()
 
     series.data.setAll(data)
 
@@ -106,18 +130,18 @@ export const createFuelChart = (
 
     // Add Comments
     if (fuelAddCommentItemShowed) {
-      chart.events.on("click", (ev: any) => {
-        let xAxis = chart.xAxes.getIndex(0);
+      chart.events.on("click", (ev: am5.ISpritePointerEvent) => {
+        const xAxis = chart.xAxes.getIndex(0);
 
-        let xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width());
+        const xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width());
 
-        let clickDate = xAxis.positionToDate(xPosition);
+        const clickDate = xAxis.positionToDate(xPosition);
 
         setFuelAddCommentModal({date: clickDate, type: 'main'})
       });
     }
     if (fuelComments && isFuelCommentsShowed) {
-      const colors: any = {
+      const colors: Record<string, string> = {
         'Advisory': 'F08080',
         'Plant Health': '90EE90',
         'Weather': 'ADD8E6',
@@ -136,9 +160,9 @@ export const createFuelChart = (
         'Installation': 'FFFFFF',
       }
 
-      let labelsArray: any[] = []
+      const labelsArray: am5.Container[] = []
 
-      fuelComments.forEach((moistMainComment: any) => {
+      fuelComments.forEach((moistMainComment: FuelComment) => {
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
         const rangeDataItem = xAxis.makeDataItem({})
         xAxis.createAxisRange(rangeDataItem)
@@ -152,7 +176,7 @@ export const createFuelChart = (
         container.adapters.add("y", function () {
           return 0
         })
-        container.adapters.add("x", function (x: any) {
+        container.adapters.add("x", function (x: number) {
           return Math.max(0, Math.min(chart.plotContainer.width(), x))
         })
         container.events.on("pointerdown", function () {
@@ -205,7 +229,7 @@ export const createFuelChart = (
         );
 
         labelsArray.push(label);
-        let buttonsContainer = label.children.push(am5.Container.new(root.current, {
+        const buttonsContainer = label.children.push(am5.Container.new(root.current, {
           layout: root.current.horizontalLayout,
           x: am5.p100,
           y: 0,
@@ -213,7 +237,7 @@ export const createFuelChart = (
           paddingTop: 3,
           paddingRight: 3,
         }));
-        let dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        const dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
           cursorOverStyle: "ew-resize",
@@ -233,7 +257,7 @@ export const createFuelChart = (
         dragButton.events.on('pointerdown', () => {
           isContainerDragging = true
         })
-        let closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        const closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
           width: 20,
           height: 20,
           cursorOverStyle: "pointer",
@@ -262,7 +286,7 @@ export const createFuelChart = (
           }
         })
 
-        function updateLabel(value?: any) {
+        function updateLabel(value?: number) {
           const x = container.x()
           const position = xAxis.toAxisPosition(x / chart.plotContainer.width())
 
@@ -276,21 +300,21 @@ export const createFuelChart = (
         }
 
         function positionLabels() {
-          let labels = labelsArray;
+          const labels = labelsArray;
 
-          labels.sort((a: any, b: any) => {
+          labels.sort((a: am5.Container, b: am5.Container) => {
             const aParent = a.parent;
             const bParent = b.parent;
             if (!aParent || !bParent) return 0;
             return aParent.x() - bParent.x();
           });
 
-          labels.forEach((label: any) => {
+          labels.forEach((label: am5.Container) => {
             label.set("y", 0);
           });
 
           for (let i = 0; i < labels.length; i++) {
-            let currentLabel = labels[i];
+            const currentLabel = labels[i];
             let yOffset = 0;
             let overlap = true;
 
@@ -298,7 +322,7 @@ export const createFuelChart = (
               overlap = false;
 
               for (let j = 0; j < i; j++) {
-                let otherLabel = labels[j];
+                const otherLabel = labels[j];
 
                 if (doLabelsOverlap(currentLabel, otherLabel)) {
                   overlap = true;
@@ -316,7 +340,7 @@ export const createFuelChart = (
           }
         }
 
-        function doLabelsOverlap(label1: any, label2: any) {
+        function doLabelsOverlap(label1: am5.Container, label2: am5.Container) {
           const parent1 = label1.parent;
           const parent2 = label2.parent;
           if (!parent1 || !parent2) return false;
@@ -345,7 +369,7 @@ export const createFuelChart = (
     }
 
 // Add cursor
-    let cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
+    const cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
       behavior: "zoomX",
       xAxis: xAxis,
     }));

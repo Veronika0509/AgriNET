@@ -3,17 +3,17 @@ import {onTelOrEmailSubmit} from "./onTelOrEmailSubmit";
 
 export const presentTelOrEmail = (
   sensorId: string,
-  name: any,
-  setEmailOrTel: any,
-  presentErrorAlert: any,
-  presentAlert: any,
+  name: number,
+  setEmailOrTel: (value: string) => void,
+  presentErrorAlert: (options: unknown) => void,
+  presentAlert: (options: unknown) => void,
   typeOfAction: string,
   inputValue?: string,
   toEnable?: string,
-  setIsSetpointEnabled?: any,
-  setIsEnabledToastOpen?: any,
-  setIsDisabledToastOpen?: any,
-  setIsEnableActionSheet?: any
+  setIsSetpointEnabled?: (enabled: boolean) => void,
+  setIsEnabledToastOpen?: (open: boolean) => void,
+  setIsDisabledToastOpen?: (open: boolean) => void,
+  setIsEnableActionSheet?: (open: boolean) => void
 ) => {
   presentAlert({
     header: typeOfAction === 'email' ? 'Enter email' : 'Enter Phone Number',
@@ -33,7 +33,7 @@ export const presentTelOrEmail = (
       {
         text: 'OK',
         role: 'confirm',
-        handler: (event: any) => onTelOrEmailSubmit(
+        handler: (event: string[]) => onTelOrEmailSubmit(
           sensorId,
           name,
           setEmailOrTel,

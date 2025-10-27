@@ -1,45 +1,65 @@
 import s from "../../../style.module.css";
 import {createRoot} from "react-dom/client";
-import React from "react";
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {getOptions} from "../../../data/getOptions";
 import skull from "../../../../../assets/images/skull.svg";
 import {onFuelSensorClick} from "../../../functions/types/wxet/onFuelSensorClick";
 
-export const initializeFuelCustomOverlay = (isGoogleApiLoaded: any) => {
+// Интерфейсы для типизации
+interface FuelChartData {
+  id: string | number;
+  mainId: string | number;
+  layerName: string;
+  name: string;
+  sensorId: string | number;
+  batteryPercentage?: number;
+  freshness?: string;
+  [key: string]: unknown;
+}
+
+interface History {
+  push: (path: string) => void;
+  [key: string]: unknown;
+}
+
+interface FuelCustomOverlayInstance {
+  chartData: FuelChartData;
+  [key: string]: unknown;
+}
+
+export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
   if (isGoogleApiLoaded) {
     return class CustomOverlayExport extends google.maps.OverlayView {
-      private setChartData: any
-      private setPage: any
-      private setSiteId: any
-      private setSiteName: any
-      private history: any
+      private setChartData: (data: unknown) => void
+      private setPage: (page: number) => void
+      private setSiteId: (id: string | number) => void
+      private setSiteName: (name: string) => void
+      private history: History
       private bounds: google.maps.LatLngBounds;
       private isValidData: boolean;
-      private chartData: any;
-      private setChartPageType: any
+      private chartData: FuelChartData;
+      private setChartPageType: (type: string) => void
       private isFuelMarkerChartDrawn: boolean
-      private borderColor: any
-      private setFuelOverlays: any
+      private borderColor: string
+      private setFuelOverlays: (overlays: FuelCustomOverlayInstance[] | ((prev: FuelCustomOverlayInstance[]) => FuelCustomOverlayInstance[])) => void
 
-      private layerName: string
-      private root: any;
+      private root: ReturnType<typeof createRoot> | null;
       private offset: { x: number; y: number };
-      private div?: any;
+      private div?: HTMLElement | null;
       private isTextTruncated: boolean
 
       constructor(
-        setChartData: any,
-        setPage: any,
-        setSiteId: any,
-        setSiteName: any,
-        history: any,
+        setChartData: (data: unknown) => void,
+        setPage: (page: number) => void,
+        setSiteId: (id: string | number) => void,
+        setSiteName: (name: string) => void,
+        history: History,
         bounds: google.maps.LatLngBounds,
         isValidData: boolean,
-        data: any,
-        setChartPageType: any,
-        isFuelMarkerChartDrawn: any,
-        setFuelOverlays: any
+        data: FuelChartData,
+        setChartPageType: (type: string) => void,
+        isFuelMarkerChartDrawn: boolean,
+        setFuelOverlays: (overlays: FuelCustomOverlayInstance[] | ((prev: FuelCustomOverlayInstance[]) => FuelCustomOverlayInstance[])) => void
       ) {
         super();
 
@@ -55,10 +75,10 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: any) => {
         this.isFuelMarkerChartDrawn = isFuelMarkerChartDrawn
         this.setFuelOverlays = setFuelOverlays
 
-        this.layerName = data.layerName
         this.offset = {x: 0, y: 0};
         this.isTextTruncated = this.chartData.name.length > 7
         this.borderColor = 'gray'
+        this.root = null
       }
 
       update() {
@@ -77,7 +97,7 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: any) => {
               <div className={s.mainContainer} onClick={() => {
                 onFuelSensorClick(
                   this.history,
-                  this.chartData.sensorId,
+                  String(this.chartData.sensorId),
                   this.chartData.name,
                   this.setChartData,
                   this.setPage,
@@ -87,7 +107,7 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: any) => {
                 )
               }}>
                 <div className={s.overlay_chartContainer} style={{background: this.borderColor}}>
-                  <div id={this.chartData.id} className={s.overlay_chart}
+                  <div id={String(this.chartData.id)} className={s.overlay_chart}
                        style={{display: this.isFuelMarkerChartDrawn ? 'block' : 'none'}}></div>
                   {this.isFuelMarkerChartDrawn ? null : (
                     <div className={s.overlay_loader}></div>
@@ -98,7 +118,7 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: any) => {
                   {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
                   {this.chartData.batteryPercentage &&
                       <p className={s.chartName}>Battery: {this.chartData.batteryPercentage}%</p>}
-                  <p>{this.chartData.sensorId}</p>
+                  <p>{String(this.chartData.sensorId)}</p>
                 </div>
               </div>
             ) : (
@@ -109,7 +129,7 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: any) => {
                 </div>
                 <div className={`${s.overlay_info} ${s.overlay_fuelInfo}`}>
                   {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
-                  <p className={s.chartName}>{this.chartData.sensorId}</p>
+                  <p className={s.chartName}>{String(this.chartData.sensorId)}</p>
                 </div>
               </div>
             )}
@@ -123,9 +143,9 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       onAdd() {
-        new Promise(async (resolve: any) => {
-          const divId = `overlay-${this.chartData.mainId}`;
-          this.div = document.getElementById(divId);
+        new Promise<void>(async (resolve) => {
+          const divId = `overlay-${String(this.chartData.mainId)}`;
+          this.div = document.getElementById(divId) as HTMLElement | null;
 
           if (!this.div) {
             this.div = document.createElement("div");
@@ -133,37 +153,45 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: any) => {
             this.div.style.borderStyle = "none";
             this.div.style.borderWidth = "0px";
             this.div.style.position = "absolute";
-            this.div.style.WebkitTransform = 'translateZ(0)';
+            this.div.style.webkitTransform = 'translateZ(0)';
             this.div.addEventListener('mouseenter', () => {
-              this.div.style.zIndex = "9999";
+              if (this.div) {
+                this.div.style.zIndex = "9999";
+              }
             });
             this.div.addEventListener('mouseleave', () => {
-              this.div.style.zIndex = "0";
+              if (this.div) {
+                this.div.style.zIndex = "0";
+              }
             });
 
             this.offset = {
               x: (Math.random() - 0.5) * 20,
               y: (Math.random() - 0.5) * 20
             };
-            const panes: any = this.getPanes();
-            panes.floatPane.appendChild(this.div);
-            if (!this.root) {
+            const panes = this.getPanes();
+            if (panes && this.div) {
+              panes.floatPane.appendChild(this.div);
+            }
+            if (!this.root && this.div) {
               this.root = createRoot(this.div);
             }
             this.setBorderColor().then(() => {
-              this.root.render(this.renderContent());
-              this.draw();
+              if (this.root) {
+                this.root.render(this.renderContent());
+                this.draw();
+              }
             });
           }
           resolve()
         }).then(() => {
           if (this.isValidData) {
-            this.setFuelOverlays((overlays: any[]) => {
+            this.setFuelOverlays((overlays: FuelCustomOverlayInstance[]) => {
               const newOverlayId = this.chartData.id;
               const overlayExists = overlays.some(overlay => overlay.chartData.id === newOverlayId);
 
               if (!overlayExists) {
-                return [...overlays, this];
+                return [...overlays, this as unknown as FuelCustomOverlayInstance];
               }
 
               return overlays;
@@ -209,12 +237,13 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: any) => {
         }
       }
 
-      setMap(map: any) {
-        return new Promise((resolve: any) => {
+      setMap(map: google.maps.Map | null) {
+        return new Promise<void>((resolve: () => void) => {
           super.setMap(map);
           resolve();
         });
       }
     }
   }
+  return undefined;
 }

@@ -6,13 +6,19 @@ import DateTimePicker from "./DateTimePicker"
 import {IonButton, IonIcon, IonInput, IonSelect, IonSelectOption, IonToggle} from "@ionic/react"
 import {alarmOutline} from "ionicons/icons"
 
-const TopSection = (props: any) => {
+interface TopSectionProps {
+  type: string;
+  locations: Array<{ id: string | number; name: string; [key: string]: unknown }>;
+  [key: string]: unknown;
+}
+
+const TopSection = (props: TopSectionProps) => {
   const [disabledComparingMode, setDisabledComparingMode] = useState(false)
   const [disabledHistoricMode, setDisabledHistoricMode] = useState(false)
 
   useEffect(() => {
     if (props.type === "fuel") {
-      props.locations.map((location: any) => {
+      props.locations.map((location: { id: string | number; name: string; sensorId?: string | number; [key: string]: unknown }) => {
         if (location.sensorId === props.sensorId) {
           props.setCurrentLocation(location)
         }
@@ -39,7 +45,7 @@ const TopSection = (props: any) => {
   }, [props.soilTempChartShowed])
 
   // Moist Toggle
-  const onMoistToggle = (event: any, mode: string) => {
+  const onMoistToggle = (event: CustomEvent, mode: string) => {
     if (mode === "comparingMode") {
       if (event.detail.checked) {
         setDisabledHistoricMode(true)
@@ -124,7 +130,7 @@ const TopSection = (props: any) => {
               <IonToggle
                 className={s.topSection_compactToggle}
                 checked={props.isCommentsShowed}
-                onIonChange={(event: any) => props.setIsCommentsShowed(event.detail.checked)}
+                onIonChange={(event: CustomEvent) => props.setIsCommentsShowed(event.detail.checked)}
               >
                 Comments
               </IonToggle>
@@ -137,7 +143,7 @@ const TopSection = (props: any) => {
               >
                 <IonSelectOption value="All">All</IonSelectOption>
                 {props.locations &&
-                  props.locations.map((location: any) => (
+                  props.locations.map((location: {name: string; [key: string]: unknown}) => (
                     <IonSelectOption key={location.name} value={location.name}>
                       {location.name}
                     </IonSelectOption>
@@ -155,7 +161,7 @@ const TopSection = (props: any) => {
               <div className={s.topSection_forecastControls}>
                 <IonToggle
                   className={s.topSection_compactToggle}
-                  onIonChange={(event: any) => props.setNwsForecast(event.detail.checked)}
+                  onIonChange={(event: CustomEvent) => props.setNwsForecast(event.detail.checked)}
                 >
                   NWS Forecast
                 </IonToggle>
@@ -172,7 +178,7 @@ const TopSection = (props: any) => {
                   <IonToggle
                     className={s.topSection_compactToggle}
                     checked={props.isCommentsShowed}
-                    onIonChange={(event: any) => props.setIsCommentsShowed(event.detail.checked)}
+                    onIonChange={(event: CustomEvent) => props.setIsCommentsShowed(event.detail.checked)}
                   >
                     Comments
                   </IonToggle>
@@ -194,21 +200,21 @@ const TopSection = (props: any) => {
               <IonToggle
                 className={`${s.topSection_compactToggle} ${s.topSection_moistCompactToggle}`}
                 disabled={disabledComparingMode}
-                onIonChange={(event: any) => onMoistToggle(event, "comparingMode")}
+                onIonChange={(event: CustomEvent) => onMoistToggle(event, "comparingMode")}
               >
                 Comparing
               </IonToggle>
               <IonToggle
                 className={`${s.topSection_compactToggle} ${s.topSection_moistCompactToggle}`}
                 disabled={disabledHistoricMode}
-                onIonChange={(event: any) => onMoistToggle(event, "historicMode")}
+                onIonChange={(event: CustomEvent) => onMoistToggle(event, "historicMode")}
               >
                 Historical
               </IonToggle>
               <IonToggle
                 className={`${s.topSection_compactToggle} ${s.topSection_moistCompactToggle}`}
                 checked={props.isCommentsShowed}
-                onIonChange={(event: any) => props.setIsCommentsShowed(event.detail.checked)}
+                onIonChange={(event: CustomEvent) => props.setIsCommentsShowed(event.detail.checked)}
               >
                 Comments
               </IonToggle>

@@ -2,7 +2,40 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import {checkOverlay} from "../../checkOverlay";
-export const createFuelChartForOverlay = async (chartData: any, roots: any, fuelOverlays: any) => {
+
+interface FuelChartDataItem {
+  time: string;
+  value: string | number;
+  [key: string]: unknown;
+}
+
+interface FuelChartData {
+  id: string | number;
+  mainId: string | number;
+  data: {
+    data: FuelChartDataItem[];
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+interface FuelOverlay {
+  layerName: string;
+  chartData: {
+    mainId: string | number;
+    [key: string]: unknown;
+  };
+  isFuelMarkerChartDrawn?: boolean;
+  update: () => void;
+  [key: string]: unknown;
+}
+
+interface ChartDataPoint {
+  date: number;
+  value: number;
+}
+
+export const createFuelChartForOverlay = async (chartData: FuelChartData, roots: am5.Root[], fuelOverlays: FuelOverlay[]) => {
   await checkOverlay(chartData.id, fuelOverlays)
   const root = am5.Root.new(chartData.id)
   roots.push(root);
@@ -21,22 +54,22 @@ export const createFuelChartForOverlay = async (chartData: any, roots: any, fuel
     paddingBottom: 0,
   }));
 
-  function createChartDataArray() {
-    let data: any = [];
-    chartData.data.data.map((chartDataItem: any) => {
+  function createChartDataArray(): ChartDataPoint[] {
+    const data: ChartDataPoint[] = [];
+    chartData.data.data.map((chartDataItem: FuelChartDataItem) => {
       const chartDate = new Date(chartDataItem.time).getTime()
-      const chartData = {
+      const chartDataPoint: ChartDataPoint = {
         date: chartDate,
         value: Number(chartDataItem.value)
       };
-      data.push(chartData);
+      data.push(chartDataPoint);
     });
     return data;
   }
 
 // Create axes
 // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-  let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
+  const xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
     maxDeviation: 0.2,
     baseInterval: {
       timeUnit: "minute",
@@ -47,7 +80,7 @@ export const createFuelChartForOverlay = async (chartData: any, roots: any, fuel
     }),
     tooltip: am5.Tooltip.new(root, {})
   }));
-  let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+  const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
     renderer: am5xy.AxisRendererY.new(root, {
       pan: "zoom"
     })
@@ -58,7 +91,7 @@ export const createFuelChartForOverlay = async (chartData: any, roots: any, fuel
 // Add series
 // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
 
-  let series: any = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
+  const series = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
     name: "Series",
     xAxis: xAxis,
     yAxis: yAxis,
@@ -74,7 +107,7 @@ export const createFuelChartForOverlay = async (chartData: any, roots: any, fuel
     strokeWidth: 2,
   });
   // Set data
-  let data = createChartDataArray();
+  const data = createChartDataArray();
   series.data.setAll(data);
 
   chart.zoomOutButton.set("forceHidden", true);
@@ -84,12 +117,11 @@ export const createFuelChartForOverlay = async (chartData: any, roots: any, fuel
   series.appear(1000);
   chart.appear(1000, 100);
 
-  fuelOverlays.map((overlay: any) => {
-    if (overlay.layerName === 'WXET') {
-      if (overlay.chartData.mainId === chartData.mainId) {
-        overlay.isFuelMarkerChartDrawn = true
-        overlay.update();
-      }
+  fuelOverlays.map((overlay: FuelOverlay) => {
+    if (overlay.chartData.mainId === chartData.mainId) {
+
+      overlay.isFuelMarkerChartDrawn = true
+      overlay.update();
     }
   })
 }

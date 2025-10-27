@@ -1,10 +1,17 @@
 import s from '../../../style.module.css'
-export const  isMobileHandler = (additionalChartData: any, chartAdditionalClass: any) => {
+
+// Интерфейс для дополнительных данных графика
+interface AdditionalChartData {
+  linesCount: number;
+}
+
+export const isMobileHandler = (additionalChartData: AdditionalChartData, chartAdditionalClass: string): string => {
   if (additionalChartData.linesCount > 3 && additionalChartData.linesCount <= 6) {
-    chartAdditionalClass = s.chartLinesSix
+    return s.chartLinesSix
   } else if (additionalChartData.linesCount > 6 && additionalChartData.linesCount <= 9) {
-    chartAdditionalClass = s.chartLinesNine
+    return s.chartLinesNine
   } else if (additionalChartData.linesCount > 9) {
-    chartAdditionalClass = s.chartLinesMoreThanNine
+    return s.chartLinesMoreThanNine
   }
+  return chartAdditionalClass
 }

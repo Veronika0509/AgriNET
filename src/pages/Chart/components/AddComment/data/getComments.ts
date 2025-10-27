@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const getComments = async (chartType: string, sensorId: any, days: any) => {
+export const getComments = async (chartType: string, sensorId: string | number, days: number) => {
   return await axios.get('https://app.agrinet.us/api/chart/comments?v=43', {
     params: {
       chartId: `${chartType}-${sensorId}`,

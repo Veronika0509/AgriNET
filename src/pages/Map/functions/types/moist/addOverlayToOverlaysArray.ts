@@ -1,9 +1,41 @@
-export const addOverlayToOverlaysArray = (overlay: any, setActiveOverlays: any, map: any)=> {
-  setActiveOverlays((prevActiveOverlays: any) => {
-    const exists = prevActiveOverlays.some(
-      (existingOverlay: any) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
-    );
-    return exists ? prevActiveOverlays : [...prevActiveOverlays, overlay];
+interface OverlayItem {
+  chartData: {
+    sensorId: string | number;
+    [key: string]: unknown;
+  };
+  setMap: (map: google.maps.Map) => void;
+  [key: string]: unknown;
+}
+
+export const addOverlayToOverlaysArray = (
+  overlay: OverlayItem, 
+  setActiveOverlays: (updater: (prev: OverlayItem[]) => OverlayItem[]) => void, 
+  map: google.maps.Map
+) => {
+  // Use React.startTransition for safe state updates
+  if (typeof (globalThis as any).React !== 'undefined' && (globalThis as any).React.startTransition) {
+    (globalThis as any).React.startTransition(() => {
+      setActiveOverlays((prevActiveOverlays: OverlayItem[]) => {
+        const exists = prevActiveOverlays.some(
+          (existingOverlay: OverlayItem) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
+        );
+        return exists ? prevActiveOverlays : [...prevActiveOverlays, overlay];
+      });
+    });
+  } else {
+    // Fallback to setTimeout if React.startTransition is not available
+    setTimeout(() => {
+      setActiveOverlays((prevActiveOverlays: OverlayItem[]) => {
+        const exists = prevActiveOverlays.some(
+          (existingOverlay: OverlayItem) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
+        );
+        return exists ? prevActiveOverlays : [...prevActiveOverlays, overlay];
+      });
+    }, 0);
+  }
+  
+  // Set map in the next animation frame to avoid conflicts
+  requestAnimationFrame(() => {
+    overlay.setMap(map);
   });
-  overlay.setMap(map);
 }

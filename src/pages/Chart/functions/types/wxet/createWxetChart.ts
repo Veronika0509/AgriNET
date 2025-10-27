@@ -2,13 +2,52 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 
+interface ChartDataItem {
+  DateTime: string;
+  Solar?: number;
+  RH?: number;
+  Temp?: number;
+  rain_display?: number;
+  wind_display?: number;
+  gust_display?: number;
+  LW?: number;
+  'Barometric Pressure'?: number;
+  vaporPressure_display?: number;
+  [key: string]: unknown;
+}
+
+interface ForecastDataItem {
+  time: string;
+  forecastTemp: number;
+}
+
+interface NwsForecastData {
+  data: ForecastDataItem[];
+  now: string;
+}
+
+interface AdditionalChartData {
+  metric: 'AMERICA' | 'METRIC';
+  type: 'ATMOS' | 'OTHER';
+}
+
+interface RootRef {
+  current: am5.Root | null;
+}
+
+interface DataLabel {
+  label: string;
+  name: string;
+  metric: string;
+}
+
 export const createWxetChart = (
-  chartData: any,
-  root: any,
+  chartData: ChartDataItem[],
+  root: RootRef,
   isMobile: boolean,
-  additionalChartData: any,
-  nwsForecastData: any,
-) => {
+  additionalChartData: AdditionalChartData,
+  nwsForecastData: NwsForecastData | null,
+): void => {
   if (root.current) {
     root.current.dispose();
     root.current = null;
@@ -38,7 +77,7 @@ export const createWxetChart = (
     ]);
 
 // Create chart
-    let chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
+    const chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
       wheelY: "zoomX",
       maxTooltipDistance: 0,
       layout: isMobile ? root.current.verticalLayout : root.current.horizontalLayout,
@@ -49,7 +88,7 @@ export const createWxetChart = (
     }));
 
 // Create axes
-    let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root.current, {
+    const xAxis = chart.xAxes.push(am5xy.DateAxis.new(root.current, {
       maxDeviation: 0.2,
       baseInterval: {
         timeUnit: "minute",
@@ -61,12 +100,12 @@ export const createWxetChart = (
       })
     }));
 
-    let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
+    const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
       renderer: am5xy.AxisRendererY.new(root.current, {})
     }));
 
 // Add series
-    function createChartData(chartDate: any, chartValue: number) {
+    function createChartData(chartDate: number, chartValue: number) {
       return {
         date: chartDate,
         value: chartValue,
@@ -74,11 +113,24 @@ export const createWxetChart = (
     }
 
     function createChartDataArray(lineLabel: string) {
-      let data: any = [];
-      const dataArray = lineLabel === 'forecastTemp' ? nwsForecastData.data : chartData
-      dataArray.map((chartDataItem: any) => {
-        const chartDate = lineLabel === 'forecastTemp' ? new Date(chartDataItem.time).getTime() : new Date(chartDataItem.DateTime).getTime()
-        const chartData = createChartData(chartDate, chartDataItem[lineLabel]);
+      const data: Array<{ date: number; value: number }> = [];
+      const dataArray = lineLabel === 'forecastTemp' ? (nwsForecastData?.data || []) : chartData;
+      
+      dataArray.forEach((chartDataItem) => {
+        let chartDate: number;
+        let chartValue: number;
+        
+        if (lineLabel === 'forecastTemp' && 'time' in chartDataItem) {
+          chartDate = new Date(chartDataItem.time).getTime();
+          chartValue = Number(chartDataItem.forecastTemp || 0);
+        } else if ('DateTime' in chartDataItem) {
+          chartDate = new Date(chartDataItem.DateTime).getTime();
+          chartValue = Number(chartDataItem[lineLabel as keyof ChartDataItem] || 0);
+        } else {
+          return; // Skip invalid items
+        }
+        
+        const chartData = createChartData(chartDate, chartValue);
         data.push(chartData);
       });
       return data;
@@ -89,7 +141,7 @@ export const createWxetChart = (
     const windMetric: string = additionalChartData.metric === 'AMERICA' ? ' MPH' : ' KPH'
     const barometricMetric: string = additionalChartData.metric === 'AMERICA' ? 'inHg' : 'kPa'
 
-    let dataLabels = [
+    const dataLabels: DataLabel[] = [
       {label: 'Solar', name: 'Solar Radiation', metric: ' W/m2'},
       {label: 'RH', name: 'RH', metric: '%'},
       {label: 'Temp', name: 'Air Temp', metric: tempMetric},
@@ -109,11 +161,11 @@ export const createWxetChart = (
         dataLabels.push({label: 'forecastTemp', name: 'Forecast Temp', metric: tempMetric},)
     }
 
-    let series: any
-    dataLabels.map((dataLabel) => {
-      let name = dataLabel.name
+    let lastSeries: am5xy.SmoothedXLineSeries | null = null;
+    dataLabels.forEach((dataLabel) => {
+      const name = dataLabel.name
 
-      series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
+      const series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
         name: name,
         xAxis: xAxis,
         yAxis: yAxis,
@@ -131,19 +183,20 @@ export const createWxetChart = (
         strokeWidth: 2,
       });
 
-      let data = createChartDataArray(dataLabel.label)
+      const data = createChartDataArray(dataLabel.label)
 
       series.data.setAll(data)
 
       series.appear();
-    })
+      lastSeries = series;
+    });
 
 // Nws Forecast
-    if (nwsForecastData) {
-      let seriesRangeDataItem = xAxis.makeDataItem({
+    if (nwsForecastData && lastSeries) {
+      const seriesRangeDataItem = xAxis.makeDataItem({
         value: new Date(nwsForecastData.now).getTime()
       });
-      series.createAxisRange(seriesRangeDataItem);
+      lastSeries.createAxisRange(seriesRangeDataItem);
       seriesRangeDataItem.get("grid").setAll({
         visible: true,
         stroke: am5.color(0xd445d2),
@@ -160,11 +213,11 @@ export const createWxetChart = (
         fontSize: 13
       })
 
-      let seriesRangeDataItemDate = xAxis.makeDataItem({
+      const seriesRangeDataItemDate = xAxis.makeDataItem({
         value: new Date(nwsForecastData.now).getTime(),
         endValue: new Date(nwsForecastData.now).getTime() + 86400000 * 6
       });
-      series.createAxisRange(seriesRangeDataItemDate);
+      lastSeries.createAxisRange(seriesRangeDataItemDate);
       seriesRangeDataItemDate.get("axisFill").setAll({
         fill: am5.color(0xF7C815),
         fillOpacity: 0.1,
@@ -176,7 +229,7 @@ export const createWxetChart = (
     }
 
 // Add cursor
-    let cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
+    const cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
       behavior: "zoomX",
       xAxis: xAxis,
     }));
@@ -196,7 +249,7 @@ export const createWxetChart = (
 
 // Add legend
     const legendHeight = dataLabels.length * 29
-    let legend = chart.children.push(am5.Legend.new(root.current, {
+    const legend = chart.children.push(am5.Legend.new(root.current, {
       width: 200,
       paddingLeft: 15,
       height: legendHeight

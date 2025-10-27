@@ -314,17 +314,97 @@
 
 /*  Layer List  */
 
-.layers_checkbox {
-  width: 160px;
+.layersListWrapper {
   position: absolute;
   top: 100px;
   left: 10px;
-  opacity: 0.85;
-  background: #fff;
+  z-index: 1000;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  min-width: 160px;
 }
 
-.layers_checkbox > ion-item {
-  border-radius: 3px;
+.layers_checkbox {
+  width: 100%;
+  background: #fff;
+  opacity: 0.85;
+}
+
+/* Modern Layer List Styles */
+.modernLayerList {
+  position: absolute;
+  top: 100px;
+  left: 10px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  margin: 0;
+  min-width: 200px;
+  overflow: hidden;
+}
+
+.layerItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin: 0;
+  min-height: 40px;
+  height: auto;
+  max-height: none;
+  background: rgba(248, 249, 250, 0.6);
+  border-bottom: 1px solid rgba(233, 236, 239, 0.4);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  user-select: none;
+  white-space: normal;
+  overflow: visible;
+}
+
+.layerItem:hover {
+  background: rgba(233, 236, 239, 0.7);
+}
+
+.layerItem:last-child {
+  border-bottom: none;
+}
+
+.layerName {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #28a745;
+  border-radius: 4px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.checkbox.checked {
+  background: #28a745;
+  border-color: #28a745;
+}
+
+.checkmark {
+  width: 16px;
+  height: 16px;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.checkbox:not(.checked) .checkmark {
+  opacity: 0;
 }
 
 /*   Budget Editor   */
@@ -699,6 +779,93 @@
   }
 }
 
+/* GPS Location Button */
+.locationButtonContainer {
+  position: absolute;
+  top: 20px;
+  right: 60px; /* Move left to avoid fullscreen button */
+  z-index: 10000; /* Higher z-index to ensure visibility above Google Maps */
+  pointer-events: auto; /* Ensure button is clickable */
+}
+
+.locationButton {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: white;
+  color: #666;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  border: none;
+  --background: white;
+  --color: #666;
+  --box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  --border-radius: 50%;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  margin: 0;
+  transition: all 0.2s ease;
+}
+
+.locationButton:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  --background: #f5f5f5;
+  transform: scale(1.05);
+}
+
+.locationButtonActive {
+  background-color: #4285F4;
+  color: white;
+  --background: #4285F4;
+  --color: white;
+}
+
+.locationButtonActive:hover {
+  background-color: #3367D6;
+  --background: #3367D6;
+}
+
+.locationIcon {
+  font-size: 24px;
+}
+
+.locationError {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  background-color: rgba(244, 67, 54, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  max-width: 200px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 600px) {
+  .locationButtonContainer {
+    top: 15px;
+    right: 15px;
+  }
+  
+  .locationButton {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .locationIcon {
+    font-size: 22px;
+  }
+  
+  .locationError {
+    max-width: 150px;
+    font-size: 11px;
+  }
+}
+
 @media (max-width: 450px) {
   .appMenu {
     display: flex;
@@ -825,4 +992,267 @@
     max-width: 55px;
     min-width: 40px;
   }
+}
+
+/* Add Unit Form Styles */
+.addUnitFormItem {
+  --padding-start: 0px;
+  --padding-end: 0px;
+  --inner-padding-start: 0px;
+  --inner-padding-end: 0px;
+  --border-width: 0;
+  --inner-border-width: 0;
+  --border-color: transparent;
+  --highlight-color-focused: transparent;
+  --highlight-color-valid: transparent;
+  --highlight-color-invalid: transparent;
+  outline: none;
+  border-bottom: 2px solid #999;
+  transition: 0.1s;
+  /* Ensure the host can grow and doesn't clip inner content */
+  overflow: visible;
+  /* Initial height */
+  min-height: 50px;
+}
+
+/* Error state for form items */
+.addUnitFormItemError {
+  border-bottom-color: var(--ion-color-danger) !important;
+}
+
+.addUnitFormItemError ion-input,
+.addUnitFormItemError ion-select {
+  --placeholder-color: var(--ion-color-danger) !important;
+  --color: var(--ion-color-danger) !important;
+}
+
+/* Make placeholder text red in error state */
+.addUnitFormItemError ion-input::part(placeholder),
+.addUnitFormItemError ion-input::part(text) {
+  color: var(--ion-color-danger) !important;
+  opacity: 1;
+}
+
+.addUnitFormItemError ion-select::part(placeholder),
+.addUnitFormItemError ion-select::part(text) {
+  color: var(--ion-color-danger) !important;
+  opacity: 1;
+}
+
+/* Coordinates container for error state */
+.coordinatesContainer {
+  /* margin-bottom: 16px; */
+}
+
+.addUnitFormItemGreen.coordinatesError {
+  border-bottom-color: var(--ion-color-danger) !important;
+}
+
+.addUnitFormItemGreen.coordinatesError ion-input {
+  --placeholder-color: var(--ion-color-danger) !important;
+  --color: var(--ion-color-danger) !important;
+}
+
+.addUnitFormItemGreen.coordinatesError ion-input::part(placeholder),
+.addUnitFormItemGreen.coordinatesError ion-input::part(text) {
+  color: var(--ion-color-danger) !important;
+  opacity: 1;
+}
+
+.addUnitFormItemGreen.coordinatesError ion-label {
+  color: var(--ion-color-danger) !important;
+  --color: var(--ion-color-danger) !important;
+}
+
+
+.addUnitFormItem::part(native) {
+  --inner-border-width: 0;
+  --border-width: 0;
+  --highlight-height: 0;
+  /* Allow the internal container to size to its content */
+  display: block;
+  height: auto !important;
+  min-height: 50px;
+  align-items: stretch;
+  overflow: visible;
+}
+
+.addUnitFormItem ion-input,
+.addUnitFormItem ion-select {
+  --border-width: 0;
+  --highlight-height: 0;
+  --highlight-color-focused: transparent;
+  --placeholder-color: #999999;
+  --color: #ffffff;
+  transition: color 0.2s ease, --placeholder-color 0.2s ease;
+}
+
+/* Force black text in all inputs and selects in the form */
+.addUnitForm {
+  --ion-color-light: #000000 !important;
+  --color: #000000 !important;
+  color: #000000 !important;
+}
+
+/* Override all input and select colors */
+.addUnitForm ion-input,
+.addUnitForm ion-select,
+.addUnitForm .native-input,
+.addUnitForm .select-text,
+.addUnitForm .sc-ion-input-md,
+.addUnitForm .sc-ion-input-ios,
+.addUnitForm .sc-ion-select-md,
+.addUnitForm .sc-ion-select-ios {
+  --color: #000000 !important;
+  color: #000000 !important;
+}
+
+/* Override placeholder colors */
+.addUnitForm ion-input::part(placeholder),
+.addUnitForm ion-select::part(placeholder) {
+  color: #666666 !important;
+  opacity: 1 !important;
+}
+
+/* Override text colors in inputs and selects */
+.addUnitForm ion-input::part(text),
+.addUnitForm ion-select::part(text),
+.addUnitForm ion-input::part(native),
+.addUnitForm ion-select::part(native) {
+  color: #000000 !important;
+  --color: #000000 !important;
+}
+
+/* Override for input fields */
+.addUnitForm input,
+.addUnitForm input[type="text"],
+.addUnitForm input[type="number"],
+.addUnitForm .native-input,
+.addUnitForm .native-input.sc-ion-input-md,
+.addUnitForm .native-input.sc-ion-input-ios {
+  color: #000000 !important;
+  --color: #000000 !important;
+}
+
+/* Override for select elements */
+.addUnitForm .select-text,
+.addUnitForm .select-text.sc-ion-select-md,
+.addUnitForm .select-text.sc-ion-select-ios {
+  color: #000000 !important;
+}
+
+/* Override for item elements */
+.addUnitForm .item-native,
+.addUnitForm .item-inner {
+  --color: #000000 !important;
+  color: #000000 !important;
+}
+
+/* Override for Ion labels */
+.addUnitForm ion-label,
+.addUnitForm .sc-ion-label,
+.addUnitForm .sc-ion-label-md,
+.addUnitForm .sc-ion-label-ios,
+.addUnitForm .item-label,
+.addUnitForm .item-label-stacked,
+.addUnitForm .item-label-floating {
+  color: #666666 !important;
+  --color: #666666 !important;
+  opacity: 1 !important;
+}
+
+/* Override for fixed position labels */
+.addUnitForm .item-label-fixed,
+.addUnitForm .label-fixed {
+  color: #666666 !important;
+  --color: #666666 !important;
+}
+
+/* Override for stacked and floating labels */
+.addUnitForm .label-stacked,
+.addUnitForm .label-floating,
+.addUnitForm .item-label-stacked,
+.addUnitForm .item-label-floating {
+  color: #666666 !important;
+  --color: #666666 !important;
+}
+
+/* Override for item inputs */
+.addUnitForm .item-input .sc-ion-label-md,
+.addUnitForm .item-input .sc-ion-label-ios {
+  color: #666666 !important;
+  --color: #666666 !important;
+}
+
+/* Override for focused state */
+.addUnitForm ion-input.ion-focused,
+.addUnitForm ion-select.ion-focused,
+.addUnitForm .item-input.ion-focused,
+.addUnitForm .item-input-has-focus {
+  --color: #000000 !important;
+  color: #000000 !important;
+}
+
+/* Error state for select placeholders */
+.addUnitFormItem .select-error::part(placeholder) {
+  color: var(--ion-color-danger) !important;
+  opacity: 1 !important;
+}
+
+/* Стили для красного лейбла при ошибке */
+.addUnitFormItemError ion-label,
+.addUnitFormItem .error-label {
+  color: var(--ion-color-danger) !important;
+  --color: var(--ion-color-danger) !important;
+  opacity: 1 !important;
+}
+
+/* Перебивка стандартных стилей Ionic */
+:global(.sc-ion-label-md-h.sc-ion-label-md-s.md.hydrated),
+:global(.sc-ion-label-ios-h.sc-ion-label-ios-s.ios.hydrated) {
+  color: inherit !important;
+  --color: inherit !important;
+}
+
+.addUnitFormItem .select-error::part(text) {
+  color: var(--ion-color-danger) !important;
+}
+
+/* Make sure the placeholder is visible when no value is selected */
+.addUnitFormItem ion-select:not(.select-has-value)::part(text) {
+  color: var(--placeholder-color, #999999) !important;
+}
+
+.addUnitFormItem:has(ion-input:global(.has-focus)),
+.addUnitFormItem:has(ion-checkbox:checked) {
+  border-color: var(--ion-color-primary);
+}
+
+/* Green border for coordinate fields */
+.addUnitFormItemGreen {
+  --padding-start: 0px;
+  --padding-end: 0px;
+  --inner-padding-start: 0px;
+  --inner-padding-end: 0px;
+  --border-width: 0;
+  --inner-border-width: 0;
+  --border-color: transparent;
+  --highlight-color-focused: transparent;
+  --highlight-color-valid: transparent;
+  --highlight-color-invalid: transparent;
+  outline: none;
+  border-bottom: 2px solid var(--ion-color-primary) !important;
+  transition: 0.1s;
+}
+
+.addUnitFormItemGreen::part(native) {
+  --inner-border-width: 0;
+  --border-width: 0;
+  --highlight-height: 0;
+}
+
+.addUnitFormItemGreen ion-input {
+  --border-width: 0;
+  --highlight-height: 0;
+  --highlight-color-focused: transparent;
 }

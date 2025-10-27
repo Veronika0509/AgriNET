@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const postComment = async (chartType: string, sensorId: string, date: any, selectValue: string, messageValue: string, userId: any, resolve: any) => {
+export const postComment = async (chartType: string, sensorId: string, date: string, selectValue: string, messageValue: string, userId: string | number, resolve: (value?: unknown) => void) => {
   axios.post('https://app.agrinet.us/api/chart/comments?v=43',
     {
       chartId: `${chartType}-${sensorId}`,
@@ -13,9 +13,9 @@ export const postComment = async (chartType: string, sensorId: string, date: any
         'user': userId
       }
     }
-  ).then((response: any) => {
+  ).then((response: unknown) => {
     resolve(response);
-  }).catch((error: any) => {
+  }).catch((error: unknown) => {
     console.error('Error posting comment:', error);
   });
 }

@@ -1,4 +1,17 @@
-export const handleResizeForChartLegend = (props: any) => {
+// Интерфейс для пропсов функции
+interface HandleResizeProps {
+  additionalChartData: {
+    linesCount: number;
+  };
+  smallScreen: boolean;
+  setSmallScreen: (value: boolean) => void;
+  middleScreen: boolean;
+  setMiddleScreen: (value: boolean) => void;
+  largeScreen: boolean;
+  setLargeScreen: (value: boolean) => void;
+}
+
+export const handleResizeForChartLegend = (props: HandleResizeProps): void => {
   if (props.additionalChartData.linesCount > 3 && props.additionalChartData.linesCount <= 6) {
     const newIsSmallScreen = window.innerWidth <= 500
     if (newIsSmallScreen !== props.smallScreen) {

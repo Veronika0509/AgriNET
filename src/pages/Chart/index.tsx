@@ -13,21 +13,24 @@ import {alarmDataProcessing} from "./functions/alarmDataProcessing";
 import {ValveChartPage} from "./components/types/valve";
 import {FuelChartPage} from "./components/types/wxet/components/fuel";
 
+// Типы
+import type { Site, SensorData, ChartPageType, UserId, SiteId } from '../../types';
+
 interface ChartProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
-  siteList: any[];
-  setSiteList: React.Dispatch<React.SetStateAction<any[]>>;
-  siteId: string;
+  siteList: Site[];
+  setSiteList: React.Dispatch<React.SetStateAction<Site[]>>;
+  siteId: SiteId;
   siteName: string;
-  userId: number;
-  chartData?: any;
-  additionalChartData: any;
-  chartPageType: any;
-  setAdditionalChartData: any,
-  setChartData: any,
-  setSiteId: any,
-  setSiteName: any,
-  setChartPageType: any
+  userId: UserId;
+  chartData: SensorData[];
+  additionalChartData: SensorData[];
+  chartPageType: ChartPageType;
+  setAdditionalChartData: React.Dispatch<React.SetStateAction<SensorData[]>>;
+  setChartData: React.Dispatch<React.SetStateAction<SensorData[]>>;
+  setSiteId: React.Dispatch<React.SetStateAction<SiteId>>;
+  setSiteName: React.Dispatch<React.SetStateAction<string>>;
+  setChartPageType: React.Dispatch<React.SetStateAction<ChartPageType>>;
 }
 
 const Chart = (props: ChartProps) => {

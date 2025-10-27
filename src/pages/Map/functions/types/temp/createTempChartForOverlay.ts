@@ -2,7 +2,44 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import {checkOverlay} from "../../checkOverlay";
-export const createTempChartForOverlay = async (chartData: any, roots: any, tempOverlays: any) => {
+
+// Интерфейсы для типизации
+interface ChartDataItem {
+  DateTime: string;
+  [key: string]: unknown;
+}
+
+interface TempChartData {
+  id: string;
+  lines: string[];
+  data: ChartDataItem[];
+  bgColor: string;
+  chartValue: string;
+  line1Color?: string;
+  line2Color?: string;
+  mainId: string | number;
+}
+
+interface TempOverlay {
+  prefix: string;
+  layerName: string;
+  chartData: {
+    id: string | number;
+    mainId: string | number;
+  };
+  isTempMarkerChartDrawn: boolean;
+  update: () => Promise<void>;
+}
+
+interface ChartDataPoint {
+  date: number;
+  value: unknown;
+}
+export const createTempChartForOverlay = async (
+  chartData: TempChartData, 
+  roots: am5.Root[], 
+  tempOverlays: TempOverlay[]
+): Promise<void> => {
   await checkOverlay(chartData.id, tempOverlays)
   const root = am5.Root.new(chartData.id)
   roots.push(root);
@@ -23,7 +60,7 @@ export const createTempChartForOverlay = async (chartData: any, roots: any, temp
 
   const lines = chartData.lines.length !== 0 ? chartData.lines : ["MS DU", "MS 1"]
 
-  function createChartData(chartDate: any, chartDataValue: any) {
+  function createChartData(chartDate: number, chartDataValue: unknown): ChartDataPoint {
     return {
       date: chartDate,
       value: chartDataValue
@@ -31,8 +68,8 @@ export const createTempChartForOverlay = async (chartData: any, roots: any, temp
   }
 
   function createChartDataArray(lineName: string) {
-    let data: any = [];
-    chartData.data.map((chartDataItem: any) => {
+    const data: ChartDataPoint[] = [];
+    chartData.data.map((chartDataItem: ChartDataItem) => {
       const chartDate = new Date(chartDataItem.DateTime).getTime()
       const chartData = createChartData(chartDate, chartDataItem[lineName]);
       data.push(chartData);
@@ -42,7 +79,7 @@ export const createTempChartForOverlay = async (chartData: any, roots: any, temp
 
 // Create axes
 // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
-  let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
+  const xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
     maxDeviation: 0.2,
     baseInterval: {
       timeUnit: "minute",
@@ -53,7 +90,7 @@ export const createTempChartForOverlay = async (chartData: any, roots: any, temp
     }),
     tooltip: am5.Tooltip.new(root, {})
   }));
-  let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+  const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
     renderer: am5xy.AxisRendererY.new(root, {
       pan: "zoom"
     })
@@ -64,15 +101,15 @@ export const createTempChartForOverlay = async (chartData: any, roots: any, temp
 // Add series
 // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
 
-  let myColors = ["#0303fe", "#fe0303", "black", "black", "black", "black", "black"]
+  const myColors = ["#0303fe", "#fe0303", "black", "black", "black", "black", "black"]
   if (chartData.line2Color) {
     myColors.unshift("#" + chartData.line2Color)
   }
   if (chartData.line1Color) {
     myColors.unshift("#" + chartData.line1Color)
   }
-  let series: any
-  lines.map((line: any, index: number) => {
+  let series: am5xy.SmoothedXLineSeries | undefined
+  lines.map((line: string, index: number) => {
     series = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
       name: "Series",
       xAxis: xAxis,
@@ -86,7 +123,7 @@ export const createTempChartForOverlay = async (chartData: any, roots: any, temp
       }),
     }));
     // Set data
-    let data = createChartDataArray(line);
+    const data = createChartDataArray(line);
     series.data.setAll(data);
   })
 
@@ -99,7 +136,7 @@ export const createTempChartForOverlay = async (chartData: any, roots: any, temp
       fillOpacity: 1,
     });
   }
-  let labelContainer = am5.Container.new(root, {
+  const labelContainer = am5.Container.new(root, {
     layout: root.horizontalLayout,
     width: am5.percent(100),
     paddingTop: 0,
@@ -112,7 +149,7 @@ export const createTempChartForOverlay = async (chartData: any, roots: any, temp
       strokeWidth: 1,
     })
   });
-  let label = am5.Label.new(root, {
+  const label = am5.Label.new(root, {
     text: chartData.chartValue,
     fontSize: 14,
     fontWeight: "400",
@@ -130,15 +167,16 @@ export const createTempChartForOverlay = async (chartData: any, roots: any, temp
 
 // Make stuff animate on load
 // https://www.amcharts.com/docs/v5/concepts/animations/
-  series.appear(1000);
+  if (series) {
+    series.appear(1000);
+  }
   chart.appear(1000, 100);
 
-  tempOverlays.map((overlay: any) => {
-    if (overlay.layerName === 'SoilTemp') {
-      if (overlay.chartData.mainId === chartData.mainId) {
-        overlay.isTempMarkerChartDrawn = true
-        overlay.update();
-      }
+  tempOverlays.map((overlay: TempOverlay) => {
+    if (overlay.chartData.mainId === chartData.mainId) {
+
+      overlay.isTempMarkerChartDrawn = true
+      overlay.update();
     }
   })
 }

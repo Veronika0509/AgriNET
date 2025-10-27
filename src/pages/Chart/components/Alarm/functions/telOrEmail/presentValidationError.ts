@@ -1,18 +1,18 @@
 import {presentTelOrEmail} from "./presentTelOrEmail";
 
 export const presentValidationError = (
-  presentErrorAlert: any,
-  sensorId: any,
-  name: any,
-  setEmailOrTel: any,
-  presentAlert: any,
+  presentErrorAlert: (options: unknown) => void,
+  sensorId: string,
+  name: number,
+  setEmailOrTel: (value: string) => void,
+  presentAlert: (options: unknown) => void,
   typeOfAction: string,
-  value: any,
+  value: string,
   toEnable: string | undefined,
-  setIsSetpointEnabled: any,
-  setIsEnabledToastOpen?: any,
-  setIsDisabledToastOpen?: any,
-  setIsEnableActionSheet?: any
+  setIsSetpointEnabled: (enabled: boolean) => void,
+  setIsEnabledToastOpen?: (open: boolean) => void,
+  setIsDisabledToastOpen?: (open: boolean) => void,
+  setIsEnableActionSheet?: (open: boolean) => void
 ) => {
   presentErrorAlert({
     header: 'Validation Error',

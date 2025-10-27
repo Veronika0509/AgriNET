@@ -1,8 +1,49 @@
-import {getOptions} from "../../../data/getOptions";
-import {logoFacebook} from "ionicons/icons";
 
-export const createMoistDataContainers = async (props: any) => {
-  const moistChartDataItem = {
+
+interface MoistChartDataItem {
+  mainId: string | number;
+  id: string | number;
+  sensorId: string | number;
+  name: string;
+  battery: number;
+  data: unknown[];
+  budgetLines: unknown[];
+  layerName: string;
+  freshness: string;
+  [key: string]: unknown;
+}
+
+interface MoistBounds {
+  [key: string]: unknown;
+}
+
+interface MoistDataContainerProps {
+  mainId: string | number;
+  moistId: { value: string | number };
+  sensorId: string | number;
+  name: string;
+  response: {
+    data: {
+      battery: number;
+      data: unknown[];
+      budgetLines: unknown[];
+      freshness: string;
+      alarmEnabled?: boolean;
+      [key: string]: unknown;
+    };
+  };
+  moistChartData: MoistChartDataItem[];
+  boundsArray: MoistBounds[];
+  bounds: MoistBounds;
+  moistChartsAmount: unknown[];
+  countMoistFuel: number;
+  invalidChartData: Array<[MoistChartDataItem, MoistBounds]>;
+  setInvalidMoistChartDataContainer: (data: Array<[MoistChartDataItem, MoistBounds]>) => void;
+  setMoistChartDataContainer: (data: Array<[MoistChartDataItem, MoistBounds]>) => void;
+}
+
+export const createMoistDataContainers = async (props: MoistDataContainerProps) => {
+  const moistChartDataItem: MoistChartDataItem = {
     mainId: props.mainId,
     id: props.moistId.value,
     sensorId: props.sensorId,
@@ -13,33 +54,28 @@ export const createMoistDataContainers = async (props: any) => {
     layerName: 'Moist',
     freshness: props.response.data.freshness
   }
-  if (props.response.data.alarmEnabled) {
-    console.log('Moist Alarm Enabled!')
-  }
   props.moistChartData.push(moistChartDataItem)
   props.boundsArray.push(props.bounds)
   if (props.moistChartsAmount.length === props.moistChartData.length) {
-    let updatedMoistChartData: any = []
-    props.boundsArray.map((bounds: any, index: number) => {
-      if (props.moistChartData[index].data.length > 1 && props.response.data.freshness !== 'outdated') {
+    const updatedMoistChartData: Array<[MoistChartDataItem, MoistBounds]> = []
+    props.boundsArray.map((bounds: MoistBounds, index: number) => {
+      if (props.moistChartData[index]?.data?.length > 1 && props.response.data.freshness !== 'outdated') {
         const exists = updatedMoistChartData.some(
-          (updatedMoistChartDataItem: any) => updatedMoistChartDataItem[0].sensorId === props.moistChartData[index].sensorId
+          (updatedMoistChartDataItem: [MoistChartDataItem, MoistBounds]) => updatedMoistChartDataItem[0].sensorId === props.moistChartData[index].sensorId
         );
         if (!exists) {
-          console.log([props.moistChartData[index], bounds])
           updatedMoistChartData.push([props.moistChartData[index], bounds]);
         }
       } else {
         const exists = props.invalidChartData.some(
-          (invalidChartDataItem: any) => invalidChartDataItem[0].sensorId === props.moistChartData[index].sensorId
+          (invalidChartDataItem: [MoistChartDataItem, MoistBounds]) => invalidChartDataItem[0].sensorId === props.moistChartData[index].sensorId
         );
         if (!exists) {
-          console.log([props.moistChartData[index], bounds])
           props.invalidChartData.push([props.moistChartData[index], bounds]);
         }
       }
-      new Promise((resolve: any) => {
-        console.log(props.invalidChartData.length, updatedMoistChartData.length, props.countMoistFuel)
+      new Promise<void>((resolve: () => void) => {
+
         if (props.invalidChartData.length + updatedMoistChartData.length === props.countMoistFuel) {
           props.setInvalidMoistChartDataContainer(props.invalidChartData)
           props.setMoistChartDataContainer(updatedMoistChartData)

@@ -1,12 +1,64 @@
-import Login from "../../../../Login";
-import {logIn} from "ionicons/icons";
+interface TempChartDataItem {
+  id: string;
+  mainId: string | number;
+  sensorId: string | number;
+  name: string;
+  layerName: string;
+  bgColor: string;
+  lines: string[];
+  line1Color: string;
+  line2Color: string;
+  chartValue: string;
+  batteryPercentage: number;
+  metric: string;
+  temp: number;
+  data: unknown[];
+  freshness: string;
+  alarmEnabled: boolean;
+  [key: string]: unknown;
+}
 
-export const createTempDataContainers = async (props: any) => {
+interface TempBounds {
+  [key: string]: unknown;
+}
+
+interface TempDataContainerProps {
+  response: {
+    data: {
+      lines: string[];
+      data: unknown[];
+      linesLabels: string[];
+      temp: number;
+      metric: string;
+      bgColor: string;
+      line1Color: string;
+      line2Color: string;
+      batteryPercentage: number;
+      freshness: string;
+      alarmEnabled: boolean;
+      [key: string]: unknown;
+    };
+  };
+  id: { value: string | number };
+  mainId: string | number;
+  sensorId: string | number;
+  name: string;
+  tempChartData: TempChartDataItem[];
+  boundsArray: TempBounds[];
+  bounds: TempBounds;
+  tempChartsAmount: unknown[];
+  countTemp: number;
+  invalidChartData: Array<[TempChartDataItem, TempBounds]>;
+  setInvalidTempChartDataContainer: (data: Array<[TempChartDataItem, TempBounds]>) => void;
+  setTempChartDataContainer: (data: Array<[TempChartDataItem, TempBounds]>) => void;
+}
+
+export const createTempDataContainers = async (props: TempDataContainerProps) => {
   let value: number = props.response.data.lines.length > 0 ? props.response.data.data[props.response.data.data.length - 1][props.response.data.lines[0]] : props.response.data.temp
-  let label: string = props.response.data.lines.length > 0 ? props.response.data.linesLabels[0] : `${props.response.data!!.metric == "AMERICA" ? "F" : "C"}°`
+  const label: string = props.response.data.lines.length > 0 ? props.response.data.linesLabels[0] : `${props.response.data!.metric == "AMERICA" ? "F" : "C"}°`
   value = Math.round(value*10) / 10
   const valueAndValue: string = value.toString() + label
-  const tempChartDataItem = {
+  const tempChartDataItem: TempChartDataItem = {
     id: 'temp_' + props.id.value,
     mainId: props.mainId,
     sensorId: props.sensorId,
@@ -27,24 +79,24 @@ export const createTempDataContainers = async (props: any) => {
   props.tempChartData.push(tempChartDataItem)
   props.boundsArray.push(props.bounds)
   if (props.tempChartsAmount.length === props.tempChartData.length) {
-    let updatedTempChartData: any = []
-    props.boundsArray.map((bounds: any, index: number) => {
-      if (props.tempChartData[index].data !== undefined && props.tempChartData[index].data.length !== 0 && props.tempChartData[index].data.length !== 1 && props.response.data.freshness !== '24h' && props.response.data.freshness !== '1d') {
+    const updatedTempChartData: Array<[TempChartDataItem, TempBounds]> = []
+    props.boundsArray.map((bounds: TempBounds, index: number) => {
+      if (props.tempChartData[index]?.data?.length > 1 && props.response.data.freshness !== 'outdated') {
         const exists = updatedTempChartData.some(
-          (updatedTempChartDataItem: any) => updatedTempChartDataItem[0].sensorId === props.tempChartData[index].sensorId
+          (updatedTempChartDataItem: [TempChartDataItem, TempBounds]) => updatedTempChartDataItem[0].sensorId === props.tempChartData[index].sensorId
         );
         if (!exists) {
           updatedTempChartData.push([props.tempChartData[index], bounds]);
         }
       } else {
         const exists = props.invalidChartData.some(
-          (invalidChartDataItem: any) => invalidChartDataItem[0].sensorId === props.tempChartData[index].sensorId
+          (invalidChartDataItem: [TempChartDataItem, TempBounds]) => invalidChartDataItem[0].sensorId === props.tempChartData[index].sensorId
         );
         if (!exists) {
           props.invalidChartData.push([props.tempChartData[index], bounds]);
         }
       }
-      new Promise((resolve: any) => {
+      new Promise<void>((resolve: () => void) => {
         // console.log(props.invalidChartData.length, updatedTempChartData.length)
         if (props.invalidChartData.length + updatedTempChartData.length === props.countTemp) {
           props.setInvalidTempChartDataContainer(props.invalidChartData)

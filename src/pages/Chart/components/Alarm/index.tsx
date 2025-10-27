@@ -7,7 +7,27 @@ import React from "react";
 import {AlarmItemTelOrEmail} from "./components/AlarmItemTelOrEmail";
 import {AlarmItemSetpoints} from "./components/AlarmItemSetpoints";
 
-export const Alarm = (props: any) => {
+interface AlarmProps {
+  sensorId: string | number;
+  emailOrTel1: string;
+  setEmailOrTel1: (value: string) => void;
+  emailOrTel2: string;
+  setEmailOrTel2: (value: string) => void;
+  emailOrTel3: string;
+  setEmailOrTel3: (value: string) => void;
+  setIsLowSetpointEnabled: (enabled: boolean) => void;
+  setIsHighSetpointEnabled: (enabled: boolean) => void;
+  lowSetpoint: number;
+  setLowSetpoint: (value: number) => void;
+  highSetpoint: number;
+  setHighSetpoint: (value: number) => void;
+  selectedSensor: string;
+  setSelectedSensor: (sensor: string) => void;
+  fieldsLabelsData: Record<string, string>;
+  [key: string]: unknown;
+}
+
+export const Alarm = (props: AlarmProps) => {
   return (
     <IonContent>
       <div className={s.alarm_container}>

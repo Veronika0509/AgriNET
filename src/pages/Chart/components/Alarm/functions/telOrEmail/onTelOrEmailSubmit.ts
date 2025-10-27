@@ -4,23 +4,23 @@ import {onEnableCLick} from "../setpoints/onEnableClick";
 
 export const onTelOrEmailSubmit = (
   sensorId: string,
-  name: any,
-  setEmailOrTel: any,
-  presentAlert: any,
-  presentErrorAlert: any,
+  name: number,
+  setEmailOrTel: (value: string) => void,
+  presentAlert: (options: unknown) => void,
+  presentErrorAlert: (options: unknown) => void,
   typeOfAction: string,
-  event: any,
+  event: string[],
   toEnable?: string | undefined,
-  setIsSetpointEnabled?: any,
-  setIsEnabledToastOpen?: any,
-  setIsDisabledToastOpen?: any,
-  setIsEnableActionSheet?: any
+  setIsSetpointEnabled?: (enabled: boolean) => void,
+  setIsEnabledToastOpen?: (open: boolean) => void,
+  setIsDisabledToastOpen?: (open: boolean) => void,
+  setIsEnableActionSheet?: (open: boolean) => void
 ) => {
-  const setEmailOrTelFunc = (validate: any) => {
+  const setEmailOrTelFunc = (validate: boolean) => {
     if (validate) {
-      new Promise((resolve: any) => {
+      new Promise<string>((resolve) => {
         setTelOrEmail(sensorId, name, event[0], resolve)
-      }).then((response: any) => {
+      }).then((response: string) => {
         setEmailOrTel(response)
         if (toEnable) {
           onEnableCLick(sensorId, toEnable, false, setIsSetpointEnabled, setIsEnabledToastOpen, setIsDisabledToastOpen, setIsEnableActionSheet)

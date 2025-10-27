@@ -2,11 +2,11 @@ import s from "../../../../style.module.css";
 import {onSetpointSubmit} from "./onSetpointSubmit";
 
 export const presentSetpointChangeAlert = (
-  presentAlert: any,
-  name: any,
+  presentAlert: (options: unknown) => void,
+  name: string,
   sensorId : string,
-  setSetpoint: any,
-  presentToast: any,
+  setSetpoint: (value: number) => void,
+  presentToast: (options: unknown) => void,
 ) => {
   presentAlert({
     header: 'Change ' + name + ' Setpoint',
@@ -23,7 +23,7 @@ export const presentSetpointChangeAlert = (
       {
         text: 'Change',
         role: 'confirm',
-        handler: (event: any) => onSetpointSubmit(
+        handler: (event: number[]) => onSetpointSubmit(
           name,
           sensorId,
           setSetpoint,

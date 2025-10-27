@@ -1,6 +1,5 @@
 import s from "../../../style.module.css";
 import {createRoot} from "react-dom/client";
-import React from "react";
 import wxetOverlayMoon from '../../../../../assets/images/icons/wxetOverlayMoon.svg'
 import wxetOverlaySun from '../../../../../assets/images/icons/wxetOverlaySun.svg'
 import {truncateText} from "../../../functions/truncateTextFunc";
@@ -9,38 +8,57 @@ import {getOptions} from "../../../data/getOptions";
 import skull from "../../../../../assets/images/skull.svg";
 import alarm from '../../../../../assets/images/icons/wxetAlarm.png'
 
-export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
+interface WxetChartData {
+  sensorId: string | number;
+  mainId: string | number;
+  name: string;
+  freshness?: string;
+  data: {
+    metric: string;
+    tempTrend?: string;
+    battery?: number;
+    batteryPercentage?: number;
+    solar?: number;
+    alarmEnabled?: boolean;
+    [key: string]: unknown;
+  };
+}
+
+interface History {
+  push: (path: string) => void;
+}
+
+export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
   if (isGoogleApiLoaded) {
     return class CustomOverlayExport extends google.maps.OverlayView {
-      private setChartData: any
-      private setPage: any
-      private setSiteId: any
-      private setSiteName: any
-      private setAdditionalChartData: any
-      private history: any
+      private setChartData: (data: unknown) => void
+      private setPage: (page: number) => void
+      private setSiteId: (id: string | number) => void
+      private setSiteName: (name: string) => void
+      private setAdditionalChartData: (data: { metric: unknown; type: unknown }) => void
+      private history: History
       private bounds: google.maps.LatLngBounds;
       private isValidData: boolean;
-      private chartData: any;
-      private setChartPageType: any
-      private borderColor: any
+      private chartData: WxetChartData;
+      private setChartPageType: (type: string) => void
+      private borderColor: string
 
-      private layerName: string
-      private root: any;
+      private root: ReturnType<typeof createRoot> | null;
       private offset: { x: number; y: number };
-      private div?: any;
+      private div: HTMLElement | null;
       private isTextTruncated: boolean
 
       constructor(
-        setChartData: any,
-        setPage: any,
-        setSiteId: any,
-        setSiteName: any,
-        setAdditionalChartData: any,
-        history: any,
+        setChartData: (data: unknown) => void,
+        setPage: (page: number) => void,
+        setSiteId: (id: string | number) => void,
+        setSiteName: (name: string) => void,
+        setAdditionalChartData: (data: { metric: unknown; type: unknown }) => void,
+        history: History,
         bounds: google.maps.LatLngBounds,
         isValidData: boolean,
-        data: any,
-        setChartPageType: any
+        data: WxetChartData,
+        setChartPageType: (type: string) => void
       ) {
         super();
 
@@ -55,7 +73,8 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         this.chartData = data
         this.setChartPageType = setChartPageType
 
-        this.layerName = data.layerName
+        this.root = null
+        this.div = null
         this.offset = { x: 0, y: 0 };
         this.isTextTruncated = this.isValidData ? this.chartData.name.length > 20 : this.chartData.name.length > 7
         this.borderColor = 'gray'
@@ -92,7 +111,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
               this.isValidData ? (
                 <div onClick={() => onWxetSensorClick(
                   this.history,
-                  this.chartData.sensorId,
+                  String(this.chartData.sensorId),
                   this.chartData.name,
                   this.setChartData,
                   this.setPage,
@@ -102,17 +121,17 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
                   this.setChartPageType
                 )}>
                   <div className={s.overlay_wxetOverlayContainer} style={{ background: this.borderColor }}>
-                    <div className={s.overlay_wxetOverlayInnerContainer} style={{backgroundColor: this.chartData.data.bgColor}}>
+                    <div className={s.overlay_wxetOverlayInnerContainer} style={{backgroundColor: String(this.chartData.data.bgColor || '')}}>
                       <img src={this.chartData.data.solar ? wxetOverlaySun : wxetOverlayMoon} className={s.overlay_wxetOverlayImage}
                            alt=""/>
                       <div>
-                        <p>Temp: {this.chartData.data.temp} {tempMetric} {termRendArrow}</p>
-                        <p>Hi: {this.chartData.data.tempHi} {tempMetric}</p>
-                        <p>Lo: {this.chartData.data.tempLo} {tempMetric}</p>
-                        <p>RH: {this.chartData.data.rh} %</p>
-                        <p>Rain: {this.chartData.data.totalRain} {rainMetric}</p>
-                        <p>Wind: {this.chartData.data.wind} {windMetric} {this.chartData.data.windDirection}</p>
-                        <p>Solar rad: {this.chartData.data.solar} W/m2</p>
+                        <p>Temp: {String(this.chartData.data.temp || '')} {tempMetric} {termRendArrow}</p>
+                        <p>Hi: {String(this.chartData.data.tempHi || '')} {tempMetric}</p>
+                        <p>Lo: {String(this.chartData.data.tempLo || '')} {tempMetric}</p>
+                        <p>RH: {String(this.chartData.data.rh || '')} %</p>
+                        <p>Rain: {String(this.chartData.data.totalRain || '')} {rainMetric}</p>
+                        <p>Wind: {String(this.chartData.data.wind || '')} {windMetric} {String(this.chartData.data.windDirection || '')}</p>
+                        <p>Solar rad: {String(this.chartData.data.solar || '')} W/m2</p>
                         {this.chartData.data.alarmEnabled && <div className={s.overlay_wxetOverlayAlarm}>
                             <img src={alarm} alt="Alarm Image"/>
                         </div>}
@@ -130,7 +149,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
                         <p className={s.overlay_text}>{this.chartData.data.battery} VDC</p>
                       </div>
                     )}
-                    <p className={s.overlay_text}>{this.chartData.sensorId}</p>
+                    <p className={s.overlay_text}>{String(this.chartData.sensorId)}</p>
                   </div>
                 </div>
               ) : (
@@ -141,7 +160,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
                   </div>
                   <div className={s.overlay_info}>
                     {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
-                    <p className={s.chartName}>{this.chartData.sensorId}</p>
+                    <p className={s.chartName}>{String(this.chartData.sensorId)}</p>
                   </div>
                 </div>
               )
@@ -156,8 +175,8 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       onAdd() {
-        const divId = `overlay-${this.chartData.mainId}`;
-        this.div = document.getElementById(divId);
+        const divId = `overlay-${String(this.chartData.mainId)}`;
+        this.div = document.getElementById(divId) as HTMLElement | null;
 
         if (!this.div) {
           this.div = document.createElement("div");
@@ -165,26 +184,34 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
           this.div.style.borderStyle = "none";
           this.div.style.borderWidth = "0px";
           this.div.style.position = "absolute";
-          this.div.style.WebkitTransform = 'translateZ(0)';
+          this.div.style.webkitTransform = 'translateZ(0)';
           this.div.addEventListener('mouseenter', () => {
-            this.div.style.zIndex = "9999";
+            if (this.div) {
+              this.div.style.zIndex = "9999";
+            }
           });
           this.div.addEventListener('mouseleave', () => {
-            this.div.style.zIndex = "0";
+            if (this.div) {
+              this.div.style.zIndex = "0";
+            }
           });
 
           this.offset = {
             x: (Math.random() - 0.5) * 20,
             y: (Math.random() - 0.5) * 20
           };
-          const panes: any = this.getPanes();
-          panes.floatPane.appendChild(this.div);
-          if (!this.root) {
+          const panes = this.getPanes();
+          if (panes && this.div) {
+            panes.floatPane.appendChild(this.div);
+          }
+          if (!this.root && this.div) {
             this.root = createRoot(this.div);
           }
           this.setBorderColor().then(() => {
-            this.root.render(this.renderContent());
-            this.draw();
+            if (this.root) {
+              this.root.render(this.renderContent());
+              this.draw();
+            }
           });
         }
       }
@@ -207,9 +234,9 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       onRemove() {
-        if (this.div) {
+        if (this.div && this.div.parentNode) {
           (this.div.parentNode as HTMLElement).removeChild(this.div);
-          delete this.div;
+          this.div = null;
         }
       }
 
@@ -226,12 +253,13 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: any) => {
         }
       }
 
-      setMap(map: any) {
-        return new Promise((resolve: any) => {
+      setMap(map: google.maps.Map | null) {
+        return new Promise<void>((resolve: () => void) => {
           super.setMap(map);
           resolve();
         });
       }
     }
   }
+  return undefined;
 }

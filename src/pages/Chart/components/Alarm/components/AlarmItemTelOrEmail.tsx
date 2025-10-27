@@ -9,7 +9,16 @@ import {onRemoveTelOrEmailSubmit} from "../functions/telOrEmail/onRemoveTelOrEma
 import {updateButtons} from "../functions/telOrEmail/updateButtons";
 import {onEmailOrTelChange} from "../functions/telOrEmail/onEmailOrTelChange";
 
-export const AlarmItemTelOrEmail = (props: any) => {
+interface AlarmItemTelOrEmailProps {
+  name: string;
+  sensorId: string | number;
+  emailOrTel: string;
+  setEmailOrTel: (value: string) => void;
+  setIsLowSetpointEnabled: (value: boolean) => void;
+  setIsHighSetpointEnabled: (value: boolean) => void;
+}
+
+export const AlarmItemTelOrEmail = (props: AlarmItemTelOrEmailProps) => {
   const [presentAlert] = useIonAlert();
   const [presentErrorAlert] = useIonAlert();
   const [presentRemoveAlert] = useIonAlert();

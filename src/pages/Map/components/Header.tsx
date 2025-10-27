@@ -4,7 +4,17 @@ import {IonHeader, IonIcon, IonTitle, IonToolbar} from "@ionic/react";
 import {arrowBackOutline} from "ionicons/icons";
 import { useHistory } from 'react-router-dom';
 
-const Header = (props: any) => {
+interface HeaderProps {
+  isMarkerClicked: boolean;
+  setIsMarkerClicked: (clicked: boolean) => void;
+  reloadMapPage: () => void;
+  setPage: (page: number) => void;
+  navigationHistory: string[];
+  setNavigationHistory: (history: string[]) => void;
+  [key: string]: unknown;
+}
+
+const Header = (props: HeaderProps) => {
   const history = useHistory();
   const back = () => {
     if (props.isMarkerClicked) {
@@ -68,6 +78,18 @@ const Header = (props: any) => {
               icon={arrowBackOutline}
             ></IonIcon>
             <IonTitle>Comments</IonTitle>
+          </>
+        )}
+        {props.activeTab === 'add' && (
+          <>
+            <IonIcon
+              onClick={onBudgetEditorBack}
+              className={`${s.header_backIcon} ${'ion-margin-start'}`}
+              slot='start'
+              size='large'
+              icon={arrowBackOutline}
+            ></IonIcon>
+            <IonTitle>Add Unit</IonTitle>
           </>
         )}
       </IonToolbar>

@@ -12,9 +12,29 @@ import {getValveConfig} from "../../../data/types/valve/getValveConfig";
 import {deleteValveRecord} from "../../../data/types/valve/deleteValveRecord";
 import {Create} from "./components/Create";
 
-export const ValveChartPage = (props: any) => {
-  const [currentData, setCurrentData] = useState([])
-  const [config, setConfig] = useState<any>()
+interface ValveChartPageProps {
+  sensorId: string | number;
+  userId: string | number;
+  chartData: unknown[];
+  [key: string]: unknown;
+}
+
+interface ValveConfig {
+  id: string | number;
+  name: string;
+  [key: string]: unknown;
+}
+
+interface ValveDataItem {
+  id: string | number;
+  localTime: string;
+  duration: string;
+  [key: string]: unknown;
+}
+
+export const ValveChartPage = (props: ValveChartPageProps) => {
+  const [currentData, setCurrentData] = useState<ValveDataItem[]>([])
+  const [config, setConfig] = useState<ValveConfig | undefined>()
   const [presentSetNowAlert] = useIonAlert();
   const [presentDeleteAlert] = useIonAlert();
   const [presentDone] = useIonToast();
@@ -25,14 +45,16 @@ export const ValveChartPage = (props: any) => {
   }
   useEffect(() => {
     if (currentData.length === 0) {
-      setCurrentData(props.chartData)
+      setCurrentData(props.chartData as ValveDataItem[])
       const getConfig = async () => {
         const newConfig = await getValveConfig(props.sensorId)
         setConfig(newConfig.data)
       }
       getConfig()
+      
     }
   }, []);
+
 
   const onNowClick = (id: number) => {
     const timezone: string = 'America/Los_Angeles'
@@ -122,7 +144,7 @@ export const ValveChartPage = (props: any) => {
         <div className={s.tableBodyContainer}>
           <table className={s.table}>
             <tbody>
-            {currentData && currentData.map((tableItem: any, index: number) => (
+            {currentData && currentData.map((tableItem: ValveDataItem, index: number) => (
               <tr key={index} className={s.tableItem}>
                 <td className={s.tableRowItem}>{tableItem.localTime && tableItem.localTime.slice(0, -5)}</td>
                 <td className={`${s.tableRowItem} ${tableItem.valve1 === 'OFF' ? s.off : s.on}`}>
@@ -172,6 +194,7 @@ export const ValveChartPage = (props: any) => {
                 setAutowater={props.setAutowater} />
       <Create sensorId={props.sensorId} valveCreate={props.valveCreate} setValveCreate={props.setValveCreate}
               config={config} userId={props.userId} />
+      
     </IonContent>
   )
 }

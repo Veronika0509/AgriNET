@@ -4,10 +4,81 @@ import * as am5xy from "@amcharts/amcharts5/xy"
 import { removeComment } from "../../../components/AddComment/data/removeComment"
 import { updateCommentDate } from "../../../components/AddComment/data/updateCommentDate"
 
-let startDateForZooming: any
-let endDateForZooming: any
+interface ChartDataItem {
+  DateTime: string;
+  [key: string]: unknown;
+}
 
-export const createMainChart = (props: any): void => {
+interface AdditionalChartData {
+  linesCount: number;
+}
+
+interface MoistComment {
+  id: string;
+  date: string;
+  comment: string;
+  [key: string]: unknown;
+}
+
+interface SetCommentModalParams {
+  isOpen: boolean
+  date?: number
+  value?: number
+  sensorId?: string | number
+  type?: string
+}
+
+interface SeriesItem {
+  name: string
+  prefix: string
+  [key: string]: unknown
+}
+
+type SetterFunction<T> = (value: T) => void;
+type UpdateCommentsFunction = (type: string, sensorId: string, updateComments: () => void, data: ChartDataItem[]) => Promise<void>;
+
+// amCharts cursor event type
+interface CursorSelectEvent {
+  target: am5xy.XYCursor;
+  type: string;
+  [key: string]: unknown;
+}
+
+// Helper to safely get private properties from amCharts objects
+function getPrivateValue(obj: any, key: string): number | undefined {
+  if (obj && typeof obj.getPrivate === 'function') {
+    return obj.getPrivate(key);
+  }
+  return undefined;
+}
+
+interface CreateMainChartProps {
+  data: ChartDataItem[];
+  root: { current: am5.Root | null };
+  comparingMode?: boolean;
+  historicMode?: boolean;
+  showForecast?: boolean;
+  additionalChartData: AdditionalChartData;
+  setMoistMainTabularDataColors?: SetterFunction<string[]>;
+  fullDatesArray?: Date[] | boolean;
+  isNewDates?: boolean;
+  moistMainAddCommentItemShowed?: boolean;
+  setMoistAddCommentModal?: (params: SetCommentModalParams) => void;
+  moistMainComments?: MoistComment[];
+  isMoistCommentsShowed?: boolean;
+  userId?: string;
+  sensorId?: string;
+  updateCommentsArray?: UpdateCommentsFunction;
+  updateComments?: () => void;
+  smallScreen?: boolean;
+  middleScreen?: boolean;
+  largeScreen?: boolean;
+}
+
+let startDateForZooming: number | null = null;
+let endDateForZooming: number | null = null;
+
+export const createMainChart = (props: CreateMainChartProps): void => {
   const chartDataWrapper = props.data
   const colors =
     "#FF6600 #FCD202 #B0DE09 #0D8ECF #2A0CD0 #CD0D74 #CC0000 #00CC00 #0000CC #DDDDDD #999999 #333333".split(" ")
@@ -37,7 +108,7 @@ export const createMainChart = (props: any): void => {
 
     const chart = props.root.current.container.children.push(
       am5xy.XYChart.new(props.root.current, {
-        wheelY: props.comparingMode ? undefined : "zoomX",
+        wheelY: props.comparingMode ? "none" : "zoomX",
         layout: props.root.current.verticalLayout,
         maxTooltipDistance: undefined,
       }),
@@ -68,7 +139,7 @@ export const createMainChart = (props: any): void => {
 
     yAxis.set("visible", false)
 
-    function createChartData(chartDate: any, chartCount: number, valueToShow: any) {
+    function createChartData(chartDate: number, chartCount: number, valueToShow: number) {
       return {
         date: chartDate,
         value: chartCount,
@@ -77,14 +148,14 @@ export const createMainChart = (props: any): void => {
     }
 
     function createChartDataArray(count: number, prefix: string) {
-      const data: any = []
-      chartDataWrapper.map((chartDataItem: any) => {
+      const data: Array<{ date: number; value: number; valueToShow: number }> = []
+      chartDataWrapper.map((chartDataItem: ChartDataItem) => {
         const chartDate = new Date(chartDataItem["DateTime"]).getTime()
         if (chartDate && chartDataItem[prefix + "MS " + count]) {
           const chartData = createChartData(
             chartDate,
-            chartDataItem[prefix + "MS " + count],
-            chartDataItem[prefix + "MABS" + `${count - 1}`],
+            Number(chartDataItem[prefix + "MS " + count]),
+            Number(chartDataItem[prefix + "MABS" + `${count - 1}`] || 0),
           )
           data.push(chartData)
         }
@@ -101,15 +172,15 @@ export const createMainChart = (props: any): void => {
       listOfSeries.push({ name: "futureSeries", prefix: "P_" })
     }
 
-    let series: any
-    const seriesArray: any[] = []
-    const ordinarySeriesArray: any = []
-    const seriesColors: any = []
-    listOfSeries.map((seriesItem: any, index: number) => {
+    let series: am5xy.SmoothedXLineSeries
+    const seriesArray: am5xy.SmoothedXLineSeries[] = []
+    const ordinarySeriesArray: am5xy.SmoothedXLineSeries[] = []
+    const seriesColors: string[] = []
+    listOfSeries.map((seriesItem: SeriesItem, index: number) => {
       let count = 4
-      for (var i = 0; i < props.additionalChartData.linesCount; i++) {
+      for (let i = 0; i < props.additionalChartData.linesCount; i++) {
         const name = count + " inch"
-        let tooltip: any
+        let tooltip: am5.Tooltip | undefined
         if (seriesItem.name === "ordinarySeries") {
           tooltip = am5.Tooltip.new(props.root.current, {
             pointerOrientation: "horizontal",
@@ -133,10 +204,9 @@ export const createMainChart = (props: any): void => {
             tension: 0.5,
             tooltip: tooltip,
             snapTooltip: true,
-            strokeWidth: 5,
           }),
         )
-        series.set("stroke", colors[i])
+        series.set("stroke", am5.color(colors[i]))
         series.strokes.template.setAll({
           strokeWidth: 2,
         })
@@ -162,9 +232,9 @@ export const createMainChart = (props: any): void => {
         }
 
         if (index === 0) {
-          seriesColors.push(series.get("stroke"))
+          seriesColors.push(colors[i])
         } else {
-          series.set("stroke", seriesColors[i])
+          series.set("stroke", am5.color(seriesColors[i]))
         }
 
         count += 4
@@ -179,8 +249,8 @@ export const createMainChart = (props: any): void => {
     })
 
     if (props.setMoistMainTabularDataColors) {
-      const colors: any[] = []
-      seriesColors.map((seriesColor: any) => {
+      const colors: string[] = []
+      seriesColors.map((seriesColor: string) => {
         colors.push(seriesColor)
       })
       props.setMoistMainTabularDataColors(colors)
@@ -209,7 +279,7 @@ export const createMainChart = (props: any): void => {
     }
 
     if (props.fullDatesArray !== undefined && props.fullDatesArray !== true) {
-      props.fullDatesArray.map((date: any) => {
+      Array.isArray(props.fullDatesArray) && props.fullDatesArray.map((date: Date) => {
         const seriesRangeDataItem = xAxis.makeDataItem({
           value: new Date(date).getTime(),
         })
@@ -224,15 +294,15 @@ export const createMainChart = (props: any): void => {
     }
 
     if (startDateForZooming && endDateForZooming && !props.isNewDates) {
-      seriesArray.map((mappedSeries: any) => {
+      seriesArray.map((mappedSeries: am5xy.SmoothedXLineSeries) => {
         mappedSeries.events.once("datavalidated", (event: any) => {
-          event.target.get("xAxis").zoomToDates(startDateForZooming, endDateForZooming, 0)
+          event.target.get("xAxis").zoomToDates(new Date(startDateForZooming!), new Date(endDateForZooming!), 0)
         })
       })
     }
 
     // Cursor
-    let cursorBehavior: any
+    let cursorBehavior: "zoomX" | "selectX"
     if (props.comparingMode) {
       cursorBehavior = "selectX"
     } else if (props.moistMainAddCommentItemShowed) {
@@ -265,17 +335,17 @@ export const createMainChart = (props: any): void => {
     // Add Comments
     if (props.moistMainAddCommentItemShowed) {
       chart.events.on("click", (ev: any) => {
-        const xAxis = chart.xAxes.getIndex(0)
+        const xAxis = chart.xAxes.getIndex(0) as am5xy.DateAxis<am5xy.AxisRendererX>
 
         const xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width())
 
         const clickDate = xAxis.positionToDate(xPosition)
 
-        props.setMoistAddCommentModal({ date: clickDate, type: "main" })
+        props.setMoistAddCommentModal({ isOpen: true, date: clickDate.getTime(), type: "main" })
       })
     }
     if (props.moistMainComments && props.isMoistCommentsShowed) {
-      const colors: any = {
+      const colors: Record<string, string> = {
         Advisory: "F08080",
         "Plant Health": "90EE90",
         Weather: "ADD8E6",
@@ -294,11 +364,11 @@ export const createMainChart = (props: any): void => {
         Installation: "FFFFFF",
       }
 
-      const labelsArray: any[] = []
+      const labelsArray: am5.Label[] = []
 
-      props.moistMainComments.forEach((moistMainComment: any) => {
+      props.moistMainComments?.forEach((moistMainComment: MoistComment) => {
         const commentColor: string = moistMainComment.color_id
-          ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}`
+          ? `#${colors[Object.keys(colors)[(moistMainComment.color_id as number) - 1]]}`
           : `#FBFFA6`
         const rangeDataItem = xAxis.makeDataItem({})
         xAxis.createAxisRange(rangeDataItem)
@@ -306,11 +376,11 @@ export const createMainChart = (props: any): void => {
         const container = am5.Container.new(props.root.current, {
           centerX: am5.p50,
           draggable: true,
-          layout: props.root.verticalLayout,
+          layout: props.root.current!.verticalLayout,
           dy: 4,
         })
         container.adapters.add("y", () => 0)
-        container.adapters.add("x", (x: any) => Math.max(0, Math.min(chart.plotContainer.width(), x)))
+        container.adapters.add("x", (x: number | null | undefined) => Math.max(0, Math.min(chart.plotContainer.width(), x || 0)))
         container.events.on("pointerdown", () => {
           container.set("draggable", isContainerDragging)
         })
@@ -352,8 +422,8 @@ export const createMainChart = (props: any): void => {
             new Date(xAxis.positionToValue(position)),
             "yyyy-MM-dd HH:mm",
           )
-          new Promise((resolve: any) => {
-            updateCommentDate(moistMainComment.id, newDate, props.userId, resolve)
+          new Promise<void>((resolve: () => void) => {
+            updateCommentDate(moistMainComment.id, newDate, props.userId || '', resolve)
           }).then(async () => {
             await props.updateCommentsArray("M", props.sensorId, props.updateComments, props.data)
             rotationAnimation?.stop()
@@ -379,7 +449,7 @@ export const createMainChart = (props: any): void => {
 
         const label = container.children.push(
           am5.Label.new(props.root.current, {
-            text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ""}${moistMainComment.text}`,
+            text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[(moistMainComment.color_id as number) - 1]}\n` : ""}${moistMainComment.text}`,
             fill: am5.color(0x000000),
             maxWidth: 150,
             // minHeight: moistMainComment.color_id ? 60 : 45,
@@ -467,8 +537,8 @@ export const createMainChart = (props: any): void => {
               icon.set("dx", 17)
               icon.set("dy", 7)
             })
-            new Promise((resolve: any) => {
-              removeComment(moistMainComment.id, props.userId, resolve)
+            new Promise<void>((resolve: () => void) => {
+              removeComment(moistMainComment.id, props.userId || '', resolve)
             }).then(async () => {
               await props.updateCommentsArray("M", props.sensorId, props.updateComments, props.data)
               rotationAnimation?.stop()
@@ -480,7 +550,7 @@ export const createMainChart = (props: any): void => {
           }
         })
 
-        function updateLabel(value?: any) {
+        function updateLabel(value?: number) {
           const x = container.x()
           const position = xAxis.toAxisPosition(x / chart.plotContainer.width())
 
@@ -490,7 +560,7 @@ export const createMainChart = (props: any): void => {
 
           label.set(
             "text",
-            `${props.root.current.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ""}${moistMainComment.text}`,
+            `${props.root.current!.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[(moistMainComment.color_id as number) - 1]}\n` : ""}${moistMainComment.text}`,
           )
 
           rangeDataItem.set("value", value)
@@ -499,14 +569,14 @@ export const createMainChart = (props: any): void => {
         function positionLabels() {
           const labels = labelsArray
 
-          labels.sort((a: any, b: any) => {
+          labels.sort((a: am5.Label, b: am5.Label) => {
             const aParent = a.parent
             const bParent = b.parent
             if (!aParent || !bParent) return 0
             return aParent.x() - bParent.x()
           })
 
-          labels.forEach((label: any) => {
+          labels.forEach((label: am5.Label) => {
             label.set("y", 0)
           })
 
@@ -534,7 +604,7 @@ export const createMainChart = (props: any): void => {
           }
         }
 
-        function doLabelsOverlap(label1: any, label2: any) {
+        function doLabelsOverlap(label1: am5.Label, label2: am5.Label) {
           const parent1 = label1.parent
           const parent2 = label2.parent
           if (!parent1 || !parent2) return false
@@ -554,7 +624,7 @@ export const createMainChart = (props: any): void => {
         props.root.current.events.on("frameended", positionLabels)
 
         series.events.on("datavalidated", () => {
-          const commentDate = new Date(moistMainComment.key).getTime()
+          const commentDate = new Date(moistMainComment.key as string).getTime()
           rangeDataItem.set("value", commentDate)
           updateLabel(commentDate)
         })
@@ -563,11 +633,11 @@ export const createMainChart = (props: any): void => {
 
     // Comparing Mode
     if (!props.comparingMode) {
-      xAxis.onPrivate("selectionMin", (value: any) => {
-        startDateForZooming = new Date(value)
+      xAxis.onPrivate("selectionMin", (value: number) => {
+        startDateForZooming = value
       })
-      xAxis.onPrivate("selectionMax", (value: any) => {
-        endDateForZooming = new Date(value)
+      xAxis.onPrivate("selectionMax", (value: number | undefined) => {
+        endDateForZooming = value || 0
       })
     }
     if (props.comparingMode) {
@@ -576,33 +646,32 @@ export const createMainChart = (props: any): void => {
       })
       chart.zoomOutButton.set("forceHidden", true)
     }
-    const tooltips: any = []
-    let selectionLabel: any
-    cursor.events.on("selectended", (event: any) => {
+    const tooltips: am5.Tooltip[] = []
+    let selectionLabel: am5.Label | undefined
+    cursor.events.on("selectended", (event: CursorSelectEvent) => {
       if (props.comparingMode) {
         const selection = event.target
-        const startSelectionPosition = event.target.getPrivate("downPositionX")
-        const endSelectionPosition = event.target.getPrivate("positionX")
+        const startSelectionPosition = getPrivateValue(event.target, "downPositionX") ?? 0
+        const endSelectionPosition = getPrivateValue(event.target, "positionX") ?? 0
 
-        const startPositionDate: any = xAxis.positionToDate(startSelectionPosition).getTime()
-        const endPositionDate: any = xAxis.positionToDate(endSelectionPosition).getTime()
+        const startPositionDate: number = xAxis.positionToDate(startSelectionPosition).getTime()
+        const endPositionDate: number = xAxis.positionToDate(endSelectionPosition).getTime()
 
         // Selection time
-        let selectionTime: any
+        let selectionTimeMs: number
         if (startPositionDate < endPositionDate) {
-          selectionTime = endPositionDate - startPositionDate
+          selectionTimeMs = endPositionDate - startPositionDate
         } else {
-          selectionTime = startPositionDate - endPositionDate
+          selectionTimeMs = startPositionDate - endPositionDate
         }
-        if (selectionTime < 86400000) {
-          selectionTime = selectionTime / 3600000
-          selectionTime = Math.floor(selectionTime) + " hours"
+        let selectionTime: string
+        if (selectionTimeMs < 86400000) {
+          const hours = selectionTimeMs / 3600000
+          selectionTime = Math.floor(hours) + " hours"
         } else {
-          const selectionTimeValue: any = selectionTime
-          let selectionDays: any = selectionTimeValue / 86400000
-          selectionDays = selectionDays.toFixed(2)
-          const selectionHours = Math.floor(selectionTimeValue / 3600000)
-          selectionTime = selectionDays + " days (" + selectionHours + " hours)"
+          const selectionDays = selectionTimeMs / 86400000
+          const selectionHours = Math.floor(selectionTimeMs / 3600000)
+          selectionTime = selectionDays.toFixed(2) + " days (" + selectionHours + " hours)"
         }
 
         let newEndSelectionPosition
@@ -649,84 +718,101 @@ export const createMainChart = (props: any): void => {
 
         // Selection Data
         const xAxisValue = chart.xAxes.getIndex(0)
+        
+        if (xAxisValue && xAxisValue instanceof am5xy.DateAxis) {
+          const downPosX = getPrivateValue(selection, "downPositionX") ?? 0
+          const posX = getPrivateValue(selection, "positionX") ?? 0
+          
+          const x1 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(downPosX)).getTime()
+          const x2 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(posX)).getTime()
+          chart.series.each((series: am5xy.SmoothedXLineSeries) => {
+            const dataItemStart = series.dataItems.find((dataItem: am5.DataItem<am5xy.IXYSeriesDataItem>) => {
+              if (x1 < x2) {
+                return dataItem.get("valueX") >= x1
+              } else {
+                return dataItem.get("valueX") >= x2
+              }
+            })
+            const dataItemEnd = series.dataItems.find((dataItem: am5.DataItem<am5xy.IXYSeriesDataItem>) => {
+              if (x1 < x2) {
+                return dataItem.get("valueX") >= x2
+              } else {
+                return dataItem.get("valueX") >= x1
+              }
+            })
+            if (dataItemStart && dataItemEnd) {
+              const startIndex = series.dataItems.indexOf(dataItemStart)
+              const endIndex = series.dataItems.indexOf(dataItemEnd)
 
-        const x1 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(selection.getPrivate("downPositionX"))).getTime()
-        const x2 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(selection.getPrivate("positionX"))).getTime()
-        chart.series.each((series: any) => {
-          const dataItemStart = series.dataItems.find((dataItem: any) => {
-            if (x1 < x2) {
-              return dataItem.get("valueX") >= x1
-            } else {
-              return dataItem.get("valueX") >= x2
+              const relevantDataItems = series.dataItems.slice(startIndex, endIndex)
+
+              const values: number[] = relevantDataItems.map((dataItem: am5.DataItem<am5xy.IXYSeriesDataItem>) => {
+                const value = dataItem.get("valueY");
+                return typeof value === 'number' ? value : 0;
+              });
+
+              if (values && values.length) {
+                const maxInSelection = Math.max(...values).toFixed(2)
+                const minInSelection = Math.min(...values).toFixed(2)
+                const changeInSelection = ((Math.max(...values)) - (Math.min(...values))).toFixed(2)
+                const avgInSelection = ((values.reduce((sum, value) => sum + value, 0)) / values.length).toFixed(2)
+
+                if (!document.querySelector('.selection-info')) {
+                  const selectionInfoDiv = document.createElement('div')
+                  selectionInfoDiv.classList.add('selection-info')
+                  selectionInfoDiv.style.position = 'absolute'
+                  selectionInfoDiv.style.top = '60px'
+                  selectionInfoDiv.style.right = '10px'
+                  selectionInfoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
+                  selectionInfoDiv.style.padding = '10px'
+                  selectionInfoDiv.style.borderRadius = '5px'
+                  selectionInfoDiv.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)'
+                  selectionInfoDiv.style.zIndex = '1000'
+                  selectionInfoDiv.style.fontSize = '14px'
+                  selectionInfoDiv.innerHTML = `
+                    <div><strong>Selection:</strong></div>
+                    <div>Max: ${maxInSelection}%</div>
+                    <div>Min: ${minInSelection}%</div>
+                    <div>Change: ${changeInSelection}%</div>
+                    <div>Avg: ${avgInSelection}%</div>
+                  `
+                  document.body.appendChild(selectionInfoDiv)
+                } else {
+                  const selectionInfoDiv = document.querySelector('.selection-info')
+                  if (selectionInfoDiv) {
+                    selectionInfoDiv.innerHTML = `
+                      <div><strong>Selection:</strong></div>
+                      <div>Max: ${maxInSelection}%</div>
+                      <div>Min: ${minInSelection}%</div>
+                      <div>Change: ${changeInSelection}%</div>
+                      <div>Avg: ${avgInSelection}%</div>
+                    `
+                  }
+                }
+              }
             }
           })
-
-          let dataItemEnd = series.dataItems.find((dataItem: any) => {
-            if (x1 < x2) {
-              return dataItem.get("valueX") >= x2
-            } else {
-              return dataItem.get("valueX") >= x1
-            }
-          })
-          if (!dataItemEnd) {
-            dataItemEnd = series.dataItems.at(-1)
-          }
-          if (dataItemStart && dataItemEnd) {
-            const fixedDataItemStart = Number.parseFloat(dataItemStart.get("valueY").toFixed(1))
-            const fixedDataItemEnd = Number.parseFloat(dataItemEnd.get("valueY").toFixed(1))
-            const difference = (fixedDataItemEnd - fixedDataItemStart).toFixed(1)
-
-            const labelText =
-              fixedDataItemStart +
-              "%" +
-              " - " +
-              fixedDataItemEnd +
-              "%" +
-              "\n" +
-              difference +
-              "%" +
-              " / " +
-              selectionTime
-            const tooltip: any = am5.Tooltip.new(props.root.current, {
-              labelText: labelText,
-              tooltipPosition: "fixed",
-              pointerOrientation: "left",
-              tooltipTarget: series,
-              pointTo: dataItemEnd._settings.point,
-              x: series.get("tooltip")._settings.x,
-              y: series.get("tooltip")._settings.y,
-              bounds: series.get("tooltip")._settings.bounds,
-              layer: 30,
-              getFillFromSprite: false,
-            })
-            tooltip.get("background").setAll({
-              fill: series.get("tooltip").get("background").get("fill"),
-              stroke: series.get("tooltip").get("background").get("stroke"),
-              fillOpacity: series.get("tooltip").get("background").get("fillOpacity"),
-              strokeOpacity: series.get("tooltip").get("background").get("strokeOpacity"),
-            })
-            tooltip.label.setAll({
-              fill: series.get("tooltip").label.get("fill"),
-              fontSize: series.get("tooltip").label.get("fontSize"),
-              fontFamily: series.get("tooltip").label.get("fontFamily"),
-            })
-            tooltip.show()
-            chart.plotContainer.children.push(tooltip)
-
-            tooltips.push(tooltip)
-          }
-        })
+        }
+      } else {
+        if (selectionLabel) {
+          selectionLabel.dispose()
+        }
       }
     })
 
-    const destroyTooltipsAndLabels = () => {
-      if (props.comparingMode) {
-        tooltips.map((tooltip: any) => {
-          tooltip.set("forceHidden", true)
-          selectionLabel.set("forceHidden", true)
-        })
+    function destroyTooltipsAndLabels() {
+      if (selectionLabel) {
+        selectionLabel.dispose()
       }
+      const selectionInfo = document.querySelector('.selection-info')
+      if (selectionInfo) {
+        selectionInfo.remove()
+      }
+      tooltips.forEach((tooltip) => {
+        tooltip.dispose()
+      })
     }
+
     cursor.events.on("selectcancelled", () => {
       destroyTooltipsAndLabels()
     })

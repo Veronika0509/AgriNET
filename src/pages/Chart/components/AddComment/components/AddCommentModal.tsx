@@ -6,22 +6,31 @@ import {
   IonFooter,
   IonHeader,
   IonModal, IonSelect, IonSelectOption,
-  IonTextarea,
+
   IonTitle,
   IonToolbar
 } from "@ionic/react";
 import s from '../../../style.module.css'
 import {postComment} from "../data/postComment";
 
-const AddCommentModal = (props: any) => {
-  const [timeString, setTimeString] = useState<any>()
+interface AddCommentModalProps {
+  addCommentModal: Date
+  type: 'main' | 'soilTemp' | 'sum' | 'temp' | 'battery'
+  sensorId: string | number
+  userId: string | number
+  setAddCommentModal: (modal: boolean) => void
+  setAddCommentItemShowed: (item: string) => void
+}
+
+const AddCommentModal = (props: AddCommentModalProps) => {
+  const [timeString, setTimeString] = useState<string>('')
   const [selectValue, setSelectValue] = useState('')
   const [messageValue, setMessageValue] = useState('')
   const modalRef = useRef<HTMLIonModalElement>(null);
 
   useEffect(() => {
     const year = props.addCommentModal.getFullYear()
-    let month = props.addCommentModal.getMonth() + 1
+    let month: string | number = props.addCommentModal.getMonth() + 1
     const days = props.addCommentModal.getDate().toString().length === 1 ? `0${props.addCommentModal.getDate()}` : props.addCommentModal.getDate()
     const hours = props.addCommentModal.getHours().toString().length === 1 ? `0${props.addCommentModal.getHours()}` : props.addCommentModal.getHours()
     const minutes = props.addCommentModal.getMinutes().toString().length === 1 ? `0${props.addCommentModal.getMinutes()}` : props.addCommentModal.getMinutes()
@@ -41,7 +50,7 @@ const AddCommentModal = (props: any) => {
   }
 
   const onSubmit = () => {
-    new Promise(async (resolve: any) => {
+    new Promise(async (resolve: (value?: unknown) => void) => {
       let chartType: string
       if (props.type === 'main') {
         chartType = 'M'
@@ -54,9 +63,10 @@ const AddCommentModal = (props: any) => {
       } else {
         chartType = 'MBattery'
       }
-      await postComment(chartType, props.sensorId, timeString, selectValue, messageValue, props.userId, resolve)
-    }).then( async (response: any) => {
-      if (response.status === 200) {
+      await postComment(chartType, String(props.sensorId), timeString, selectValue, messageValue, props.userId, resolve)
+    }).then( async (response: unknown) => {
+      const res = response as { status: number }
+      if (res.status === 200) {
         props.setAddCommentItemShowed('comments')
         onCancel()
       }
@@ -72,11 +82,11 @@ const AddCommentModal = (props: any) => {
               <IonTitle>New comment for {timeString}</IonTitle>
             </IonToolbar>
           </IonHeader>
-          <textarea onChange={(e: any) => setMessageValue(e.target.value)} value={messageValue} className={s.addComment_textarea} placeholder='Enter a comment: '></textarea>
+          <textarea onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMessageValue(e.target.value)} value={messageValue} className={s.addComment_textarea} placeholder='Enter a comment: '></textarea>
           <div className={s.mixed_modalFooter}>
             <IonFooter className={s.mixed_footer}>
               <IonToolbar className={s.mixed_bottomButtons}>
-                <IonSelect className={s.addComment_select} placeholder="Type" slot='start' value={selectValue} onIonChange={(e: any) => setSelectValue(e.detail.value)}>
+                <IonSelect className={s.addComment_select} placeholder="Type" slot='start' value={selectValue} onIonChange={(e: CustomEvent) => setSelectValue(e.detail.value)}>
                   <IonSelectOption value="1">Advisory</IonSelectOption>
                   <IonSelectOption value="2">Plant Health</IonSelectOption>
                   <IonSelectOption value="3">Weather</IonSelectOption>

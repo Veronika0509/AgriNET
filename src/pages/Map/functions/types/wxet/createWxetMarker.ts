@@ -1,23 +1,60 @@
 import {createWxetDataContainers} from "./createWxetDataContainers";
-import axios from "axios";
-import {logoFacebook} from "ionicons/icons";
+import axios, { AxiosResponse } from "axios";
+
+// Интерфейсы для типизации
+interface SensorItem {
+  id: string | number;
+  sensorId: string | number;
+  markerType: string;
+  lat: number;
+  lng: number;
+  name: string;
+  [key: string]: unknown;
+}
+
+interface WxetDataItem {
+  mainId: string | number;
+  id: string | number;
+  sensorId: string | number;
+  name: string;
+  data: {
+    temp?: number | null;
+    freshness?: string;
+    data?: unknown[];
+    [key: string]: unknown;
+  };
+  layerName: string;
+  freshness?: string | undefined;
+  markerType: string;
+  [key: string]: unknown;
+}
+
+interface WxetBounds {
+  [key: string]: unknown;
+}
+
+interface IdCounter {
+  value: number;
+}
+
+
 
 export const createWxetMarker = async (
-  wxetChartsAmount: any,
-  sensorItem: any,
-  page: any,
-  userId: any,
-  setInvalidWxetChartDataContainer: any,
-  setWxetChartDataContainer: any,
-  wxetId: any,
-  wxetData: any,
-  wxetBoundsArray: any,
-  wxetInvalidChartData: any,
+  wxetChartsAmount: SensorItem[],
+  sensorItem: SensorItem,
+  page: number,
+  userId: string | number,
+  setInvalidWxetChartDataContainer: (data: Array<[WxetDataItem, WxetBounds]>) => void,
+  setWxetChartDataContainer: (data: Array<[WxetDataItem, WxetBounds]>) => void,
+  wxetId: IdCounter,
+  wxetData: WxetDataItem[],
+  wxetBoundsArray: WxetBounds[],
+  wxetInvalidChartData: Array<[WxetDataItem, WxetBounds]>,
   countWxet: number
-) => {
-  const exists = wxetChartsAmount.some((secondItemTemp: any) => secondItemTemp.id === sensorItem.id);
+): Promise<void> => {
+  const exists = wxetChartsAmount.some((secondItemTemp: SensorItem) => secondItemTemp.id === sensorItem.id);
   if (!exists) {
-    let response: any
+    let response: AxiosResponse<{ temp?: number | null; freshness?: string; data?: unknown[]; [key: string]: unknown; }> | undefined = undefined
     if (sensorItem.markerType === 'fuel') {
       response = await axios.get('https://app.agrinet.us/api/chart/fuel?v=43', {
         params: {
@@ -40,10 +77,10 @@ export const createWxetMarker = async (
 
     wxetId.value++;
     wxetChartsAmount.push(sensorItem);
-    const bounds: any = new google.maps.LatLngBounds(
+    const bounds: WxetBounds = new google.maps.LatLngBounds(
       new google.maps.LatLng(sensorItem.lat, sensorItem.lng),
       new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
-    )
+    ) as unknown as WxetBounds
     if (page === 1) {
       createWxetDataContainers({
         mainId: sensorItem.id,
@@ -57,7 +94,7 @@ export const createWxetMarker = async (
         wxetData,
         boundsArray: wxetBoundsArray,
         invalidChartData: wxetInvalidChartData,
-        response,
+        response: response!,
         countWxet,
         markerType: sensorItem.markerType
       });

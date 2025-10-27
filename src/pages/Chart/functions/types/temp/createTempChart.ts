@@ -3,21 +3,79 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated"
 import * as am5xy from "@amcharts/amcharts5/xy"
 import { updateCommentDate } from "../../../components/AddComment/data/updateCommentDate"
 import { removeComment } from "../../../components/AddComment/data/removeComment"
+import { UserId, SensorId } from '../../../../../types';
+
+// Интерфейсы для данных графика
+interface TempChartData {
+  DateTime: string;
+  Temperature?: number;
+  DewPoint?: number;
+  RelativeHumidity?: number;
+  leafWetness?: number;
+  analog1?: number;
+  analog2?: number;
+  psi?: number;
+  waterTemp?: number;
+  [key: string]: string | number | undefined;
+}
+
+interface AdditionalChartData {
+  linesCount: number;
+  metric: string;
+  [key: string]: unknown;
+}
+
+interface ForecastData {
+  time: string;
+  forecastTemp: number;
+}
+
+interface NwsForecastData {
+  data: ForecastData[];
+}
+
+interface TempComment {
+  key: string;
+  text: string;
+  color_id?: number;
+  id: string;
+}
+
+interface DataLabel {
+  label: string;
+  name: string;
+  tooltip: string;
+  metric: string;
+}
+
+interface ChartDataPoint {
+  date: number;
+  value: number;
+}
+
+interface SeriesVisibility {
+  name: string;
+  visible: boolean;
+}
+
+interface RootRef {
+  current: any;
+}
 
 export const createTempChart = (
-  chartData: any,
-  root: any,
+  chartData: TempChartData[],
+  root: RootRef,
   isMobile: boolean,
-  additionalChartData: any,
-  nwsForecastData: any,
-  setTempAddCommentModal: any,
-  tempAddCommentItemShowed: any,
-  tempComments: any,
-  updateCommentsArray: any,
-  userId: any,
-  sensorId: any,
+  additionalChartData: AdditionalChartData,
+  nwsForecastData: NwsForecastData | null,
+  setTempAddCommentModal: (value: boolean) => void,
+  tempAddCommentItemShowed: boolean,
+  tempComments: TempComment[],
+  updateCommentsArray: (type: string, data: TempComment) => void,
+  userId: UserId,
+  sensorId: SensorId,
   isTempCommentsShowed: boolean,
-  setTabularDataColors?: any,
+  setTabularDataColors?: (colors: string[]) => void,
 ) => {
   if (root.current) {
     root.current.dispose()
@@ -79,7 +137,7 @@ export const createTempChart = (
     )
 
     // Add series
-    function createChartData(chartDate: any, chartValue: number) {
+    function createChartData(chartDate: number, chartValue: number): ChartDataPoint {
       return {
         date: chartDate,
         value: chartValue,
@@ -87,30 +145,33 @@ export const createTempChart = (
     }
 
     function createChartDataArray(lineLabel: string) {
-      const data: any = []
-      const dataArray = lineLabel === "forecastTemp" ? nwsForecastData.data : chartData
-      dataArray.map((chartDataItem: any) => {
-        const chartDate =
-          lineLabel === "forecastTemp"
-            ? new Date(chartDataItem.time).getTime()
-            : new Date(chartDataItem.DateTime).getTime()
-        const chartData = createChartData(chartDate, chartDataItem[lineLabel])
-        data.push(chartData)
-      })
+      const data: ChartDataPoint[] = []
+      if (lineLabel === "forecastTemp" && nwsForecastData?.data) {
+        nwsForecastData.data.map((chartDataItem: ForecastData) => {
+          const chartDate = new Date(chartDataItem.time).getTime()
+          const chartData = createChartData(chartDate, chartDataItem.forecastTemp)
+          data.push(chartData)
+        })
+      } else {
+        chartData.map((chartDataItem: TempChartData) => {
+          const chartDate = new Date(chartDataItem.DateTime).getTime()
+          const value = chartDataItem[lineLabel as keyof TempChartData]
+          if (typeof value === 'number') {
+            const chartData = createChartData(chartDate, value)
+            data.push(chartData)
+          }
+        })
+      }
       return data
     }
 
     const metricSign = additionalChartData.metric === "AMERICA" ? "°F" : "°C"
 
+    // Only use data0, data1, and data2 as requested
     const dataLabels = [
       { label: "MS 1", name: "Temperature", tooltip: "Temp", metric: metricSign },
       { label: "MS DU", name: "Dew Point", tooltip: "Dew Point", metric: metricSign },
       { label: "MS 3", name: "Relative Humidity", tooltip: "RH", metric: "%" },
-      { label: "leafWetness", name: "Leaf Wetness", tooltip: "Leaf Wetness", metric: "%" },
-      { label: "analog1", name: "Analog 1", tooltip: "Analog 1", metric: "" },
-      { label: "analog2", name: "Analog 2", tooltip: "Analog 2", metric: "" },
-      { label: "psi", name: "PSI", tooltip: "PSI", metric: "" },
-      { label: "waterTemp", name: "Water Temperature", tooltip: "Water Temp", metric: "°F" },
     ]
 
     if (nwsForecastData) {
@@ -118,7 +179,7 @@ export const createTempChart = (
     }
 
     let series: any
-    const seriesColors: any = []
+    const seriesColors: string[] = []
     dataLabels.map((dataLabel) => {
       series = chart.series.push(
         am5xy.SmoothedXLineSeries.new(root.current, {
@@ -171,11 +232,7 @@ export const createTempChart = (
           series.appear()
         }
       } else {
-        if (dataLabel.name === 'Temperature' || dataLabel.name === 'Dew Point' || dataLabel.name === 'Relative Humidity') {
-          series.appear()
-        } else {
-          series.set('visible', false)
-        }
+        series.appear()
       }
     })
 
@@ -255,7 +312,7 @@ export const createTempChart = (
       })
     }
     if (tempComments && isTempCommentsShowed) {
-      const colors: any = {
+      const colors: Record<string, string> = {
         Advisory: "F08080",
         "Plant Health": "90EE90",
         Weather: "ADD8E6",
@@ -276,7 +333,7 @@ export const createTempChart = (
 
       const labelsArray: any[] = []
 
-      tempComments.forEach((moistMainComment: any) => {
+      tempComments.forEach((moistMainComment: TempComment) => {
         const commentColor: string = moistMainComment.color_id
           ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}`
           : `#FBFFA6`
@@ -290,7 +347,7 @@ export const createTempChart = (
           dy: 4,
         })
         container.adapters.add("y", () => 0)
-        container.adapters.add("x", (x: any) => Math.max(0, Math.min(chart.plotContainer.width(), x)))
+        container.adapters.add("x", (x: number) => Math.max(0, Math.min(chart.plotContainer.width(), x)))
         container.events.on("pointerdown", () => {
           container.set("draggable", isContainerDragging)
         })
@@ -447,7 +504,7 @@ export const createTempChart = (
               icon.set("dx", 17)
               icon.set("dy", 7)
             })
-            new Promise((resolve: any) => {
+            new Promise((resolve: () => void) => {
               removeComment(moistMainComment.id, userId, resolve)
             }).then(async () => {
               await updateCommentsArray("T")
@@ -460,7 +517,7 @@ export const createTempChart = (
           }
         })
 
-        function updateLabel(value?: any) {
+        function updateLabel(value?: number) {
           const x = container.x()
           const position = xAxis.toAxisPosition(x / chart.plotContainer.width())
 
@@ -575,7 +632,7 @@ export const createTempChart = (
       }
 
       const clickedName = clickedSeries.get("name")
-      const seriesIndex = visibilityMap.findIndex((item: any) => item.name === clickedName)
+      const seriesIndex = visibilityMap.findIndex((item: SeriesVisibility) => item.name === clickedName)
 
       if (seriesIndex !== -1) {
         visibilityMap[seriesIndex].visible = !visibilityMap[seriesIndex].visible

@@ -1,5 +1,44 @@
-export const createValveDataContainers = async (props: any) => {
-  const valveChartDataItem = {
+interface ValveChartDataItem {
+  id: string;
+  mainId: string | number;
+  sensorId: string | number;
+  name: string;
+  layerName: string;
+  events: unknown[];
+  nowMinutes: number | undefined;
+  bgColor: string;
+  enabled: boolean;
+  [key: string]: unknown;
+}
+
+interface ValveBounds {
+  [key: string]: unknown;
+}
+
+interface ValveDataContainerProps {
+  id: { value: string | number };
+  mainId: string | number;
+  sensorId: string | number;
+  name: string;
+  data: {
+    events: unknown[];
+    nowMinutes: number | undefined;
+    bgColor: string;
+    enabled: boolean;
+    [key: string]: unknown;
+  };
+  valveChartData: ValveChartDataItem[];
+  boundsArray: ValveBounds[];
+  bounds: ValveBounds;
+  valveChartsAmount: unknown[];
+  countValve: number;
+  invalidChartData: Array<[ValveChartDataItem, ValveBounds]>;
+  setInvalidValveChartDataContainer: (data: Array<[ValveChartDataItem, ValveBounds]>) => void;
+  setValveChartDataContainer: (data: Array<[ValveChartDataItem, ValveBounds]>) => void;
+}
+
+export const createValveDataContainers = async (props: ValveDataContainerProps) => {
+  const valveChartDataItem: ValveChartDataItem = {
     id: 'valve_' + props.id.value,
     mainId: props.mainId,
     sensorId: props.sensorId,
@@ -13,24 +52,24 @@ export const createValveDataContainers = async (props: any) => {
   props.valveChartData.push(valveChartDataItem)
   props.boundsArray.push(props.bounds)
   if (props.valveChartsAmount.length === props.valveChartData.length) {
-    let updatedValveChartData: any = []
-    props.boundsArray.map((bounds: any, index: number) => {
+    const updatedValveChartData: Array<[ValveChartDataItem, ValveBounds]> = []
+    props.boundsArray.map((bounds: ValveBounds, index: number) => {
       if (props.valveChartData[index].nowMinutes !== undefined) {
         const exists = updatedValveChartData.some(
-          (updatedValveChartDataItem: any) => updatedValveChartDataItem[0].sensorId === props.valveChartData[index].sensorId
+          (updatedValveChartDataItem: [ValveChartDataItem, ValveBounds]) => updatedValveChartDataItem[0].sensorId === props.valveChartData[index].sensorId
         );
         if (!exists) {
           updatedValveChartData.push([props.valveChartData[index], bounds]);
         }
       } else {
         const exists = props.invalidChartData.some(
-          (invalidChartDataItem: any) => invalidChartDataItem[0].sensorId === props.valveChartData[index].sensorId
+          (invalidChartDataItem: [ValveChartDataItem, ValveBounds]) => invalidChartDataItem[0].sensorId === props.valveChartData[index].sensorId
         );
         if (!exists) {
           props.invalidChartData.push([props.valveChartData[index], bounds]);
         }
       }
-      new Promise((resolve: any) => {
+      new Promise<void>((resolve: () => void) => {
         if (props.invalidChartData.length + updatedValveChartData.length === props.countValve) {
           props.setInvalidValveChartDataContainer(props.invalidChartData)
           props.setValveChartDataContainer(updatedValveChartData)

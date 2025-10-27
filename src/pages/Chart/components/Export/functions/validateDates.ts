@@ -1,4 +1,7 @@
-export const validateDates = (fromDate: any, toDate: any) => {
+export const validateDates = (
+  fromDate: string | Date,
+  toDate: string | Date
+): string | undefined => {
   const fromDateTime = new Date(fromDate)
   const toDateTime = new Date(toDate)
 
@@ -30,4 +33,6 @@ export const validateDates = (fromDate: any, toDate: any) => {
   } else if (fromTime === toTime) {
     return 'To Date equals From Date'
   }
+  
+  return undefined
 }

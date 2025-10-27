@@ -1,20 +1,51 @@
 import {createValveDataContainers} from "./createValveDataContainers";
 import axios from "axios";
 
+// Интерфейсы для типизации
+interface SensorItem {
+  id: string | number;
+  sensorId: string | number;
+  lat: number;
+  lng: number;
+  name: string;
+  [key: string]: unknown;
+}
+
+interface ValveChartDataItem {
+  id: string;
+  mainId: string | number;
+  sensorId: string | number;
+  name: string;
+  layerName: string;
+  events: unknown[];
+  nowMinutes: number | undefined;
+  bgColor: string;
+  enabled: boolean;
+  [key: string]: unknown;
+}
+
+interface ValveBounds {
+  [key: string]: unknown;
+}
+
+interface IdCounter {
+  value: number;
+}
+
 export const createValveMarker = async (
-  valveChartsAmount: any,
-  sensorItem: any,
-  page: any,
-  userId: any,
-  setInvalidValveChartDataContainer: any,
-  setValveChartDataContainer: any,
-  valveId: any,
-  valveChartData: any,
-  valveBoundsArray: any,
-  valveInvalidChartData: any,
+  valveChartsAmount: SensorItem[],
+  sensorItem: SensorItem,
+  page: number,
+  userId: string | number,
+  setInvalidValveChartDataContainer: (data: Array<[ValveChartDataItem, ValveBounds]>) => void,
+  setValveChartDataContainer: (data: Array<[ValveChartDataItem, ValveBounds]>) => void,
+  valveId: IdCounter,
+  valveChartData: ValveChartDataItem[],
+  valveBoundsArray: ValveBounds[],
+  valveInvalidChartData: Array<[ValveChartDataItem, ValveBounds]>,
   countValve: number
-) => {
-  const exists = valveChartsAmount.some((secondItemValve: any) => secondItemValve.id === sensorItem.id);
+): Promise<void> => {
+  const exists = valveChartsAmount.some((secondItemValve: SensorItem) => secondItemValve.id === sensorItem.id);
   if (!exists) {
     const response = await axios.get('https://app.agrinet.us/api/map/valve?v=43', {
       params: {
@@ -25,10 +56,10 @@ export const createValveMarker = async (
     })
     valveId.value++;
     valveChartsAmount.push(sensorItem);
-    const bounds: any = new google.maps.LatLngBounds(
+    const bounds: ValveBounds = new google.maps.LatLngBounds(
       new google.maps.LatLng(sensorItem.lat, sensorItem.lng),
       new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
-    )
+    ) as unknown as ValveBounds
     if (page === 1) {
       createValveDataContainers({
         mainId: sensorItem.id,

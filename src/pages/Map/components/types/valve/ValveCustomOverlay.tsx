@@ -1,48 +1,62 @@
 import s from "../../../style.module.css";
 import {createRoot} from "react-dom/client";
-import React from "react";
 import {onValveSensorClick} from "../../../functions/types/valve/onValveSensorClick";
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {simpleColors} from "../../../../../assets/getColors";
 import skull from "../../../../../assets/images/skull.svg";
-// import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
 
-export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
+interface ValveChartData {
+  id: string | number;
+  sensorId: string | number;
+  name: string;
+  bgColor?: string;
+  enabled?: boolean;
+}
+
+interface History {
+  push: (path: string) => void;
+}
+
+interface ValveCustomOverlayInstance {
+  chartData: ValveChartData;
+  [key: string]: unknown;
+}
+
+export const initializeValveCustomOverlay = (isGoogleApiLoaded: boolean) => {
   if (isGoogleApiLoaded) {
     return class CustomOverlayExport extends google.maps.OverlayView {
       private bounds: google.maps.LatLngBounds;
       private isValidChartData: boolean;
-      private chartData: any;
-      private setChartData: any
-      private setPage: any
-      private setSiteId: any
-      private setSiteName: any
-      private setChartPageType: any
-      private history: any
+      private chartData: ValveChartData;
+      private setChartData: (data: unknown) => void
+      private setPage: (page: number) => void
+      private setSiteId: (id: string) => void
+      private setSiteName: (name: string) => void
+      private setChartPageType: (type: string) => void
+      private history: History
       private isValveMarkerChartDrawn: boolean
-      private setValveOverlays: any
-      private userId: any
-      private bgColor: any
+      private setValveOverlays: (fn: (overlays: ValveCustomOverlayInstance[]) => ValveCustomOverlayInstance[]) => void
+      private userId: string | number
+      private bgColor: string | undefined
 
-      private layerName: string
-      private root: any;
+      private root: ReturnType<typeof createRoot> | null;
       private offset: { x: number; y: number };
-      private div?: any;
+      private div: HTMLElement | null;
       private isTextTruncated: boolean
 
       constructor(
         bounds: google.maps.LatLngBounds,
         isValidChartData: boolean,
-        chartData: any,
-        setChartData: any,
-        setPage: any,
-        setSiteId: any,
-        setSiteName: any,
-        setChartPageType: any,
-        history: any,
+        chartData: ValveChartData,
+        setChartData: (data: unknown) => void,
+        setPage: (page: number) => void,
+        setSiteId: (id: string) => void,
+        setSiteName: (name: string) => void,
+        setChartPageType: (type: string) => void,
+        history: History,
         isValveMarkerChartDrawn: boolean,
-        setValveOverlays: any,
-        userId: any
+        setValveOverlays: (fn: (overlays: ValveCustomOverlayInstance[]) => ValveCustomOverlayInstance[]) => void,
+        userId: string | number
       ) {
         super();
         this.bounds = bounds;
@@ -57,9 +71,10 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
         this.isValveMarkerChartDrawn = isValveMarkerChartDrawn
         this.setValveOverlays = setValveOverlays
         this.userId = userId
-        this.bgColor = this.chartData.bgColor && simpleColors[this.chartData.bgColor.toLowerCase()]
+        this.bgColor = this.chartData.bgColor ? simpleColors[this.chartData.bgColor.toLowerCase()] : undefined
 
-        this.layerName = chartData.layerName
+        this.root = null
+        this.div = null
         this.offset = { x: 0, y: 0 };
         this.isTextTruncated = this.chartData.name.length > 7
       }
@@ -78,7 +93,7 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
           <div className={`${s.overlay_container}`} onClick={() => onValveSensorClick(
             this.history,
             this.userId,
-            this.chartData.sensorId,
+            String(this.chartData.sensorId),
             this.chartData.name,
             this.setChartData,
             this.setPage,
@@ -89,11 +104,11 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
             {this.isValidChartData ? (
               <div>
                 <div className={`${s.overlay_chartContainer} ${s.overlay_valveChartContainer}`} style={{background: '#96fd66'}}>
-                  <div className={s.overlay_chartWrapper} style={this.chartData.bgColor && {background: `#${this.bgColor}`}}>
+                  <div className={s.overlay_chartWrapper} style={this.chartData.bgColor && this.bgColor ? {background: `#${this.bgColor}`} : undefined}>
                     <div style={{
                       display: this.isValveMarkerChartDrawn ? 'block' : 'none',
                       ...(this.bgColor && {background: `#${this.bgColor}`})
-                    }} id={`${this.chartData.id}`}
+                    }} id={String(this.chartData.id)}
                          className={`${s.overlay_chart} ${s.overlay_chart__valve}`}>
                       <div
                         className={`${s.overlay_valveEnabled} ${this.chartData.enabled && s.overlay_valveEnabled__enabled}`}></div>
@@ -107,7 +122,7 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
                 </div>
                 <div className={s.overlay_info}>
                   {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
-                  <p>{this.chartData.sensorId}</p>
+                  <p>{String(this.chartData.sensorId)}</p>
                 </div>
               </div>
             ) : (
@@ -118,7 +133,7 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
                 </div>
                 <div className={s.overlay_info}>
                   {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
-                  <p className={s.chartName}>{this.chartData.sensorId}</p>
+                  <p className={s.chartName}>{String(this.chartData.sensorId)}</p>
                 </div>
               </div>
             )}
@@ -127,9 +142,9 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       onAdd() {
-        new Promise((resolve: any) => {
-          const divId = `overlay-${this.chartData.id}`;
-          this.div = document.getElementById(divId);
+        new Promise<void>((resolve: () => void) => {
+          const divId = `overlay-${String(this.chartData.id)}`;
+          this.div = document.getElementById(divId) as HTMLElement | null;
 
           if (!this.div) {
             this.div = document.createElement("div");
@@ -137,34 +152,42 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
             this.div.style.borderStyle = "none";
             this.div.style.borderWidth = "0px";
             this.div.style.position = "absolute";
-            this.div.style.WebkitTransform = 'translateZ(0)';
+            this.div.style.webkitTransform = 'translateZ(0)';
             this.div.addEventListener('mouseenter', () => {
-              this.div.style.zIndex = "9999";
+              if (this.div) {
+                this.div.style.zIndex = "9999";
+              }
             });
             this.div.addEventListener('mouseleave', () => {
-              this.div.style.zIndex = "0";
+              if (this.div) {
+                this.div.style.zIndex = "0";
+              }
             });
 
             this.offset = {
               x: (Math.random() - 0.5) * 20,
               y: (Math.random() - 0.5) * 20
             };
-            const panes: any = this.getPanes();
-            panes.floatPane.appendChild(this.div);
-            if (!this.root) {
+            const panes = this.getPanes();
+            if (panes && this.div) {
+              panes.floatPane.appendChild(this.div);
+            }
+            if (!this.root && this.div) {
               this.root = createRoot(this.div);
             }
-            const content = this.renderContent()
-            this.root.render(content);
+            if (this.root) {
+              const content = this.renderContent()
+              this.root.render(content);
+            }
           }
           resolve()
         }).then(() => {
           if (this.isValidChartData) {
-            this.setValveOverlays((overlays: any[]) => {
+            this.setValveOverlays((overlays: ValveCustomOverlayInstance[]) => {
               const overlayExists = overlays.some(overlay => overlay.chartData.id === this.chartData.id);
 
               if (!overlayExists) {
-                return [...overlays, this];
+                return [...overlays, this as unknown as ValveCustomOverlayInstance];
               }
 
               return overlays;
@@ -191,9 +214,9 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
       }
 
       onRemove() {
-        if (this.div) {
+        if (this.div && this.div.parentNode) {
           (this.div.parentNode as HTMLElement).removeChild(this.div);
-          delete this.div;
+          this.div = null;
         }
       }
 
@@ -212,12 +235,13 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: any) => {
         }
       }
 
-      setMap(map: any) {
-        return new Promise((resolve: any) => {
+      setMap(map: google.maps.Map | null) {
+        return new Promise<void>((resolve: () => void) => {
           super.setMap(map);
           resolve();
         });
       }
     }
   }
+  return undefined;
 }

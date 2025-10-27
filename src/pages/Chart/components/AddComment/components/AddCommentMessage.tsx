@@ -2,9 +2,9 @@ import {IonButton, IonItem, IonText} from "@ionic/react";
 import s from '../../../style.module.css'
 
 interface AddCommentMessageProps {
-  type: string,
-  addCommentItemShowed: boolean,
-  setAddCommentModal: any
+  type: string;
+  addCommentItemShowed: boolean;
+  setAddCommentModal: (params: { date: Date; type: string }) => void;
 }
 
 export const AddCommentMessage: React.FC<AddCommentMessageProps> = ({type, addCommentItemShowed, setAddCommentModal}) => {
