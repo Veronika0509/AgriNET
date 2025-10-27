@@ -409,6 +409,9 @@ const MapPage: React.FC<MapProps> = (props) => {
     props.setPage(3);
   }, [props]);
 
+  // Responsive design state
+  const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 768);
+  
   // Timezone modal state
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState<boolean>(false);
   const [selectedTimezone, setSelectedTimezone] = useState<string>('America/Los_Angeles');
@@ -671,6 +674,18 @@ const MapPage: React.FC<MapProps> = (props) => {
     }
   }, [selectedSite, props.siteList, unitLatitude, unitLongitude]);
 
+  // Handle window resize for responsive design
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+  
   // Initialize form with site when sites are loaded or when selected site changes
   useEffect(() => {
     if (props.siteList && props.siteList.length > 0) {
@@ -1873,15 +1888,21 @@ const MapPage: React.FC<MapProps> = (props) => {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                 }}>
-                  <IonButton fill='outline' size="default" style={{
-                      width: '100%',
-                      height: '36px'
-                    }} onClick={() => {
-                      
-                    }}>
-                    <IonIcon icon={cameraOutline} slot="start" />
-                    TAKE A PICTURE
-                  </IonButton>
+                  {/* Only show camera button on mobile devices */}
+                  {window.innerWidth < 768 && (
+                    {/* Only show camera button on mobile devices */}
+                    {isMobileView && (
+                      <IonButton fill='outline' size="default" style={{
+                          width: '100%',
+                          height: '36px'
+                        }} onClick={() => {
+                        
+                        }}>
+                        <IonIcon icon={cameraOutline} slot="start" />
+                        TAKE A PICTURE
+                      </IonButton>
+                    )}
+                  )}
                   <IonButton 
                     fill="outline"
                     size="default"
