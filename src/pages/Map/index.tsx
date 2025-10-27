@@ -1889,19 +1889,16 @@ const MapPage: React.FC<MapProps> = (props) => {
                   alignItems: 'center',
                 }}>
                   {/* Only show camera button on mobile devices */}
-                  {window.innerWidth < 768 && (
-                    {/* Only show camera button on mobile devices */}
-                    {isMobileView && (
-                      <IonButton fill='outline' size="default" style={{
-                          width: '100%',
-                          height: '36px'
-                        }} onClick={() => {
-                        
-                        }}>
-                        <IonIcon icon={cameraOutline} slot="start" />
-                        TAKE A PICTURE
-                      </IonButton>
-                    )}
+                  {isMobileView && (
+                    <IonButton fill='outline' size="default" style={{
+                        width: '100%',
+                        height: '36px'
+                      }} onClick={() => {
+                      
+                      }}>
+                      <IonIcon icon={cameraOutline} slot="start" />
+                      TAKE A PICTURE
+                    </IonButton>
                   )}
                   <IonButton 
                     fill="outline"
