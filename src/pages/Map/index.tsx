@@ -759,6 +759,21 @@ const MapPage: React.FC<MapProps> = (props) => {
     loadLayers();
   }, []);
 
+  // Fetch user site groups when navigating to Add Unit page
+  useEffect(() => {
+    if (activeTab === 'add') {
+      // Fetch user site groups from API
+      fetch('https://app.agrinet.us/api/add-unit/user-site-groups')
+        .then(response => response.json())
+        .then(data => {
+          console.log('User site groups:', data);
+        })
+        .catch(error => {
+          console.error('Error fetching user site groups:', error);
+        });
+    }
+  }, [activeTab]);
+
   // Initialize Add Unit map when tab is active and API is loaded
   useEffect(() => {
     if (activeTab === 'add' && props.isGoogleApiLoaded && window.google && window.google.maps && addUnitMapRef.current) {
