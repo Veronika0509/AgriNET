@@ -2112,8 +2112,8 @@ const MapPage: React.FC<MapProps> = (props) => {
                   </IonButton>
                 </IonItem>
 
-                {/* Site Group Selection - Only show when there are site groups */}
-                {siteGroups.length > 0 && (
+                {/* Site Group Selection - Only show when there are more than 1 site groups */}
+                {siteGroups.length > 1 && (
                   <IonItem 
                     className={s.addUnitFormItem}
                     style={{
