@@ -789,7 +789,12 @@ const MapPage: React.FC<MapProps> = (props) => {
           
           // Set site groups if data is valid and not empty
           if (datanew && Array.isArray(datanew) && datanew.length > 0) {
-            setSiteGroups(datanew);
+            // Convert string array to object array with id and name
+            const formattedGroups = datanew.map((group, index) => ({
+              id: index + 1,
+              name: group
+            }));
+            setSiteGroups(formattedGroups);
           } else {
             // Clear site groups if data is empty
             setSiteGroups([]);
@@ -2208,7 +2213,7 @@ const MapPage: React.FC<MapProps> = (props) => {
                       >
                         {siteGroups.length > 0 ? (
                           siteGroups.map((group) => (
-                            <IonSelectOption key={group.id} value={group.id.toString()}>
+                            <IonSelectOption key={group.id} value={group.name}>
                               {group.name}
                             </IonSelectOption>
                           ))
