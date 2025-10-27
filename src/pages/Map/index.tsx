@@ -2180,8 +2180,8 @@ const MapPage: React.FC<MapProps> = (props) => {
                           opacity: 1 !important;
                         }
                         #site-group-select::part(text) {
-                          color: #666666 !important;
-                          opacity: 0.8 !important;
+                          color: #000000 !important;
+                          opacity: 1 !important;
                         }
                         #site-group-select::part(icon) {
                           color: #666666 !important;
