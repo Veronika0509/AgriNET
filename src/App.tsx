@@ -9,7 +9,7 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import {home, informationCircle} from 'ionicons/icons';
+import {home, informationCircle, qrCode} from 'ionicons/icons';
 import {loadGoogleApi} from "./functions/loadGoogleApiFunc";
 import {useHistory} from 'react-router-dom';
 
@@ -44,6 +44,7 @@ import Chart from "./pages/Chart";
 import TestOverlays from "./pages/TestOverlays";
 import VirtualValve from "./pages/VirtualValve";
 import AddValvePage from "./pages/AddValvePage";
+import QRScannerPage from "./pages/QRScannerPage";
 import './App.css'
 
 setupIonicReact();
@@ -89,6 +90,9 @@ const App: React.FC = () => {
                       <Route exact path="/info">
                         <Info showHeader={true} />
                       </Route>
+                      <Route exact path="/qr-scanner">
+                        <QRScannerPage />
+                      </Route>
                       <Route exact path="/test-overlays">
                         <TestOverlays />
                       </Route>
@@ -120,6 +124,9 @@ const App: React.FC = () => {
                       </IonTabButton>
                       <IonTabButton tab="info" href="/info">
                         <IonIcon icon={informationCircle}/>
+                      </IonTabButton>
+                      <IonTabButton tab="qr-scanner" href="/qr-scanner">
+                        <IonIcon icon={qrCode}/>
                       </IonTabButton>
                     </IonTabBar>
                   </IonTabs>
