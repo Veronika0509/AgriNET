@@ -49,5 +49,7 @@
 		<string>We want to track you</string>
   <key>NSLocationWhenInUseUsageDescription</key>
   	<string>We want your current position</string>
+  <key>NSCameraUsageDescription</key>
+  	<string>We need camera access to scan QR codes</string>
 </dict>
 </plist>

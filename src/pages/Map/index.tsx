@@ -19,6 +19,7 @@ import {
   IonButtons,
   IonCheckbox
 } from '@ionic/react';
+import QRScanner from '../../components/QRScanner';
 import SensorSelector from '../VirtualValve/components/TimezoneSelector';
 import { useHistory } from 'react-router-dom';
 import { documentText, home, informationCircle, informationCircleOutline, add, settings, cameraOutline } from 'ionicons/icons';
@@ -414,6 +415,10 @@ const MapPage: React.FC<MapProps> = (props) => {
 
   // Responsive design state
   const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 768);
+  
+  // QR Scanner state
+  const [isQRScannerOpen, setIsQRScannerOpen] = useState<boolean>(false);
+  const [scannedQRData, setScannedQRData] = useState<string>('');
   
   // Timezone modal state
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState<boolean>(false);
@@ -1948,36 +1953,11 @@ const MapPage: React.FC<MapProps> = (props) => {
                         width: '100%',
                         height: '36px'
                       }} onClick={() => {
-                        const showCameraErrorAlert = () => {
-                          presentAlert({
-                            header: 'Error',
-                            message: 'App met some problems during taking picture, please try again',
-                            buttons: [
-                              {
-                                text: 'Cancel',
-                                role: 'cancel',
-                                cssClass: 'alert-button-cancel'
-                              },
-                              {
-                                text: 'Retry',
-                                cssClass: 'alert-button-confirm',
-                                handler: () => {
-                                  // This will close the alert and then reopen it
-                                  setTimeout(() => {
-                                    showCameraErrorAlert();
-                                  }, 300);
-                                  return true;
-                                }
-                              }
-                            ]
-                          });
-                        };
-                        
-                        // Show the alert when button is clicked
-                        showCameraErrorAlert();
+                        // Open QR scanner
+                        setIsQRScannerOpen(true);
                       }}>
                       <IonIcon icon={cameraOutline} slot="start" />
-                      TAKE A PICTURE
+                      SCAN QR CODE
                     </IonButton>
                   )}
                   <IonButton 
@@ -2845,6 +2825,22 @@ const MapPage: React.FC<MapProps> = (props) => {
           onConfirm={handleSensorSelect}
           selectedSensor={selectedSensor}
           sensors={availableSensors}
+        />
+        
+        <QRScanner 
+          isOpen={isQRScannerOpen}
+          onClose={() => setIsQRScannerOpen(false)}
+          onScan={(data) => {
+            setScannedQRData(data);
+            setIsQRScannerOpen(false);
+            
+            // Show the scanned data in an alert
+            presentAlert({
+              header: 'QR Code Scanned',
+              message: `Scanned data: ${data}`,
+              buttons: ['OK']
+            });
+          }}
         />
       </IonContent>
     </IonPage>
