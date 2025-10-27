@@ -813,12 +813,22 @@ const MapPage: React.FC<MapProps> = (props) => {
           if (!errorShown) {
             console.error('Error fetching user site groups:', error);
             // Show toast notification for better user feedback
-            present({
-              message: 'Using default site groups. Server may be unavailable.',
-              duration: 3000,
-              color: 'warning',
-              position: 'top'
-            });
+            // Fix: present is an array, so we need to use the first element
+            if (typeof present === 'function') {
+              present({
+                message: 'Using default site groups. Server may be unavailable.',
+                duration: 3000,
+                color: 'warning',
+                position: 'top'
+              });
+            } else if (Array.isArray(present) && typeof present[0] === 'function') {
+              present[0]({
+                message: 'Using default site groups. Server may be unavailable.',
+                duration: 3000,
+                color: 'warning',
+                position: 'top'
+              });
+            }
             errorShown = true;
           }
           return defaultSiteGroups;
@@ -829,12 +839,22 @@ const MapPage: React.FC<MapProps> = (props) => {
         setTimeout(() => {
           if (!errorShown) {
             console.log('API request timed out, using default site groups');
-            present({
-              message: 'Request timed out. Using default site groups.',
-              duration: 3000,
-              color: 'warning',
-              position: 'top'
-            });
+            // Fix: present is an array, so we need to use the first element
+            if (typeof present === 'function') {
+              present({
+                message: 'Request timed out. Using default site groups.',
+                duration: 3000,
+                color: 'warning',
+                position: 'top'
+              });
+            } else if (Array.isArray(present) && typeof present[0] === 'function') {
+              present[0]({
+                message: 'Request timed out. Using default site groups.',
+                duration: 3000,
+                color: 'warning',
+                position: 'top'
+              });
+            }
             errorShown = true;
           }
           resolve(defaultSiteGroups);
