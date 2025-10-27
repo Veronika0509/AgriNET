@@ -45,6 +45,7 @@ import TestOverlays from "./pages/TestOverlays";
 import VirtualValve from "./pages/VirtualValve";
 import AddValvePage from "./pages/AddValvePage";
 import QRScannerPage from "./pages/QRScannerPage";
+import QRScanner from "./components/QRScanner";
 import './App.css'
 
 setupIonicReact();
@@ -92,6 +93,9 @@ const App: React.FC = () => {
                       </Route>
                       <Route exact path="/qr-scanner">
                         <QRScannerPage />
+                      </Route>
+                      <Route exact path="/qr-scanner-v0">
+                        <QRScanner />
                       </Route>
                       <Route exact path="/test-overlays">
                         <TestOverlays />

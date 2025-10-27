@@ -21,9 +21,14 @@ body.scanner-active {
 }
 
 /* For web scanner */
-#html5-qrcode-scanner {
+#html5-qrcode-scanner, #qr-reader {
   width: 100%;
   max-width: 500px;
   margin: 0 auto;
   padding: 20px 0;
+}
+
+/* Hide UI elements when scanner is active */
+body.scanner-active ion-content > * {
+  display: none;
 }
