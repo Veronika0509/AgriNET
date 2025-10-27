@@ -227,6 +227,8 @@ const MapPage: React.FC<MapProps> = (props) => {
   const [unitLatitude, setUnitLatitude] = useState<string>('');
   const [unitLongitude, setUnitLongitude] = useState<string>('');
   const [selectedSite, setSelectedSite] = useState<string>(props.selectedSiteForAddUnit || '');
+  const [selectedSiteGroup, setSelectedSiteGroup] = useState<string>('');
+  const [siteGroups, setSiteGroups] = useState<Array<{id: string | number; name: string}>>([]);
   
   // Initialize coordinates when component mounts or props change
   useEffect(() => {
@@ -384,6 +386,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Track form validation errors
   const [formErrors, setFormErrors] = useState({
     site: false,
+    siteGroup: false,
     unitName: false,
     latitude: false,
     longitude: false,
@@ -801,13 +804,17 @@ const MapPage: React.FC<MapProps> = (props) => {
           // If data is valid, use it
           if (data && (Array.isArray(data) || typeof data === 'object')) {
             console.log('User site groups loaded successfully:', data);
+            // Store site groups in state
+            setSiteGroups(Array.isArray(data) ? data : defaultSiteGroups);
             return data;
           }
           // Otherwise use defaults
+          setSiteGroups(defaultSiteGroups);
           return defaultSiteGroups;
         })
         .catch(error => {
           console.error('Error fetching user site groups:', error);
+          setSiteGroups(defaultSiteGroups);
           return defaultSiteGroups;
         });
     }
@@ -2112,6 +2119,123 @@ const MapPage: React.FC<MapProps> = (props) => {
                   </IonButton>
                 </IonItem>
 
+                {/* Site Group Selection */}
+                <IonItem 
+                  className={s.addUnitFormItem}
+                  style={{
+                    '--background': 'transparent',
+                    '--background-hover': 'transparent',
+                    '--background-activated': 'transparent',
+                    '--background-focused': 'transparent',
+                    '--border-radius': '8px',
+                    '--padding-start': '0 !important',
+                    '--padding-end': '0 !important',
+                    '--padding-top': '0',
+                    '--padding-bottom': '0',
+                    '--inner-padding-start': '0 !important',
+                    '--transition': 'all 0.3s ease',
+                    '--border': '1px solid #666666',
+                    '--highlight-color-invalid': 'transparent',
+                    '--highlight-color-valid': 'transparent',
+                    '--highlight-color-focused': 'transparent',
+                    '--color': 'inherit',
+                    '--ripple-color': 'transparent',
+                    '--inner-padding-top': '0',
+                    '--inner-padding-bottom': '0',
+                    '--inner-border-width': '0',
+                    '--inner-padding-end': '0 !important',
+                    'display': 'flex',
+                    'flex-direction': 'column',
+                    'align-items': 'stretch',
+                    'margin': '0',
+                  }}
+                >
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    padding: '0',
+                    margin: '0'
+                  }}>
+                    <IonLabel 
+                      style={{ 
+                        color: '#666666',
+                        opacity: '0.8',
+                        margin: '0',
+                        padding: '0'
+                      }}
+                    >
+                      Site Group
+                    </IonLabel>
+                    <div style={{ 
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      paddingRight: '0'
+                    }}>
+                      <style dangerouslySetInnerHTML={{__html: `
+                        #site-group-select::part(placeholder) {
+                          color: #666666 !important;
+                          opacity: 1 !important;
+                        }
+                        #site-group-select::part(text) {
+                          color: #666666 !important;
+                          opacity: 0.8 !important;
+                        }
+                        #site-group-select::part(icon) {
+                          color: #666666 !important;
+                          opacity: 0.8 !important;
+                        }
+                      `}} />
+                      <IonSelect 
+                        id="site-group-select"
+                        placeholder="Site Group"
+                        style={{ 
+                          width: 'auto',
+                          '--placeholder-color': '#666666',
+                          '--color': '#666666',
+                          '--background': 'transparent',
+                          '--background-hover': 'transparent',
+                          '--background-focused': 'transparent',
+                          '--border': 'none',
+                          '--border-radius': '4px',
+                          '--placeholder-opacity': '0.8',
+                          '--padding-start': '0',
+                          '--padding-end': '3px',
+                          '--highlight-color-focused': 'transparent',
+                          '--highlight-color-valid': 'transparent',
+                          '--highlight-color-invalid': 'transparent',
+                          '--padding-top': '0',
+                          '--padding-bottom': '0',
+                          '--opacity': '1',
+                          opacity: 1,
+                          'height': '50px',
+                          'display': 'flex',
+                          'alignItems': 'center',
+                          'textAlign': 'right',
+                          'maxWidth': '100%'
+                        }}
+                        interface="popover"
+                        value={selectedSiteGroup}
+                        onIonChange={(e) => {
+                          setSelectedSiteGroup(e.detail.value);
+                        }}
+                      >
+                        {siteGroups.length > 0 ? (
+                          siteGroups.map((group) => (
+                            <IonSelectOption key={group.id} value={group.id.toString()}>
+                              {group.name}
+                            </IonSelectOption>
+                          ))
+                        ) : (
+                          <IonSelectOption value="default">Default Group</IonSelectOption>
+                        )}
+                      </IonSelect>
+                    </div>
+                  </div>
+                </IonItem>
+
                 {/* Unit Name Field */}
                 <IonItem className={`${s.addUnitFormItem} ${formErrors.unitName ? s.addUnitFormItemError : ''}`}>
                   <IonLabel 
@@ -2538,6 +2662,7 @@ const MapPage: React.FC<MapProps> = (props) => {
                       // Validate form data (sensorPrefix может быть пустым!)
                       const hasErrors = {
                         site: !selectedSite,
+                        siteGroup: false, // Site group is optional
                         unitName: !unitName.trim(),
                         latitude: !unitLatitude,
                         longitude: !unitLongitude,
@@ -2558,6 +2683,7 @@ const MapPage: React.FC<MapProps> = (props) => {
                       const createUnit = () => {
                         const unitData = {
                           site: selectedSite,
+                          siteGroup: selectedSiteGroup,
                           name: unitName,
                           latitude: parseFloat(unitLatitude),
                           longitude: parseFloat(unitLongitude),
