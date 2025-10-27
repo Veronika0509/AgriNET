@@ -104,7 +104,15 @@ const QRScanner = () => {
   };
 
   return (
-    <IonPage>
+    <IonPage className="add-valve-page">
+      <style>
+        {`
+          .add-valve-page .qr-scanner-wrapper {
+            margin-top: 20px;
+            margin-bottom: 20px;
+          }
+        `}
+      </style>
       <IonContent className="ion-padding">
         <h1>QR Scanner</h1>
         <p>Platform: {isNative ? 'Native (iOS/Android)' : 'Web Browser'}</p>
