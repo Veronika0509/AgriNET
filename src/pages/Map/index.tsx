@@ -805,6 +805,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           if (data && (Array.isArray(data) || typeof data === 'object')) {
             console.log('User site groups loaded successfully:', data);
             // Store site groups in state
+
             setSiteGroups(Array.isArray(data) ? data : defaultSiteGroups);
             return data;
           }
