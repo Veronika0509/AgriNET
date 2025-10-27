@@ -784,11 +784,12 @@ const MapPage: React.FC<MapProps> = (props) => {
           }
         })
         .then(data => {
-          console.log('Site groups API response data:', data);
+          const datanew = ["Group1", "Group2", "Group3"]
+          console.log('Site groups API response data:', datanew);
           
           // Set site groups if data is valid and not empty
-          if (data && Array.isArray(data) && data.length > 0) {
-            setSiteGroups(data);
+          if (datanew && Array.isArray(datanew) && datanew.length > 0) {
+            setSiteGroups(datanew);
           } else {
             // Clear site groups if data is empty
             setSiteGroups([]);
