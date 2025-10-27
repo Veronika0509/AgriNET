@@ -1,0 +1,99 @@
+/* Create Modal Styles */
+.createModalContent {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.sensorInfo {
+  background-color: #f0f8ff;
+  border: 1px solid #d1ecf1;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.sensorInfo h3 {
+  margin: 0 0 12px 0;
+  color: #0c5460;
+  font-size: 1.1em;
+}
+
+.sensorInfo p {
+  margin: 4px 0;
+  color: #495057;
+}
+
+.createModalItem {
+  --padding-start: 0;
+}
+
+.createModalItem:hover {
+  --background: transparent !important;
+}
+
+.createModalItemLabel {
+  color: #999 !important;
+}
+
+.createModalSelect::part(label) {
+  color: #999 !important;
+}
+
+.createTimePickerModal {
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.createTimezoneItem {
+  border-bottom: 2px solid #33db64;
+}
+
+.createTimezoneItem[class*="item-interactive"]  {
+  --border-width: 0;
+}
+
+.createTimezoneItem[class*="item-has-focus"]  {
+  --highlight-background: transparent !important;
+  border-color: #05a55a;
+}
+
+.createModalItemCheckbox {
+  color: #999;
+}
+
+.createPulseCountItem::part(native) {
+  --inner-border-width: 0;
+  --inner-padding-end: 0;
+}
+
+.createPulseCountInput {
+  text-align: right;
+  flex: 1;
+}
+
+.createPulseCountInput > label > div:nth-child(1) {
+  color: #999;
+}
+
+.createPulseCountItem {
+  border-bottom: 2px solid #33db64;
+  display: flex;
+  align-items: center;
+}
+
+.createPulseCountItem:has(.createPulseCountInput:global(.has-focus)) {
+  border-color: #05a55a;
+}
+
+.createPulseButton, .createButton {
+  margin: 0;
+}
+
+.createPulseButton::part(native) {
+  padding: 0;
+}
+
+.createButton {
+  width: 100%;
+  margin-top: 5px;
+}

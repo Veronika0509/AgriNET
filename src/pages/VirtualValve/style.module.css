@@ -1,0 +1,86 @@
+/*  Header  */
+.header_mainToolbar {
+  --min-height: auto;
+}
+
+.header_contentWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  gap: 16px;
+}
+
+.header_titleSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header_backIcon {
+  cursor: pointer;
+}
+
+.header_title {
+  padding: 0;
+  margin-left: 10px;
+  text-align: left;
+}
+
+@media only screen and (max-width: 640px) {
+  .header_contentWrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}
+
+/* Settings Styles */
+.settingsWrapper {
+  width: 100%;
+}
+
+.settingsInputWrapper {
+  --padding-start: 0;
+  width: 500px;
+  margin: 0 auto;
+  outline: none;
+  border-bottom: 2px solid #33db64;
+  transition: 0.1s;
+}
+
+.settingsInputWrapper:nth-child(1) {
+  margin-top: 40px;
+}
+
+.settingsInputWrapper::part(native) {
+  --inner-border-width: 0;
+}
+
+.settingsInputWrapper:has(.settingsInput:global(.has-focus)) {
+  border-color: var(--ion-color-primary);
+  border-width: 2px;
+}
+
+.settingsInput > label > div:nth-child(1) {
+  color: #999;
+  min-width: 175px;
+}
+
+.settingsWrongInput {
+  border-color: var(--ion-color-danger) !important;
+}
+
+.settingsInputConcurrentWrapper {
+  border-bottom: 1px solid #dedede;
+  transition: 0.1s;
+}
+
+.settingsButton {
+  width: 500px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+}
+
