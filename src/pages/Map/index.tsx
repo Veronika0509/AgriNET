@@ -17,7 +17,9 @@ import {
   IonToolbar,
   IonTitle,
   IonButtons,
-  IonCheckbox
+  IonCheckbox,
+  IonModal,
+  IonHeader
 } from '@ionic/react';
 import SensorSelector from '../VirtualValve/components/TimezoneSelector';
 import { useHistory } from 'react-router-dom';
@@ -95,6 +97,8 @@ import Header from "./components/Header";
 import {initializeMoistCustomOverlay} from "./components/types/moist/MoistCustomOverlay";
 import {getSiteList} from "./data/getSiteList";
 import {getLayers} from "./data/getLayers";
+import QRCodeScanner from "../../components/QRCodeScanner";
+import SimpleCamera from "../../components/SimpleCamera";
 import {createMap} from "./functions/createMap";
 import {createSites} from "./functions/createSites";
 import {createMoistChartForOverlay} from "./functions/types/moist/createMoistChartForOverlay";
@@ -953,6 +957,10 @@ const MapPage: React.FC<MapProps> = (props) => {
   
   // LayerList state
   const [checkedLayers, setCheckedLayers] = useState<{[key: string]: boolean}>({});
+  
+  // QR Scanner state
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [scannedQRData, setScannedQRData] = useState<string | null>(null);
   
   const history = useHistory();
 
@@ -1942,44 +1950,17 @@ const MapPage: React.FC<MapProps> = (props) => {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                 }}>
-                  {/* Only show camera button on mobile devices */}
-                  {isMobileView && (
-                    <IonButton fill='outline' size="default" style={{
-                        width: '100%',
-                        height: '36px'
-                      }} onClick={() => {
-                        const showCameraErrorAlert = () => {
-                          presentAlert({
-                            header: 'Error',
-                            message: 'App met some problems during taking picture, please try again',
-                            buttons: [
-                              {
-                                text: 'Cancel',
-                                role: 'cancel',
-                                cssClass: 'alert-button-cancel'
-                              },
-                              {
-                                text: 'Retry',
-                                cssClass: 'alert-button-confirm',
-                                handler: () => {
-                                  // This will close the alert and then reopen it
-                                  setTimeout(() => {
-                                    showCameraErrorAlert();
-                                  }, 300);
-                                  return true;
-                                }
-                              }
-                            ]
-                          });
-                        };
-                        
-                        // Show the alert when button is clicked
-                        showCameraErrorAlert();
-                      }}>
-                      <IonIcon icon={cameraOutline} slot="start" />
-                      TAKE A PICTURE
-                    </IonButton>
-                  )}
+                  {/* QR Scanner button - now available on all platforms */}
+                  <IonButton fill='outline' size="default" style={{
+                      width: '100%',
+                      height: '36px'
+                    }} onClick={() => {
+                      // Open QR Scanner modal
+                      setShowQRScanner(true);
+                    }}>
+                    <IonIcon icon={cameraOutline} slot="start" />
+                    SCAN QR CODE
+                  </IonButton>
                   <IonButton 
                     fill="outline"
                     size="default"
@@ -2638,6 +2619,21 @@ const MapPage: React.FC<MapProps> = (props) => {
                       const userRole = localStorage.getItem('userRole');
                       console.log('ADD UNIT button clicked. User role:', userRole || 'No role found');
                       
+                      // Log current date in user's timezone
+                      const currentDate = new Date();
+                      const year = currentDate.getFullYear();
+                      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                      const day = String(currentDate.getDate()).padStart(2, '0');
+                      const formattedDate = `${year}-${month}-${day}`;
+                      
+                      // Get timezone offset in hours (getTimezoneOffset returns minutes, negative for east of UTC)
+                      const offsetMinutes = currentDate.getTimezoneOffset();
+                      const offsetHours = -offsetMinutes / 60; // Invert sign because getTimezoneOffset is inverted
+                      const userTimezone = offsetHours >= 0 ? `+${offsetHours}` : `${offsetHours}`;
+                      
+                      console.log('Current date (YYYY-MM-DD):', formattedDate);
+                      console.log('User timezone (UTC offset):', userTimezone);
+                      
                       // Check if user is in Demo mode
                       if (userRole === 'Demo') {
                         presentAlert({
@@ -2846,6 +2842,65 @@ const MapPage: React.FC<MapProps> = (props) => {
           selectedSensor={selectedSensor}
           sensors={availableSensors}
         />
+
+        {/* QR Scanner Modal */}
+        <IonModal isOpen={showQRScanner} onDidDismiss={() => setShowQRScanner(false)}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Scan Valve QR Code</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setShowQRScanner(false)}>Close</IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent fullscreen style={{ '--padding-top': '0', '--padding-bottom': '0', '--padding-start': '0', '--padding-end': '0' } as React.CSSProperties}>
+            {/* <SimpleCamera /> */}
+            <QRCodeScanner 
+              onScanSuccess={(decodedText: string) => {
+                console.log('QR Code scanned:', decodedText);
+                setScannedQRData(decodedText);
+                setShowQRScanner(false);
+                
+                // Show success message
+                present[0]({
+                  message: `QR Code scanned: ${decodedText}`,
+                  duration: 3000,
+                  color: 'success',
+                  position: 'top'
+                });
+
+                // Parse and handle the QR code data
+                // Expected format could be: valve_id:XXXXX or JSON data
+                try {
+                  // Try to parse as JSON first
+                  const data = JSON.parse(decodedText);
+                  console.log('Parsed QR data:', data);
+                  // Handle valve registration here
+                } catch {
+                  // If not JSON, treat as simple valve ID
+                  console.log('Valve ID:', decodedText);
+                  // Handle valve ID here
+                }
+              }}
+              onScanError={(error: string) => {
+                console.error('QR scan error:', error);
+                // Only show error if it's not a permission denied (already handled in component)
+                if (!error.includes('permission')) {
+                  present[0]({
+                    message: `Camera error: ${error}`,
+                    duration: 3000,
+                    color: 'danger',
+                    position: 'top'
+                  });
+                }
+              }}
+              onScanCancel={() => {
+                console.log('QR scan cancelled');
+                setShowQRScanner(false);
+              }}
+            />
+          </IonContent>
+        </IonModal>
       </IonContent>
     </IonPage>
   )
