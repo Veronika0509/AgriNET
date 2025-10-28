@@ -387,6 +387,9 @@ const MapPage: React.FC<MapProps> = (props) => {
   const [layerMapping, setLayerMapping] = useState<{ [key: string]: string }>({});
   const [isLoadingLayers, setIsLoadingLayers] = useState<boolean>(false);
   
+  // New layer creation state
+  const [presentEmptyLayerNameAlert] = useIonAlert();
+  
   // Track form validation errors
   const [formErrors, setFormErrors] = useState({
     site: false,
@@ -466,6 +469,24 @@ const MapPage: React.FC<MapProps> = (props) => {
     return { isValid: true };
   };
 
+  // Function to check if layer name is valid
+  const isLayerNameValid = (layerName: string): { isValid: boolean; error?: string } => {
+    if (!layerName || !layerName.trim()) {
+      return { isValid: false, error: 'Layer name cannot be empty' };
+    }
+    
+    const trimmedName = layerName.trim();
+    const layerExists = layers.some(layer => 
+      layer.name.toLowerCase() === trimmedName.toLowerCase()
+    );
+    
+    if (layerExists) {
+      return { isValid: false, error: 'A layer with this name already exists' };
+    }
+    
+    return { isValid: true };
+  };
+
   // Function to create a new site
   const handleCreateNewSite = async (siteName: string): Promise<Site | null> => {
     
@@ -511,6 +532,54 @@ const MapPage: React.FC<MapProps> = (props) => {
       props.setSelectedSiteForAddUnit(trimmedName);
       
       return newSite;
+    } catch (error) {
+      throw error; // Пробрасываем ошибку дальше
+    }
+  };
+
+  // Function to create a new layer
+  const handleCreateNewLayer = async (layerName: string): Promise<{id: string; name: string; value: string} | null> => {
+    
+    if (!layerName || !layerName.trim()) {
+      // This should never happen as we check this before calling handleCreateNewLayer
+      return null;
+    }
+    
+    const validation = isLayerNameValid(layerName);
+    
+    if (!validation.isValid) {
+      // Show error for duplicate name using the main alert
+      try {
+        await presentAlert({
+          header: 'Error',
+          message: validation.error || 'Invalid layer name',
+          buttons: ['OK']
+        });
+      } catch (error) {
+      }
+      return null;
+    }
+    
+    try {
+      const trimmedName = layerName.trim();
+      
+      // Create new layer object
+      const newLayer = {
+        id: trimmedName.toLowerCase(),
+        name: trimmedName,
+        value: trimmedName.toLowerCase()
+      };
+      
+      // Update the layers list
+      setLayers(prev => {
+        const newList = [...prev, newLayer];
+        return newList;
+      });
+      
+      // Select the new layer
+      setSelectedLayer(newLayer.value);
+      
+      return newLayer;
     } catch (error) {
       throw error; // Пробрасываем ошибку дальше
     }
@@ -631,6 +700,131 @@ const MapPage: React.FC<MapProps> = (props) => {
             try {
               const result = await handleCreateNewSite(siteName);
               // Return true only if site was created successfully
+              return result !== null;
+            } catch (error) {
+              return false; // Keep dialog open on error
+            }
+          }
+        }
+      ]
+    });
+  };
+
+  // Create New Layer Alert function
+  const showCreateNewLayerAlert = () => {
+    
+    // Проверяем, что presentAlert инициализирован
+    if (typeof presentAlert !== 'function' || typeof presentEmptyLayerNameAlert !== 'function') {
+      return;
+    }
+    
+    presentAlert({
+      header: 'Create new layer',
+      cssClass: 'create-layer-alert',
+      backdropDismiss: false, // Prevent closing on backdrop click
+      inputs: [
+        {
+          name: 'layerName',
+          placeholder: 'Enter a layer name',
+          type: 'text',
+          cssClass: s.alarm_actionInput,
+          attributes: {
+            required: true,
+            minlength: 1
+          },
+          value: ''
+        }
+      ],
+      buttons: [
+        {
+          text: 'CANCEL',
+          role: 'cancel',
+          handler: () => {
+            return true; // Allow dialog to close
+          }
+        },
+        {
+          text: 'CREATE',
+          role: 'confirm',
+          handler: async (data: any) => {
+            const layerName = data?.layerName || '';
+            
+            // If field is empty, show error alert
+            if (!layerName || !layerName.trim()) {
+              
+              try {
+                const result = await new Promise<boolean>((resolve) => {
+                  presentEmptyLayerNameAlert({
+                    header: 'Error',
+                    message: 'Layer name cannot be empty',
+                    backdropDismiss: false,
+                    buttons: [
+                      {
+                        text: 'Cancel',
+                        role: 'cancel',
+                        handler: () => {
+                          resolve(false); // Close both dialogs
+                          return false;
+                        }
+                      },
+                      {
+                        text: 'Retry',
+                        handler: () => {
+                          resolve(true); // Keep create dialog open
+                          return true;
+                        }
+                      }
+                    ]
+                  });
+                });
+                
+                return result; // true to keep dialog open, false to close
+              } catch (error) {
+                return false; // Close dialog on error
+              }
+            }
+            
+            // Check if layer with this name already exists
+            const layerExists = layers.some(layer => 
+              layer.name.toLowerCase() === layerName.toLowerCase()
+            );
+            
+            if (layerExists) {
+              try {
+                const result = await new Promise<boolean>((resolve) => {
+                  presentEmptyLayerNameAlert({
+                    header: 'Error',
+                    message: 'A layer with this name already exists',
+                    backdropDismiss: false,
+                    buttons: [
+                      {
+                        text: 'Cancel',
+                        role: 'cancel',
+                        handler: () => {
+                          resolve(false); // Close both dialogs
+                          return false;
+                        }
+                      },
+                      {
+                        text: 'Retry',
+                        handler: () => {
+                          resolve(true); // Keep create dialog open
+                          return true;
+                        }
+                      }
+                    ]
+                  });
+                });
+                return result; // true to keep dialog open, false to close
+              } catch (error) {
+                return false; // Close dialog on error
+              }
+            }
+            
+            // For non-empty and unique names, proceed with layer creation
+            try {
+              const result = await handleCreateNewLayer(layerName);
+              // Return true only if layer was created successfully
               return result !== null;
             } catch (error) {
               return false; // Keep dialog open on error
@@ -2430,7 +2624,8 @@ const MapPage: React.FC<MapProps> = (props) => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'flex-end',
-                      paddingRight: '0'
+                      paddingRight: '0',
+                      gap: '8px'
                     }}>
                       <style dangerouslySetInnerHTML={{__html: `
                         #layer-select-error::part(placeholder) {
@@ -2508,6 +2703,29 @@ const MapPage: React.FC<MapProps> = (props) => {
                           </>
                         )}
                       </IonSelect>
+                      <IonButton 
+                        fill="outline" 
+                        size="small" 
+                        onClick={(e) => {
+                          showCreateNewLayerAlert();
+                        }}
+                        style={{
+                          '--background': 'transparent',
+                          '--border-color': 'var(--ion-color-primary)',
+                          '--color': 'var(--ion-color-primary)',
+                          '--border-radius': '4px',
+                          '--padding-start': '8px',
+                          '--padding-end': '8px',
+                          'height': '32px',
+                          'font-size': '12px',
+                          'font-weight': '500',
+                          'text-transform': 'uppercase',
+                          'letter-spacing': '0.5px',
+                          'margin-left': '8px'
+                        }}
+                      >
+                        New Layer
+                      </IonButton>
                     </div>
                   </div>
                   {selectedLayer && layerMapping[selectedLayer] && (
