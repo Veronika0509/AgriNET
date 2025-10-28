@@ -2572,218 +2572,52 @@ const MapPage: React.FC<MapProps> = (props) => {
                 </IonItem>
 
                 {/* Layer Field */}
-                <IonItem 
-                  className={`${s.addUnitFormItem} ${formErrors.layer || moistLevelError ? s.addUnitFormItemError : ''}`}
-                  style={{
-                    '--background': 'transparent',
-                    '--background-hover': 'transparent',
-                    '--background-activated': 'transparent',
-                    '--background-focused': 'transparent',
-                    '--border-radius': '8px',
-                    '--padding-start': '0 !important',
-                    '--padding-end': '0 !important',
-                    '--padding-top': '0',
-                    '--padding-bottom': '0',
-                    '--inner-padding-start': '0 !important',
-                    '--transition': 'all 0.3s ease',
-                    '--border': formErrors.layer ? '1px solid var(--ion-color-danger)' : '1px solid #666666',
-                    '--highlight-color-invalid': 'transparent',
-                    '--highlight-color-valid': 'transparent',
-                    '--highlight-color-focused': 'transparent',
-                    '--color': formErrors.layer ? 'var(--ion-color-danger)' : 'inherit',
-                    '--ripple-color': 'transparent',
-                    '--inner-padding-top': '0',
-                    '--inner-padding-bottom': '0',
-                    '--inner-border-width': '0',
-                    '--inner-padding-end': '0 !important',
-                    'display': 'flex',
-                    'flex-direction': 'column',
-                    'align-items': 'stretch',
-                    'margin': '0',
-                  }}
-                >
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    padding: '0',
-                    margin: '0'
-                  }}>
-                    <IonLabel 
-                      style={{ 
-                        color: formErrors.layer ? 'var(--ion-color-danger)' : '#666666',
-                        opacity: formErrors.layer ? '1' : '0.8',
-                        margin: '0',
-                        padding: '0'
-                      }}
-                    >
-                      Layer
-                    </IonLabel>
-                    <div style={{ 
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'flex-end',
-                      paddingRight: '0'
-                    }}>
-                      <style dangerouslySetInnerHTML={{__html: `
-                        #layer-select-error::part(placeholder) {
-                          color: ${formErrors.layer ? 'var(--ion-color-danger)' : '#666666'} !important;
-                          opacity: 1 !important;
-                        }
-                        #layer-select-error::part(text) {
-                          color: ${formErrors.layer ? 'var(--ion-color-danger)' : '#666666'} !important;
-                          opacity: ${formErrors.layer ? '1' : '0.8'} !important;
-                        }
-                        #layer-select-error::part(icon) {
-                          color: ${formErrors.layer ? 'var(--ion-color-danger)' : '#666666'} !important;
-                          opacity: ${formErrors.layer ? '1' : '0.8'} !important;
-                        }
-                      `}} />
-                      <IonSelect 
-                        id="layer-select-error"
-                        placeholder="Layer"
-                        style={{ 
-                          width: 'auto',
-                          '--placeholder-color': formErrors.layer ? 'var(--ion-color-danger)' : '#666666',
-                          '--color': formErrors.layer ? 'var(--ion-color-danger)' : '#666666',
-                          '--background': 'transparent',
-                          '--background-hover': 'transparent',
-                          '--background-focused': 'transparent',
-                          '--border': 'none',
-                          '--border-radius': '4px',
-                          '--placeholder-opacity': formErrors.layer ? '1' : '0.8',
-                          '--padding-start': '0',
-                          '--padding-end': '3px',
-                          '--highlight-color-focused': 'transparent',
-                          '--highlight-color-valid': 'transparent',
-                          '--highlight-color-invalid': 'transparent',
-                          '--padding-top': '0',
-                          '--padding-bottom': '0',
-                          '--opacity': '1',
-                          opacity: 1,
-                          'height': '50px',
-                          'display': 'flex',
-                          'alignItems': 'center',
-                          'textAlign': 'right',
-                          'maxWidth': '100%'
-                        }}
-                        className={formErrors.layer ? 'select-error ion-invalid ion-touched' : ''}
-                        interface="popover"
-                        value={selectedLayer}
-                        onIonChange={(e) => {
-                          const selectedLayerValue = e.detail.value;
-                          
-                          // Выводим mapping для выбранного слоя
-                          if (selectedLayerValue && layerMapping[selectedLayerValue]) {
-                          }
-                          
-                          setSelectedLayer(selectedLayerValue);
-                          if (selectedLayerValue && formErrors.layer) {
-                            setFormErrors(prev => ({ ...prev, layer: false }));
-                          }
-                        }}
-                      >
-                        {isLoadingLayers ? (
-                          <IonSelectOption value="" disabled>Loading layers...</IonSelectOption>
-                        ) : layers.length > 0 ? (
-                          layers.map((layer) => (
-                            <IonSelectOption key={layer.id} value={layer.value || layer.id}>
-                              {layer.name || `Layer ${layer.id}`}
-                            </IonSelectOption>
-                          ))
-                        ) : (
-                          <>
-                            <IonSelectOption value="Moist">Moist</IonSelectOption>
-                            <IonSelectOption value="Temp">Temp</IonSelectOption>
-                            <IonSelectOption value="Wxet">Wxet</IonSelectOption>
-                            <IonSelectOption value="Valve">Valve</IonSelectOption>
-                            <IonSelectOption value="Extl">Extl</IonSelectOption>
-                          </>
-                        )}
-                      </IonSelect>
-                    </div>
-                  </div>
-                  {selectedLayer && layerMapping[selectedLayer] && (
-                    <div
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'flex-start',
-                        paddingTop: '8px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-                        <img
-                          src={`https://app.agrinet.us/marker-icons/${layerMapping[selectedLayer]}.png`}
-                          alt={`${selectedLayer} layer icon`}
-                          style={{ height: '70px', width: 'auto', marginBottom: '8px' }}
-                          onError={(e) => {
-                            const img = e.target as HTMLImageElement;
-                            img.src = 'https://app.agrinet.us/marker-icons/default.png';
-                          }}
-                        />
-                        {selectedLayer.toLowerCase() === 'moist' && (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <IonInput
-                              type="number"
-                              min="1"
-                              max="12"
-                              step="1"
-                              placeholder="Sensor count"
-                              inputmode="numeric"
-                              value={moistLevel}
-                              onIonInput={(e) => {
-                                const inputValue = (e.target as HTMLIonInputElement).value;
-                                // Если инпут пустой, не показываем ошибку
-                                if (!inputValue || inputValue === '') {
-                                  setMoistLevel(undefined);
-                                  setMoistLevelError(false);
-                                  return;
-                                }
-                                const v = Number(inputValue);
-                                if (Number.isNaN(v)) {
-                                  setMoistLevelError(false);
-                                  return;
-                                }
-                                setMoistLevel(v);
-                                if (v < 1 || v > 12) {
-                                  setMoistLevelError(true);
-                                } else {
-                                  setMoistLevelError(false);
-                                }
-                              }}
-                              style={{ 
-                                width: '150px', 
-                                textAlign: 'left',
-                                '--padding-start': '0px',
-                                '--padding-end': '0px'
-                              } as React.CSSProperties}
-                            />
-                            {moistLevelError && (
-                              <div style={{ 
-                                color: 'var(--ion-color-danger)', 
-                                fontSize: '14px',
-                                marginTop: '4px'
-                              }}>
-                                Input sensor count from 1 to 12
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </IonItem>
-
-                {/* New Layer Button - positioned outside IonItem like New Site button */}
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'flex-end', 
-                  marginTop: '-8px', 
-                  marginBottom: '16px',
-                  paddingRight: '0px'
-                }}>
+                <IonItem className={s.addUnitFormItem}>
+                  <IonLabel position="fixed" color="light" style={{ minWidth: '80px', alignSelf: 'center' }}>Layer</IonLabel>
+                  <IonSelect 
+                    value={selectedLayer} 
+                    style={{ 
+                      flex: 1, 
+                      marginRight: '12px',
+                      '--color': '#000000',
+                      '--placeholder-color': '#000000',
+                      '--placeholder-opacity': '1',
+                      '--padding-start': '8px',
+                      '--background': '#ffffff',
+                      '--border': '1px solid #ccc',
+                      '--border-radius': '4px'
+                    }}
+                    onIonChange={(e) => {
+                      const selectedLayerValue = e.detail.value;
+                      
+                      // Выводим mapping для выбранного слоя
+                      if (selectedLayerValue && layerMapping[selectedLayerValue]) {
+                      }
+                      
+                      setSelectedLayer(selectedLayerValue);
+                      if (selectedLayerValue && formErrors.layer) {
+                        setFormErrors(prev => ({ ...prev, layer: false }));
+                      }
+                    }}
+                  >
+                    {isLoadingLayers ? (
+                      <IonSelectOption value="" disabled>Loading layers...</IonSelectOption>
+                    ) : layers.length > 0 ? (
+                      layers.map((layer) => (
+                        <IonSelectOption key={layer.id} value={layer.value || layer.id}>
+                          {layer.name || `Layer ${layer.id}`}
+                        </IonSelectOption>
+                      ))
+                    ) : (
+                      <>
+                        <IonSelectOption value="Moist">Moist</IonSelectOption>
+                        <IonSelectOption value="Temp">Temp</IonSelectOption>
+                        <IonSelectOption value="Wxet">Wxet</IonSelectOption>
+                        <IonSelectOption value="Valve">Valve</IonSelectOption>
+                        <IonSelectOption value="Extl">Extl</IonSelectOption>
+                      </>
+                    )}
+                  </IonSelect>
                   <IonButton 
                     fill="outline" 
                     size="small" 
@@ -2803,12 +2637,84 @@ const MapPage: React.FC<MapProps> = (props) => {
                       'font-size': '12px',
                       'font-weight': '500',
                       'text-transform': 'uppercase',
-                      'letter-spacing': '0.5px'
+                      'letter-spacing': '0.5px',
+                      'margin-left': '8px'
                     }}
                   >
                     New Layer
                   </IonButton>
-                </div>
+                </IonItem>
+
+                {/* Layer preview section */}
+                {selectedLayer && layerMapping[selectedLayer] && (
+                  <div style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'flex-start',
+                    paddingTop: '8px',
+                    paddingBottom: '16px'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                      <img
+                        src={`https://app.agrinet.us/marker-icons/${layerMapping[selectedLayer]}.png`}
+                        alt={`${selectedLayer} layer icon`}
+                        style={{ height: '70px', width: 'auto', marginBottom: '8px' }}
+                        onError={(e) => {
+                          const img = e.target as HTMLImageElement;
+                          img.src = 'https://app.agrinet.us/marker-icons/default.png';
+                        }}
+                      />
+                      {selectedLayer.toLowerCase() === 'moist' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <IonInput
+                            type="number"
+                            min="1"
+                            max="12"
+                            step="1"
+                            placeholder="Sensor count"
+                            inputmode="numeric"
+                            value={moistLevel}
+                            onIonInput={(e) => {
+                              const inputValue = (e.target as HTMLIonInputElement).value;
+                              // Если инпут пустой, не показываем ошибку
+                              if (!inputValue || inputValue === '') {
+                                setMoistLevel(undefined);
+                                setMoistLevelError(false);
+                                return;
+                              }
+                              const v = Number(inputValue);
+                              if (Number.isNaN(v)) {
+                                setMoistLevelError(false);
+                                return;
+                              }
+                              setMoistLevel(v);
+                              if (v < 1 || v > 12) {
+                                setMoistLevelError(true);
+                              } else {
+                                setMoistLevelError(false);
+                              }
+                            }}
+                            style={{ 
+                              width: '150px', 
+                              textAlign: 'left',
+                              '--padding-start': '0px',
+                              '--padding-end': '0px'
+                            } as React.CSSProperties}
+                          />
+                          {moistLevelError && (
+                            <div style={{ 
+                              color: 'var(--ion-color-danger)', 
+                              fontSize: '14px',
+                              marginTop: '4px'
+                            }}>
+                              Input sensor count from 1 to 12
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Request Hardware Field */}
                 <IonItem className={s.addUnitFormItem}>
