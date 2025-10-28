@@ -2624,8 +2624,7 @@ const MapPage: React.FC<MapProps> = (props) => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'flex-end',
-                      paddingRight: '0',
-                      gap: '8px'
+                      paddingRight: '0'
                     }}>
                       <style dangerouslySetInnerHTML={{__html: `
                         #layer-select-error::part(placeholder) {
@@ -2703,31 +2702,6 @@ const MapPage: React.FC<MapProps> = (props) => {
                           </>
                         )}
                       </IonSelect>
-                      <IonButton 
-                        fill="outline" 
-                        size="small" 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          showCreateNewLayerAlert();
-                        }}
-                        style={{
-                          '--background': 'transparent',
-                          '--border-color': 'var(--ion-color-primary)',
-                          '--color': 'var(--ion-color-primary)',
-                          '--border-radius': '4px',
-                          '--padding-start': '8px',
-                          '--padding-end': '8px',
-                          'height': '32px',
-                          'font-size': '12px',
-                          'font-weight': '500',
-                          'text-transform': 'uppercase',
-                          'letter-spacing': '0.5px',
-                          'margin-left': '8px'
-                        }}
-                      >
-                        New Layer
-                      </IonButton>
                     </div>
                   </div>
                   {selectedLayer && layerMapping[selectedLayer] && (
@@ -2801,6 +2775,40 @@ const MapPage: React.FC<MapProps> = (props) => {
                     </div>
                   )}
                 </IonItem>
+
+                {/* New Layer Button - positioned outside IonItem to avoid selector conflicts */}
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'flex-end', 
+                  marginTop: '-8px', 
+                  marginBottom: '16px',
+                  paddingRight: '0px'
+                }}>
+                  <IonButton 
+                    fill="outline" 
+                    size="small" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      showCreateNewLayerAlert();
+                    }}
+                    style={{
+                      '--background': 'transparent',
+                      '--border-color': 'var(--ion-color-primary)',
+                      '--color': 'var(--ion-color-primary)',
+                      '--border-radius': '4px',
+                      '--padding-start': '8px',
+                      '--padding-end': '8px',
+                      'height': '32px',
+                      'font-size': '12px',
+                      'font-weight': '500',
+                      'text-transform': 'uppercase',
+                      'letter-spacing': '0.5px'
+                    }}
+                  >
+                    New Layer
+                  </IonButton>
+                </div>
 
                 {/* Request Hardware Field */}
                 <IonItem className={s.addUnitFormItem}>
