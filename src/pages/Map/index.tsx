@@ -2637,8 +2637,7 @@ const MapPage: React.FC<MapProps> = (props) => {
                       'font-size': '12px',
                       'font-weight': '500',
                       'text-transform': 'uppercase',
-                      'letter-spacing': '0.5px',
-                      'margin-left': '8px'
+                      'letter-spacing': '0.5px'
                     }}
                   >
                     New Layer
