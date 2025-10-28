@@ -2707,6 +2707,8 @@ const MapPage: React.FC<MapProps> = (props) => {
                         fill="outline" 
                         size="small" 
                         onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           showCreateNewLayerAlert();
                         }}
                         style={{
