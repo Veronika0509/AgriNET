@@ -714,7 +714,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   const showCreateNewLayerAlert = () => {
     
     // Проверяем, что presentAlert инициализирован
-    if (typeof presentAlert !== 'function' || typeof presentEmptyLayerNameAlert !== 'function') {
+    if (typeof presentAlert !== 'function' || typeof presentEmptyNameAlert !== 'function') {
       return;
     }
     
@@ -754,7 +754,7 @@ const MapPage: React.FC<MapProps> = (props) => {
               
               try {
                 const result = await new Promise<boolean>((resolve) => {
-                  presentEmptyLayerNameAlert({
+                  presentEmptyNameAlert({
                     header: 'Error',
                     message: 'Layer name cannot be empty',
                     backdropDismiss: false,
@@ -792,7 +792,7 @@ const MapPage: React.FC<MapProps> = (props) => {
             if (layerExists) {
               try {
                 const result = await new Promise<boolean>((resolve) => {
-                  presentEmptyLayerNameAlert({
+                  presentEmptyNameAlert({
                     header: 'Error',
                     message: 'A layer with this name already exists',
                     backdropDismiss: false,
