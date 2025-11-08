@@ -30,7 +30,6 @@ const QRScannerPage: React.FC = () => {
   };
 
   const handleScanCancel = () => {
-    console.log('Scan was cancelled');
   };
 
   const clearResults = () => {

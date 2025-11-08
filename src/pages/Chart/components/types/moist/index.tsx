@@ -444,7 +444,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           )
         } else if (updateReason === "dates") {
           const newSumChartData: ChartResponse = await getSumChartData(props.sensorId, historicMode, days, endDateDays)
-          console.log(newSumChartData.data)
           setCurrentSumChartData(newSumChartData.data)
 
           if (isMoistCommentsShowed) {

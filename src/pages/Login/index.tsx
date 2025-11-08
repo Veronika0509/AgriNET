@@ -33,7 +33,6 @@ const Login: React.FC<LoginProps> = (props) => {
         password: passwordInputValue,
       },
     }).then(response => {
-      console.log('User role:', response.data.role);
       if (response.data.role) {
         localStorage.setItem('userRole', response.data.role);
       }

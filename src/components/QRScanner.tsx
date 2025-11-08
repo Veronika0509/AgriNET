@@ -15,18 +15,13 @@ const QRScanner = () => {
   // ===== NATIVE SCANNER (iOS/Android) =====
   
   const scanNative = async () => {
-    console.log('[v0] Starting native scan (iOS/Android)...');
-    
     // Request camera permission
     const permission = await BarcodeScanner.checkPermission({ force: true });
     
     if (!permission.granted) {
-      console.log('[v0] Camera permission denied');
       alert('Camera permission denied');
       return;
     }
-    
-    console.log('[v0] Camera permission granted');
     setIsScanning(true);
     
     // Make background transparent so camera is visible
@@ -42,15 +37,12 @@ const QRScanner = () => {
     // Log result to console
     if (result.hasContent) {
       console.log('[v0] QR Code Data:', result.content);
-    } else {
-      console.log('[v0] No QR code detected');
     }
   };
 
   // ===== WEB SCANNER (Browser) =====
   
   const scanWeb = () => {
-    console.log('[v0] Starting web scan (Browser)...');
     setIsScanning(true);
     
     // Create scanner instance

@@ -8,32 +8,71 @@ interface QRCodeScannerProps {
   onScanSuccess: (decodedText: string) => void;
   onScanError?: (error: string) => void;
   onScanCancel?: () => void;
+  autoStart?: boolean;
 }
 
-const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ 
-  onScanSuccess, 
-  onScanError = () => {}, 
-  onScanCancel = () => {} 
+const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
+  onScanSuccess,
+  onScanError = () => {},
+  onScanCancel = () => {},
+  autoStart = false
 }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [isPermissionGranted, setIsPermissionGranted] = useState(false);
+  const [shouldStartScan, setShouldStartScan] = useState(false);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
+  const scannerContainerRef = useRef<HTMLDivElement | null>(null);
   const scannerContainerId = 'html5-qrcode-scanner';
 
   const isMobile = isPlatform('ios') || isPlatform('android');
 
+  // Cleanup on unmount
   useEffect(() => {
-    // Cleanup function
     return () => {
+      if (html5QrCodeRef.current) {
+        try {
+          const scannerState = html5QrCodeRef.current.getState();
+          if (scannerState === 2) { // 2 = SCANNING state
+            html5QrCodeRef.current.stop().catch(error => {
+              console.error('Error stopping html5QrCode scanner:', error);
+            });
+          }
+          html5QrCodeRef.current.clear();
+        } catch (error) {
+          console.error('Error cleaning up scanner:', error);
+        }
+      }
       if (isMobile) {
-        stopNativeScan();
-      } else if (html5QrCodeRef.current) {
-        html5QrCodeRef.current.stop().catch(error => {
-          console.error('Error stopping html5QrCode scanner:', error);
-        });
+        BarcodeScanner.showBackground();
+        BarcodeScanner.stopScan();
+        document.body.classList.remove('scanner-active');
+        document.querySelector('ion-content')?.classList.remove('scanner-active');
       }
     };
-  }, []);
+  }, [isMobile]);
+
+  // Start scanning when shouldStartScan becomes true
+  useEffect(() => {
+    const initiateScan = async () => {
+      if (isMobile) {
+        await startNativeScan();
+      } else {
+        await startWebScan();
+      }
+    };
+
+    if (shouldStartScan && isScanning) {
+      initiateScan();
+      setShouldStartScan(false);
+    }
+  }, [shouldStartScan, isScanning, isMobile]);
+
+  // Auto-start scanning when autoStart is true
+  useEffect(() => {
+    if (autoStart && !isScanning) {
+      startScan();
+    }
+  }, [autoStart]);
 
   const checkPermissions = async () => {
     if (isMobile) {
@@ -94,9 +133,29 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
 
   const startWebScan = async () => {
     try {
-      if (!html5QrCodeRef.current) {
-        html5QrCodeRef.current = new Html5Qrcode(scannerContainerId);
+      // Wait for the DOM element to be available
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Check if element exists
+      const element = document.getElementById(scannerContainerId);
+      if (!element) {
+        throw new Error('Scanner container not found in DOM');
       }
+
+      // Always create a fresh instance
+      if (html5QrCodeRef.current) {
+        try {
+          const scannerState = html5QrCodeRef.current.getState();
+          if (scannerState === 2) {
+            await html5QrCodeRef.current.stop();
+          }
+          html5QrCodeRef.current.clear();
+        } catch (e) {
+          // Scanner cleanup
+        }
+      }
+
+      html5QrCodeRef.current = new Html5Qrcode(scannerContainerId);
 
       await html5QrCodeRef.current.start(
         { facingMode: "environment" },
@@ -106,15 +165,14 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
           aspectRatio: 1.0,
         },
         (decodedText) => {
-          onScanSuccess(decodedText);
-          if (html5QrCodeRef.current) {
-            html5QrCodeRef.current.stop().catch(console.error);
-            setIsScanning(false);
-          }
+          // Successfully scanned - stop scanner and call callback
+          stopWebScan().then(() => {
+            onScanSuccess(decodedText);
+          });
         },
         (errorMessage) => {
           // This is just a failure to decode, not a critical error
-          console.log('QR code scan error:', errorMessage);
+          // Silent - no need to log decode attempts
         }
       );
     } catch (error) {
@@ -127,9 +185,23 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   const stopWebScan = async () => {
     if (html5QrCodeRef.current) {
       try {
-        await html5QrCodeRef.current.stop();
+        const scannerState = html5QrCodeRef.current.getState();
+        // Only stop if scanner is actually running
+        if (scannerState === 2) { // 2 = SCANNING state
+          await html5QrCodeRef.current.stop();
+        }
+        // Clear the scanner instance
+        html5QrCodeRef.current.clear();
+        html5QrCodeRef.current = null;
       } catch (error) {
         console.error('Error stopping web scanner:', error);
+        // Force clear even on error
+        try {
+          html5QrCodeRef.current?.clear();
+        } catch (clearError) {
+          console.error('Error clearing scanner:', clearError);
+        }
+        html5QrCodeRef.current = null;
       }
     }
     setIsScanning(false);
@@ -143,12 +215,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     }
 
     setIsScanning(true);
-    
-    if (isMobile) {
-      startNativeScan();
-    } else {
-      startWebScan();
-    }
+    setShouldStartScan(true);
   };
 
   const stopScan = () => {
@@ -163,13 +230,15 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   return (
     <div className="qr-scanner-container">
       {!isScanning ? (
-        <IonButton onClick={startScan}>
-          Scan QR Code
-        </IonButton>
+        !autoStart && (
+          <IonButton onClick={startScan}>
+            Scan QR Code
+          </IonButton>
+        )
       ) : (
         <>
           {!isMobile && (
-            <div id={scannerContainerId} style={{ width: '100%', maxWidth: '500px', margin: '0 auto' }}></div>
+            <div id={scannerContainerId} style={{ width: '100%', maxWidth: '500px', margin: '0 auto', paddingTop: '16px' }}></div>
           )}
           <IonButton onClick={stopScan} color="danger">
             Cancel Scan

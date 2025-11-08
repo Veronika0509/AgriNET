@@ -61,6 +61,6 @@ export const getIrrigationDates = async (
       })
     }
   } catch (error) {
-    console.log(error);
+    // Error handling
   }
 }

@@ -12,6 +12,7 @@ import {IonReactRouter} from '@ionic/react-router';
 import {home, informationCircle} from 'ionicons/icons';
 import {loadGoogleApi} from "./functions/loadGoogleApiFunc";
 import {useHistory} from 'react-router-dom';
+import {getSiteList} from "./pages/Map/data/getSiteList";
 
 // Типы
 import type { Site, SensorData, ChartPageType, UserId, SiteId } from './types';
@@ -65,6 +66,18 @@ const App: React.FC = () => {
   const history = useHistory();
 
   const reloadMapPage = async (): Promise<void> => {
+    // Fetch fresh site list data
+    const sites = await getSiteList(userId);
+
+    // Check if API call was successful
+    if ('success' in sites && sites.success === false) {
+      console.error('Failed to reload site list:', sites.error);
+    } else {
+      // Update site list with fresh data
+      setSiteList(sites.data);
+    }
+
+    // Force map component to remount
     setMapPageKey(prevKey => prevKey + 1);
   };
 

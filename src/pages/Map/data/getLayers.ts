@@ -38,12 +38,19 @@ export const getLayers = async (): Promise<LayersResponse> => {
       
       // Удаляем Teros и SRS из списка
       layers = layers.filter((layer: string) => layer !== 'Teros' && layer !== 'SRS');
-      
-      // Заменяем SoilTemp на TempRH
+
+      // Заменяем SoilTemp на TempRH, но избегаем дубликатов
+      // Если TempRH уже есть в списке, удаляем SoilTemp вместо замены
+      const hasTempRH = layers.includes('TempRH');
+      if (hasTempRH) {
+        // Если TempRH уже есть, удаляем SoilTemp
+        layers = layers.filter((layer: string) => layer !== 'SoilTemp');
+      }
+
       const formattedLayers = layers.map((layerName: string, index: number) => {
-        // Если это SoilTemp, заменяем на TempRH
+        // Если это SoilTemp и TempRH еще нет, заменяем на TempRH
         const name = layerName === 'SoilTemp' ? 'TempRH' : layerName;
-        
+
         return {
           id: String(index + 1),
           name: name,  // Используем (возможно измененное) имя слоя

@@ -45,11 +45,8 @@ const TestOverlays: React.FC = () => {
   // Функция для тестирования простого оверлея
   const testSimpleOverlay = () => {
     if (!map || !isGoogleApiLoaded) {
-      console.log('Map or Google API not loaded');
       return;
     }
-
-    console.log('Creating simple test overlay...');
 
     // Создаем простой кастомный оверлей
     class SimpleTestOverlay extends google.maps.OverlayView {
@@ -124,18 +121,13 @@ const TestOverlays: React.FC = () => {
     // Создаем и добавляем оверлей на карту
     const overlay = new SimpleTestOverlay(bounds);
     overlay.setMap(map);
-
-    console.log('Simple test overlay created and added to map');
   };
 
   // Функция для создания нескольких тестовых оверлеев
   const testMultipleOverlays = () => {
     if (!map || !isGoogleApiLoaded) {
-      console.log('Map or Google API not loaded');
       return;
     }
-
-    console.log('Creating multiple test overlays...');
 
     const overlayData = [
       { lat: 40.7128, lng: -74.0060, type: 'Влажность', value: '25.5%', color: '#007cff' },
@@ -219,8 +211,6 @@ const TestOverlays: React.FC = () => {
         overlay.setMap(map);
       }, index * 500); // Добавляем задержку для анимации
     });
-
-    console.log('Multiple test overlays will be created with animation');
   };
 
   return (

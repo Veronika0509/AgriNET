@@ -233,6 +233,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   const [selectedSite, setSelectedSite] = useState<string>(props.selectedSiteForAddUnit || '');
   const [selectedSiteGroup, setSelectedSiteGroup] = useState<string>('');
   const [siteGroups, setSiteGroups] = useState<Array<{id: string | number; name: string}>>([]);
+  const [siteGroupError, setSiteGroupError] = useState<{invalidGroup: string; correctGroups: string[]} | null>(null);
   
   // Initialize coordinates when component mounts or props change
   useEffect(() => {
@@ -297,12 +298,6 @@ const MapPage: React.FC<MapProps> = (props) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      console.log('All Sensor IDs from server:', data);
-      console.log('Type of data:', Array.isArray(data) ? 'Array' : typeof data);
-      if (data.length > 0) {
-        console.log('First item type:', typeof data[0]);
-        console.log('First item:', data[0]);
-      }
       return data;
     } catch (error) {
       return [];
@@ -312,23 +307,17 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Функция проверки на дубликаты sensor ID
   const checkSensorIdExists = async (sensorId: string): Promise<{ exists: boolean; layers: string[] }> => {
     const allSensorIds = await getAllSensorIds();
-    console.log('Checking for sensor ID:', sensorId);
-    console.log('Total sensor IDs in database:', allSensorIds.length);
-    
+
     // API возвращает массив строк, проверяем наличие в массиве
     const exists = allSensorIds.includes(sensorId);
-    
-    console.log('Exists in array?', exists);
-    
+
     if (exists) {
       // Получаем информацию о слое для существующего sensor ID
       try {
-        console.log('Fetching layer info for sensor ID:', sensorId);
         const response = await fetch(`https://app.agrinet.us/api/utils/${sensorId}`);
         if (response.ok) {
           const data = await response.json();
-          console.log('Sensor info from server:', data);
-          
+
           // API возвращает массив объектов, каждый объект имеет поле layer
           let layers: string[] = [];
           if (Array.isArray(data)) {
@@ -336,8 +325,6 @@ const MapPage: React.FC<MapProps> = (props) => {
               .filter(item => item.layer) // Берем только объекты с полем layer
               .map(item => item.layer);
           }
-          
-          console.log('Extracted layers:', layers);
           
           return {
             exists: true,
@@ -386,9 +373,14 @@ const MapPage: React.FC<MapProps> = (props) => {
   const [layers, setLayers] = useState<Array<{id: string; name: string; value: string}>>([]);
   const [layerMapping, setLayerMapping] = useState<{ [key: string]: string }>({});
   const [isLoadingLayers, setIsLoadingLayers] = useState<boolean>(false);
-  
+
   // New layer creation state
   const [presentEmptyLayerNameAlert] = useIonAlert();
+  const [isNewLayerModalOpen, setIsNewLayerModalOpen] = useState<boolean>(false);
+  const [newLayerName, setNewLayerName] = useState<string>('');
+  const [newLayerMarkerType, setNewLayerMarkerType] = useState<string>('fuel');
+  const [newLayerTable, setNewLayerTable] = useState<string>('');
+  const [newLayerColumn, setNewLayerColumn] = useState<string>('');
   
   // Track form validation errors
   const [formErrors, setFormErrors] = useState({
@@ -538,15 +530,20 @@ const MapPage: React.FC<MapProps> = (props) => {
   };
 
   // Function to create a new layer
-  const handleCreateNewLayer = async (layerName: string): Promise<{id: string; name: string; value: string} | null> => {
-    
+  const handleCreateNewLayer = async (
+    layerName: string,
+    markerType?: string,
+    table?: string,
+    column?: string
+  ): Promise<{id: string; name: string; value: string} | null> => {
+
     if (!layerName || !layerName.trim()) {
       // This should never happen as we check this before calling handleCreateNewLayer
       return null;
     }
-    
+
     const validation = isLayerNameValid(layerName);
-    
+
     if (!validation.isValid) {
       // Show error for duplicate name using the main alert
       try {
@@ -559,26 +556,68 @@ const MapPage: React.FC<MapProps> = (props) => {
       }
       return null;
     }
-    
+
     try {
       const trimmedName = layerName.trim();
-      
+
       // Create new layer object
       const newLayer = {
         id: trimmedName.toLowerCase(),
         name: trimmedName,
-        value: trimmedName.toLowerCase()
+        value: trimmedName.toLowerCase(),
+        markerType: markerType || 'fuel',
+        table: table || '',
+        column: column || ''
       };
-      
-      // Update the layers list
-      setLayers(prev => {
-        const newList = [...prev, newLayer];
-        return newList;
-      });
-      
-      // Select the new layer
+
+      // Save layer data to backend
+      try {
+        const response = await fetch('https://app.agrinet.us/api/map/layers', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: trimmedName,
+            markerType: markerType || 'fuel',
+            table: table || '',
+            column: column || ''
+          })
+        });
+
+        if (!response.ok) {
+          console.error('Failed to save layer to backend:', response.statusText);
+          throw new Error('Failed to save layer to backend');
+        }
+
+        // Reload layers from backend to get the updated list
+        const layersData = await getLayers();
+        setLayers(layersData.layers);
+        setLayerMapping(layersData.mapping);
+        console.log('Layers reloaded from backend after creating new layer:', layersData.layers);
+      } catch (apiError) {
+        console.error('Error saving layer to backend:', apiError);
+        // If backend save fails, add layer locally only
+        setLayers(prev => {
+          const exists = prev.some(layer => layer.id === newLayer.id);
+          if (exists) {
+            return prev;
+          }
+          return [...prev, newLayer];
+        });
+      }
+
+      // If markerType is provided, update the layerMapping
+      if (markerType) {
+        setLayerMapping(prev => ({
+          ...prev,
+          [newLayer.value]: markerType.toLowerCase()
+        }));
+      }
+
+      // Select the new layer after state update
       setSelectedLayer(newLayer.value);
-      
+
       return newLayer;
     } catch (error) {
       throw error; // Пробрасываем ошибку дальше
@@ -712,127 +751,103 @@ const MapPage: React.FC<MapProps> = (props) => {
 
   // Create New Layer Alert function
   const showCreateNewLayerAlert = () => {
-    
-    // Проверяем, что presentAlert инициализирован
-    if (typeof presentAlert !== 'function' || typeof presentEmptyNameAlert !== 'function') {
+    // Reset form fields
+    setNewLayerName('');
+    setNewLayerMarkerType('fuel');
+    setNewLayerTable('');
+    setNewLayerColumn('');
+    // Open modal
+    setIsNewLayerModalOpen(true);
+  };
+
+  // Handle new layer creation from modal
+  const handleFinishNewLayer = async () => {
+    const layerName = newLayerName.trim();
+    const markerType = newLayerMarkerType.trim();
+    const table = newLayerTable.trim();
+    const column = newLayerColumn.trim();
+
+    // Validate Layer Name
+    if (!layerName) {
+      presentEmptyNameAlert({
+        header: 'Validation Error',
+        message: 'Layer name should not be empty',
+        buttons: ['OK']
+      });
       return;
     }
-    
-    presentAlert({
-      header: 'Create new layer',
-      cssClass: 'create-layer-alert',
-      backdropDismiss: false, // Prevent closing on backdrop click
-      inputs: [
-        {
-          name: 'layerName',
-          placeholder: 'Enter a layer name',
-          type: 'text',
-          cssClass: s.alarm_actionInput,
-          attributes: {
-            required: true,
-            minlength: 1
-          },
-          value: ''
-        }
-      ],
-      buttons: [
-        {
-          text: 'CANCEL',
-          role: 'cancel',
-          handler: () => {
-            return true; // Allow dialog to close
-          }
-        },
-        {
-          text: 'CREATE',
-          role: 'confirm',
-          handler: async (data: any) => {
-            const layerName = data?.layerName || '';
-            
-            // If field is empty, show error alert
-            if (!layerName || !layerName.trim()) {
-              
-              try {
-                const result = await new Promise<boolean>((resolve) => {
-                  presentEmptyNameAlert({
-                    header: 'Error',
-                    message: 'Layer name cannot be empty',
-                    backdropDismiss: false,
-                    buttons: [
-                      {
-                        text: 'Cancel',
-                        role: 'cancel',
-                        handler: () => {
-                          resolve(false); // Close both dialogs
-                          return false;
-                        }
-                      },
-                      {
-                        text: 'Retry',
-                        handler: () => {
-                          resolve(true); // Keep create dialog open
-                          return true;
-                        }
-                      }
-                    ]
-                  });
-                });
-                
-                return result; // true to keep dialog open, false to close
-              } catch (error) {
-                return false; // Close dialog on error
-              }
-            }
-            
-            // Check if layer with this name already exists
-            const layerExists = layers.some(layer => 
-              layer.name.toLowerCase() === layerName.toLowerCase()
-            );
-            
-            if (layerExists) {
-              try {
-                const result = await new Promise<boolean>((resolve) => {
-                  presentEmptyNameAlert({
-                    header: 'Error',
-                    message: 'A layer with this name already exists',
-                    backdropDismiss: false,
-                    buttons: [
-                      {
-                        text: 'Cancel',
-                        role: 'cancel',
-                        handler: () => {
-                          resolve(false); // Close both dialogs
-                          return false;
-                        }
-                      },
-                      {
-                        text: 'Retry',
-                        handler: () => {
-                          resolve(true); // Keep create dialog open
-                          return true;
-                        }
-                      }
-                    ]
-                  });
-                });
-                return result; // true to keep dialog open, false to close
-              } catch (error) {
-                return false; // Close dialog on error
-              }
-            }
-            
-            // For non-empty and unique names, proceed with layer creation
-            try {
-              const result = await handleCreateNewLayer(layerName);
-              // Return true only if layer was created successfully
-              return result !== null;
-            } catch (error) {
-              return false; // Keep dialog open on error
-            }
-          }
-        }
-      ]
-    });
+
+    // Validate Marker Type
+    if (!markerType) {
+      presentEmptyNameAlert({
+        header: 'Validation Error',
+        message: 'Marker Type should be selected',
+        buttons: ['OK']
+      });
+      return;
+    }
+
+    // Validate Table
+    if (!table) {
+      presentEmptyNameAlert({
+        header: 'Validation Error',
+        message: 'Table should not be empty',
+        buttons: ['OK']
+      });
+      return;
+    }
+
+    // Validate Column
+    if (!column) {
+      presentEmptyNameAlert({
+        header: 'Validation Error',
+        message: 'Column should not be empty',
+        buttons: ['OK']
+      });
+      return;
+    }
+
+    // Check if layer with this name already exists
+    const layerExists = layers.some(layer =>
+      layer.name.toLowerCase() === layerName.toLowerCase()
+    );
+
+    if (layerExists) {
+      presentEmptyNameAlert({
+        header: 'Error',
+        message: 'A layer with this name already exists',
+        buttons: ['OK']
+      });
+      return;
+    }
+
+    // For non-empty and unique names, proceed with layer creation
+    try {
+      const result = await handleCreateNewLayer(
+        layerName,
+        markerType,
+        table,
+        column
+      );
+
+      if (result !== null) {
+        // Save new layer config data
+        setNewLayerConfigData({
+          table: table,
+          column: column,
+          markerType: markerType
+        });
+
+        // Close modal on success
+        setIsNewLayerModalOpen(false);
+      }
+    } catch (error) {
+      presentEmptyNameAlert({
+        header: 'Error',
+        message: 'Failed to create layer',
+        buttons: ['OK']
+      });
+    }
   };
   const [addUnitMap, setAddUnitMap] = useState<google.maps.Map | null>(null);
 
@@ -911,34 +926,36 @@ const MapPage: React.FC<MapProps> = (props) => {
     }
   }, [props.siteList, selectedSite, props.selectedSiteForAddUnit]);
 
-  // Function to grab coordinates from crosshair marker position with rounding
+  // Function to grab coordinates from map center with rounding
   const grabCoordinatesFromMap = () => {
-    if (crosshairMarker && crosshairMarker.getPosition()) {
-      const position = crosshairMarker.getPosition()!;
-      const roundedLat = Math.round(position.lat() * 10000000) / 10000000; // Округление до 7 знаков
-      const roundedLng = Math.round(position.lng() * 10000000) / 10000000;
-      
-      setUnitLatitude(roundedLat.toString());
-      setUnitLongitude(roundedLng.toString());
-      
-      // Find closest site to the marker position
-      if (props.siteList && props.siteList.length > 0) {
-        let closestSite = props.siteList[0];
-        let minDistance = Number.MAX_VALUE;
-        
-        props.siteList.forEach(site => {
-          if (site.lat && site.lng) {
-            const distance = Math.sqrt(
-              Math.pow(site.lat - roundedLat, 2) + Math.pow(site.lng - roundedLng, 2)
-            );
-            if (distance < minDistance) {
-              minDistance = distance;
-              closestSite = site;
+    if (addUnitMap) {
+      const center = addUnitMap.getCenter();
+      if (center) {
+        const roundedLat = Math.round(center.lat() * 10000000) / 10000000; // Округление до 7 знаков
+        const roundedLng = Math.round(center.lng() * 10000000) / 10000000;
+
+        setUnitLatitude(roundedLat.toString());
+        setUnitLongitude(roundedLng.toString());
+
+        // Find closest site to the map center
+        if (props.siteList && props.siteList.length > 0) {
+          let closestSite = props.siteList[0];
+          let minDistance = Number.MAX_VALUE;
+
+          props.siteList.forEach(site => {
+            if (site.lat && site.lng) {
+              const distance = Math.sqrt(
+                Math.pow(site.lat - roundedLat, 2) + Math.pow(site.lng - roundedLng, 2)
+              );
+              if (distance < minDistance) {
+                minDistance = distance;
+                closestSite = site;
+              }
             }
-          }
-        });
-        
-        setSelectedSite(closestSite.name);
+          });
+
+          setSelectedSite(closestSite.name);
+        }
       }
     }
   };
@@ -966,9 +983,6 @@ const MapPage: React.FC<MapProps> = (props) => {
       // Simple fetch request to get user site groups
       fetch('https://app.agrinet.us/api/add-unit/user-site-groups')
         .then(response => {
-          console.log('Site groups API response status:', response.status);
-          console.log('Site groups API response headers:', response.headers);
-          
           // Try to parse as JSON if possible
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
@@ -976,15 +990,13 @@ const MapPage: React.FC<MapProps> = (props) => {
           } else {
             // If not JSON, get text
             return response.text().then(text => {
-              console.log('Site groups API raw text response:', text);
               return text;
             });
           }
         })
         .then(data => {
-          const datanew = ["Group1", "Group2", "Group3"]
-          console.log('Site groups API response data:', datanew);
-          
+          const datanew = data;
+
           // Set site groups if data is valid and not empty
           if (datanew && Array.isArray(datanew) && datanew.length > 0) {
             // Convert string array to object array with id and name
@@ -992,14 +1004,15 @@ const MapPage: React.FC<MapProps> = (props) => {
               id: index + 1,
               name: group
             }));
+
             setSiteGroups(formattedGroups);
-            
+
             // Automatically select the first site group
             if (formattedGroups.length > 0) {
               setSelectedSiteGroup(formattedGroups[0].name);
             }
           } else {
-            // Clear site groups if data is empty
+            // Clear site groups if no data
             setSiteGroups([]);
           }
         })
@@ -1010,6 +1023,63 @@ const MapPage: React.FC<MapProps> = (props) => {
         });
     }
   }, [activeTab]);
+
+  // Handle site group error alert presentation at component level
+  useEffect(() => {
+    if (siteGroupError) {
+      console.log('useEffect triggered with siteGroupError:', siteGroupError);
+      const { invalidGroup, correctGroups } = siteGroupError;
+
+      console.log('About to call presentAlert...');
+
+      if (correctGroups.length === 1) {
+        // Only one valid site group - auto-select and retry
+        console.log('Single group path');
+        presentAlert({
+          header: '❌ Site Group Warning',
+          message: `Current User has no access to the Site Group ${invalidGroup}. Use ${correctGroups[0]} Site Group`,
+          buttons: [
+            {
+              text: 'OK',
+              handler: () => {
+                console.log('Single group OK clicked');
+                // Auto-select the correct site group
+                setSelectedSiteGroup(correctGroups[0]);
+                // Clear the error state
+                setSiteGroupError(null);
+              }
+            }
+          ]
+        });
+        console.log('presentAlert called for single group');
+      } else {
+        // Multiple valid site groups - user must select
+        console.log('Multiple groups path');
+        presentAlert({
+          header: '❌ Site Group Warning',
+          message: `Current User has no access to the Site Group ${invalidGroup}. Select another Site Group`,
+          buttons: [
+            {
+              text: 'OK',
+              handler: () => {
+                console.log('Multiple groups OK clicked');
+                // Focus the site group selector after user closes the alert
+                setTimeout(() => {
+                  const siteGroupSelect = document.getElementById('site-group-select');
+                  if (siteGroupSelect) {
+                    siteGroupSelect.click();
+                  }
+                }, 300);
+                // Clear the error state
+                setSiteGroupError(null);
+              }
+            }
+          ]
+        });
+        console.log('presentAlert called for multiple groups');
+      }
+    }
+  }, [siteGroupError]);
 
   // Initialize Add Unit map when tab is active and API is loaded
   useEffect(() => {
@@ -1037,30 +1107,27 @@ const MapPage: React.FC<MapProps> = (props) => {
         
         // Store map reference for coordinate grabbing
         setAddUnitMap(map);
-        
-        // Create crosshair marker with original design
-        const crosshairPath = 'M 0,0 m -25,0 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0 M 0,-35 L 0,-10 M 0,10 L 0,35 M -35,0 L -10,0 M 10,0 L 35,0 M 0,0 m -8,0 a 8,8 0 1,1 16,0 a 8,8 0 1,1 -16,0 M 0,0 m -2,0 a 2,2 0 1,1 4,0 a 2,2 0 1,1 -4,0';
-        
-        const crosshair = new window.google.maps.Marker({
-          position: centerCoords,
-          map: map,
-          icon: {
-            path: crosshairPath,
-            fillColor: 'white',
-            fillOpacity: 1,
-            strokeColor: 'black',
-            strokeWeight: 3,
-            scale: 0.8,
-            anchor: new window.google.maps.Point(0, 0)
-          },
-          zIndex: 1000,
-          title: 'Site Location'
+
+        // Set initial coordinates to match the site
+        if (props.siteList && props.siteList.length > 0) {
+          const firstSite = props.siteList[0];
+          if (firstSite.lat && firstSite.lng) {
+            setUnitLatitude(firstSite.lat.toString());
+            setUnitLongitude(firstSite.lng.toString());
+          }
+        }
+
+        // Add event listener to update coordinates when map center changes
+        window.google.maps.event.addListener(map, 'center_changed', () => {
+          const center = map.getCenter();
+          if (center) {
+            const roundedLat = Math.round(center.lat() * 10000000) / 10000000;
+            const roundedLng = Math.round(center.lng() * 10000000) / 10000000;
+            setUnitLatitude(roundedLat.toString());
+            setUnitLongitude(roundedLng.toString());
+          }
         });
-        
-        
-        setCrosshairMarker(crosshair);
-        
-        
+
         // Force resize after a short delay
         setTimeout(() => {
           window.google.maps.event.trigger(map, 'resize');
@@ -1155,7 +1222,16 @@ const MapPage: React.FC<MapProps> = (props) => {
   // QR Scanner state
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [scannedQRData, setScannedQRData] = useState<string | null>(null);
-  
+  const [isQRScanned, setIsQRScanned] = useState<boolean>(false);
+  const [qrTimezone, setQrTimezone] = useState<string>('');
+  const [qrCustomFields, setQrCustomFields] = useState<{[key: string]: any}>({});
+  const [qrBudgetLines, setQrBudgetLines] = useState<{[key: string]: any}>({});
+  const [qrRawMetric, setQrRawMetric] = useState<number>(0);
+  const [qrDisplayMetric, setQrDisplayMetric] = useState<number>(0);
+  const [newLayerConfigData, setNewLayerConfigData] = useState<{table: string; column: string; markerType: string} | undefined>(undefined);
+  const [scannedSensorId, setScannedSensorId] = useState<string>(''); // Track the original scanned sensor ID
+  const [shouldRecreateMarkers, setShouldRecreateMarkers] = useState<boolean>(false); // Flag to control marker recreation
+
   const history = useHistory();
 
   useEffect(() => {
@@ -1239,7 +1315,13 @@ const MapPage: React.FC<MapProps> = (props) => {
       CollisionResolver.resolve(activeOverlays);
     }
     if (map && props.siteList.length > 0) {
-
+      // Only clear markers if shouldRecreateMarkers flag is true (after adding new unit)
+      // This prevents clearing markers during normal navigation
+      if (shouldRecreateMarkers) {
+        console.log('🔄 Clearing markers to recreate with new data');
+        setMarkers([]);
+        setShouldRecreateMarkers(false); // Reset flag
+      }
 
       // Map Site[] to SensorsGroupData[]
       const sitesAsSensorsGroupData = props.siteList.map((site: SiteWithLayers) => ({
@@ -1288,7 +1370,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         setAdditionalChartData: props.setAdditionalChartData
       })
     }
-  }, [map, props.siteList]);
+  }, [map, props.siteList, shouldRecreateMarkers]);
 
   // Fix map display after returning from overlay
   useEffect(() => {
@@ -2110,6 +2192,28 @@ const MapPage: React.FC<MapProps> = (props) => {
                   backgroundColor: 'white'
                 }}
               />
+              {/* Crosshair overlay - always centered */}
+              <svg
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '80px',
+                  height: '80px',
+                  pointerEvents: 'none',
+                  zIndex: 1000
+                }}
+                viewBox="-40 -40 80 80"
+              >
+                <path
+                  d="M 0,0 m -25,0 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0 M 0,-35 L 0,-10 M 0,10 L 0,35 M -35,0 L -10,0 M 10,0 L 35,0 M 0,0 m -8,0 a 8,8 0 1,1 16,0 a 8,8 0 1,1 -16,0 M 0,0 m -2,0 a 2,2 0 1,1 4,0 a 2,2 0 1,1 -4,0"
+                  fill="white"
+                  fillOpacity="1"
+                  stroke="black"
+                  strokeWidth="3"
+                />
+              </svg>
             </div>
             
             {/* Form section taking the other half */}
@@ -2287,8 +2391,8 @@ const MapPage: React.FC<MapProps> = (props) => {
                   </IonButton>
                 </IonItem>
 
-                {/* Site Group Selection - Only show when there are more than 1 site groups */}
-                {siteGroups.length > 1 && (
+                {/* Site Group Selection - Show when there are site groups available */}
+                {siteGroups.length > 0 && (
                   <IonItem 
                     className={s.addUnitFormItem}
                     style={{
@@ -2457,10 +2561,20 @@ const MapPage: React.FC<MapProps> = (props) => {
                         '--opacity': '1'
                       }}
                       onIonInput={(e) => {
-                        setUnitLatitude(e.detail.value!);
+                        const newLat = e.detail.value!;
+                        setUnitLatitude(newLat);
                         // Сбрасываем ошибку latitude как только начинаем вводить
-                        if (e.detail.value) {
+                        if (newLat) {
                           setFormErrors(prev => ({ ...prev, latitude: false }));
+                        }
+
+                        // Update map center when latitude changes
+                        if (addUnitMap && newLat && unitLongitude) {
+                          const lat = parseFloat(newLat);
+                          const lng = parseFloat(unitLongitude);
+                          if (!isNaN(lat) && !isNaN(lng)) {
+                            addUnitMap.setCenter({ lat, lng });
+                          }
                         }
                       }}
                     />
@@ -2483,10 +2597,20 @@ const MapPage: React.FC<MapProps> = (props) => {
                         '--opacity': '1'
                       }}
                       onIonInput={(e) => {
-                        setUnitLongitude(e.detail.value!);
+                        const newLng = e.detail.value!;
+                        setUnitLongitude(newLng);
                         // Сбрасываем ошибку longitude как только начинаем вводить
-                        if (e.detail.value) {
+                        if (newLng) {
                           setFormErrors(prev => ({ ...prev, longitude: false }));
+                        }
+
+                        // Update map center when longitude changes
+                        if (addUnitMap && newLng && unitLatitude) {
+                          const lat = parseFloat(unitLatitude);
+                          const lng = parseFloat(newLng);
+                          if (!isNaN(lat) && !isNaN(lng)) {
+                            addUnitMap.setCenter({ lat, lng });
+                          }
                         }
                       }}
                     />
@@ -2572,7 +2696,7 @@ const MapPage: React.FC<MapProps> = (props) => {
                 </IonItem>
 
                 {/* Layer Field */}
-                <IonItem className={s.addUnitFormItem}>
+                <IonItem className={`${s.addUnitFormItem} ${formErrors.layer ? s.addUnitFormItemError : ''}`}>
                   <IonLabel position="fixed" color="light" style={{ minWidth: '80px', alignSelf: 'center' }}>Layer</IonLabel>
                   <IonSelect 
                     value={selectedLayer} 
@@ -2589,14 +2713,29 @@ const MapPage: React.FC<MapProps> = (props) => {
                     }}
                     onIonChange={(e) => {
                       const selectedLayerValue = e.detail.value;
-                      
+
                       // Выводим mapping для выбранного слоя
                       if (selectedLayerValue && layerMapping[selectedLayerValue]) {
                       }
-                      
+
                       setSelectedLayer(selectedLayerValue);
                       if (selectedLayerValue && formErrors.layer) {
                         setFormErrors(prev => ({ ...prev, layer: false }));
+                      }
+
+                      // Clear newLayerConfigData if switching to an existing layer
+                      // Check if the selected layer was just created (has newLayerConfigData)
+                      // and if we're switching away from it
+                      if (newLayerConfigData && selectedLayer !== selectedLayerValue) {
+                        // Find if the newly selected layer already existed (not the one we just created)
+                        const existingLayer = layers.find(layer =>
+                          (layer.value || layer.id) === selectedLayerValue
+                        );
+
+                        // If we're switching to a different layer, clear the new layer config
+                        if (existingLayer) {
+                          setNewLayerConfigData(undefined);
+                        }
                       }
                     }}
                   >
@@ -2751,22 +2890,6 @@ const MapPage: React.FC<MapProps> = (props) => {
                     title={localStorage.getItem('userRole') === 'User' ? 'This action is not available for your user role' : ''}
                     onClick={async () => {
                       const userRole = localStorage.getItem('userRole');
-                      console.log('ADD UNIT button clicked. User role:', userRole || 'No role found');
-                      
-                      // Log current date in user's timezone
-                      const currentDate = new Date();
-                      const year = currentDate.getFullYear();
-                      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-                      const day = String(currentDate.getDate()).padStart(2, '0');
-                      const formattedDate = `${year}-${month}-${day}`;
-                      
-                      // Get timezone offset in hours (getTimezoneOffset returns minutes, negative for east of UTC)
-                      const offsetMinutes = currentDate.getTimezoneOffset();
-                      const offsetHours = -offsetMinutes / 60; // Invert sign because getTimezoneOffset is inverted
-                      const userTimezone = offsetHours >= 0 ? `+${offsetHours}` : `${offsetHours}`;
-                      
-                      console.log('Current date (YYYY-MM-DD):', formattedDate);
-                      console.log('User timezone (UTC offset):', userTimezone);
                       
                       // Check if user is in Demo mode
                       if (userRole === 'Demo') {
@@ -2796,89 +2919,444 @@ const MapPage: React.FC<MapProps> = (props) => {
                       };
                       
                       setFormErrors(hasErrors);
-                      
+
                       // Check if there are any errors
                       if (Object.values(hasErrors).some(error => error)) {
+                        return;
+                      }
+
+                      // Check if both latitude and longitude are 0
+                      const lat = parseFloat(unitLatitude);
+                      const lng = parseFloat(unitLongitude);
+                      if (lat === 0 && lng === 0) {
+                        presentAlert({
+                          header: 'Invalid Location',
+                          message: 'Invalid location (0, 0). Please position the map to select a valid sensor location.',
+                          buttons: ['OK']
+                        });
                         return;
                       }
 
                       const fullSensorId = `${sensorPrefix}${sensorId}`;
 
                       // Функция для создания юнита
-                      const createUnit = () => {
+                      const createUnit = async (overrideFlags?: { warnIfSensorIdExist?: boolean; askOverrideInstallDate?: boolean }) => {
+                        // Get current date in YYYY-MM-DD format
+                        const currentDate = new Date().toISOString().split('T')[0];
+
+                        // Determine timezone: QR code first, then browser timezone
+                        const timezone = qrTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+                        // Check if sensor ID was modified after QR scan
+                        const sensorIdModified = isQRScanned && scannedSensorId && scannedSensorId !== fullSensorId;
+
                         const unitData = {
-                          site: selectedSite,
-                          siteGroup: selectedSiteGroup,
+                          // Required Fields
                           name: unitName,
-                          latitude: parseFloat(unitLatitude),
-                          longitude: parseFloat(unitLongitude),
-                          sensorId: fullSensorId,
+                          lat: parseFloat(unitLatitude),
+                          lng: parseFloat(unitLongitude),
+                          userId: props.userId,
+                          site: selectedSite,
                           layer: selectedLayer,
-                          requestHardware: requestHardware
+                          siteGroup: selectedSiteGroup || undefined,
+                          installDate: currentDate,
+                          timezone: timezone,
+                          warnIfSensorIdExist: overrideFlags?.warnIfSensorIdExist !== undefined ? overrideFlags.warnIfSensorIdExist : (!isQRScanned || sensorIdModified),
+                          askOverrideInstallDate: overrideFlags?.askOverrideInstallDate !== undefined ? overrideFlags.askOverrideInstallDate : true,
+                          requestHardware: requestHardware,
+
+                          // Optional Fields
+                          sensorId: fullSensorId || undefined,
+                          sensorCount: selectedLayer.toLowerCase() === 'moist' ? moistLevel : undefined,
+                          newLayerConfig: newLayerConfigData || undefined,
+                          datasource: undefined,
+                          customFields: qrCustomFields,
+                          budgetLines: qrBudgetLines,
+                          rawMetric: qrRawMetric,
+                          displayMetric: qrDisplayMetric,
+                          pictureBase64: null
                         };
 
-                        // TODO: Implement API call to add unit
-                      };
+                        console.log('Unit Data before sending to server:', unitData);
 
-                      // Функция проверки дубликатов и создания юнита
-                      const checkDuplicatesAndCreate = async (skipDuplicateCheck: boolean = false) => {
-                        console.log('checkDuplicatesAndCreate called with skipDuplicateCheck:', skipDuplicateCheck);
-                        
-                        if (!skipDuplicateCheck) {
-                          console.log('Starting duplicate check for:', fullSensorId);
-                          const duplicateCheck = await checkSensorIdExists(fullSensorId);
-                          console.log('Duplicate check result:', duplicateCheck);
-                          
-                          if (duplicateCheck.exists) {
-                            console.log('Duplicate found! Showing alert...');
-                            
-                            let message = "This sensor ID already exist, continue anyway?";
-                            
-                            if (duplicateCheck.layers.length === 1) {
-                              message = `This sensor ID already exist in the ${duplicateCheck.layers[0]} layer`;
-                            } else if (duplicateCheck.layers.length > 1) {
-                              message = `This sensor ID already exist in the ${duplicateCheck.layers.join(', ')} layers`;
+                        try {
+
+                          // Make POST request to add unit
+                          // Note: Authentication is handled via the 'User' header, not Authorization
+                          const response = await fetch('https://app.agrinet.us/api/add-unit', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'User': props.userId.toString()
+                            },
+                            body: JSON.stringify(unitData)
+                          });
+
+                          if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                            console.log('Error Response Data:', errorData);
+                            throw new Error(errorData.message || `Failed to add unit: ${response.statusText}`);
+                          }
+
+                          const result = await response.json();
+                          console.log('Success Response Data:', result);
+
+                          // Check if the operation was successful
+                          if (result.success === false) {
+                            // Step 1: Check which flag indicates the reason for failure
+
+                            // Step 2a: Sensor ID already exists?
+                            if (result.sensorIdExistWarn === true) {
+                              const layers = result.sensorIdExistOnLayer || [];
+                              const layerText = layers.length > 0
+                                ? `the ${layers.join(', ')} layer${layers.length > 1 ? 's' : ''}`
+                                : 'another layer';
+
+                              // Add delay to ensure previous alert (if any) is dismissed
+                              setTimeout(() => {
+                                presentAlert({
+                                  header: '⚠️ Warning',
+                                  message: `This sensor ID already exist in ${layerText}`,
+                                  buttons: [
+                                    {
+                                      text: 'Cancel',
+                                      role: 'cancel'
+                                    },
+                                    {
+                                      text: 'Continue',
+                                      handler: () => {
+                                        // Retry with warnIfSensorIdExist: false, preserving other override flags
+                                        createUnit({
+                                          warnIfSensorIdExist: false,
+                                          askOverrideInstallDate: overrideFlags?.askOverrideInstallDate
+                                        });
+                                      }
+                                    }
+                                  ]
+                                });
+                              }, 100);
+                              return;
                             }
-                            
-                            console.log('Alert message:', message);
-                            
+
+                            // Step 2b: Install date conflict?
+                            else if (result.askOverrideInstallDate === true) {
+                              const existingDate = result.installDate || 'unknown date';
+
+                              // Use a small delay to ensure any previous alerts are dismissed
+                              setTimeout(async () => {
+                                try {
+                                  await presentAlert({
+                                    header: 'Warning',
+                                    message: `This sensor already exist and has install data: ${existingDate}, override this by current date?`,
+                                    buttons: [
+                                      {
+                                        text: 'Cancel',
+                                        role: 'cancel',
+                                        handler: () => {
+                                          console.log('User cancelled install date override');
+                                        }
+                                      },
+                                      {
+                                        text: 'Override install date',
+                                        handler: () => {
+                                          console.log('User confirmed install date override');
+                                          // Retry with askOverrideInstallDate: false, preserving warnIfSensorIdExist flag
+                                          createUnit({
+                                            warnIfSensorIdExist: overrideFlags?.warnIfSensorIdExist,
+                                            askOverrideInstallDate: false
+                                          });
+                                        }
+                                      }
+                                    ]
+                                  });
+                                  console.log('Alert presented successfully');
+                                } catch (error) {
+                                  console.error('Error presenting alert:', error);
+                                }
+                              }, 100);
+                              return;
+                            }
+
+                            // Step 2c: Site group access issue?
+                            else if (result.userNotInSiteGroup === true) {
+
+                              const invalidGroup = result.siteGroup || selectedSiteGroup;
+                              const correctGroups = result.userSiteGroups || [];
+
+                              console.log('Production mode: Setting siteGroupError state:', { invalidGroup, correctGroups });
+
+                              // Add a small delay to ensure any previous alerts (like sensor ID validation) are dismissed
+                              setTimeout(() => {
+                                setSiteGroupError({
+                                  invalidGroup: invalidGroup,
+                                  correctGroups: correctGroups
+                                });
+                              }, 300);
+
+                              return;
+                            }
+
+                            // Step 2d: General error
+                            else {
+                              const errorMessage = result.error || 'Failed to add unit. Please try again.';
+                              presentAlert({
+                                header: '❌ Error',
+                                message: errorMessage,
+                                buttons: ['Close']
+                              });
+                              return;
+                            }
+                          }
+
+                          // Success! The unit was added successfully
+                          console.log('✅ Unit added successfully!');
+                          console.log('📋 Current site list BEFORE reload:', props.siteList);
+
+                          // Store the old site list for comparison
+                          const oldSiteList = JSON.parse(JSON.stringify(props.siteList));
+
+                          // Helper function to clear form fields
+                          const clearFormFields = () => {
+                            // Clear text inputs
+                            setUnitName('');
+                            setSensorId('');
+                            setSensorPrefix('');
+
+                            // DON'T clear coordinate inputs - they show the map center position
+                            // setUnitLatitude('');
+                            // setUnitLongitude('');
+
+                            // Clear selectors
+                            setSelectedLayer('');
+                            setSelectedSiteGroup('');
+
+                            // Clear other form fields
+                            setMoistLevel(undefined);
+                            setRequestHardware(false);
+
+                            // Clear form errors
+                            setFormErrors({
+                              site: false,
+                              siteGroup: false,
+                              unitName: false,
+                              latitude: false,
+                              longitude: false,
+                              sensor: false,
+                              layer: false
+                            });
+
+                            // Reset QR-related states
+                            setIsQRScanned(false);
+                            setScannedSensorId('');
+                            setQrTimezone('');
+                            setQrCustomFields({});
+                            setQrBudgetLines({});
+                            setQrRawMetric(0);
+                            setQrDisplayMetric(0);
+                            setNewLayerConfigData(undefined);
+                          };
+
+                          // Helper function to reload and log site list changes
+                          const reloadAndLogChanges = async () => {
+                            // Fetch fresh site list data WITHOUT forcing component remount
+                            const sites = await getSiteList(props.userId);
+
+                            // Check if API call was successful
+                            if ('success' in sites && sites.success === false) {
+                              console.error('Failed to reload site list:', sites.error);
+                              return;
+                            }
+
+                            // Clear existing markers so createSites will recreate all markers with new data
+                            console.log('🗑️ Clearing existing markers to allow recreation with new data');
+                            // IMPORTANT: Remove old markers from the map BEFORE clearing the state
+                            markers.forEach((marker: any) => {
+                              if (marker && marker.setMap) {
+                                marker.setMap(null);
+                              }
+                              if (marker && marker.infoWindow) {
+                                marker.infoWindow.close();
+                              }
+                            });
+                            setMarkers([]);
+
+                            // Update site list with fresh data
+                            props.setSiteList(sites.data);
+
+                            console.log('📋 Site list AFTER reload:', sites.data);
+                            console.log('🔍 Looking for newly added unit with sensor ID:', fullSensorId);
+
+                            // Compare old and new site lists
+                            console.log('\n🔄 ===== COMPARING SITE LISTS =====');
+                            console.log('Old site list length:', oldSiteList.length);
+                            console.log('New site list length:', props.siteList.length);
+
+                            // Check for new sites
+                            const newSites = props.siteList.filter((newSite: any) =>
+                              !oldSiteList.some((oldSite: any) => oldSite.id === newSite.id)
+                            );
+                            if (newSites.length > 0) {
+                              console.log('➕ NEW SITES ADDED:', newSites);
+                            }
+
+                            // Check for removed sites
+                            const removedSites = oldSiteList.filter((oldSite: any) =>
+                              !props.siteList.some((newSite: any) => newSite.id === oldSite.id)
+                            );
+                            if (removedSites.length > 0) {
+                              console.log('➖ SITES REMOVED:', removedSites);
+                            }
+
+                            // Check for modified sites (compare layers and markers)
+                            props.siteList.forEach((newSite: any) => {
+                              const oldSite = oldSiteList.find((old: any) => old.id === newSite.id);
+                              if (oldSite) {
+                                // Compare layers
+                                const oldLayers = oldSite.layers || [];
+                                const newLayers = newSite.layers || [];
+
+                                if (oldLayers.length !== newLayers.length) {
+                                  console.log(`🔧 Site "${newSite.name}" layer count changed: ${oldLayers.length} → ${newLayers.length}`);
+                                }
+
+                                // Check each layer for new markers
+                                newLayers.forEach((newLayer: any) => {
+                                  const oldLayer = oldLayers.find((old: any) => old.name === newLayer.name);
+
+                                  if (!oldLayer) {
+                                    console.log(`  ➕ NEW LAYER in site "${newSite.name}": "${newLayer.name}"`);
+                                  } else {
+                                    const oldMarkers = oldLayer.markers || [];
+                                    const newMarkers = newLayer.markers || [];
+
+                                    if (oldMarkers.length !== newMarkers.length) {
+                                      console.log(`  🔧 Layer "${newLayer.name}" in site "${newSite.name}" marker count changed: ${oldMarkers.length} → ${newMarkers.length}`);
+
+                                      // Find new markers
+                                      const addedMarkers = newMarkers.filter((newMarker: any) =>
+                                        !oldMarkers.some((oldMarker: any) =>
+                                          oldMarker.chartData?.sensorId === newMarker.chartData?.sensorId
+                                        )
+                                      );
+
+                                      if (addedMarkers.length > 0) {
+                                        console.log(`    ➕ NEW MARKERS ADDED (${addedMarkers.length}):`);
+                                        addedMarkers.forEach((marker: any) => {
+                                          console.log(`      - Sensor ID: ${marker.chartData?.sensorId}`);
+                                          console.log(`        Name: ${marker.chartData?.name || 'N/A'}`);
+                                          console.log(`        Type: ${marker.chartData?.markerType || 'N/A'}`);
+                                          console.log(`        Coordinates: (${marker.chartData?.lat}, ${marker.chartData?.lng})`);
+                                        });
+                                      }
+
+                                      // Find removed markers
+                                      const removedMarkers = oldMarkers.filter((oldMarker: any) =>
+                                        !newMarkers.some((newMarker: any) =>
+                                          newMarker.chartData?.sensorId === oldMarker.chartData?.sensorId
+                                        )
+                                      );
+
+                                      if (removedMarkers.length > 0) {
+                                        console.log(`    ➖ MARKERS REMOVED (${removedMarkers.length}):`);
+                                        removedMarkers.forEach((marker: any) => {
+                                          console.log(`      - Sensor ID: ${marker.chartData?.sensorId}`);
+                                        });
+                                      }
+                                    }
+                                  }
+                                });
+
+                                // Check for removed layers
+                                oldLayers.forEach((oldLayer: any) => {
+                                  const layerStillExists = newLayers.some((newLayer: any) => newLayer.name === oldLayer.name);
+                                  if (!layerStillExists) {
+                                    console.log(`  ➖ LAYER REMOVED from site "${newSite.name}": "${oldLayer.name}"`);
+                                  }
+                                });
+                              }
+                            });
+
+                            console.log('===== END COMPARISON =====\n');
+
+                            // Search through all sites and layers to find the new unit
+                            props.siteList.forEach((site: any) => {
+                              if (site.layers) {
+                                site.layers.forEach((layer: any) => {
+                                  if (layer.markers) {
+                                    const foundMarker = layer.markers.find((marker: any) =>
+                                      marker.chartData && marker.chartData.sensorId === fullSensorId
+                                    );
+                                    if (foundMarker) {
+                                      console.log('✨ Found newly added unit!');
+                                      console.log('  Site:', site.name);
+                                      console.log('  Layer:', layer.name);
+                                      console.log('  Marker data:', foundMarker);
+                                    }
+                                  }
+                                });
+                              }
+                            });
+                          };
+
+                          // Show success alert with options - use setTimeout to ensure it displays
+                          setTimeout(() => {
                             presentAlert({
-                              header: 'Warning',
-                              message: message,
-                              cssClass: 'sensor-id-duplicate-alert',
+                              header: '✓ Added',
+                              message: 'Unit successfully added.\nDo you want create another one?',
+                              backdropDismiss: false,
                               buttons: [
                                 {
-                                  text: 'Continue',
-                                  cssClass: 'alert-button-confirm',
-                                  handler: () => {
-                                    createUnit();
+                                  text: 'To map',
+                                  handler: async () => {
+                                    // Ensure QR scanner is closed before navigating
+                                    setShowQRScanner(false);
+
+                                    // Clear form fields first
+                                    clearFormFields();
+
+                                    // Reload data FIRST to get the updated site list
+                                    await reloadAndLogChanges();
+
+                                    // Then navigate to map tab after data is loaded
+                                    // This ensures the map renders with the new data
+                                    setTimeout(() => {
+                                      setActiveTab('map');
+                                      // Remove 'add' from history since we're going to map
+                                      setNavigationHistory(prev => prev.slice(0, -1));
+                                    }, 100);
                                   }
                                 },
                                 {
-                                  text: 'Cancel',
-                                  role: 'cancel',
-                                  cssClass: 'alert-button-cancel'
+                                  text: 'Add next',
+                                  handler: () => {
+                                    // Clear form fields immediately
+                                    clearFormFields();
+
+                                    // Don't reload the map page at all to avoid component remount
+                                    // The new unit will appear when user navigates to map tab naturally
+                                    console.log('Form cleared, ready for next unit. Map will update when you navigate to it.');
+                                  }
                                 }
                               ]
                             });
-                            return;
-                          } else {
-                            console.log('No duplicate found, proceeding to create unit');
-                          }
+                          }, 100);
+                        } catch (error) {
+                          console.error('Error adding unit:', error);
+
+                          // Show error message
+                          presentAlert({
+                            header: 'Error',
+                            message: error instanceof Error ? error.message : 'Failed to add unit. Please try again.',
+                            buttons: ['OK']
+                          });
                         }
-                        
-                        // Нет дубликатов или проверка пропущена - создаем юнит
-                        createUnit();
                       };
 
                       // Валидация формата SensorId
-                      console.log('Validating sensor ID format:', fullSensorId);
                       const validation = validateSensorId(fullSensorId);
-                      console.log('Format validation result:', validation);
-                      
+
                       if (!validation.isValid) {
-                        console.log('Format is invalid, showing validation alert');
-                        
+
                         // Показываем предупреждение с возможностью продолжить
                         presentAlert({
                           header: 'Sensor ID Validation Warning',
@@ -2889,10 +3367,9 @@ const MapPage: React.FC<MapProps> = (props) => {
                               text: 'ACCEPT ANYWAY',
                               cssClass: 'alert-button-confirm',
                               handler: () => {
-                                console.log('User accepted invalid format, checking duplicates...');
                                 // Формат невалиден, но пользователь хочет продолжить
-                                // Проверяем дубликаты
-                                checkDuplicatesAndCreate();
+                                // Создаем юнит, сервер проверит дубликаты
+                                createUnit();
                               }
                             },
                             {
@@ -2903,9 +3380,8 @@ const MapPage: React.FC<MapProps> = (props) => {
                           ]
                         });
                       } else {
-                        console.log('Format is valid, checking duplicates...');
-                        // Формат валиден - проверяем дубликаты
-                        await checkDuplicatesAndCreate();
+                        // Формат валиден - создаем юнит, сервер проверит дубликаты
+                        createUnit();
                       }
                     }}
                   >
@@ -2977,6 +3453,87 @@ const MapPage: React.FC<MapProps> = (props) => {
           sensors={availableSensors}
         />
 
+        {/* New Layer Modal */}
+        <IonModal isOpen={isNewLayerModalOpen} onDidDismiss={() => setIsNewLayerModalOpen(false)}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Create New Layer</IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setIsNewLayerModalOpen(false)}>Cancel</IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="ion-padding">
+            <IonItem>
+              <IonLabel position="stacked">Layer Name</IonLabel>
+              <IonInput
+                placeholder="Enter Layer Name"
+                value={newLayerName}
+                onIonInput={(e) => setNewLayerName(e.detail.value!)}
+              />
+            </IonItem>
+
+            <IonItem>
+              <IonLabel position="stacked">Marker Type</IonLabel>
+              <IonSelect
+                value={newLayerMarkerType}
+                onIonChange={(e) => setNewLayerMarkerType(e.detail.value)}
+              >
+                <IonSelectOption value="fuel">Fuel marker</IonSelectOption>
+                <IonSelectOption value="srs-green-fuel">SRS Green Fuel</IonSelectOption>
+                <IonSelectOption value="srs-ref-fuel">SRS Reference Fuel</IonSelectOption>
+                <IonSelectOption value="moist-fuel">Moisture Fuel</IonSelectOption>
+                <IonSelectOption value="temp_rh">Temperature/Relative Humidity</IonSelectOption>
+                <IonSelectOption value="temp-rh-v2">Temperature/RH Version 2</IonSelectOption>
+                <IonSelectOption value="wxet">Weather Station ET</IonSelectOption>
+                <IonSelectOption value="planthealth">Plant Health</IonSelectOption>
+                <IonSelectOption value="soiltemp">Soil Temperature</IonSelectOption>
+                <IonSelectOption value="psi">PSI (Pressure)</IonSelectOption>
+                <IonSelectOption value="vfd">VFD (Variable Frequency Drive)</IonSelectOption>
+                <IonSelectOption value="bflow">Budget/Flow</IonSelectOption>
+                <IonSelectOption value="valve">Valve</IonSelectOption>
+                <IonSelectOption value="graphic">Graphic</IonSelectOption>
+                <IonSelectOption value="disease">Disease</IonSelectOption>
+                <IonSelectOption value="pump">Pump</IonSelectOption>
+                <IonSelectOption value="chemical">Chemical</IonSelectOption>
+                <IonSelectOption value="infra-red">Infra-Red</IonSelectOption>
+                <IonSelectOption value="neutron">Neutron</IonSelectOption>
+                <IonSelectOption value="virtual-weather-station">Virtual Weather Station</IonSelectOption>
+              </IonSelect>
+            </IonItem>
+
+            <div style={{ marginTop: '20px', marginBottom: '10px', fontWeight: 'bold', color: '#666' }}>
+              Data Source Configuration
+            </div>
+
+            <IonItem>
+              <IonLabel position="stacked">Table</IonLabel>
+              <IonInput
+                placeholder="Table"
+                value={newLayerTable}
+                onIonInput={(e) => setNewLayerTable(e.detail.value!)}
+              />
+            </IonItem>
+
+            <IonItem>
+              <IonLabel position="stacked">Column</IonLabel>
+              <IonInput
+                placeholder="Column"
+                value={newLayerColumn}
+                onIonInput={(e) => setNewLayerColumn(e.detail.value!)}
+              />
+            </IonItem>
+
+            <IonButton
+              expand="block"
+              onClick={handleFinishNewLayer}
+              style={{ marginTop: '20px' }}
+            >
+              Finish
+            </IonButton>
+          </IonContent>
+        </IonModal>
+
         {/* QR Scanner Modal */}
         <IonModal isOpen={showQRScanner} onDidDismiss={() => setShowQRScanner(false)}>
           <IonHeader>
@@ -2987,39 +3544,287 @@ const MapPage: React.FC<MapProps> = (props) => {
               </IonButtons>
             </IonToolbar>
           </IonHeader>
-          <IonContent fullscreen style={{ '--padding-top': '0', '--padding-bottom': '0', '--padding-start': '0', '--padding-end': '0' } as React.CSSProperties}>
+          <IonContent fullscreen style={{ '--padding-top': '16px', '--padding-bottom': '0', '--padding-start': '0', '--padding-end': '0' } as React.CSSProperties}>
             {/* <SimpleCamera /> */}
-            <QRCodeScanner 
+            <QRCodeScanner
+              autoStart={true}
               onScanSuccess={(decodedText: string) => {
-                console.log('QR Code scanned:', decodedText);
+                console.log('=== QR CODE SCANNED ===');
+                console.log('Raw QR Code Value:', decodedText);
+                console.log('QR Code Length:', decodedText.length);
+                console.log('=======================');
+
                 setScannedQRData(decodedText);
                 setShowQRScanner(false);
-                
-                // Show success message
-                present[0]({
-                  message: `QR Code scanned: ${decodedText}`,
-                  duration: 3000,
-                  color: 'success',
-                  position: 'top'
-                });
+                setIsQRScanned(true); // Mark that QR code was scanned
 
                 // Parse and handle the QR code data
-                // Expected format could be: valve_id:XXXXX or JSON data
                 try {
                   // Try to parse as JSON first
                   const data = JSON.parse(decodedText);
-                  console.log('Parsed QR data:', data);
-                  // Handle valve registration here
+                  console.log('Parsed as JSON:', data);
+
+                  // Extract and store QR-specific data fields
+                  if (data.timezone) {
+                    setQrTimezone(data.timezone);
+                  }
+                  if (data.customFields && typeof data.customFields === 'object') {
+                    setQrCustomFields(data.customFields);
+                  }
+                  if (data.budgetLines && typeof data.budgetLines === 'object') {
+                    setQrBudgetLines(data.budgetLines);
+                  }
+                  if (data.rawMetric !== undefined) {
+                    setQrRawMetric(Number(data.rawMetric) || 0);
+                  }
+                  if (data.displayMetric !== undefined) {
+                    setQrDisplayMetric(Number(data.displayMetric) || 0);
+                  }
+
+                  // Populate form fields from JSON data
+                  if (data.sensorId) {
+                    // Extract prefix and numeric part from sensor ID
+                    const sensorIdStr = String(data.sensorId);
+                    setScannedSensorId(sensorIdStr); // Store the original scanned sensor ID
+                    const match = sensorIdStr.match(/^([A-Z]+)?(\d+)$/);
+                    if (match) {
+                      const [, prefix = '', numeric] = match;
+                      setSensorPrefix(prefix);
+                      setSensorId(numeric);
+                    } else {
+                      // If no match, just set the whole thing as sensor ID
+                      setSensorId(sensorIdStr);
+                    }
+                  }
+                  if (data.name) setUnitName(data.name);
+                  if (data.lat) setUnitLatitude(String(data.lat));
+                  if (data.lng || data.lon) setUnitLongitude(String(data.lng || data.lon));
+
+                  // Handle site name from QR data
+                  if (data.siteName || data.site) {
+                    const qrSiteName = data.siteName || data.site;
+                    console.log('Site Name from QR:', qrSiteName);
+
+                    // Check if site exists
+                    const siteExists = props.siteList.some(site =>
+                      site.name.toLowerCase() === qrSiteName.toLowerCase()
+                    );
+
+                    if (siteExists) {
+                      // Site exists, select it
+                      console.log('Site exists, selecting:', qrSiteName);
+                      setSelectedSite(qrSiteName);
+                      props.setSelectedSiteForAddUnit(qrSiteName);
+
+                      // Update coordinates if site has them
+                      const site = props.siteList.find(s => s.name.toLowerCase() === qrSiteName.toLowerCase());
+                      if (site && site.lat && site.lng) {
+                        setUnitLatitude(String(site.lat));
+                        setUnitLongitude(String(site.lng));
+                      }
+                    } else {
+                      // Site doesn't exist, create it
+                      console.log('Site does not exist, creating:', qrSiteName);
+                      handleCreateNewSite(qrSiteName);
+                    }
+                  }
+
+                  // Set siteGroup from JSON data
+                  if (data.siteGroup) {
+                    setSelectedSiteGroup(data.siteGroup);
+
+
+                    // Add to siteGroups if it doesn't exist
+                    setSiteGroups(prevGroups => {
+                      const groupExists = prevGroups.some(g => g.name === data.siteGroup);
+                      if (!groupExists) {
+                        const newGroup = {
+                          id: prevGroups.length + 1,
+                          name: data.siteGroup
+                        };
+                        return [...prevGroups, newGroup];
+                      }
+                      return prevGroups;
+                    });
+                  }
+
+                  // Set layer from JSON data
+                  if (data.locall || data.local) {
+                    const layerValue = data.locall || data.local;
+                    const capitalizedLayer = layerValue.charAt(0).toUpperCase() + layerValue.slice(1).toLowerCase();
+                    setSelectedLayer(capitalizedLayer);
+
+                  }
                 } catch {
-                  // If not JSON, treat as simple valve ID
-                  console.log('Valve ID:', decodedText);
-                  // Handle valve ID here
+                  // If not JSON, try to parse as key-value pairs (comma-separated format)
+                  // Format: "sensorid=ANM01587, state=DT, locall=Moist, ..."
+                  const qrData = decodedText.trim();
+
+                  // Parse key-value pairs
+                  const pairs = qrData.split(',').map(pair => pair.trim());
+                  const parsedData: { [key: string]: string } = {};
+
+                  pairs.forEach(pair => {
+                    const [key, value] = pair.split('=').map(s => s.trim());
+                    if (key && value) {
+                      parsedData[key] = value;
+                    }
+                  });
+
+                  console.log('Parsed QR Data:', parsedData);
+
+                  // Extract individual fields
+                  const qrSensorId = parsedData['sensorid'] || parsedData['sensorId'] || '';
+                  const qrName = parsedData['name'] || parsedData['Name'] || '';
+                  const qrSiteName = parsedData['siteName'] || parsedData['site'] || parsedData['Site'] || '';
+                  const qrState = parsedData['state'] || '';
+                  const qrLocall = parsedData['locall'] || parsedData['local'] || '';
+                  const qrDealer = parsedData['Dealer'] || parsedData['dealer'] || '';
+                  const qrSensorCount = parsedData['SensorCount'] || parsedData['sensorCount'] || '';
+                  const qrSiteGroup = parsedData['siteGroup'] || parsedData['SiteGroup'] || '';
+                  const qrDataSourceId = parsedData['data_source_id'] || parsedData['dataSourceId'] || '';
+                  const qrTimezoneValue = parsedData['timezone'] || parsedData['Timezone'] || '';
+                  const qrSensType = parsedData['Sens_type'] || parsedData['sensType'] || '';
+                  const qrCustomFieldsValue = parsedData['customFields'] || '';
+                  const qrBudgetLinesValue = parsedData['budgetLines'] || '';
+                  const qrRawMetricValue = parsedData['rawMetric'] || '';
+                  const qrDisplayMetricValue = parsedData['displayMetric'] || '';
+
+                  // Extract and store QR-specific data fields
+                  if (qrTimezoneValue) {
+                    setQrTimezone(qrTimezoneValue);
+                  }
+                  if (qrCustomFieldsValue) {
+                    try {
+                      const customFields = JSON.parse(qrCustomFieldsValue);
+                      if (typeof customFields === 'object') {
+                        setQrCustomFields(customFields);
+                      }
+                    } catch {
+                      // If not valid JSON, ignore
+                    }
+                  }
+                  if (qrBudgetLinesValue) {
+                    try {
+                      const budgetLines = JSON.parse(qrBudgetLinesValue);
+                      if (typeof budgetLines === 'object') {
+                        setQrBudgetLines(budgetLines);
+                      }
+                    } catch {
+                      // If not valid JSON, ignore
+                    }
+                  }
+                  if (qrRawMetricValue) {
+                    setQrRawMetric(Number(qrRawMetricValue) || 0);
+                  }
+                  if (qrDisplayMetricValue) {
+                    setQrDisplayMetric(Number(qrDisplayMetricValue) || 0);
+                  }
+
+                  // Populate form fields with extracted data
+
+                  // Set Unit Name
+                  if (qrName) {
+                    console.log('Setting Unit Name to:', qrName);
+                    setUnitName(qrName);
+                  }
+
+                  // Handle site name from QR data
+                  if (qrSiteName) {
+                    console.log('Site Name from QR:', qrSiteName);
+
+                    // Check if site exists
+                    const siteExists = props.siteList.some(site =>
+                      site.name.toLowerCase() === qrSiteName.toLowerCase()
+                    );
+
+                    if (siteExists) {
+                      // Site exists, select it
+                      console.log('Site exists, selecting:', qrSiteName);
+                      setSelectedSite(qrSiteName);
+                      props.setSelectedSiteForAddUnit(qrSiteName);
+
+                      // Update coordinates if site has them
+                      const site = props.siteList.find(s => s.name.toLowerCase() === qrSiteName.toLowerCase());
+                      if (site && site.lat && site.lng) {
+                        setUnitLatitude(String(site.lat));
+                        setUnitLongitude(String(site.lng));
+                      }
+                    } else {
+                      // Site doesn't exist, create it
+                      console.log('Site does not exist, creating:', qrSiteName);
+                      handleCreateNewSite(qrSiteName);
+                    }
+                  }
+
+                  // Handle Sensor ID - extract prefix and numeric part
+                  if (qrSensorId) {
+                    setScannedSensorId(qrSensorId); // Store the original scanned sensor ID
+                    const sensorIdMatch = qrSensorId.match(/^([A-Z]+)?(\d+)$/);
+                    if (sensorIdMatch) {
+                      const [, prefix = '', numeric] = sensorIdMatch;
+                      setSensorPrefix(prefix);
+                      setSensorId(numeric);
+
+                    } else {
+                      // If no match, just set the whole thing as sensor ID
+                      setSensorId(qrSensorId);
+
+                    }
+                  }
+
+                  // Set Layer (locall field)
+                  if (qrLocall) {
+                    // Capitalize first letter to match layer values (Moist, Temp, etc.)
+                    const capitalizedLayer = qrLocall.charAt(0).toUpperCase() + qrLocall.slice(1).toLowerCase();
+                    setSelectedLayer(capitalizedLayer);
+
+                  }
+
+                  // Set Sensor Count for Moist sensors
+                  if (qrSensorCount) {
+                    const count = parseInt(qrSensorCount, 10);
+                    if (!isNaN(count)) {
+                      setMoistLevel(count);
+
+                    }
+                  }
+
+                  // Set Site Group
+                  if (qrSiteGroup) {
+                    setSelectedSiteGroup(qrSiteGroup);
+
+
+                    // Add to siteGroups if it doesn't exist
+                    setSiteGroups(prevGroups => {
+                      const groupExists = prevGroups.some(g => g.name === qrSiteGroup);
+                      if (!groupExists) {
+                        const newGroup = {
+                          id: prevGroups.length + 1,
+                          name: qrSiteGroup
+                        };
+                        return [...prevGroups, newGroup];
+                      }
+                      return prevGroups;
+                    });
+                  }
+
+                  // Store additional data for potential future uset3
                 }
               }}
               onScanError={(error: string) => {
                 console.error('QR scan error:', error);
-                // Only show error if it's not a permission denied (already handled in component)
-                if (!error.includes('permission')) {
+                // Close modal if permission was denied
+                if (error.toLowerCase().includes('permission') || error.toLowerCase().includes('denied')) {
+                  setShowQRScanner(false);
+                  present[0]({
+                    message: 'Camera permission denied',
+                    duration: 3000,
+                    color: 'danger',
+                    position: 'top'
+                  });
+                } else {
+                  // Show other errors without closing modal
                   present[0]({
                     message: `Camera error: ${error}`,
                     duration: 3000,
@@ -3029,7 +3834,6 @@ const MapPage: React.FC<MapProps> = (props) => {
                 }
               }}
               onScanCancel={() => {
-                console.log('QR scan cancelled');
                 setShowQRScanner(false);
               }}
             />
