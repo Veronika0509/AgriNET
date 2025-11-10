@@ -83,14 +83,14 @@ export const createTempDataContainers = async (props: TempDataContainerProps) =>
     props.boundsArray.map((bounds: TempBounds, index: number) => {
       if (props.tempChartData[index]?.data?.length > 1 && props.response.data.freshness !== 'outdated') {
         const exists = updatedTempChartData.some(
-          (updatedTempChartDataItem: [TempChartDataItem, TempBounds]) => updatedTempChartDataItem[0].sensorId === props.tempChartData[index].sensorId
+          (updatedTempChartDataItem: [TempChartDataItem, TempBounds]) => updatedTempChartDataItem[0].mainId === props.tempChartData[index].mainId
         );
         if (!exists) {
           updatedTempChartData.push([props.tempChartData[index], bounds]);
         }
       } else {
         const exists = props.invalidChartData.some(
-          (invalidChartDataItem: [TempChartDataItem, TempBounds]) => invalidChartDataItem[0].sensorId === props.tempChartData[index].sensorId
+          (invalidChartDataItem: [TempChartDataItem, TempBounds]) => invalidChartDataItem[0].mainId === props.tempChartData[index].mainId
         );
         if (!exists) {
           props.invalidChartData.push([props.tempChartData[index], bounds]);

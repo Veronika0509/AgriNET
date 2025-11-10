@@ -5,6 +5,7 @@ import axios from "axios";
 interface SensorItem {
   id: string | number;
   sensorId: string | number;
+  mainId: string | number;
   lat: number;
   lng: number;
   name: string;

@@ -77,8 +77,9 @@ const App: React.FC = () => {
       setSiteList(sites.data);
     }
 
-    // Force map component to remount
-    setMapPageKey(prevKey => prevKey + 1);
+    // DON'T force remount - just update the site list
+    // The map will react to the siteList change via useEffect
+    // setMapPageKey(prevKey => prevKey + 1);
   };
 
   useEffect(() => {

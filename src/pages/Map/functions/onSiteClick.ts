@@ -99,6 +99,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   const extlData: unknown[] = []
   const extlBoundsArray: unknown[] = []
   const extlInvalidChartData: unknown[] = []
+  const extlChartsAmount: unknown[] = []
   const countExtl: Marker[] = []
   // valve props
   const valveId: IdCounter = { value: 0 };
@@ -106,47 +107,51 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   const valveBoundsArray: unknown[] = []
   const valveInvalidChartData: unknown[] = []
   const countValve: Marker[] = []
-
+  console.log(props.siteList)
   props.siteList.map((site: Site) => {
-
     if (site.name === props.groupMarker.title) {
-
       site.layers.map((layer: Layer) => {
-        if (layer.name === 'Moist' || layer.name === 'moist') {
-          layer.markers.map((marker: Marker) => {
-            if (!countMoistFuel.some((item: Marker) => item.sensorId === marker.sensorId)) {
+        layer.markers.map((marker: Marker) => {
+          // Check by markerType if available, otherwise fall back to layer name
+          const markerType = (marker as any).markerType;
+          const layerName = layer.name;
+
+          // Moist type sensors
+          if (markerType === 'moist' || markerType === 'moist-fuel' ||
+              layerName === 'Moist' || layerName === 'moist') {
+            if (!countMoistFuel.some((item: Marker) => item.id === marker.id)) {
               countMoistFuel.push(marker)
             }
-          })
-        } else if (layer.name === 'SoilTemp') {
-          layer.markers.map((marker: Marker) => {
-            if (!countTemp.some((item: Marker) => item.sensorId === marker.sensorId)) {
+          }
+          // Temp type sensors
+          else if (markerType === 'temp' ||
+                   layerName === 'SoilTemp' || layerName === 'Temp' || layerName === 'temp') {
+            if (!countTemp.some((item: Marker) => item.id === marker.id)) {
               countTemp.push(marker)
             }
-          })
-        } else if (layer.name === 'WXET') {
-          layer.markers.map((marker: Marker) => {
-            if (!countWxet.some((item: Marker) => item.sensorId === marker.sensorId)) {
+          }
+          // WXET and Fuel type sensors (both use createWxetMarker)
+          else if (markerType === 'wxet' || layerName === 'WXET' || layerName === 'wxet') {
+            if (!countWxet.some((item: Marker) => item.id === marker.id)) {
               countWxet.push(marker)
             }
-          })
-        } else if (layer.name === 'Valve') {
-          layer.markers.map((marker: Marker) => {
-            if (!countValve.some((item: Marker) => item.sensorId === marker.sensorId)) {
+          }
+          // Valve type sensors
+          else if (markerType === 'valve' || layerName === 'Valve' || layerName === 'valve') {
+            if (!countValve.some((item: Marker) => item.id === marker.id)) {
               countValve.push(marker)
             }
-          })
-        } else if (layer.name === 'EXTL') {
-          layer.markers.map((marker: Marker) => {
-            if (!countExtl.some((item: Marker) => item.sensorId === marker.sensorId)) {
+          }
+          // EXTL type sensors
+          else if (markerType === 'extl' || layerName === 'EXTL' || layerName === 'extl') {
+            if (!countExtl.some((item: Marker) => item.id === marker.id)) {
               countExtl.push(marker)
             }
-          })
-        }
+          }
+        })
       })
     }
   })
-
   countMoistFuel.length !== 0 && countMoistFuel.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
     createMoistMarker(
@@ -198,7 +203,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   countExtl.length !== 0 && countExtl.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
     createExtlMarker(
-      props.extlChartsAmount,
+      extlChartsAmount,
       marker,
       props.page,
       props.setExtlDataContainer,

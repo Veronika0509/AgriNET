@@ -56,14 +56,14 @@ export const createValveDataContainers = async (props: ValveDataContainerProps) 
     props.boundsArray.map((bounds: ValveBounds, index: number) => {
       if (props.valveChartData[index].nowMinutes !== undefined) {
         const exists = updatedValveChartData.some(
-          (updatedValveChartDataItem: [ValveChartDataItem, ValveBounds]) => updatedValveChartDataItem[0].sensorId === props.valveChartData[index].sensorId
+          (updatedValveChartDataItem: [ValveChartDataItem, ValveBounds]) => updatedValveChartDataItem[0].mainId === props.valveChartData[index].mainId
         );
         if (!exists) {
           updatedValveChartData.push([props.valveChartData[index], bounds]);
         }
       } else {
         const exists = props.invalidChartData.some(
-          (invalidChartDataItem: [ValveChartDataItem, ValveBounds]) => invalidChartDataItem[0].sensorId === props.valveChartData[index].sensorId
+          (invalidChartDataItem: [ValveChartDataItem, ValveBounds]) => invalidChartDataItem[0].mainId === props.valveChartData[index].mainId
         );
         if (!exists) {
           props.invalidChartData.push([props.valveChartData[index], bounds]);

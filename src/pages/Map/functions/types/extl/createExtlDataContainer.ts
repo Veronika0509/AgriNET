@@ -1,5 +1,8 @@
+import {logoHackernews} from "ionicons/icons";
+
 interface ExtlItem {
   sensorId: string | number;
+  mainId: string | number;
   layerName?: string;
   [key: string]: unknown;
 }
@@ -9,6 +12,7 @@ interface ExtlBounds {
 }
 
 interface CreateExtlDataContainerProps {
+  mainId: number,
   item: ExtlItem;
   extlData: ExtlItem[];
   boundsArray: ExtlBounds[];
@@ -29,7 +33,7 @@ export const createExtlDataContainer = (props: CreateExtlDataContainerProps) => 
     const updatedExtlData: Array<[ExtlItem, ExtlBounds]> = []
     props.boundsArray.map((bounds: ExtlBounds, index: number) => {
       const exists = updatedExtlData.some(
-        (updatedExtlChartDataItem: [ExtlItem, ExtlBounds]) => updatedExtlChartDataItem[0].sensorId === props.extlData[index].sensorId
+        (updatedExtlChartDataItem: [ExtlItem, ExtlBounds]) => updatedExtlChartDataItem[0].mainId === props.extlData[index].id
       );
       if (!exists) {
         updatedExtlData.push([props.extlData[index], bounds]);

@@ -17,7 +17,7 @@ export const addOverlayToOverlaysArray = (
     (globalThis as any).React.startTransition(() => {
       setActiveOverlays((prevActiveOverlays: OverlayItem[]) => {
         const exists = prevActiveOverlays.some(
-          (existingOverlay: OverlayItem) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
+          (existingOverlay: OverlayItem) => existingOverlay.chartData.mainId === overlay.chartData.mainId
         );
         return exists ? prevActiveOverlays : [...prevActiveOverlays, overlay];
       });
@@ -27,7 +27,7 @@ export const addOverlayToOverlaysArray = (
     setTimeout(() => {
       setActiveOverlays((prevActiveOverlays: OverlayItem[]) => {
         const exists = prevActiveOverlays.some(
-          (existingOverlay: OverlayItem) => existingOverlay.chartData.sensorId === overlay.chartData.sensorId
+          (existingOverlay: OverlayItem) => existingOverlay.chartData.mainId === overlay.chartData.mainId
         );
         return exists ? prevActiveOverlays : [...prevActiveOverlays, overlay];
       });

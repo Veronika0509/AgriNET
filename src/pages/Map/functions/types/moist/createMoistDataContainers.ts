@@ -61,14 +61,14 @@ export const createMoistDataContainers = async (props: MoistDataContainerProps) 
     props.boundsArray.map((bounds: MoistBounds, index: number) => {
       if (props.moistChartData[index]?.data?.length > 1 && props.response.data.freshness !== 'outdated') {
         const exists = updatedMoistChartData.some(
-          (updatedMoistChartDataItem: [MoistChartDataItem, MoistBounds]) => updatedMoistChartDataItem[0].sensorId === props.moistChartData[index].sensorId
+          (updatedMoistChartDataItem: [MoistChartDataItem, MoistBounds]) => updatedMoistChartDataItem[0].mainId === props.moistChartData[index].mainId
         );
         if (!exists) {
           updatedMoistChartData.push([props.moistChartData[index], bounds]);
         }
       } else {
         const exists = props.invalidChartData.some(
-          (invalidChartDataItem: [MoistChartDataItem, MoistBounds]) => invalidChartDataItem[0].sensorId === props.moistChartData[index].sensorId
+          (invalidChartDataItem: [MoistChartDataItem, MoistBounds]) => invalidChartDataItem[0].mainId === props.moistChartData[index].mainId
         );
         if (!exists) {
           props.invalidChartData.push([props.moistChartData[index], bounds]);

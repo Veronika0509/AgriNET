@@ -23,7 +23,16 @@ import {
 } from '@ionic/react';
 import SensorSelector from '../VirtualValve/components/TimezoneSelector';
 import { useHistory } from 'react-router-dom';
-import { documentText, home, informationCircle, informationCircleOutline, add, settings, cameraOutline } from 'ionicons/icons';
+import {
+  documentText,
+  home,
+  informationCircle,
+  informationCircleOutline,
+  add,
+  settings,
+  cameraOutline,
+  logoFacebook
+} from 'ionicons/icons';
 import type { 
   Site, 
   SensorData, 
@@ -118,6 +127,7 @@ import {initializeFuelCustomOverlay} from "./components/types/wxet/FuelCustomOve
 import LocationButton from "./components/LocationButton";
 import {createFuelChartForOverlay} from "./functions/types/wxet/createFuelChartForOverlay";
 import { OverlayItem } from "./types/OverlayItem";
+import Login from "@/pages/Login";
 
 
 // Типы (already imported above)
@@ -1259,62 +1269,74 @@ const MapPage: React.FC<MapProps> = (props) => {
         props.setSiteList(sites.data);
 
 
-        if (mapRef.current) {
-
+        if (mapRef.current && !map) {
           createMap(map, setMap, mapRef);
           setMapInitialized(true);
-          
-          // Create sites immediately with fresh API data
-
-          if (map && sites.data && sites.data.length > 0) {
-
-            const sitesAsSensorsGroupData = sites.data.map((site: SiteWithLayers) => ({
-              lat: site.lat,
-              lng: site.lng,
-              name: site.name,
-              layers: site.layers || []
-            }));
-            
-            createSites({
-              page: props.page,
-              map,
-              siteList: sitesAsSensorsGroupData,
-              markers: markers,
-              setMarkers: setMarkers,
-              userId: props.userId,
-              allCoordinatesOfMarkers,
-              setCoordinatesForFitting,
-              setSecondMap,
-              moistChartsAmount,
-              setInvalidMoistChartDataContainer,
-              setMoistChartDataContainer,
-              wxetChartsAmount,
-              setInvalidWxetDataContainer,
-              setWxetDataContainer,
-              tempChartsAmount,
-              setInvalidTempChartDataContainer,
-              setTempChartDataContainer,
-              valveChartsAmount,
-              setInvalidValveChartDataContainer,
-              setValveChartDataContainer,
-              amountOfSensors,
-              setAmountOfSensors,
-              setIsMarkerClicked,
-              setInitialZoom,
-              extlChartsAmount,
-              setExtlDataContainer
-            });
-          }
+        } else if (!mapRef.current) {
+          // If mapRef is not ready, wait a bit and retry
+          setTimeout(() => {
+            if (mapRef.current && !map) {
+              createMap(map, setMap, mapRef);
+              setMapInitialized(true);
+            }
+          }, 100);
         }
       }
     }
     initializeMap()
   }, [props.page, activeTab, mapInitialized]);
+  // Handle back navigation from marker view
+  useEffect(() => {
+    if (!isMarkerClicked && secondMap) {
+      // User clicked back from marker view to sites view
+      console.log('🔙 Navigating back from marker view to sites view');
+
+      // Clear all sensor overlays
+      activeOverlays.forEach((overlay: any) => {
+        if (overlay && overlay.setMap) {
+          overlay.setMap(null);
+        }
+      });
+      setActiveOverlays([]);
+
+      // Clear sensor data containers
+      setMoistChartDataContainer([]);
+      setInvalidMoistChartDataContainer([]);
+      setTempChartDataContainer([]);
+      setInvalidTempChartDataContainer([]);
+      setWxetDataContainer([]);
+      setInvalidWxetDataContainer([]);
+      setValveChartDataContainer([]);
+      setInvalidValveChartDataContainer([]);
+      setExtlDataContainer([]);
+
+      // Clear sensor overlays
+      setMoistOverlays([]);
+      setTempOverlays([]);
+      setFuelOverlays([]);
+      setValveOverlays([]);
+
+      // Reset secondMap to show site markers again
+      setSecondMap(null);
+      setAreBoundsFitted(false);
+      setAmountOfSensors(0);
+
+      // Force markers to be recreated
+      markers.forEach((marker: any) => {
+        if (marker && marker.setMap) {
+          marker.setMap(null);
+        }
+      });
+      setMarkers([]);
+    }
+  }, [isMarkerClicked]);
+
   useEffect(() => {
     if (activeOverlays.length !== 0) {
       CollisionResolver.resolve(activeOverlays);
     }
-    if (map && props.siteList.length > 0) {
+    if (map && props.siteList.length > 0 && !isMarkerClicked) {
+      // Only create sites when NOT in marker view
       // Only clear markers if shouldRecreateMarkers flag is true (after adding new unit)
       // This prevents clearing markers during normal navigation
       if (shouldRecreateMarkers) {
@@ -1370,7 +1392,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         setAdditionalChartData: props.setAdditionalChartData
       })
     }
-  }, [map, props.siteList, shouldRecreateMarkers]);
+  }, [map, props.siteList, shouldRecreateMarkers, isMarkerClicked]);
 
   // Fix map display after returning from overlay
   useEffect(() => {
@@ -1901,7 +1923,6 @@ const MapPage: React.FC<MapProps> = (props) => {
   // EXTL Marker
   useEffect(() => {
     if (extlDataContainer.length !== 0) {
-
       extlDataContainer.map((data: ExtlDataContainerItem) => {
         const ExtlCustomOverlayExport = initializeExtlCustomOverlay(props.isGoogleApiLoaded)
         if (!ExtlCustomOverlayExport) return
@@ -1925,9 +1946,9 @@ const MapPage: React.FC<MapProps> = (props) => {
           chartType: 'default',
           width: extlItem.width,
           height: extlItem.height,
-          sensorId: extlItem.sensorId
+          sensorId: extlItem.sensorId,
+          mainId: extlItem.id
         };
-        
         const overlay = new ExtlCustomOverlayExport(
           bounds,
           extlChartData
@@ -1952,7 +1973,9 @@ const MapPage: React.FC<MapProps> = (props) => {
       setAreBoundsFitted(true);
       map.fitBounds(bounds);
     } else {
-
+      activeOverlays.length === 26 && activeOverlays.map((over: any) => {
+        console.log(over.chartData.layerName)
+      })
     }
     return undefined;
   }, [activeOverlays]);
