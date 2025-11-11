@@ -6,6 +6,7 @@ import {logoFacebook} from "ionicons/icons";
 interface SensorItem {
   id: string | number;
   sensorId: string;
+  mainId: string | number;
   lat: number;
   lng: number;
   name: string;

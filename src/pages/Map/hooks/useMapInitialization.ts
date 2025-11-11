@@ -63,8 +63,10 @@ interface UseMapInitializationProps {
 export const useMapInitialization = (props: UseMapInitializationProps) => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [mapInitialized, setMapInitialized] = useState(false);
+  const [siteList, setSiteListLocal] = useState<Site[]>([]);
   const mapRef = useRef<HTMLDivElement>(null);
 
+  // Initialize map and fetch sites
   useEffect(() => {
     const initializeMap = async () => {
       if (props.page === 1 && props.activeTab === 'map' && !mapInitialized) {
@@ -76,63 +78,76 @@ export const useMapInitialization = (props: UseMapInitializationProps) => {
           props.presentToast(sites.error, 'danger');
           // Set empty array to prevent crashes
           props.setSiteList([]);
+          setSiteListLocal([]);
           return; // Exit early
         }
 
         // API call successful
         props.setSiteList(sites.data);
+        setSiteListLocal(sites.data);
 
+        // Wait for mapRef to be available before creating map
         if (mapRef.current) {
           createMap(map, setMap, mapRef);
           setMapInitialized(true);
-          
-          // Create sites immediately with fresh API data
-          if (map && sites.data && sites.data.length > 0) {
-            const sitesAsSensorsGroupData = sites.data.map((site: SiteWithLayers) => ({
-              lat: site.lat,
-              lng: site.lng,
-              name: site.name,
-              layers: site.layers || []
-            }));
-            
-            createSites({
-              page: props.page,
-              map,
-              siteList: sitesAsSensorsGroupData,
-              markers: props.markers,
-              setMarkers: props.setMarkers,
-              userId: props.userId,
-              allCoordinatesOfMarkers: props.allCoordinatesOfMarkers,
-              setCoordinatesForFitting: props.setCoordinatesForFitting,
-              setSecondMap: props.setSecondMap,
-              moistChartsAmount: props.moistChartsAmount,
-              setInvalidMoistChartDataContainer: props.setInvalidMoistChartDataContainer,
-              setMoistChartDataContainer: props.setMoistChartDataContainer,
-              moistId: props.moistId,
-              tempChartsAmount: props.tempChartsAmount,
-              setInvalidTempChartDataContainer: props.setInvalidTempChartDataContainer,
-              setTempChartDataContainer: props.setTempChartDataContainer,
-              tempId: props.tempId,
-              wxetChartsAmount: props.wxetChartsAmount,
-              setInvalidWxetChartDataContainer: props.setInvalidWxetChartDataContainer,
-              setWxetChartDataContainer: props.setWxetChartDataContainer,
-              wxetId: props.wxetId,
-              valveChartsAmount: props.valveChartsAmount,
-              setInvalidValveChartDataContainer: props.setInvalidValveChartDataContainer,
-              setValveChartDataContainer: props.setValveChartDataContainer,
-              valveId: props.valveId,
-              extlChartsAmount: props.extlChartsAmount,
-              setInvalidExtlChartDataContainer: props.setInvalidExtlChartDataContainer,
-              setExtlChartDataContainer: props.setExtlChartDataContainer,
-              extlId: props.extlId
-            });
-          }
+        } else {
+          // If mapRef is not available yet, retry after a short delay
+          setTimeout(() => {
+            if (mapRef.current && !map) {
+              createMap(map, setMap, mapRef);
+              setMapInitialized(true);
+            }
+          }, 100);
         }
       }
     };
 
     initializeMap();
   }, [props.page, props.activeTab, mapInitialized]);
+
+  // Create sites when map is ready
+  useEffect(() => {
+    if (map && siteList.length > 0 && props.page === 1) {
+      const sitesAsSensorsGroupData = siteList.map((site: SiteWithLayers) => ({
+        lat: site.lat,
+        lng: site.lng,
+        name: site.name,
+        layers: site.layers || []
+      }));
+
+      createSites({
+        page: props.page,
+        map,
+        siteList: sitesAsSensorsGroupData,
+        markers: props.markers,
+        setMarkers: props.setMarkers,
+        userId: props.userId,
+        allCoordinatesOfMarkers: props.allCoordinatesOfMarkers,
+        setCoordinatesForFitting: props.setCoordinatesForFitting,
+        setSecondMap: props.setSecondMap,
+        moistChartsAmount: props.moistChartsAmount,
+        setInvalidMoistChartDataContainer: props.setInvalidMoistChartDataContainer,
+        setMoistChartDataContainer: props.setMoistChartDataContainer,
+        moistId: props.moistId,
+        tempChartsAmount: props.tempChartsAmount,
+        setInvalidTempChartDataContainer: props.setInvalidTempChartDataContainer,
+        setTempChartDataContainer: props.setTempChartDataContainer,
+        tempId: props.tempId,
+        wxetChartsAmount: props.wxetChartsAmount,
+        setInvalidWxetChartDataContainer: props.setInvalidWxetChartDataContainer,
+        setWxetChartDataContainer: props.setWxetChartDataContainer,
+        wxetId: props.wxetId,
+        valveChartsAmount: props.valveChartsAmount,
+        setInvalidValveChartDataContainer: props.setInvalidValveChartDataContainer,
+        setValveChartDataContainer: props.setValveChartDataContainer,
+        valveId: props.valveId,
+        extlChartsAmount: props.extlChartsAmount,
+        setInvalidExtlChartDataContainer: props.setInvalidExtlChartDataContainer,
+        setExtlChartDataContainer: props.setExtlChartDataContainer,
+        extlId: props.extlId
+      });
+    }
+  }, [map, siteList]);
 
   return { map, setMap, mapRef, mapInitialized };
 };
