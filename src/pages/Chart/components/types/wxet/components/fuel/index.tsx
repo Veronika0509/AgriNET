@@ -103,6 +103,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
             if (marker.sensorId === props.sensorId) {
               layer.markers.map((neededMarker: any) => {
                 if (neededMarker.markerType === 'fuel') {
+                  console.log(neededMarker)
                   setLocations((prevLocations: any) => {
                     const exists = prevLocations.some((loc: any) => loc.id === neededMarker.id)
                     if (exists) {

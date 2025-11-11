@@ -114,31 +114,31 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       site.layers.map((layer: Layer) => {
         if (layer.name === 'Moist' || layer.name === 'moist') {
           layer.markers.map((marker: Marker) => {
-            if (!countMoistFuel.some((item: Marker) => item.sensorId === marker.sensorId)) {
+            if (!countMoistFuel.some((item: Marker) => item.id === marker.id)) {
               countMoistFuel.push(marker)
             }
           })
         } else if (layer.name === 'SoilTemp') {
           layer.markers.map((marker: Marker) => {
-            if (!countTemp.some((item: Marker) => item.sensorId === marker.sensorId)) {
+            if (!countTemp.some((item: Marker) => item.id === marker.id)) {
               countTemp.push(marker)
             }
           })
         } else if (layer.name === 'WXET') {
           layer.markers.map((marker: Marker) => {
-            if (!countWxet.some((item: Marker) => item.sensorId === marker.sensorId)) {
+            if (!countWxet.some((item: Marker) => item.id === marker.id)) {
               countWxet.push(marker)
             }
           })
         } else if (layer.name === 'Valve') {
           layer.markers.map((marker: Marker) => {
-            if (!countValve.some((item: Marker) => item.sensorId === marker.sensorId)) {
+            if (!countValve.some((item: Marker) => item.id === marker.id)) {
               countValve.push(marker)
             }
           })
         } else if (layer.name === 'EXTL') {
           layer.markers.map((marker: Marker) => {
-            if (!countExtl.some((item: Marker) => item.sensorId === marker.sensorId)) {
+            if (!countExtl.some((item: Marker) => item.id === marker.id)) {
               countExtl.push(marker)
             }
           })

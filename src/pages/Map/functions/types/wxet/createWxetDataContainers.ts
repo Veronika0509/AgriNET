@@ -61,7 +61,7 @@ export const createWxetDataContainers = async (props: WxetDataContainerProps): P
     props.boundsArray.map((bounds: WxetBounds, index: number) => {
       const pushValidMarker = () => {
         const exists = updatedWxetData.some(
-          (updatedWxetChartDataItem: [WxetDataItem, WxetBounds]) => updatedWxetChartDataItem[0]?.sensorId === props.wxetData[index]?.sensorId
+          (updatedWxetChartDataItem: [WxetDataItem, WxetBounds]) => updatedWxetChartDataItem[0]?.mainId === props.wxetData[index]?.mainId
         );
         if (!exists) {
           updatedWxetData.push([props.wxetData[index], bounds]);
@@ -69,7 +69,7 @@ export const createWxetDataContainers = async (props: WxetDataContainerProps): P
       }
       const pushInvalidMarker = () => {
         const exists = props.invalidChartData.some(
-          (invalidChartDataItem: [WxetDataItem, WxetBounds]) => invalidChartDataItem[0].sensorId === props.wxetData[index].sensorId
+          (invalidChartDataItem: [WxetDataItem, WxetBounds]) => invalidChartDataItem[0].mainId === props.wxetData[index].mainId
         );
         if (!exists) {
           props.invalidChartData.push([props.wxetData[index], bounds]);

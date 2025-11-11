@@ -19,8 +19,10 @@ interface CreateExtlDataContainerProps {
 }
 
 export const createExtlDataContainer = (props: CreateExtlDataContainerProps) => {
+  const { id, ...rest } = props.item;
   const itemData: ExtlItem = {
-    ...props.item,
+    ...rest,
+    mainId: props.item.id,
     layerName: 'EXTL'
   }
   props.extlData.push(itemData)
@@ -29,7 +31,7 @@ export const createExtlDataContainer = (props: CreateExtlDataContainerProps) => 
     const updatedExtlData: Array<[ExtlItem, ExtlBounds]> = []
     props.boundsArray.map((bounds: ExtlBounds, index: number) => {
       const exists = updatedExtlData.some(
-        (updatedExtlChartDataItem: [ExtlItem, ExtlBounds]) => updatedExtlChartDataItem[0].sensorId === props.extlData[index].sensorId
+        (updatedExtlChartDataItem: [ExtlItem, ExtlBounds]) => updatedExtlChartDataItem[0].mainId === props.extlData[index].mainId
       );
       if (!exists) {
         updatedExtlData.push([props.extlData[index], bounds]);

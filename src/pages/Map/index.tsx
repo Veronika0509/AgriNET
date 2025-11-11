@@ -304,7 +304,6 @@ const MapPage: React.FC<MapProps> = (props) => {
     }
   };
 
-  // Функция проверки на дубликаты sensor ID
   const checkSensorIdExists = async (sensorId: string): Promise<{ exists: boolean; layers: string[] }> => {
     const allSensorIds = await getAllSensorIds();
 
@@ -312,7 +311,6 @@ const MapPage: React.FC<MapProps> = (props) => {
     const exists = allSensorIds.includes(sensorId);
 
     if (exists) {
-      // Получаем информацию о слое для существующего sensor ID
       try {
         const response = await fetch(`https://app.agrinet.us/api/utils/${sensorId}`);
         if (response.ok) {
@@ -334,8 +332,7 @@ const MapPage: React.FC<MapProps> = (props) => {
       } catch (error) {
         console.error('Error fetching sensor info:', error);
       }
-      
-      // Если не удалось получить информацию о слое, возвращаем Unknown
+
       return {
         exists: true,
         layers: ['Unknown']
@@ -885,8 +882,6 @@ const MapPage: React.FC<MapProps> = (props) => {
   useEffect(() => {
     if (selectedSite && props.siteList) {
       const site = props.siteList.find(s => s.name === selectedSite || s.name === props.selectedSiteForAddUnit);
-      if (site) {
-      }
     }
   }, [selectedSite, props.siteList, unitLatitude, unitLongitude]);
 
@@ -1925,7 +1920,8 @@ const MapPage: React.FC<MapProps> = (props) => {
           chartType: 'default',
           width: extlItem.width,
           height: extlItem.height,
-          sensorId: extlItem.sensorId
+          sensorId: extlItem.sensorId,
+          mainId: extlItem.mainId
         };
         
         const overlay = new ExtlCustomOverlayExport(
@@ -1952,7 +1948,11 @@ const MapPage: React.FC<MapProps> = (props) => {
       setAreBoundsFitted(true);
       map.fitBounds(bounds);
     } else {
-
+      if (activeOverlays.length === 27) {
+        activeOverlays.map((over: any) => {
+          console.log(over.chartData.layerName)
+        })
+      }
     }
     return undefined;
   }, [activeOverlays]);
