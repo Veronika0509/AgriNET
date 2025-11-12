@@ -65,6 +65,7 @@ interface OnSiteClickProps {
   setValveChartDataContainer: (data: unknown[]) => void;
   allCoordinatesOfMarkers: { lat: number; lng: number; id: string | number; mainId: string | number }[];
   setCoordinatesForFitting: (coords: { lat: number; lng: number; id: string | number; mainId: string | number }[]) => void;
+  setAllCoordinatesOfMarkers: (coords: { lat: number; lng: number; id: string | number; mainId: string | number }[]) => void;
 }
 
 export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
@@ -167,6 +168,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       props.allCoordinatesOfMarkers,
       props.siteList,
       props.setCoordinatesForFitting,
+      props.setAllCoordinatesOfMarkers,
       props.groupMarker.title,
       'Moist'
     )
@@ -191,6 +193,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       props.allCoordinatesOfMarkers,
       props.siteList,
       props.setCoordinatesForFitting,
+      props.setAllCoordinatesOfMarkers,
       props.groupMarker.title,
       'WXET'
     )
@@ -212,6 +215,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       props.allCoordinatesOfMarkers,
       props.siteList,
       props.setCoordinatesForFitting,
+      props.setAllCoordinatesOfMarkers,
       props.groupMarker.title,
       'EXTL'
     )
@@ -236,6 +240,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       props.allCoordinatesOfMarkers,
       props.siteList,
       props.setCoordinatesForFitting,
+      props.setAllCoordinatesOfMarkers,
       props.groupMarker.title,
       'SoilTemp'
     )
@@ -260,6 +265,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       props.allCoordinatesOfMarkers,
       props.siteList,
       props.setCoordinatesForFitting,
+      props.setAllCoordinatesOfMarkers,
       props.groupMarker.title,
       'Valve'
     )

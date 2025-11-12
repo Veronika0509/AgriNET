@@ -316,17 +316,16 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
               return overlays;
             });
           } else {
-            // Add invalid overlays to state as well
             this.setMoistOverlays((overlays: MoistCustomOverlayInstance[]) => {
               const newOverlayId = this.chartData.id;
               const overlayExists = overlays.some(overlay => overlay.chartData.id === newOverlayId);
-
               if (!overlayExists) {
                 if (this.prefix === 'b') {
                   if (!this.moistOverlaysRef.current.some((overlay: MoistCustomOverlayInstance) => overlay.chartData.id === this.chartData.id)) {
                     this.moistOverlaysRef.current.push(this as unknown as MoistCustomOverlayInstance);
                   }
                 }
+                console.log( this as unknown as MoistCustomOverlayInstance)
                 return [...overlays, this as unknown as MoistCustomOverlayInstance];
               }
 

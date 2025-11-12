@@ -1,7 +1,18 @@
 // Custom hooks for Map component
-// These hooks extract logic from the 2601-line Map/index.tsx God component
+// These hooks extract logic from the massive Map/index.tsx component
 
+// Map initialization and management
 export { useMapInitialization } from './useMapInitialization';
-export { useAddUnitForm } from './useAddUnitForm';
-export { useUserLocation } from './useUserLocation';
 export { useOverlayManagement } from './useOverlayManagement';
+
+// User interactions
+export { useUserLocation } from './useUserLocation';
+export { useLocationTracking } from './useLocationTracking';
+export type { UseLocationTrackingReturn } from './useLocationTracking';
+
+// Add Unit form management
+export { useAddUnitForm } from './useAddUnitForm';
+
+// Layer management
+export { useLayers } from './useLayers';
+export type { UseLayersReturn } from './useLayers';

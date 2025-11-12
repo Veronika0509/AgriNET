@@ -19,7 +19,7 @@ const Header = (props: HeaderProps) => {
   const back = () => {
     if (props.isMarkerClicked) {
       props.setIsMarkerClicked(false)
-      props.reloadMapPage()
+      // Don't call reloadMapPage() - let the cleanup effect in Map component handle everything
     } else {
       history.push('/AgriNET/');
       props.setPage(0);

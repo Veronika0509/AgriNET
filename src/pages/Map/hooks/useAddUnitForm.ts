@@ -1,18 +1,47 @@
 import { useState, useEffect } from 'react';
 import type { Site } from '../../../types';
+import type { SiteGroup, FormErrors } from '../types';
 
 interface UseAddUnitFormProps {
   selectedSiteForAddUnit: string;
   siteList: Site[];
+  activeTab: string;
 }
 
 export const useAddUnitForm = (props: UseAddUnitFormProps) => {
+  // Unit details state
   const [unitName, setUnitName] = useState<string>('');
   const [unitLatitude, setUnitLatitude] = useState<string>('');
   const [unitLongitude, setUnitLongitude] = useState<string>('');
+
+  // Site selection state
   const [selectedSite, setSelectedSite] = useState<string>(props.selectedSiteForAddUnit || '');
+  const [selectedSiteGroup, setSelectedSiteGroup] = useState<string>('');
+  const [siteGroups, setSiteGroups] = useState<SiteGroup[]>([]);
+  const [siteGroupError, setSiteGroupError] = useState<{ invalidGroup: string; correctGroups: string[] } | null>(null);
+
+  // Sensor ID state
   const [sensorPrefix, setSensorPrefix] = useState<string>('');
   const [sensorId, setSensorId] = useState<string>('');
+
+  // Layer selection state
+  const [selectedLayer, setSelectedLayer] = useState<string>('');
+
+  // Moisture sensor configuration state
+  const [requestHardware, setRequestHardware] = useState<boolean>(false);
+  const [moistLevel, setMoistLevel] = useState<number | undefined>(undefined);
+  const [moistLevelError, setMoistLevelError] = useState<boolean>(false);
+
+  // Form validation state
+  const [formErrors, setFormErrors] = useState<FormErrors>({
+    site: false,
+    siteGroup: false,
+    unitName: false,
+    latitude: false,
+    longitude: false,
+    sensor: false,
+    layer: false,
+  });
 
   // Initialize coordinates when component mounts or props change
   useEffect(() => {
@@ -35,6 +64,42 @@ export const useAddUnitForm = (props: UseAddUnitFormProps) => {
       }
     }
   }, [selectedSite, props.siteList]);
+
+  // Fetch user site groups when navigating to Add Unit page
+  useEffect(() => {
+    if (props.activeTab === 'add') {
+      fetch('https://app.agrinet.us/api/add-unit/user-site-groups')
+        .then((response) => {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            return response.json();
+          } else {
+            return response.text().then((text) => text);
+          }
+        })
+        .then((data) => {
+          if (data && Array.isArray(data) && data.length > 0) {
+            const formattedGroups = data.map((group, index) => ({
+              id: index + 1,
+              name: group,
+            }));
+
+            setSiteGroups(formattedGroups);
+
+            // Automatically select the first site group
+            if (formattedGroups.length > 0) {
+              setSelectedSiteGroup(formattedGroups[0].name);
+            }
+          } else {
+            setSiteGroups([]);
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching user site groups:', error);
+          setSiteGroups([]);
+        });
+    }
+  }, [props.activeTab]);
 
   // Sensor ID validation function
   const validateSensorId = (fullSensorId: string): { isValid: boolean; message?: string } => {
@@ -87,23 +152,65 @@ export const useAddUnitForm = (props: UseAddUnitFormProps) => {
     setSelectedSite('');
     setSensorPrefix('');
     setSensorId('');
+    setSelectedLayer('');
+    setRequestHardware(false);
+    setMoistLevel(undefined);
+    setMoistLevelError(false);
+    setFormErrors({
+      site: false,
+      siteGroup: false,
+      unitName: false,
+      latitude: false,
+      longitude: false,
+      sensor: false,
+      layer: false,
+    });
   };
 
   return {
+    // Unit details
     unitName,
     setUnitName,
     unitLatitude,
     setUnitLatitude,
     unitLongitude,
     setUnitLongitude,
+
+    // Site selection
     selectedSite,
     setSelectedSite,
+    selectedSiteGroup,
+    setSelectedSiteGroup,
+    siteGroups,
+    setSiteGroups,
+    siteGroupError,
+    setSiteGroupError,
+
+    // Sensor ID
     sensorPrefix,
     setSensorPrefix,
     sensorId,
     setSensorId,
+
+    // Layer selection
+    selectedLayer,
+    setSelectedLayer,
+
+    // Moisture sensor configuration
+    requestHardware,
+    setRequestHardware,
+    moistLevel,
+    setMoistLevel,
+    moistLevelError,
+    setMoistLevelError,
+
+    // Form validation
+    formErrors,
+    setFormErrors,
+
+    // Helper functions
     validateSensorId,
     getAllSensorIds,
-    resetForm
+    resetForm,
   };
 };

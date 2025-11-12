@@ -33,6 +33,7 @@ export const pushAllCoordinates = (
   allCoordinatesOfMarkers: Coordinate[],
   siteList: Site[],
   setCoordinatesForFitting: (coords: Coordinate[]) => void,
+  setAllCoordinatesOfMarkers: (coords: Coordinate[]) => void,
   siteName: string,
   type: string
 ): void => {

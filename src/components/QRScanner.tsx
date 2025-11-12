@@ -33,11 +33,6 @@ const QRScanner = () => {
     // Remove transparency
     document.body.classList.remove('scanner-active');
     setIsScanning(false);
-    
-    // Log result to console
-    if (result.hasContent) {
-      console.log('[v0] QR Code Data:', result.content);
-    }
   };
 
   // ===== WEB SCANNER (Browser) =====
@@ -59,7 +54,6 @@ const QRScanner = () => {
     scannerRef.current.render(
       // Success callback - called when QR code is detected
       (decodedText) => {
-        console.log('[v0] QR Code Data:', decodedText);
         
         // Stop scanner after successful scan
         if (scannerRef.current) {
