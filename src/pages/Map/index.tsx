@@ -113,6 +113,7 @@ import { createFuelChartForOverlay } from "./functions/types/wxet/createFuelChar
 import type { OverlayItem } from "./types/OverlayItem"
 import { validateSensorId, getAllSensorIds, checkSensorIdExists } from "./functions/sensorValidation"
 import { roundCoordinate, roundCoordinates, findClosestSite } from "./functions/coordinateUtils"
+import Login from "@/pages/Login";
 
 // Типы (already imported above)
 
@@ -1946,10 +1947,7 @@ const MapPage: React.FC<MapProps> = (props) => {
       requestAnimationFrame(() => {
         setTimeout(() => {
           google.maps.event.trigger(map, "resize")
-
           map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 })
-
-
 
           setAreBoundsFitted(true)
         }, 100)

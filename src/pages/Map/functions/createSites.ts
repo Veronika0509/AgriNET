@@ -123,7 +123,7 @@ export const createSites = (props: CreateSitesProps): void => {
       if (props.map.zoom !== undefined && props.map.zoom !== props.initialZoom) {
         props.map.setZoom(props.initialZoom)
       }
-      props.map.fitBounds(bounds)
+      props.map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 })
       if (!props.initialZoom) {
         props.setInitialZoom(props.map.zoom)
       }
