@@ -26,8 +26,6 @@ export class CollisionResolver {
   private static alreadyMoved: Map<OverlayItem, boolean> = new Map();
 
   static resolve(overlays: OverlayItem[]) {
-    if (overlays.length > 30) return;
-
     clearTimeout(this.timerId);
     this.timerId = setTimeout(() => {
       this.alreadyMoved.clear();
