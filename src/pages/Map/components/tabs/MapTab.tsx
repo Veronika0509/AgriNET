@@ -1,18 +1,35 @@
-import React from "react"
-import { IonCheckbox, IonItem } from "@ionic/react"
-import type { Site } from "../../../../types"
-import type { SiteWithLayers, LayerListLayer } from "../../types"
-import type { OverlayItem } from "../../types/OverlayItem"
+import React, { useEffect } from "react"
+import { IonItem, IonCheckbox } from "@ionic/react"
 import LocationButton from "../LocationButton"
+import type { Site } from "@/types"
+import type { OverlayItem } from "../../types/OverlayItem"
 import s from "../../style.module.css"
 
-export interface MapTabProps {
+// LayerList interfaces
+interface LayerListLayer {
+  name: string
+  markers: LayerListMarker[]
+  [key: string]: unknown
+}
+
+interface LayerListMarker {
+  chartData: {
+    sensorId: string | number
+    [key: string]: unknown
+  }
+  [key: string]: unknown
+}
+
+// Extend Site interface to include layers
+interface SiteWithLayers extends Site {
+  layers?: LayerListLayer[]
+}
+
+interface MapTabProps {
   mapRef: React.RefObject<HTMLDivElement>
-  // Location button props
   centerMapOnUserLocation: () => void
   isLocationEnabled: boolean
   locationError: string | null
-  // Layer list props
   siteList: Site[]
   activeOverlays: OverlayItem[]
   allOverlays: OverlayItem[]
@@ -22,10 +39,7 @@ export interface MapTabProps {
   setActiveOverlays: React.Dispatch<React.SetStateAction<OverlayItem[]>>
 }
 
-/**
- * Map Tab - Displays the main map with location button and layer list
- */
-const MapTab: React.FC<MapTabProps> = ({
+export const MapTab: React.FC<MapTabProps> = ({
   mapRef,
   centerMapOnUserLocation,
   isLocationEnabled,
@@ -38,21 +52,29 @@ const MapTab: React.FC<MapTabProps> = ({
   setCheckedLayers,
   setActiveOverlays,
 }) => {
-  /**
-   * Checks if device is mobile
-   */
-  const isMobileDevice = () => {
+  // Trigger Google Maps resize when component mounts/becomes visible
+  useEffect(() => {
+    // Small delay to ensure the DOM is ready
+    const timer = setTimeout(() => {
+      if (secondMap && typeof secondMap !== 'string') {
+        google.maps.event.trigger(secondMap, 'resize')
+      }
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [secondMap])
+
+  // Determine if location button should be shown
+  const shouldShowLocationButton = (() => {
     const userAgent = navigator.userAgent
     const screenWidth = window.screen?.width || window.innerWidth
     const isMobileUserAgent =
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|IEMobile|Opera Mini|Mobile|Tablet/i.test(userAgent)
     const isDesktop = /Windows NT|Macintosh|Linux/i.test(userAgent) && screenWidth > 1024
     return isMobileUserAgent && !isDesktop
-  }
+  })()
 
-  /**
-   * Handles layer visibility toggle
-   */
+  // Handle layer toggle
   const handleToggleLayer = (checkbox: CustomEvent, layerName: string) => {
     const isChecked = checkbox.detail.checked
 
@@ -68,11 +90,9 @@ const MapTab: React.FC<MapTabProps> = ({
 
         if (overlay && isMatchByChartDataLayerName) {
           if (isChecked) {
-            // Show overlay
             if (overlay.show && typeof overlay.show === "function") {
               overlay.show()
             }
-            // Add to active overlays if not already there
             if (activeOverlays && !activeOverlays.includes(overlay)) {
               setActiveOverlays((prevActiveOverlays: OverlayItem[]) => {
                 const exists = prevActiveOverlays.some(
@@ -86,11 +106,9 @@ const MapTab: React.FC<MapTabProps> = ({
               })
             }
           } else {
-            // Hide overlay
             if (overlay.hide && typeof overlay.hide === "function") {
               overlay.hide()
             }
-            // Remove from active overlays
             setActiveOverlays((prevActiveOverlays: OverlayItem[]) =>
               prevActiveOverlays.filter(
                 (active: OverlayItem) =>
@@ -106,11 +124,8 @@ const MapTab: React.FC<MapTabProps> = ({
     }
   }
 
-  /**
-   * Renders the layer list checkboxes
-   */
+  // Extract layer names from site data
   const renderLayerList = () => {
-    // Check conditions for LayerList
     const hasSites = siteList && Array.isArray(siteList) && siteList.length > 0
     const hasCustomOverlays = activeOverlays && activeOverlays.length > 0
 
@@ -118,7 +133,6 @@ const MapTab: React.FC<MapTabProps> = ({
       return null
     }
 
-    // Extract layer names from site data
     const layers: string[] = []
     const secondMapName = typeof secondMap === "string" ? secondMap : secondMap?.getDiv()?.id || ""
 
@@ -159,16 +173,26 @@ const MapTab: React.FC<MapTabProps> = ({
 
   return (
     <div
-      className={s.map}
-      ref={mapRef}
       style={{
         height: "100%",
         width: "100%",
         position: "relative",
       }}
     >
+      <div
+        className={s.map}
+        ref={mapRef}
+        style={{
+          height: "100%",
+          width: "100%",
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
+      />
+
       {/* LocationButton - Mobile devices only */}
-      {isMobileDevice() && (
+      {shouldShowLocationButton && (
         <LocationButton
           onLocationClick={centerMapOnUserLocation}
           isLocationEnabled={isLocationEnabled}
@@ -181,5 +205,3 @@ const MapTab: React.FC<MapTabProps> = ({
     </div>
   )
 }
-
-export default MapTab

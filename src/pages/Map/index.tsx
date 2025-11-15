@@ -103,17 +103,18 @@ import { initializeValveCustomOverlay } from "./components/types/valve/ValveCust
 import { createValveChartForOverlay } from "./functions/types/valve/createValveChartForOverlay"
 import s from "./style.module.css"
 import { addOverlayToOverlaysArray } from "./functions/types/moist/addOverlayToOverlaysArray"
-import Info from "../Info"
-import BudgetEditor from "./components/types/moist/BudgetEditor"
-import Comments from "./components/Comments"
 import { initializeExtlCustomOverlay } from "./components/types/extl/ExtlCustomOverlay"
 import { initializeFuelCustomOverlay } from "./components/types/wxet/FuelCustomOverlay"
-import LocationButton from "./components/LocationButton"
 import { createFuelChartForOverlay } from "./functions/types/wxet/createFuelChartForOverlay"
 import type { OverlayItem } from "./types/OverlayItem"
 import { validateSensorId, getAllSensorIds, checkSensorIdExists } from "./functions/sensorValidation"
 import { roundCoordinate, roundCoordinates, findClosestSite } from "./functions/coordinateUtils"
 import Login from "@/pages/Login";
+// Tab components
+import { MapTab } from "./components/tabs/MapTab"
+import { InfoTab } from "./components/tabs/InfoTab"
+import { CommentsTab } from "./components/tabs/CommentsTab"
+import { BudgetEditorTab } from "./components/tabs/BudgetEditorTab"
 
 // Типы (already imported above)
 
@@ -264,6 +265,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   const [selectedSiteGroup, setSelectedSiteGroup] = useState<string>("")
   const [siteGroups, setSiteGroups] = useState<Array<{ id: string | number; name: string }>>([])
   const [siteGroupError, setSiteGroupError] = useState<{ invalidGroup: string; correctGroups: string[] } | null>(null)
+  const mapRefFunc = useRef(null);
 
   // Initialize coordinates when component mounts or props change
   useEffect(() => {
@@ -1210,6 +1212,10 @@ const MapPage: React.FC<MapProps> = (props) => {
       })
       setMarkers([])
 
+      // Reset initialZoom so that createSites recalculates the proper zoom/center for all sites
+      // This ensures the map fits all sites properly when returning from sensor view
+      setInitialZoom(undefined)
+
     }
 
     // Update the ref to track the current state for the next render
@@ -1240,10 +1246,8 @@ const MapPage: React.FC<MapProps> = (props) => {
         props.setSiteList(sites.data)
 
         if (mapRef.current) {
-          createMap(map, setMap, mapRef)
+          createMap(map, setMap, mapRef, mapRefFunc)
           setMapInitialized(true)
-
-          // Create sites immediately with fresh API data
 
           if (map && sites.data && sites.data.length > 0) {
             const sitesAsSensorsGroupData = sites.data.map((site: SiteWithLayers) => ({
@@ -1252,7 +1256,6 @@ const MapPage: React.FC<MapProps> = (props) => {
               name: site.name,
               layers: site.layers || [],
             }))
-
             createSites({
               page: props.page,
               map,
@@ -1282,6 +1285,7 @@ const MapPage: React.FC<MapProps> = (props) => {
               setInitialZoom,
               extlChartsAmount,
               setExtlDataContainer,
+              mapRefFunc
             })
           }
         }
@@ -1308,7 +1312,6 @@ const MapPage: React.FC<MapProps> = (props) => {
         name: site.name,
         layers: site.layers || [], // Use layers from API data
       }))
-
       createSites({
         page: props.page,
         map,
@@ -1347,9 +1350,10 @@ const MapPage: React.FC<MapProps> = (props) => {
         setSiteName: props.setSiteName,
         setChartPageType: props.setChartPageType,
         setAdditionalChartData: props.setAdditionalChartData,
+        mapRefFunc
       })
     }
-  }, [map, props.siteList, shouldRecreateMarkers, markers])
+  }, [map, props.siteList, shouldRecreateMarkers, markers, mapRefFunc])
 
   // Fix map display after returning from overlay
   useEffect(() => {
@@ -1881,7 +1885,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         // Преобразуем extlItem в ExtlChartData
         const extlChartData = {
           id: extlItem.sensorId,
-          layerName: "Extl",
+          layerName: "EXTL",
           name: extlItem.name || `Sensor ${extlItem.sensorId}`,
           graphic: extlItem.graphic,
           chartType: "default",
@@ -1952,11 +1956,6 @@ const MapPage: React.FC<MapProps> = (props) => {
           setAreBoundsFitted(true)
         }, 100)
       })
-    } else {
-      if (activeOverlays.length === 27) {
-        activeOverlays.map((over: any) => {
-        })
-      }
     }
     return undefined
   }, [activeOverlays])
@@ -2023,167 +2022,26 @@ const MapPage: React.FC<MapProps> = (props) => {
     switch (activeTab) {
       case "map":
         return (
-          <div
-            className={s.map}
-            ref={mapRef}
-            style={{
-              height: "100%",
-              width: "100%",
-              position: "relative",
-            }}
-          >
-            {/* LocationButton - Mobile devices only */}
-            {(() => {
-              const userAgent = navigator.userAgent
-              const screenWidth = window.screen?.width || window.innerWidth
-              const isMobileUserAgent =
-                /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|IEMobile|Opera Mini|Mobile|Tablet/i.test(
-                  userAgent,
-                )
-              const isDesktop = /Windows NT|Macintosh|Linux/i.test(userAgent) && screenWidth > 1024
-              const shouldShowLocationButton = isMobileUserAgent && !isDesktop
-
-              if (!shouldShowLocationButton) {
-                return null
-              }
-
-              return (
-                <LocationButton
-                  onLocationClick={centerMapOnUserLocation}
-                  isLocationEnabled={isLocationEnabled}
-                  locationError={locationError}
-                />
-              )
-            })()}
-
-            {/* LayerList Component - Working version outside IIFE */}
-            {(() => {
-              // Check conditions for LayerList
-              const hasSites = props.siteList && Array.isArray(props.siteList) && props.siteList.length > 0
-              const hasCustomOverlays = activeOverlays && activeOverlays.length > 0
-
-              if (!hasSites || !hasCustomOverlays) {
-                return null
-              }
-
-              // Extract layer names from site data
-              const layers: string[] = []
-              const secondMapName = typeof secondMap === "string" ? secondMap : secondMap?.getDiv()?.id || ""
-
-              if (props.siteList && Array.isArray(props.siteList)) {
-                props.siteList.forEach((site: SiteWithLayers) => {
-                  if (site && site.name === secondMapName && site.layers && Array.isArray(site.layers)) {
-                    site.layers.forEach((layer: LayerListLayer) => {
-                      if (layer && layer.name && !layers.includes(layer.name)) {
-                        layers.push(layer.name)
-                      }
-                    })
-                  }
-                })
-              }
-
-              if (!layers || layers.length === 0) {
-                return null
-              }
-
-              // Handle layer toggle
-              const handleToggleLayer = (checkbox: CustomEvent, layerName: string) => {
-                const isChecked = checkbox.detail.checked
-
-                setCheckedLayers((prev) => ({
-                  ...prev,
-                  [layerName]: isChecked,
-                }))
-
-                if (allOverlays && Array.isArray(allOverlays)) {
-                  allOverlays.forEach((overlay: OverlayItem) => {
-                    const chartDataLayerName = overlay?.chartData?.layerName
-                    const isMatchByChartDataLayerName = chartDataLayerName === layerName
-
-                    if (overlay && isMatchByChartDataLayerName) {
-                      if (isChecked) {
-                        if (overlay.show && typeof overlay.show === "function") {
-                          overlay.show()
-                        }
-                        if (activeOverlays && !activeOverlays.includes(overlay)) {
-                          setActiveOverlays((prevActiveOverlays: OverlayItem[]) => {
-                            const exists = prevActiveOverlays.some(
-                              (existingOverlay: OverlayItem) =>
-                                existingOverlay &&
-                                existingOverlay.chartData &&
-                                overlay.chartData &&
-                                existingOverlay.chartData.sensorId === overlay.chartData.sensorId,
-                            )
-                            return exists ? prevActiveOverlays : [...prevActiveOverlays, overlay]
-                          })
-                        }
-                      } else {
-                        if (overlay.hide && typeof overlay.hide === "function") {
-                          overlay.hide()
-                        }
-                        setActiveOverlays((prevActiveOverlays: OverlayItem[]) =>
-                          prevActiveOverlays.filter(
-                            (active: OverlayItem) =>
-                              active &&
-                              active.chartData &&
-                              overlay.chartData &&
-                              active.chartData.sensorId !== overlay.chartData.sensorId,
-                          ),
-                        )
-                      }
-                    }
-                  })
-                }
-              }
-
-              return (
-                <div className={s.layersListWrapper}>
-                  <div className={s.layers_checkbox}>
-                    {layers.map((layer: string) => (
-                      <IonItem key={layer}>
-                        <IonCheckbox
-                          checked={checkedLayers[layer] || false}
-                          justify="space-between"
-                          onIonChange={(checkbox) => handleToggleLayer(checkbox, layer)}
-                        >
-                          {layer === "SoilTemp" ? "Temp/RH" : layer}
-                        </IonCheckbox>
-                      </IonItem>
-                    ))}
-                  </div>
-                </div>
-              )
-            })()}
-          </div>
+          <MapTab
+            mapRef={mapRef}
+            centerMapOnUserLocation={centerMapOnUserLocation}
+            isLocationEnabled={isLocationEnabled}
+            locationError={locationError}
+            siteList={props.siteList}
+            activeOverlays={activeOverlays}
+            allOverlays={allOverlays}
+            secondMap={secondMap}
+            checkedLayers={checkedLayers}
+            setCheckedLayers={setCheckedLayers}
+            setActiveOverlays={setActiveOverlays}
+          />
         )
-      case "budgetEditor":
-        return (
-          <div style={{ height: "100%" }}>
-            <section style={{ height: "100%" }}>
-              <BudgetEditor
-                siteList={props.siteList}
-                userId={props.userId}
-                isGoogleApiLoaded={props.isGoogleApiLoaded}
-              />
-            </section>
-          </div>
-        )
+      case "budget":
+        return <BudgetEditorTab siteList={props.siteList} userId={props.userId} isGoogleApiLoaded={props.isGoogleApiLoaded} />
       case "info":
-        return (
-          <div style={{ height: "100%", padding: "16px" }}>
-            <section>
-              <Info />
-            </section>
-          </div>
-        )
+        return <InfoTab />
       case "comments":
-        return (
-          <div style={{ height: "100%", padding: "16px" }}>
-            <section>
-              <Comments userId={props.userId} />
-            </section>
-          </div>
-        )
+        return <CommentsTab userId={props.userId} />
       case "add":
         return (
           <div
@@ -3285,12 +3143,6 @@ const MapPage: React.FC<MapProps> = (props) => {
                                   const oldLayers = oldSite.layers || []
                                   const newLayers = newSite.layers || []
 
-                                  if (oldLayers.length !== newLayers.length) {
-                                    console.log(
-                                      `🔧 Site "${newSite.name}" layer count changed: ${oldLayers.length} → ${newLayers.length}`,
-                                    )
-                                  }
-
                                   // Check each layer for new markers
                                   newLayers.forEach((newLayer: any) => {
                                     const oldLayer = oldLayers.find((old: any) => old.name === newLayer.name)
@@ -3301,10 +3153,6 @@ const MapPage: React.FC<MapProps> = (props) => {
                                       const newMarkers = newLayer.markers || []
 
                                       if (oldMarkers.length !== newMarkers.length) {
-                                        console.log(
-                                          `  🔧 Layer "${newLayer.name}" in site "${newSite.name}" marker count changed: ${oldMarkers.length} → ${newMarkers.length}`,
-                                        )
-
                                         // Find new markers
                                         const addedMarkers = newMarkers.filter(
                                           (newMarker: any) =>
@@ -3391,6 +3239,8 @@ const MapPage: React.FC<MapProps> = (props) => {
                                       // Then navigate to map tab after data is loaded
                                       // This ensures the map renders with the new data
                                       setTimeout(() => {
+                                        // Reset marker clicked state to show all sites/markers
+                                        setIsMarkerClicked(false)
                                         setActiveTab("map")
                                         // Remove 'add' from history since we're going to map
                                         setNavigationHistory((prev) => prev.slice(0, -1))
@@ -3487,9 +3337,26 @@ const MapPage: React.FC<MapProps> = (props) => {
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           <div
             className={activeTab === "map" ? undefined : activeTab === "add" ? undefined : s.contentWrapper}
-            style={{ flex: 1, marginBottom: "48px" }}
+            style={{ flex: 1, marginBottom: "48px", position: "relative" }}
           >
-            {renderContent()}
+            {/* Keep map always mounted, just hide it */}
+            <div style={{ display: activeTab === "map" ? "block" : "none", height: "100%", width: "100%" }}>
+              <MapTab
+                mapRef={mapRef}
+                centerMapOnUserLocation={centerMapOnUserLocation}
+                isLocationEnabled={isLocationEnabled}
+                locationError={locationError}
+                siteList={props.siteList}
+                activeOverlays={activeOverlays}
+                allOverlays={allOverlays}
+                secondMap={secondMap}
+                checkedLayers={checkedLayers}
+                setCheckedLayers={setCheckedLayers}
+                setActiveOverlays={setActiveOverlays}
+              />
+            </div>
+            {/* Render other tabs */}
+            {activeTab !== "map" && renderContent()}
           </div>
           <IonSegment value={activeTab} className={s.appMenu}>
             <IonSegmentButton

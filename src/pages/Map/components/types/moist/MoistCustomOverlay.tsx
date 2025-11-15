@@ -325,7 +325,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
                     this.moistOverlaysRef.current.push(this as unknown as MoistCustomOverlayInstance);
                   }
                 }
-                console.log( this as unknown as MoistCustomOverlayInstance)
                 return [...overlays, this as unknown as MoistCustomOverlayInstance];
               }
 

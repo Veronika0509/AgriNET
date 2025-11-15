@@ -144,7 +144,8 @@ export const useMapInitialization = (props: UseMapInitializationProps) => {
         extlChartsAmount: props.extlChartsAmount,
         setInvalidExtlChartDataContainer: props.setInvalidExtlChartDataContainer,
         setExtlChartDataContainer: props.setExtlChartDataContainer,
-        extlId: props.extlId
+        extlId: props.extlId,
+        mapRefFunc
       });
     }
   }, [map, siteList]);

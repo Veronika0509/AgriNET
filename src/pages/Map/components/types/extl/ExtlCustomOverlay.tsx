@@ -38,7 +38,6 @@ export const initializeExtlCustomOverlay = (isGoogleApiLoaded: boolean) => {
         this.bounds = bounds
         this.chartData = data
 
-
         this.offset = {x: 0, y: 0};
         this.isTextTruncated = this.chartData.name.length > 7
       }
@@ -52,7 +51,6 @@ export const initializeExtlCustomOverlay = (isGoogleApiLoaded: boolean) => {
 
       renderContent() {
         const img = 'https://app.agrinet.us/' + this.chartData.graphic
-    
         return (
           <a target='_blank' href={this.chartData.chartType.substring(this.chartData.chartType.indexOf("https"))} className={s.overlay_extlOverlayWrapper} rel="noreferrer">
             <div className={s.overlay_extlOverlay}>

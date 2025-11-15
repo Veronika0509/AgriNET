@@ -32,8 +32,14 @@ const Header = (props: HeaderProps) => {
       newHistory.pop()
       const previousPage = newHistory[newHistory.length - 1];
       props.setNavigationHistory(newHistory);
+      // Reset marker clicked state when navigating back to map
+      if (previousPage === 'map') {
+        props.setIsMarkerClicked(false);
+      }
       props.setActiveTab(previousPage);
     } else {
+      // Reset marker clicked state when navigating to map
+      props.setIsMarkerClicked(false);
       props.setActiveTab('map');
     }
   }

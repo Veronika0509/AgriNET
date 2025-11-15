@@ -1,15 +1,12 @@
 import React from "react"
-import type { UserId } from "../../../../types"
-import Comments from "../Comments"
+import {Comments} from "../Comments/index";
+import type { UserId } from "@/types"
 
-export interface CommentsTabProps {
+interface CommentsTabProps {
   userId: UserId
 }
 
-/**
- * Comments Tab - Wrapper for Comments component
- */
-const CommentsTab: React.FC<CommentsTabProps> = ({ userId }) => {
+export const CommentsTab: React.FC<CommentsTabProps> = ({ userId }) => {
   return (
     <div style={{ height: "100%", padding: "16px" }}>
       <section>
@@ -18,5 +15,3 @@ const CommentsTab: React.FC<CommentsTabProps> = ({ userId }) => {
     </div>
   )
 }
-
-export default CommentsTab

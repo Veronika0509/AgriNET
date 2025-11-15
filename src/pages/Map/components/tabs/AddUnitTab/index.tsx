@@ -1322,12 +1322,6 @@ const AddUnitTab: React.FC<AddUnitTabProps> = ({
                             const oldLayers = oldSite.layers || []
                             const newLayers = newSite.layers || []
 
-                            if (oldLayers.length !== newLayers.length) {
-                              console.log(
-                                `🔧 Site "${newSite.name}" layer count changed: ${oldLayers.length} → ${newLayers.length}`,
-                              )
-                            }
-
                             // Check each layer for new markers
                             newLayers.forEach((newLayer: any) => {
                               const oldLayer = oldLayers.find((old: any) => old.name === newLayer.name)
@@ -1338,10 +1332,6 @@ const AddUnitTab: React.FC<AddUnitTabProps> = ({
                                 const newMarkers = newLayer.markers || []
 
                                 if (oldMarkers.length !== newMarkers.length) {
-                                  console.log(
-                                    `  🔧 Layer "${newLayer.name}" in site "${newSite.name}" marker count changed: ${oldMarkers.length} → ${newMarkers.length}`,
-                                  )
-
                                   // Find new markers
                                   const addedMarkers = newMarkers.filter(
                                     (newMarker: any) =>
