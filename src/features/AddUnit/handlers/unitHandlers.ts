@@ -1,6 +1,6 @@
 import type { Site, UserId, SiteId } from "../../../types"
 import type { FormErrors, NewLayerConfigData } from "../types"
-import { getSiteList } from "../data/getSiteList"
+import { getSiteList } from "../../../pages/Map/data/getSiteList"
 
 export interface UnitData {
   name: string
@@ -71,6 +71,7 @@ export interface CreateUnitOptions {
   setQrDisplayMetric: (metric: number) => void
   setNewLayerConfigData: (data: NewLayerConfigData | undefined) => void
   setSiteGroupError: (error: { invalidGroup: string; correctGroups: string[] } | null) => void
+  setTempLayerName: (name: string | undefined) => void
 
   // Map markers state
   markers: any[]
@@ -107,6 +108,7 @@ export const clearFormFields = (options: Omit<CreateUnitOptions, "markers" | "va
     setQrRawMetric,
     setQrDisplayMetric,
     setNewLayerConfigData,
+    setTempLayerName,
   } = options
 
   // Clear text inputs
@@ -143,7 +145,10 @@ export const clearFormFields = (options: Omit<CreateUnitOptions, "markers" | "va
   setQrBudgetLines({})
   setQrRawMetric(0)
   setQrDisplayMetric(0)
+
+  // Clear new layer config and temp layer name
   setNewLayerConfigData(undefined)
+  setTempLayerName(undefined)
 }
 
 /**
@@ -342,7 +347,6 @@ export const createUnit = async (
       },
       body: JSON.stringify(unitData),
     })
-
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: response.statusText }))
       throw new Error(errorData.message || `Failed to add unit: ${response.statusText}`)

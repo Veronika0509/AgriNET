@@ -8,218 +8,114 @@ import {
   IonLabel,
   IonSelect,
   IonSelectOption,
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
   useIonAlert,
 } from "@ionic/react"
 import { add, cameraOutline, informationCircle } from "ionicons/icons"
-import { getSiteList } from "../../../data/getSiteList"
-import s from "../../../style.module.css"
+import s from "../../../pages/Map/style.module.css"
 
 // Type imports
-import type { Site, UserId, SiteId } from "../../../../../types"
+import type { Site, UserId, SiteId } from "../../../types"
+import type { AddUnitTabProps, HTMLIonInputElement } from "../types"
 
-interface AddUnitTabProps {
-  // Refs
-  addUnitMapRef: React.RefObject<HTMLDivElement>
+// Import unit creation handlers
+import { validateAndCreateUnit } from "../handlers/unitHandlers"
+import type { CreateUnitOptions } from "../handlers/unitHandlers"
 
-  // Map state
-  addUnitMap: google.maps.Map | null
-  crosshairMarker: google.maps.Marker | null
+export { type AddUnitTabProps }
 
-  // Props from parent
-  userId: UserId
-  siteList: Site[]
-  setSiteList: React.Dispatch<React.SetStateAction<Site[]>>
-  selectedSiteForAddUnit: string
-  setSelectedSiteForAddUnit: (site: string) => void
-  setSelectedMoistureSensor?: (sensor: any) => void
-  setPage: (page: number) => void
+const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
+  // For backward compatibility, keep the old interface structure
+  const {
+    addUnitMapRef,
+    addUnitMap,
+    crosshairMarker,
+    userId,
+    siteList,
+    setSiteList,
+    selectedSiteForAddUnit,
+    setSelectedSiteForAddUnit,
+    setSelectedMoistureSensor,
+    setPage,
+    unitName,
+    setUnitName,
+    unitLatitude,
+    setUnitLatitude,
+    unitLongitude,
+    setUnitLongitude,
+    selectedSite,
+    setSelectedSite,
+    selectedSiteGroup,
+    setSelectedSiteGroup,
+    siteGroups,
+    siteGroupError,
+    setSiteGroupError,
+    sensorPrefix,
+    setSensorPrefix,
+    sensorId,
+    setSensorId,
+    selectedLayer,
+    setSelectedLayer,
+    requestHardware,
+    setRequestHardware,
+    moistLevel,
+    setMoistLevel,
+    moistLevelError,
+    setMoistLevelError,
+    formErrors,
+    setFormErrors,
+    validateSensorId,
+    layers,
+    layerMapping,
+    isLoadingLayers,
+    setShowQRScanner,
+    isQRScanned,
+    scannedSensorId,
+    qrTimezone,
+    qrCustomFields,
+    qrBudgetLines,
+    qrRawMetric,
+    qrDisplayMetric,
+    newLayerConfigData,
+    setNewLayerConfigData,
+    tempLayerName,
+    setTempLayerName,
+    markers,
+    setMarkers,
+    setLayers,
+    setLayerMapping,
+    setAvailableSensors,
+    setIsSensorModalOpen,
+    setActiveTab,
+    setNavigationHistory,
+    showCreateNewSiteAlert,
+    showCreateNewLayerAlert,
+    showPurchaseRequestAlert,
+    setIsQRScanned,
+    setScannedSensorId,
+    setQrTimezone,
+    setQrCustomFields,
+    setQrBudgetLines,
+    setQrRawMetric,
+    setQrDisplayMetric,
+    isNewLayerModalOpen,
+    setIsNewLayerModalOpen,
+    newLayerName,
+    setNewLayerName,
+    newLayerMarkerType,
+    setNewLayerMarkerType,
+    newLayerTable,
+    setNewLayerTable,
+    newLayerColumn,
+    setNewLayerColumn,
+    handleFinishNewLayer,
+  } = props
 
-  // Form state from useAddUnitForm hook
-  unitName: string
-  setUnitName: (value: string) => void
-  unitLatitude: string
-  setUnitLatitude: (value: string) => void
-  unitLongitude: string
-  setUnitLongitude: (value: string) => void
-  selectedSite: string
-  setSelectedSite: (value: string) => void
-  selectedSiteGroup: string
-  setSelectedSiteGroup: (value: string) => void
-  siteGroups: Array<{ id: string; name: string }>
-  setSiteGroups: React.Dispatch<React.SetStateAction<Array<{ id: string; name: string }>>>
-  siteGroupError: { invalidGroup: string; correctGroups: string[] } | null
-  setSiteGroupError: React.Dispatch<
-    React.SetStateAction<{ invalidGroup: string; correctGroups: string[] } | null>
-  >
-  sensorPrefix: string
-  setSensorPrefix: (value: string) => void
-  sensorId: string
-  setSensorId: (value: string) => void
-  selectedLayer: string
-  setSelectedLayer: (value: string) => void
-  requestHardware: boolean
-  setRequestHardware: (value: boolean) => void
-  moistLevel: number | undefined
-  setMoistLevel: (value: number | undefined) => void
-  moistLevelError: boolean
-  setMoistLevelError: (value: boolean) => void
-  formErrors: {
-    site: boolean
-    siteGroup: boolean
-    unitName: boolean
-    latitude: boolean
-    longitude: boolean
-    sensor: boolean
-    layer: boolean
-  }
-  setFormErrors: React.Dispatch<
-    React.SetStateAction<{
-      site: boolean
-      siteGroup: boolean
-      unitName: boolean
-      latitude: boolean
-      longitude: boolean
-      sensor: boolean
-      layer: boolean
-    }>
-  >
-  validateSensorId: (sensorId: string) => { isValid: boolean; message: string }
-  getAllSensorIds: () => string[]
 
-  // Layer state
-  layers: Array<{ id: string; name: string; value: string }>
-  setLayers: React.Dispatch<React.SetStateAction<Array<{ id: string; name: string; value: string }>>>
-  layerMapping: { [key: string]: string }
-  setLayerMapping: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
-  isLoadingLayers: boolean
-
-  // QR Scanner state
-  showQRScanner: boolean
-  setShowQRScanner: (value: boolean) => void
-  isQRScanned: boolean
-  setIsQRScanned: (value: boolean) => void
-  scannedSensorId: string
-  setScannedSensorId: (value: string) => void
-  qrTimezone: string
-  setQrTimezone: (value: string) => void
-  qrCustomFields: { [key: string]: any }
-  setQrCustomFields: (value: { [key: string]: any }) => void
-  qrBudgetLines: { [key: string]: any }
-  setQrBudgetLines: (value: { [key: string]: any }) => void
-  qrRawMetric: number
-  setQrRawMetric: (value: number) => void
-  qrDisplayMetric: number
-  setQrDisplayMetric: (value: number) => void
-
-  // New layer config state
-  newLayerConfigData:
-    | {
-        table: string
-        column: string
-        markerType: string
-      }
-    | undefined
-  setNewLayerConfigData: React.Dispatch<
-    React.SetStateAction<
-      | {
-          table: string
-          column: string
-          markerType: string
-        }
-      | undefined
-    >
-  >
-
-  // Markers state
-  markers: google.maps.Marker[]
-  setMarkers: React.Dispatch<React.SetStateAction<google.maps.Marker[]>>
-
-  // Available sensors state
-  availableSensors: any[]
-  setAvailableSensors: (value: any[]) => void
-
-  // Sensor modal state
-  setIsSensorModalOpen: (value: boolean) => void
-
-  // Navigation state
-  setActiveTab: (tab: string) => void
-  setNavigationHistory: React.Dispatch<React.SetStateAction<string[]>>
-
-  // Handler functions
-  showCreateNewSiteAlert: () => void
-  showCreateNewLayerAlert: () => void
-  showPurchaseRequestAlert: () => void
-}
-
-const AddUnitTab: React.FC<AddUnitTabProps> = ({
-  addUnitMapRef,
-  addUnitMap,
-  crosshairMarker,
-  userId,
-  siteList,
-  setSiteList,
-  selectedSiteForAddUnit,
-  setSelectedSiteForAddUnit,
-  setSelectedMoistureSensor,
-  setPage,
-  unitName,
-  setUnitName,
-  unitLatitude,
-  setUnitLatitude,
-  unitLongitude,
-  setUnitLongitude,
-  selectedSite,
-  setSelectedSite,
-  selectedSiteGroup,
-  setSelectedSiteGroup,
-  siteGroups,
-  siteGroupError,
-  setSiteGroupError,
-  sensorPrefix,
-  setSensorPrefix,
-  sensorId,
-  setSensorId,
-  selectedLayer,
-  setSelectedLayer,
-  requestHardware,
-  setRequestHardware,
-  moistLevel,
-  setMoistLevel,
-  moistLevelError,
-  setMoistLevelError,
-  formErrors,
-  setFormErrors,
-  validateSensorId,
-  layers,
-  layerMapping,
-  isLoadingLayers,
-  setShowQRScanner,
-  isQRScanned,
-  scannedSensorId,
-  qrTimezone,
-  qrCustomFields,
-  qrBudgetLines,
-  qrRawMetric,
-  qrDisplayMetric,
-  newLayerConfigData,
-  setNewLayerConfigData,
-  markers,
-  setMarkers,
-  setAvailableSensors,
-  setIsSensorModalOpen,
-  setActiveTab,
-  setNavigationHistory,
-  showCreateNewSiteAlert,
-  showCreateNewLayerAlert,
-  showPurchaseRequestAlert,
-  setIsQRScanned,
-  setScannedSensorId,
-  setQrTimezone,
-  setQrCustomFields,
-  setQrBudgetLines,
-  setQrRawMetric,
-  setQrDisplayMetric,
-}) => {
   const [presentAlert] = useIonAlert()
 
   return (
@@ -824,6 +720,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = ({
                     // and if we're switching away from it
                     if (newLayerConfigData && selectedLayer !== selectedLayerValue) {
                       // Find if the newly selected layer already existed (not the one we just created)
+                      console.log(layers)
                       const existingLayer = layers.find(
                         (layer) => (layer.value || layer.id) === selectedLayerValue,
                       )
@@ -839,19 +736,24 @@ const AddUnitTab: React.FC<AddUnitTabProps> = ({
                     <IonSelectOption value="" disabled>
                       Loading layers...
                     </IonSelectOption>
-                  ) : layers.length > 0 ? (
-                    layers.map((layer) => (
-                      <IonSelectOption key={layer.id} value={layer.value || layer.id}>
-                        {layer.name || `Layer ${layer.id}`}
-                      </IonSelectOption>
-                    ))
                   ) : (
                     <>
-                      <IonSelectOption value="Moist">Moist</IonSelectOption>
-                      <IonSelectOption value="Temp">Temp</IonSelectOption>
-                      <IonSelectOption value="Wxet">Wxet</IonSelectOption>
-                      <IonSelectOption value="Valve">Valve</IonSelectOption>
-                      <IonSelectOption value="Extl">Extl</IonSelectOption>
+                      {layers
+                        .filter((layer) => {
+                          // Show layers that have a mapping (system layers + newly created layers)
+                          // Check both the layer value/id and the layer name in the mapping
+                          const layerKey = layer.value || layer.id
+                          const layerName = layer.name
+                          return (
+                            layerMapping[layerKey] !== undefined ||
+                            layerMapping[layerName] !== undefined
+                          )
+                        })
+                        .map((layer) => (
+                          <IonSelectOption key={layer.id} value={layer.value || layer.id}>
+                            {layer.name || `Layer ${layer.id}`}
+                          </IonSelectOption>
+                        ))}
                     </>
                   )}
                 </IonSelect>
@@ -903,7 +805,9 @@ const AddUnitTab: React.FC<AddUnitTabProps> = ({
                         img.src = "https://app.agrinet.us/marker-icons/default.png"
                       }}
                     />
-                    {selectedLayer.toLowerCase() === "moist" && (
+                    {(selectedLayer.toLowerCase() === "moist" ||
+                      layerMapping[selectedLayer] === "moist-fuel" ||
+                      layerMapping[selectedLayer.toLowerCase()] === "moist-fuel") && (
                       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                         <IonInput
                           type="number"
@@ -1051,437 +955,70 @@ const AddUnitTab: React.FC<AddUnitTabProps> = ({
 
                   const fullSensorId = `${sensorPrefix}${sensorId}`
 
-                  // Функция для создания юнита
-                  const createUnit = async (overrideFlags?: {
-                    warnIfSensorIdExist?: boolean
-                    askOverrideInstallDate?: boolean
-                  }) => {
-                    // Get current date in YYYY-MM-DD format
-                    const currentDate = new Date().toISOString().split("T")[0]
+                  // Prepare options for unit creation handler
+                  const createUnitOptions: CreateUnitOptions = {
+                    // Form state
+                    unitName,
+                    unitLatitude,
+                    unitLongitude,
+                    selectedSite,
+                    selectedSiteGroup,
+                    selectedLayer,
+                    fullSensorId,
+                    moistLevel,
+                    requestHardware,
 
-                    // Determine timezone: QR code first, then browser timezone
-                    const timezone = qrTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+                    // QR state
+                    isQRScanned,
+                    scannedSensorId,
+                    qrTimezone,
+                    qrCustomFields,
+                    qrBudgetLines,
+                    qrRawMetric,
+                    qrDisplayMetric,
+                    newLayerConfigData,
 
-                    // Check if sensor ID was modified after QR scan
-                    const sensorIdModified = isQRScanned && scannedSensorId && scannedSensorId !== fullSensorId
+                    // Props
+                    userId,
+                    siteList,
+                    setSiteList,
 
-                    const unitData = {
-                      // Required Fields
-                      name: unitName,
-                      lat: Number.parseFloat(unitLatitude),
-                      lng: Number.parseFloat(unitLongitude),
-                      userId: userId,
-                      site: selectedSite,
-                      layer: selectedLayer,
-                      siteGroup: selectedSiteGroup || undefined,
-                      installDate: currentDate,
-                      timezone: timezone,
-                      warnIfSensorIdExist:
-                        overrideFlags?.warnIfSensorIdExist !== undefined
-                          ? overrideFlags.warnIfSensorIdExist
-                          : !isQRScanned || sensorIdModified,
-                      askOverrideInstallDate:
-                        overrideFlags?.askOverrideInstallDate !== undefined
-                          ? overrideFlags.askOverrideInstallDate
-                          : true,
-                      requestHardware: requestHardware,
+                    // State setters for form clearing
+                    setUnitName,
+                    setSensorId,
+                    setSensorPrefix,
+                    setSelectedLayer,
+                    setSelectedSiteGroup,
+                    setMoistLevel,
+                    setRequestHardware,
+                    setFormErrors,
+                    setIsQRScanned,
+                    setScannedSensorId,
+                    setQrTimezone,
+                    setQrCustomFields,
+                    setQrBudgetLines,
+                    setQrRawMetric,
+                    setQrDisplayMetric,
+                    setNewLayerConfigData,
+                    setSiteGroupError,
+                    setTempLayerName,
 
-                      // Optional Fields
-                      sensorId: fullSensorId || undefined,
-                      sensorCount: selectedLayer.toLowerCase() === "moist" ? moistLevel : undefined,
-                      newLayerConfig: newLayerConfigData || undefined,
-                      datasource: undefined,
-                      customFields: qrCustomFields,
-                      budgetLines: qrBudgetLines,
-                      rawMetric: qrRawMetric,
-                      displayMetric: qrDisplayMetric,
-                      pictureBase64: null,
-                    }
+                    // Map markers state
+                    markers,
+                    setMarkers,
+                    setShowQRScanner,
+                    setActiveTab,
+                    setNavigationHistory,
 
+                    // Alert function
+                    presentAlert,
 
-                    try {
-                      // Make POST request to add unit
-                      // Note: Authentication is handled via the 'User' header, not Authorization
-                      const response = await fetch("https://app.agrinet.us/api/add-unit", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                          User: userId.toString(),
-                        },
-                        body: JSON.stringify(unitData),
-                      })
-
-                      if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({ message: response.statusText }))
-                        throw new Error(errorData.message || `Failed to add unit: ${response.statusText}`)
-                      }
-
-                      const result = await response.json()
-
-                      // Check if the operation was successful
-                      if (result.success === false) {
-                        // Step 1: Check which flag indicates the reason for failure
-
-                        // Step 2a: Sensor ID already exists?
-                        if (result.sensorIdExistWarn === true) {
-                          const layers = result.sensorIdExistOnLayer || []
-                          const layerText =
-                            layers.length > 0
-                              ? `the ${layers.join(", ")} layer${layers.length > 1 ? "s" : ""}`
-                              : "another layer"
-
-                          // Add delay to ensure previous alert (if any) is dismissed
-                          setTimeout(() => {
-                            presentAlert({
-                              header: "⚠️ Warning",
-                              message: `This sensor ID already exist in ${layerText}`,
-                              buttons: [
-                                {
-                                  text: "Cancel",
-                                  role: "cancel",
-                                },
-                                {
-                                  text: "Continue",
-                                  handler: () => {
-                                    // Retry with warnIfSensorIdExist: false, preserving other override flags
-                                    createUnit({
-                                      warnIfSensorIdExist: false,
-                                      askOverrideInstallDate: overrideFlags?.askOverrideInstallDate,
-                                    })
-                                  },
-                                },
-                              ],
-                            })
-                          }, 100)
-                          return
-                        }
-
-                        // Step 2b: Install date conflict?
-                        else if (result.askOverrideInstallDate === true) {
-                          const existingDate = result.installDate || "unknown date"
-
-                          // Use a small delay to ensure any previous alerts (like sensor ID validation) are dismissed
-                          setTimeout(async () => {
-                            try {
-                              await presentAlert({
-                                header: "Warning",
-                                message: `This sensor already exist and has install data: ${existingDate}, override this by current date?`,
-                                buttons: [
-                                  {
-                                    text: "Cancel",
-                                    role: "cancel",
-                                    handler: () => {
-                                    },
-                                  },
-                                  {
-                                    text: "Override install date",
-                                    handler: () => {
-                                      // Retry with askOverrideInstallDate: false, preserving warnIfSensorIdExist flag
-                                      createUnit({
-                                        warnIfSensorIdExist: overrideFlags?.warnIfSensorIdExist,
-                                        askOverrideInstallDate: false,
-                                      })
-                                    },
-                                  },
-                                ],
-                              })
-                            } catch (error) {
-                              console.error("Error presenting alert:", error)
-                            }
-                          }, 100)
-                          return
-                        }
-
-                        // Step 2c: Site group access issue?
-                        else if (result.userNotInSiteGroup === true) {
-                          const invalidGroup = result.siteGroup || selectedSiteGroup
-                          const correctGroups = result.userSiteGroups || []
-
-                          console.log("Production mode: Setting siteGroupError state:", {
-                            invalidGroup,
-                            correctGroups,
-                          })
-
-                          // Add a small delay to ensure any previous alerts (like sensor ID validation) are dismissed
-                          setTimeout(() => {
-                            setSiteGroupError({
-                              invalidGroup: invalidGroup,
-                              correctGroups: correctGroups,
-                            })
-                          }, 300)
-
-                          return
-                        }
-
-                        // Step 2d: General error
-                        else {
-                          const errorMessage = result.error || "Failed to add unit. Please try again."
-                          presentAlert({
-                            header: "❌ Error",
-                            message: errorMessage,
-                            buttons: ["Close"],
-                          })
-                          return
-                        }
-                      }
-
-                      // Success! The unit was added successfully
-
-                      // Store the old site list for comparison
-                      const oldSiteList = JSON.parse(JSON.stringify(siteList))
-
-                      // Helper function to clear form fields
-                      const clearFormFields = () => {
-                        // Clear text inputs
-                        setUnitName("")
-                        setSensorId("")
-                        setSensorPrefix("")
-
-                        // DON'T clear coordinate inputs - they show the map center position
-                        // setUnitLatitude('');
-                        // setUnitLongitude('');
-
-                        // Clear selectors
-                        setSelectedLayer("")
-                        setSelectedSiteGroup("")
-
-                        // Clear other form fields
-                        setMoistLevel(undefined)
-                        setRequestHardware(false)
-
-                        // Clear form errors
-                        setFormErrors({
-                          site: false,
-                          siteGroup: false,
-                          unitName: false,
-                          latitude: false,
-                          longitude: false,
-                          sensor: false,
-                          layer: false,
-                        })
-
-                        // Reset QR-related states
-                        setIsQRScanned(false)
-                        setScannedSensorId("")
-                        setQrTimezone("")
-                        setQrCustomFields({})
-                        setQrBudgetLines({})
-                        setQrRawMetric(0)
-                        setQrDisplayMetric(0)
-                        setNewLayerConfigData(undefined)
-                      }
-
-                      // Helper function to reload and log site list changes
-                      const reloadAndLogChanges = async () => {
-                        // Fetch fresh site list data WITHOUT forcing component remount
-                        const sites = await getSiteList(userId)
-
-                        // Check if API call was successful
-                        if ("success" in sites && sites.success === false) {
-                          console.error("Failed to reload site list:", sites.error)
-                          return
-                        }
-
-                        // Clear existing markers so createSites will recreate all markers with new data
-                        // IMPORTANT: Remove old markers from the map BEFORE clearing the state
-                        markers.forEach((marker: any) => {
-                          if (marker && marker.setMap) {
-                            marker.setMap(null)
-                          }
-                          if (marker && marker.infoWindow) {
-                            marker.infoWindow.close()
-                          }
-                        })
-                        setMarkers([])
-
-                        // Update site list with fresh data
-                        setSiteList(sites.data)
-
-
-                        // Compare old and new site lists
-
-                        // Check for new sites
-                        const newSites = siteList.filter(
-                          (newSite: any) => !oldSiteList.some((oldSite: any) => oldSite.id === newSite.id),
-                        )
-                        if (newSites.length > 0) {
-                        }
-
-                        // Check for removed sites
-                        const removedSites = oldSiteList.filter(
-                          (oldSite: any) => !siteList.some((newSite: any) => newSite.id === oldSite.id),
-                        )
-                        if (removedSites.length > 0) {
-                        }
-
-                        // Check for modified sites (compare layers and markers)
-                        siteList.forEach((newSite: any) => {
-                          const oldSite = oldSiteList.find((old: any) => old.id === newSite.id)
-                          if (oldSite) {
-                            // Compare layers
-                            const oldLayers = oldSite.layers || []
-                            const newLayers = newSite.layers || []
-
-                            // Check each layer for new markers
-                            newLayers.forEach((newLayer: any) => {
-                              const oldLayer = oldLayers.find((old: any) => old.name === newLayer.name)
-
-                              if (!oldLayer) {
-                              } else {
-                                const oldMarkers = oldLayer.markers || []
-                                const newMarkers = newLayer.markers || []
-
-                                if (oldMarkers.length !== newMarkers.length) {
-                                  // Find new markers
-                                  const addedMarkers = newMarkers.filter(
-                                    (newMarker: any) =>
-                                      !oldMarkers.some(
-                                        (oldMarker: any) =>
-                                          oldMarker.chartData?.sensorId === newMarker.chartData?.sensorId,
-                                      ),
-                                  )
-
-                                  if (addedMarkers.length > 0) {
-                                    console.log(`    ➕ NEW MARKERS ADDED (${addedMarkers.length}):`)
-                                    addedMarkers.forEach((marker: any) => {
-                                      console.log(`      - Sensor ID: ${marker.chartData?.sensorId}`)
-                                      console.log(`        Name: ${marker.chartData?.name || "N/A"}`)
-                                      console.log(`        Type: ${marker.chartData?.markerType || "N/A"}`)
-                                      console.log(
-                                        `        Coordinates: (${marker.chartData?.lat}, ${marker.chartData?.lng})`,
-                                      )
-                                    })
-                                  }
-
-                                  // Find removed markers
-                                  const removedMarkers = oldMarkers.filter(
-                                    (oldMarker: any) =>
-                                      !newMarkers.some(
-                                        (newMarker: any) =>
-                                          newMarker.chartData?.sensorId === oldMarker.chartData?.sensorId,
-                                      ),
-                                  )
-
-                                  if (removedMarkers.length > 0) {
-                                  }
-                                }
-                              }
-                            })
-
-                            // Check for removed layers
-                            oldLayers.forEach((oldLayer: any) => {
-                              const layerStillExists = newLayers.some(
-                                (newLayer: any) => newLayer.name === oldLayer.name,
-                              )
-                              if (!layerStillExists) {
-                              }
-                            })
-                          }
-                        })
-
-
-                        // Search through all sites and layers to find the new unit
-                        siteList.forEach((site: any) => {
-                          if (site.layers) {
-                            site.layers.forEach((layer: any) => {
-                              if (layer.markers) {
-                                const foundMarker = layer.markers.find(
-                                  (marker: any) => marker.chartData && marker.chartData.sensorId === fullSensorId,
-                                )
-                                if (foundMarker) {
-                                }
-                              }
-                            })
-                          }
-                        })
-                      }
-
-                      // Show success alert with options - use setTimeout to ensure it displays
-                      setTimeout(() => {
-                        presentAlert({
-                          header: "✓ Added",
-                          message: "Unit successfully added.\nDo you want create another one?",
-                          backdropDismiss: false,
-                          buttons: [
-                            {
-                              text: "To map",
-                              handler: async () => {
-                                // Ensure QR scanner is closed before navigating
-                                setShowQRScanner(false)
-
-                                // Clear form fields first
-                                clearFormFields()
-
-                                // Reload data FIRST to get the updated site list
-                                await reloadAndLogChanges()
-
-                                // Then navigate to map tab after data is loaded
-                                // This ensures the map renders with the new data
-                                setTimeout(() => {
-                                  setActiveTab("map")
-                                  // Remove 'add' from history since we're going to map
-                                  setNavigationHistory((prev) => prev.slice(0, -1))
-                                }, 100)
-                              },
-                            },
-                            {
-                              text: "Add next",
-                              handler: () => {
-                                // Clear form fields immediately
-                                clearFormFields()
-
-                                // Don't reload the map page at all to avoid component remount
-                                // The new unit will appear when user navigates to map tab naturally
-                                console.log(
-                                  "Form cleared, ready for next unit. Map will update when you navigate to it.",
-                                )
-                              },
-                            },
-                          ],
-                        })
-                      }, 100)
-                    } catch (error) {
-                      console.error("Error adding unit:", error)
-
-                      // Show error message
-                      presentAlert({
-                        header: "Error",
-                        message: error instanceof Error ? error.message : "Failed to add unit. Please try again.",
-                        buttons: ["OK"],
-                      })
-                    }
+                    // Validation function
+                    validateSensorId,
                   }
 
-                  // Валидация формата SensorId
-                  const validation = validateSensorId(fullSensorId)
-
-                  if (!validation.isValid) {
-                    // Показываем предупреждение с возможностью продолжить
-                    presentAlert({
-                      header: "Sensor ID Validation Warning",
-                      message: validation.message,
-                      cssClass: "sensor-id-validation-alert",
-                      buttons: [
-                        {
-                          text: "ACCEPT ANYWAY",
-                          cssClass: "alert-button-confirm",
-                          handler: () => {
-                            // Формат невалиден, но пользователь хочет продолжить
-                            // Создаем юнит, сервер проверит дубликаты
-                            createUnit()
-                          },
-                        },
-                        {
-                          text: "CANCEL SAVING",
-                          role: "cancel",
-                          cssClass: "alert-button-cancel",
-                        },
-                      ],
-                    })
-                  } else {
-                    // Формат валиден - создаем юнит, сервер проверит дубликаты
-                    createUnit()
-                  }
+                  // Use the consolidated handler
+                  validateAndCreateUnit(createUnitOptions)
                 }}
               >
                 <IonIcon icon={add} slot="start" />
@@ -1491,6 +1028,80 @@ const AddUnitTab: React.FC<AddUnitTabProps> = ({
           </div>
         </div>
       </div>
+
+      {/* New Layer Modal */}
+      <IonModal isOpen={isNewLayerModalOpen} onDidDismiss={() => setIsNewLayerModalOpen(false)}>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Create New Layer</IonTitle>
+            <IonButton slot="end" fill="clear" onClick={() => setIsNewLayerModalOpen(false)}>
+              Cancel
+            </IonButton>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent className="ion-padding">
+          <IonItem>
+            <IonLabel position="stacked">Layer Name</IonLabel>
+            <IonInput
+              placeholder="Enter Layer Name"
+              value={newLayerName}
+              onIonInput={(e) => setNewLayerName(e.detail.value!)}
+            />
+          </IonItem>
+
+          <IonItem>
+            <IonLabel position="stacked">Marker Type</IonLabel>
+            <IonSelect value={newLayerMarkerType} onIonChange={(e) => setNewLayerMarkerType(e.detail.value)}>
+              <IonSelectOption value="fuel">Fuel marker</IonSelectOption>
+              <IonSelectOption value="srs-green-fuel">SRS Green Fuel</IonSelectOption>
+              <IonSelectOption value="srs-ref-fuel">SRS Reference Fuel</IonSelectOption>
+              <IonSelectOption value="moist-fuel">Moisture Fuel</IonSelectOption>
+              <IonSelectOption value="temp_rh">Temperature/Relative Humidity</IonSelectOption>
+              <IonSelectOption value="temp-rh-v2">Temperature/RH Version 2</IonSelectOption>
+              <IonSelectOption value="wxet">Weather Station ET</IonSelectOption>
+              <IonSelectOption value="planthealth">Plant Health</IonSelectOption>
+              <IonSelectOption value="soiltemp">Soil Temperature</IonSelectOption>
+              <IonSelectOption value="psi">PSI (Pressure)</IonSelectOption>
+              <IonSelectOption value="vfd">VFD (Variable Frequency Drive)</IonSelectOption>
+              <IonSelectOption value="bflow">Budget/Flow</IonSelectOption>
+              <IonSelectOption value="valve">Valve</IonSelectOption>
+              <IonSelectOption value="graphic">Graphic</IonSelectOption>
+              <IonSelectOption value="disease">Disease</IonSelectOption>
+              <IonSelectOption value="pump">Pump</IonSelectOption>
+              <IonSelectOption value="chemical">Chemical</IonSelectOption>
+              <IonSelectOption value="infra-red">Infra-Red</IonSelectOption>
+              <IonSelectOption value="neutron">Neutron</IonSelectOption>
+              <IonSelectOption value="virtual-weather-station">Virtual Weather Station</IonSelectOption>
+            </IonSelect>
+          </IonItem>
+
+          <div style={{ marginTop: "20px", marginBottom: "10px", fontWeight: "bold", color: "#666" }}>
+            Data Source Configuration
+          </div>
+
+          <IonItem>
+            <IonLabel position="stacked">Table</IonLabel>
+            <IonInput
+              placeholder="Table"
+              value={newLayerTable}
+              onIonInput={(e) => setNewLayerTable(e.detail.value!)}
+            />
+          </IonItem>
+
+          <IonItem>
+            <IonLabel position="stacked">Column</IonLabel>
+            <IonInput
+              placeholder="Column"
+              value={newLayerColumn}
+              onIonInput={(e) => setNewLayerColumn(e.detail.value!)}
+            />
+          </IonItem>
+
+          <IonButton expand="block" onClick={handleFinishNewLayer} style={{ marginTop: "20px" }}>
+            Finish
+          </IonButton>
+        </IonContent>
+      </IonModal>
     </div>
   )
 }

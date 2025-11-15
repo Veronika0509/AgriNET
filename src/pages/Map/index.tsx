@@ -22,170 +22,36 @@ import {
   IonModal,
   IonHeader,
 } from "@ionic/react"
-import SensorSelector from "../VirtualValve/components/TimezoneSelector"
+import SensorModal from "./components/modals/SensorModal"
+import { NewLayerModal } from "./components/modals/NewLayerModal"
 import { useHistory } from "react-router-dom"
 import { documentText, home, informationCircle, add, settings, cameraOutline } from "ionicons/icons"
 import type { Site, SensorData, ChartPageType, UserId, SiteId } from "../../types"
 import { AddUnitContainer } from "../../features/AddUnit"
-// LayerList interfaces
-interface LayerListLayer {
-  name: string
-  markers: LayerListMarker[]
-  [key: string]: unknown
-}
-
-interface LayerListMarker {
-  chartData: {
-    sensorId: string | number
-    [key: string]: unknown
-  }
-  [key: string]: unknown
-}
-
-// Extend Site interface to include layers
-interface SiteWithLayers extends Site {
-  layers?: LayerListLayer[]
-}
-import invalidChartDataImage from "../../assets/images/invalidChartData.png"
-
-// Chart data types (using unknown for now to avoid compilation errors)
-type MoistChartData = unknown
-type FuelChartData = unknown
-type TempChartData = unknown
-
-// Extl data types
-interface ExtlSensorData {
-  sensorId: string | number
-  name?: string
-  lat: number
-  lng: number
-  graphic?: unknown
-  width?: number
-  height?: number
-  [key: string]: unknown
-}
-
-interface ExtlBounds {
-  lat: number
-  lng: number
-  [key: string]: unknown
-}
-
-type ExtlDataContainerItem = [ExtlSensorData, ExtlBounds]
-
-// Custom overlay constructor type
-type CustomOverlayConstructor = {
-  new (...args: any[]): OverlayItem
-}
-
-// Chart data with bounds type
-type ChartDataWithBounds<T> = [T, google.maps.LatLngBounds]
-
-// Marker type
-type Marker = {
-  position: google.maps.LatLngLiteral
-  id: string | number
-  type: string
-  [key: string]: unknown
-}
+import type { LayerListLayer, SiteWithLayers, Coordinate } from "./types"
+import type { OverlayItem } from "./types/OverlayItem"
 import Header from "./components/Header"
-import { initializeMoistCustomOverlay } from "./components/types/moist/MoistCustomOverlay"
 import { getSiteList } from "./data/getSiteList"
 import { getLayers } from "./data/getLayers"
-import QRCodeScanner from "../../components/QRCodeScanner"
 import { createMap } from "./functions/createMap"
 import { createSites } from "./functions/createSites"
-import { createMoistChartForOverlay } from "./functions/types/moist/createMoistChartForOverlay"
-import { initializeWxetCustomOverlay } from "./components/types/wxet/WxetCustomOverlay"
-import { initializeTempCustomOverlay } from "./components/types/temp/TempCustomOverlay"
-import { createTempChartForOverlay } from "./functions/types/temp/createTempChartForOverlay"
 import { CollisionResolver } from "./components/CollisionResolver"
-import { initializeValveCustomOverlay } from "./components/types/valve/ValveCustomOverlay"
-import { createValveChartForOverlay } from "./functions/types/valve/createValveChartForOverlay"
 import s from "./style.module.css"
-import { addOverlayToOverlaysArray } from "./functions/types/moist/addOverlayToOverlaysArray"
-import { initializeExtlCustomOverlay } from "./components/types/extl/ExtlCustomOverlay"
-import { initializeFuelCustomOverlay } from "./components/types/wxet/FuelCustomOverlay"
-import { createFuelChartForOverlay } from "./functions/types/wxet/createFuelChartForOverlay"
-import type { OverlayItem } from "./types/OverlayItem"
-import { validateSensorId, getAllSensorIds, checkSensorIdExists } from "./functions/sensorValidation"
-import { roundCoordinate, roundCoordinates, findClosestSite } from "./functions/coordinateUtils"
-import Login from "@/pages/Login";
 // Tab components
 import { MapTab } from "./components/tabs/MapTab"
 import { InfoTab } from "./components/tabs/InfoTab"
 import { CommentsTab } from "./components/tabs/CommentsTab"
 import { BudgetEditorTab } from "./components/tabs/BudgetEditorTab"
-
-// Типы (already imported above)
-
-// Интерфейсы для типизации Map компонента
-interface ChartDataItem {
-  sensorId: string | number
-  markerType?: string
-  [key: string]: unknown
-}
-
-// Base interface for custom overlays
-interface BaseOverlay {
-  show: () => void
-  hide: () => void
-  getBounds: () => {
-    north: number
-    south: number
-    east: number
-    west: number
-  }
-  getPosition: () => { lat: number; lng: number }
-  setPosition: (lat: number, lng: number) => void
-  getDiv: () => HTMLElement | null
-  draw: () => void
-  setMap: (map: google.maps.Map | null) => Promise<void>
-  update?: () => void
-  sensorId: string | number
-  layerName: string
-  [key: string]: unknown
-}
-
-// Type for custom overlay constructor functions (duplicate removed - using definition from line 47)
-
-interface Coordinate {
-  lat: number
-  lng: number
-}
-
-// Interface for chart data bounds
-interface ChartBounds {
-  north: number
-  south: number
-  east: number
-  west: number
-}
-
-// Type for chart data with bounds (duplicate removed - using definition from line 52)
-
-// Interface for amCharts root elements
-interface ChartRoot {
-  dispose: () => void
-  [key: string]: unknown
-}
-
-// Base interface for all overlay items (duplicate removed - using definition from line 36)
-
-// Interface for API responses
-interface ApiResponse<T> {
-  data: T
-}
-
-// Type for marker data
-// Marker interface (duplicate removed - using type definition from line 55)
-
-// Type for sensor data point
-interface DataPoint {
-  date: Date | string | number
-  value: number
-  [key: string]: unknown
-}
+// Custom hooks
+import { useUserLocation } from "./hooks/useUserLocation"
+import { useMarkerClickCleanup } from "./hooks/useMarkerClickCleanup"
+import { useLayers } from "./hooks/useLayers"
+import { useChartOverlays } from "./hooks/useChartOverlays"
+import { useSiteManagement } from "./hooks/useSiteManagement"
+import { useLayerCreation } from "./hooks/useLayerCreation"
+import { useMapBounds } from "./hooks/useMapBounds"
+import { useCollisionResolution } from "./hooks/useCollisionResolution"
+import { useMapVisibility } from "./hooks/useMapVisibility"
 
 interface MapProps {
   page: number
@@ -207,42 +73,6 @@ interface MapProps {
   setSelectedMoistureSensor?: (sensor: any) => void
 }
 
-declare global {
-  interface Window {
-    google: typeof google
-  }
-
-  const google: {
-    maps: {
-      Map: any
-      Marker: any
-      LatLng: any
-      LatLngBounds: any
-      SymbolPath: any
-      event: any
-      MapTypeId: any
-      [key: string]: any
-    }
-  }
-
-  namespace JSX {
-    interface IntrinsicElements {
-      "ion-icon": any
-      "ion-input": any
-    }
-  }
-}
-
-// HTMLIonIconElement and HTMLIonInputElement declarations
-interface HTMLIonIconElement extends HTMLElement {
-  icon?: string
-  color?: string
-}
-
-interface HTMLIonInputElement extends HTMLElement {
-  value?: string | number | null
-}
-
 const MapPage: React.FC<MapProps> = (props) => {
   if (!props.reloadMapPage) {
   }
@@ -257,18 +87,37 @@ const MapPage: React.FC<MapProps> = (props) => {
   const [, setAreArraysUpdated] = useState(false)
   const mapRefFunc = useRef(null);
 
-  // Keep layers state - it's shared with Map tab
-  const [layers, setLayers] = useState<Array<{ id: string; name: string; value: string }>>([])
-  const [layerMapping, setLayerMapping] = useState<{ [key: string]: string }>({})
-  const [isLoadingLayers, setIsLoadingLayers] = useState<boolean>(false)
+  // Keep layers state - it's shared with Map tab (using custom hook)
+  const { layers, setLayers, layerMapping, setLayerMapping, isLoadingLayers } = useLayers()
 
-  // New layer creation state (shared across tabs)
-  const [presentEmptyLayerNameAlert] = useIonAlert()
-  const [isNewLayerModalOpen, setIsNewLayerModalOpen] = useState<boolean>(false)
-  const [newLayerName, setNewLayerName] = useState<string>("")
-  const [newLayerMarkerType, setNewLayerMarkerType] = useState<string>("fuel")
-  const [newLayerTable, setNewLayerTable] = useState<string>("")
-  const [newLayerColumn, setNewLayerColumn] = useState<string>("")
+  // Site management (using custom hook)
+  const { isSiteNameValid, handleCreateNewSite, showCreateNewSiteAlert } = useSiteManagement({
+    siteList: props.siteList,
+    setSiteList: props.setSiteList,
+    setSelectedSiteForAddUnit: props.setSelectedSiteForAddUnit,
+  })
+
+  // Layer creation (using custom hook)
+  const {
+    isNewLayerModalOpen,
+    setIsNewLayerModalOpen,
+    newLayerName,
+    setNewLayerName,
+    newLayerMarkerType,
+    setNewLayerMarkerType,
+    newLayerTable,
+    setNewLayerTable,
+    newLayerColumn,
+    setNewLayerColumn,
+    isLayerNameValid,
+    handleCreateNewLayer,
+    showCreateNewLayerAlert,
+    handleFinishNewLayer,
+  } = useLayerCreation({
+    layers,
+    setLayers,
+    setLayerMapping,
+  })
 
   // Sensor modal state (shared)
   const [isSensorModalOpen, setIsSensorModalOpen] = useState(false)
@@ -309,387 +158,7 @@ const MapPage: React.FC<MapProps> = (props) => {
     props.setPage(3)
   }
 
-  // Purchase Request Alert function
-
-  // Function to check if site name is valid
-  const isSiteNameValid = (siteName: string): { isValid: boolean; error?: string } => {
-    if (!siteName || !siteName.trim()) {
-      return { isValid: false, error: "Site name cannot be empty" }
-    }
-
-    const trimmedName = siteName.trim()
-    const siteExists = props.siteList.some((site) => site.name.toLowerCase() === trimmedName.toLowerCase())
-
-    if (siteExists) {
-      return { isValid: false, error: "A site with this name already exists" }
-    }
-
-    return { isValid: true }
-  }
-
-  // Function to check if layer name is valid
-  const isLayerNameValid = (layerName: string): { isValid: boolean; error?: string } => {
-    if (!layerName || !layerName.trim()) {
-      return { isValid: false, error: "Layer name cannot be empty" }
-    }
-
-    const trimmedName = layerName.trim()
-    const layerExists = layers.some((layer) => layer.name.toLowerCase() === trimmedName.toLowerCase())
-
-    if (layerExists) {
-      return { isValid: false, error: "A layer with this name already exists" }
-    }
-
-    return { isValid: true }
-  }
-
-  // Function to create a new site
-  const handleCreateNewSite = async (siteName: string): Promise<Site | null> => {
-    if (!siteName || !siteName.trim()) {
-      // This should never happen as we check this before calling handleCreateNewSite
-      return null
-    }
-
-    const validation = isSiteNameValid(siteName)
-
-    if (!validation.isValid) {
-      // Show error for duplicate name using the main alert
-      try {
-        await presentAlert({
-          header: "Error",
-          message: validation.error || "Invalid site name",
-          buttons: ["OK"],
-        })
-      } catch (error) {}
-      return null
-    }
-
-    try {
-      const trimmedName = siteName.trim()
-
-      // Create new site object
-      const newSite: Site = {
-        id: trimmedName as SiteId,
-        name: trimmedName,
-        lat: 0,
-        lng: 0,
-      }
-
-      // Update the site list
-      props.setSiteList((prev) => {
-        const newList = [...prev, newSite]
-        return newList
-      })
-
-      // Select the new site (for Add Unit container if needed)
-      props.setSelectedSiteForAddUnit(trimmedName)
-
-      return newSite
-    } catch (error) {
-      throw error // Пробрасываем ошибку дальше
-    }
-  }
-
-  // Function to create a new layer
-  const handleCreateNewLayer = async (
-    layerName: string,
-    markerType?: string,
-    table?: string,
-    column?: string,
-  ): Promise<{ id: string; name: string; value: string } | null> => {
-    if (!layerName || !layerName.trim()) {
-      // This should never happen as we check this before calling handleCreateNewLayer
-      return null
-    }
-
-    const validation = isLayerNameValid(layerName)
-
-    if (!validation.isValid) {
-      // Show error for duplicate name using the main alert
-      try {
-        await presentAlert({
-          header: "Error",
-          message: validation.error || "Invalid layer name",
-          buttons: ["OK"],
-        })
-      } catch (error) {}
-      return null
-    }
-
-    try {
-      const trimmedName = layerName.trim()
-
-      // Create new layer object
-      const newLayer = {
-        id: trimmedName.toLowerCase(),
-        name: trimmedName,
-        value: trimmedName.toLowerCase(),
-        markerType: markerType || "fuel",
-        table: table || "",
-        column: column || "",
-      }
-
-      // Save layer data to backend
-      try {
-        const response = await fetch("https://app.agrinet.us/api/map/layers", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: trimmedName,
-            markerType: markerType || "fuel",
-            table: table || "",
-            column: column || "",
-          }),
-        })
-
-        if (!response.ok) {
-          console.error("Failed to save layer to backend:", response.statusText)
-          throw new Error("Failed to save layer to backend")
-        }
-
-        // Reload layers from backend to get the updated list
-        const layersData = await getLayers()
-        setLayers(layersData.layers)
-        setLayerMapping(layersData.mapping)
-      } catch (apiError) {
-        console.error("Error saving layer to backend:", apiError)
-        // If backend save fails, add layer locally only
-        setLayers((prev) => {
-          const exists = prev.some((layer) => layer.id === newLayer.id)
-          if (exists) {
-            return prev
-          }
-          return [...prev, newLayer]
-        })
-      }
-
-      // If markerType is provided, update the layerMapping
-      if (markerType) {
-        setLayerMapping((prev) => ({
-          ...prev,
-          [newLayer.value]: markerType.toLowerCase(),
-        }))
-      }
-
-      return newLayer
-    } catch (error) {
-      throw error // Пробрасываем ошибку дальше
-    }
-  }
-
-  // Create New Site Alert function
-  const showCreateNewSiteAlert = () => {
-    // Проверяем, что presentAlert инициализирован
-    if (typeof presentAlert !== "function" || typeof presentEmptyNameAlert !== "function") {
-      return
-    }
-
-    presentAlert({
-      header: "Create new site",
-      cssClass: "create-site-alert",
-      backdropDismiss: false, // Prevent closing on backdrop click
-      inputs: [
-        {
-          name: "siteName",
-          placeholder: "Enter a site name",
-          type: "text",
-          cssClass: s.alarm_actionInput,
-          attributes: {
-            required: true,
-            minlength: 1,
-          },
-          value: "",
-        },
-      ],
-      buttons: [
-        {
-          text: "CANCEL",
-          role: "cancel",
-          handler: () => {
-            return true // Allow dialog to close
-          },
-        },
-        {
-          text: "CREATE",
-          role: "confirm",
-          handler: async (data: any) => {
-            const siteName = data?.siteName || ""
-
-            // If field is empty, show error alert
-            if (!siteName || !siteName.trim()) {
-              try {
-                const result = await new Promise<boolean>((resolve) => {
-                  presentEmptyNameAlert({
-                    header: "Error",
-                    message: "Site name cannot be empty",
-                    backdropDismiss: false,
-                    buttons: [
-                      {
-                        text: "Cancel",
-                        role: "cancel",
-                        handler: () => {
-                          resolve(false) // Close both dialogs
-                          return false
-                        },
-                      },
-                      {
-                        text: "Retry",
-                        handler: () => {
-                          resolve(true) // Keep create dialog open
-                          return true
-                        },
-                      },
-                    ],
-                  })
-                })
-
-                return result // true to keep dialog open, false to close
-              } catch (error) {
-                return false // Close dialog on error
-              }
-            }
-
-            // Check if site with this name already exists
-            const siteExists = props.siteList.some((site) => site.name.toLowerCase() === siteName.toLowerCase())
-
-            if (siteExists) {
-              try {
-                const result = await new Promise<boolean>((resolve) => {
-                  presentEmptyNameAlert({
-                    header: "Error",
-                    message: "A site with this name already exists",
-                    backdropDismiss: false,
-                    buttons: [
-                      {
-                        text: "Cancel",
-                        role: "cancel",
-                        handler: () => {
-                          resolve(false) // Close both dialogs
-                          return false
-                        },
-                      },
-                      {
-                        text: "Retry",
-                        handler: () => {
-                          resolve(true) // Keep create dialog open
-                          return true
-                        },
-                      },
-                    ],
-                  })
-                })
-                return result // true to keep dialog open, false to close
-              } catch (error) {
-                return false // Close dialog on error
-              }
-            }
-
-            // For non-empty and unique names, proceed with site creation
-            try {
-              const result = await handleCreateNewSite(siteName)
-              // Return true only if site was created successfully
-              return result !== null
-            } catch (error) {
-              return false // Keep dialog open on error
-            }
-          },
-        },
-      ],
-    })
-  }
-
-  // Create New Layer Alert function
-  const showCreateNewLayerAlert = () => {
-    // Reset form fields
-    setNewLayerName("")
-    setNewLayerMarkerType("fuel")
-    setNewLayerTable("")
-    setNewLayerColumn("")
-    // Open modal
-    setIsNewLayerModalOpen(true)
-  }
-
-  // Handle new layer creation from modal
-  const handleFinishNewLayer = async () => {
-    const layerName = newLayerName.trim()
-    const markerType = newLayerMarkerType.trim()
-    const table = newLayerTable.trim()
-    const column = newLayerColumn.trim()
-
-    // Validate Layer Name
-    if (!layerName) {
-      presentEmptyNameAlert({
-        header: "Validation Error",
-        message: "Layer name should not be empty",
-        buttons: ["OK"],
-      })
-      return
-    }
-
-    // Validate Marker Type
-    if (!markerType) {
-      presentEmptyNameAlert({
-        header: "Validation Error",
-        message: "Marker Type should be selected",
-        buttons: ["OK"],
-      })
-      return
-    }
-
-    // Validate Table
-    if (!table) {
-      presentEmptyNameAlert({
-        header: "Validation Error",
-        message: "Table should not be empty",
-        buttons: ["OK"],
-      })
-      return
-    }
-
-    // Validate Column
-    if (!column) {
-      presentEmptyNameAlert({
-        header: "Validation Error",
-        message: "Column should not be empty",
-        buttons: ["OK"],
-      })
-      return
-    }
-
-    // Check if layer with this name already exists
-    const layerExists = layers.some((layer) => layer.name.toLowerCase() === layerName.toLowerCase())
-
-    if (layerExists) {
-      presentEmptyNameAlert({
-        header: "Error",
-        message: "A layer with this name already exists",
-        buttons: ["OK"],
-      })
-      return
-    }
-
-    // For non-empty and unique names, proceed with layer creation
-    try {
-      const result = await handleCreateNewLayer(layerName, markerType, table, column)
-
-      if (result !== null) {
-        // Close modal on success
-        setIsNewLayerModalOpen(false)
-      }
-    } catch (error) {
-      presentEmptyNameAlert({
-        header: "Error",
-        message: "Failed to create layer",
-        buttons: ["OK"],
-      })
-    }
-  }
-
-  // Выводим координаты при монтировании компонента
-
-  // Логируем координаты при изменении выбранного сайта
+  // Site and layer management logic is now handled by custom hooks
 
   // Handle window resize for responsive design
   useEffect(() => {
@@ -707,22 +176,7 @@ const MapPage: React.FC<MapProps> = (props) => {
 
   // Function to grab coordinates from map center with rounding
 
-  // Load layers when component mounts
-  useEffect(() => {
-    const loadLayers = async () => {
-      setIsLoadingLayers(true)
-      try {
-        const layersData = await getLayers()
-        setLayers(layersData.layers)
-        setLayerMapping(layersData.mapping)
-      } catch (error) {
-      } finally {
-        setIsLoadingLayers(false)
-      }
-    }
-
-    loadLayers()
-  }, [])
+  // Layer loading is now handled by the useLayers hook
 
   // Fetch user site groups when navigating to Add Unit page
 
@@ -731,40 +185,6 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Initialize Add Unit map when tab is active and API is loaded
 
   // Handle map resize when returning to Add Unit tab
-
-  // Moist Marker Chart
-  const isMoistMarkerChartDrawn: boolean = false
-  const [moistChartDataContainer, setMoistChartDataContainer] = useState<ChartDataItem[]>([])
-  const [invalidMoistChartDataContainer, setInvalidMoistChartDataContainer] = useState<ChartDataItem[]>([])
-  const [moistOverlays, setMoistOverlays] = useState<OverlayItem[]>([])
-  const moistOverlaysRef = useRef<any[]>([])
-  const [currentSensorId, setCurrentSensorId] = useState<string | number>(0)
-  const moistChartsAmount: ChartDataItem[] = []
-
-  // Temp type
-  const isTempMarkerChartDrawn: boolean = false
-  const [tempChartDataContainer, setTempChartDataContainer] = useState<ChartDataItem[]>([])
-  const [invalidTempChartDataContainer, setInvalidTempChartDataContainer] = useState<ChartDataItem[]>([])
-  const [tempOverlays, setTempOverlays] = useState<OverlayItem[]>([])
-  const tempChartsAmount: ChartDataItem[] = []
-
-  // Valve type
-  const isValveMarkerChartDrawn: boolean = false
-  const [valveChartDataContainer, setValveChartDataContainer] = useState<ChartDataItem[]>([])
-  const [invalidValveChartDataContainer, setInvalidValveChartDataContainer] = useState<ChartDataItem[]>([])
-  const [valveOverlays, setValveOverlays] = useState<OverlayItem[]>([])
-  const valveChartsAmount: ChartDataItem[] = []
-
-  // Wxet type
-  const isFuelMarkerChartDrawn: boolean = false
-  const [wxetDataContainer, setWxetDataContainer] = useState<ChartDataItem[]>([])
-  const [invalidWxetDataContainer, setInvalidWxetDataContainer] = useState<ChartDataItem[]>([])
-  const [fuelOverlays, setFuelOverlays] = useState<OverlayItem[]>([])
-  const wxetChartsAmount: ChartDataItem[] = []
-
-  // EXTl type
-  const [extlDataContainer, setExtlDataContainer] = useState<ExtlDataContainerItem[]>([])
-  const extlChartsAmount: ChartDataItem[] = []
 
   // All Types
   const [allCoordinatesOfMarkers, setAllCoordinatesOfMarkers] = useState<Coordinate[]>([])
@@ -782,11 +202,64 @@ const MapPage: React.FC<MapProps> = (props) => {
   const mapRef = useRef(null)
   const [mapInitialized, setMapInitialized] = useState(false)
 
-  // User location tracking
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
-  const [userLocationMarker, setUserLocationMarker] = useState<google.maps.Marker | null>(null)
-  const [isLocationEnabled, setIsLocationEnabled] = useState(false)
-  const [locationError, setLocationError] = useState<string | null>(null)
+  // User location tracking (using custom hook)
+  const {
+    userLocation,
+    userLocationMarker,
+    isLocationEnabled,
+    locationError,
+    getCurrentLocation: getUserLocation,
+    centerOnUserLocation,
+  } = useUserLocation()
+
+  // Chart overlays (using custom hook)
+  const {
+    moistChartDataContainer,
+    setMoistChartDataContainer,
+    invalidMoistChartDataContainer,
+    setInvalidMoistChartDataContainer,
+    moistOverlays,
+    setMoistOverlays,
+    moistOverlaysRef,
+    tempChartDataContainer,
+    setTempChartDataContainer,
+    invalidTempChartDataContainer,
+    setInvalidTempChartDataContainer,
+    tempOverlays,
+    setTempOverlays,
+    valveChartDataContainer,
+    setValveChartDataContainer,
+    invalidValveChartDataContainer,
+    setInvalidValveChartDataContainer,
+    valveOverlays,
+    setValveOverlays,
+    wxetDataContainer,
+    setWxetDataContainer,
+    invalidWxetDataContainer,
+    setInvalidWxetDataContainer,
+    fuelOverlays,
+    setFuelOverlays,
+    extlDataContainer,
+    setExtlDataContainer,
+    moistChartsAmount,
+    tempChartsAmount,
+    valveChartsAmount,
+    wxetChartsAmount,
+    extlChartsAmount,
+  } = useChartOverlays({
+    isGoogleApiLoaded: props.isGoogleApiLoaded,
+    map,
+    setChartData: props.setChartData,
+    setPage: props.setPage,
+    setSiteId: props.setSiteId,
+    setSiteName: props.setSiteName,
+    setAdditionalChartData: props.setAdditionalChartData,
+    setChartPageType: props.setChartPageType,
+    siteList: props.siteList,
+    userId: props.userId,
+    present,
+    setActiveOverlays,
+  })
 
   // LayerList state
   const [checkedLayers, setCheckedLayers] = useState<{ [key: string]: boolean }>({})
@@ -795,82 +268,34 @@ const MapPage: React.FC<MapProps> = (props) => {
 
   const history = useHistory()
 
-  // Cleanup effect: Clear all overlays and sensor data when going back from sensors view
-  const prevIsMarkerClickedRef = useRef<boolean | string | null>(null)
-
-  useEffect(() => {
-    // Skip on first mount (prevIsMarkerClickedRef.current === null)
-    if (prevIsMarkerClickedRef.current === null) {
-      prevIsMarkerClickedRef.current = isMarkerClicked
-      return
-    }
-
-    // Only cleanup when transitioning from sensor view (was truthy) to site view (now false)
-    const wasInSensorView = prevIsMarkerClickedRef.current !== false
-    const isNowInSiteView = isMarkerClicked === false
-
-    if (wasInSensorView && isNowInSiteView) {
-
-      // Remove all overlays from the map using activeOverlays which contains all the overlay instances
-      activeOverlays.forEach((overlay: OverlayItem) => {
-        if (overlay && overlay.setMap && typeof overlay.setMap === "function") {
-          try {
-            overlay.setMap(null)
-          } catch (error) {
-            console.warn("Error removing overlay from map:", error)
-          }
-        }
-      })
-
-      // Clear all overlay state arrays
-      setMoistOverlays([])
-      setTempOverlays([])
-      setValveOverlays([])
-      setFuelOverlays([])
-      setActiveOverlays([])
-      setAllOverlays([])
-
-      // Clear all data containers
-      setMoistChartDataContainer([])
-      setInvalidMoistChartDataContainer([])
-      setTempChartDataContainer([])
-      setInvalidTempChartDataContainer([])
-      setValveChartDataContainer([])
-      setInvalidValveChartDataContainer([])
-      setWxetDataContainer([])
-      setInvalidWxetDataContainer([])
-      setExtlDataContainer([])
-
-      // Reset other related state
-      setCoordinatesForFitting([])
-      setAllCoordinatesOfMarkers([])
-      setAmountOfSensors(0)
-      setAreBoundsFitted(false)
-
-      // Clear moistOverlaysRef
-      moistOverlaysRef.current = []
-
-      // Clear site markers so createSites will recreate them
-      // IMPORTANT: Remove old site markers from the map BEFORE clearing the state
-      markers.forEach((marker: any) => {
-        if (marker && marker.setMap) {
-          marker.setMap(null)
-        }
-        if (marker && marker.infoWindow) {
-          marker.infoWindow.close()
-        }
-      })
-      setMarkers([])
-
-      // Reset initialZoom so that createSites recalculates the proper zoom/center for all sites
-      // This ensures the map fits all sites properly when returning from sensor view
-      setInitialZoom(undefined)
-
-    }
-
-    // Update the ref to track the current state for the next render
-    prevIsMarkerClickedRef.current = isMarkerClicked
-  }, [isMarkerClicked, activeOverlays, markers])
+  // Cleanup effect: Clear all overlays and sensor data when going back from sensors view (using custom hook)
+  useMarkerClickCleanup({
+    isMarkerClicked,
+    activeOverlays,
+    markers,
+    moistOverlaysRef,
+    setMoistOverlays,
+    setTempOverlays,
+    setValveOverlays,
+    setFuelOverlays,
+    setActiveOverlays,
+    setAllOverlays,
+    setMoistChartDataContainer,
+    setInvalidMoistChartDataContainer,
+    setTempChartDataContainer,
+    setInvalidTempChartDataContainer,
+    setValveChartDataContainer,
+    setInvalidValveChartDataContainer,
+    setWxetDataContainer,
+    setInvalidWxetDataContainer,
+    setExtlDataContainer,
+    setCoordinatesForFitting,
+    setAllCoordinatesOfMarkers,
+    setAmountOfSensors,
+    setAreBoundsFitted,
+    setMarkers,
+    setInitialZoom,
+  })
 
   useEffect(() => {
     const initializeMap = async () => {
@@ -1018,535 +443,15 @@ const MapPage: React.FC<MapProps> = (props) => {
     }
   }, [activeTab, map])
 
-  // GPS Location functions
-  const getCurrentLocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      React.startTransition(() => {
-        setLocationError("Geolocation is not supported by this browser.")
-      })
-      return
-    }
-
-    React.startTransition(() => {
-      setLocationError(null)
-    })
-
-    // Try with high accuracy first, then fallback to low accuracy
-    const tryHighAccuracy = () => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords
-          const newLocation = { lat: latitude, lng: longitude }
-
-          // Use React.startTransition for safe state updates
-          React.startTransition(() => {
-            setUserLocation(newLocation)
-            setIsLocationEnabled(true)
-          })
-
-          // Update marker after state is set
-          requestAnimationFrame(() => {
-            if (map) {
-              updateUserLocationMarker(newLocation)
-              // Removed auto-centering - user doesn't want map to jump automatically
-            }
-          })
-        },
-        (error) => {
-          // Fallback to low accuracy
-          tryLowAccuracy()
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 60000, // 1 minute
-        },
-      )
-    }
-
-    const tryLowAccuracy = () => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords
-          const newLocation = { lat: latitude, lng: longitude }
-
-          // Use React.startTransition for safe state updates
-          React.startTransition(() => {
-            setUserLocation(newLocation)
-            setIsLocationEnabled(true)
-          })
-
-          // Update marker after state is set
-          requestAnimationFrame(() => {
-            if (map) {
-              updateUserLocationMarker(newLocation)
-              // Removed auto-centering - user doesn't want map to jump automatically
-            }
-          })
-        },
-        (error) => {
-          let errorMessage = "Unable to retrieve your location."
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage = "Location access denied. Please enable location permissions."
-              break
-            case error.POSITION_UNAVAILABLE:
-              errorMessage = "Location information is unavailable."
-              break
-            case error.TIMEOUT:
-              errorMessage = "Location request timed out. Please try again."
-              break
-          }
-
-          // Use React.startTransition for safe state updates
-          React.startTransition(() => {
-            setLocationError(errorMessage)
-            setIsLocationEnabled(false)
-          })
-        },
-        {
-          enableHighAccuracy: false,
-          timeout: 20000,
-          maximumAge: 300000, // 5 minutes
-        },
-      )
-    }
-
-    // Start with high accuracy attempt
-    tryHighAccuracy()
-  }, [map])
-
-  const updateUserLocationMarker = (location: { lat: number; lng: number }) => {
-    if (!map) return
-
-    // Remove existing marker if it exists
-    if (userLocationMarker) {
-      userLocationMarker.setMap(null)
-    }
-
-    // Create new marker for user location
-    const marker = new google.maps.Marker({
-      position: location,
-      map: map,
-      title: "Your Location",
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 8,
-        fillColor: "#4285F4",
-        fillOpacity: 1,
-        strokeColor: "#ffffff",
-        strokeWeight: 2,
-      },
-      zIndex: 1000,
-    })
-
-    setUserLocationMarker(marker)
-  }
-
+  // GPS Location functions are now handled by useUserLocation hook
+  // Wrapper for MapTab component that doesn't pass map parameter
   const centerMapOnUserLocation = useCallback(() => {
-    if (userLocation && map) {
-      requestAnimationFrame(() => {
-        map.setCenter(userLocation)
-        map.setZoom(16)
-      })
-    } else {
-      // Try to get location if not available
-      getCurrentLocation()
+    if (map) {
+      centerOnUserLocation(map)
     }
-  }, [userLocation, map, getCurrentLocation])
+  }, [map, centerOnUserLocation])
 
-  // Initialize location on map load - ONLY ON MOBILE DEVICES
-  useEffect(() => {
-    // Check if device is mobile before initializing GPS
-    const userAgent = navigator.userAgent
-    const screenWidth = window.screen?.width || window.innerWidth
-    const isMobileUserAgent =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|IEMobile|Opera Mini|Mobile|Tablet/i.test(userAgent)
-    const isDesktop = /Windows NT|Macintosh|Linux/i.test(userAgent) && screenWidth > 1024
-    const shouldInitializeLocation = isMobileUserAgent && !isDesktop
-
-    // Initialize GPS ONLY on mobile devices when map is loaded
-    if (map && activeTab === "map" && shouldInitializeLocation) {
-      // Small delay to ensure map is fully rendered
-      const timer = setTimeout(() => {
-        getCurrentLocation()
-      }, 1000)
-
-      return () => clearTimeout(timer)
-    }
-    return () => {}
-  }, [map, activeTab, getCurrentLocation])
-
-  // Moist Marker Chart
-  useEffect(() => {
-    if (moistChartDataContainer.length !== 0) {
-      moistChartDataContainer.map((chartData: ChartDataItem) => {
-        const MoistCustomOverlayExport = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
-        const overlay = new MoistCustomOverlayExport(
-          false,
-          chartData[1],
-          invalidChartDataImage,
-          true,
-          chartData[0],
-          props.setChartData,
-          props.setPage,
-          props.setSiteId,
-          props.setSiteName,
-          history,
-          isMoistMarkerChartDrawn,
-          props.setAdditionalChartData,
-          props.siteList,
-          setMoistOverlays,
-          props.setChartPageType,
-          moistOverlaysRef,
-          currentSensorId,
-          setCurrentSensorId,
-          false,
-        )
-        if (overlay) {
-          React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
-          })
-        }
-      })
-    }
-  }, [moistChartDataContainer])
-  useEffect(() => {
-    if (invalidMoistChartDataContainer.length !== 0) {
-      invalidMoistChartDataContainer.map((chartData: ChartDataItem) => {
-        const CustomOverlayExport = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
-        const overlay = new CustomOverlayExport(
-          false,
-          chartData[1],
-          invalidChartDataImage,
-          false,
-          chartData[0],
-          props.setChartData,
-          props.setPage,
-          props.setSiteId,
-          props.setSiteName,
-          history,
-          isMoistMarkerChartDrawn,
-          props.setAdditionalChartData,
-          props.siteList,
-          setMoistOverlays,
-          props.setChartPageType,
-          moistOverlaysRef,
-          currentSensorId,
-          setCurrentSensorId,
-          false,
-        )
-        if (overlay) {
-          React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
-          })
-        }
-      })
-    }
-  }, [invalidMoistChartDataContainer])
-  useEffect(() => {
-    if (moistOverlays.length !== 0) {
-      let roots: ChartRoot[] = []
-      moistOverlays.map((moistOverlay: OverlayItem) => {
-        createMoistChartForOverlay("m", moistOverlay.chartData, roots, moistOverlays)
-      })
-      return () => {
-        roots.forEach((root) => root.dispose())
-        roots = []
-      }
-    }
-    return undefined
-  }, [moistOverlays])
-
-  // Wxet Marker
-  useEffect(() => {
-    if (wxetDataContainer.length !== 0) {
-      wxetDataContainer.map((data: ChartDataItem) => {
-        let overlay: OverlayItem | undefined
-        if (data[0].markerType === "wxet") {
-          const WxetCustomOverlayExport = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
-          if (!WxetCustomOverlayExport) return
-          overlay = new WxetCustomOverlayExport(
-            (data: unknown) => props.setChartData(data as SensorData[]),
-            props.setPage,
-            props.setSiteId,
-            props.setSiteName,
-            props.setAdditionalChartData,
-            history,
-            data[1],
-            true,
-            data[0],
-            props.setChartPageType,
-          )
-        } else if (data[0].markerType === "fuel") {
-          const FuelCustomOverlayExport = initializeFuelCustomOverlay(props.isGoogleApiLoaded)
-          if (!FuelCustomOverlayExport) return
-          overlay = new FuelCustomOverlayExport(
-            props.setChartData,
-            props.setPage,
-            props.setSiteId,
-            props.setSiteName,
-            history,
-            data[1],
-            true,
-            data[0],
-            props.setChartPageType,
-            isFuelMarkerChartDrawn,
-            setFuelOverlays,
-          )
-        }
-        if (overlay) {
-          React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
-          })
-        }
-      })
-    }
-  }, [wxetDataContainer])
-  useEffect(() => {
-    if (invalidWxetDataContainer.length !== 0) {
-      invalidWxetDataContainer.map((data: ChartDataItem) => {
-        let overlay: OverlayItem | undefined
-        if (data[0].markerType === "wxet") {
-          const WxetCustomOverlayExport = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
-          if (!WxetCustomOverlayExport) return
-          overlay = new WxetCustomOverlayExport(
-            props.setChartData,
-            props.setPage,
-            props.setSiteId,
-            props.setSiteName,
-            props.setAdditionalChartData,
-            history,
-            data[1],
-            false,
-            data[0],
-            props.setChartPageType,
-          )
-        } else if (data[0].markerType === "fuel") {
-          const FuelCustomOverlayExport = initializeFuelCustomOverlay(props.isGoogleApiLoaded)
-          if (!FuelCustomOverlayExport) return
-          overlay = new FuelCustomOverlayExport(
-            props.setChartData,
-            props.setPage,
-            props.setSiteId,
-            props.setSiteName,
-            history,
-            data[1],
-            true,
-            data[0],
-            props.setChartPageType,
-            isFuelMarkerChartDrawn,
-            setFuelOverlays,
-          )
-        }
-
-        if (overlay) {
-          React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
-          })
-        }
-      })
-    }
-  }, [invalidWxetDataContainer])
-
-  useEffect(() => {
-    if (fuelOverlays.length !== 0) {
-      const roots: ChartRoot[] = []
-      fuelOverlays.map((fuelOverlay: OverlayItem) => {
-        createFuelChartForOverlay(fuelOverlay.chartData, roots, fuelOverlays)
-      })
-
-      return () => {
-        roots.forEach((root) => root.dispose())
-      }
-    }
-    return undefined
-  }, [fuelOverlays])
-
-  // Temp Marker
-  useEffect(() => {
-    if (tempChartDataContainer.length !== 0) {
-      tempChartDataContainer.map((chartData: ChartDataItem) => {
-        const TempCustomOverlayExport = initializeTempCustomOverlay(props.isGoogleApiLoaded)
-        if (!TempCustomOverlayExport) return
-        const overlay = new TempCustomOverlayExport(
-          chartData[1],
-          true,
-          chartData[0],
-          props.setChartData,
-          props.setPage,
-          props.setSiteId,
-          props.setSiteName,
-          history,
-          isTempMarkerChartDrawn,
-          props.setAdditionalChartData,
-          setTempOverlays,
-          props.setChartPageType,
-          props.userId,
-          present,
-        )
-        if (overlay) {
-          React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
-          })
-        }
-      })
-    }
-  }, [tempChartDataContainer])
-  useEffect(() => {
-    if (invalidTempChartDataContainer.length !== 0) {
-      invalidTempChartDataContainer.map((chartData: ChartDataItem) => {
-        const CustomOverlayExport = initializeTempCustomOverlay(props.isGoogleApiLoaded)
-        if (!CustomOverlayExport) return
-        const overlay = new CustomOverlayExport(
-          chartData[1],
-          false,
-          chartData[0],
-          props.setChartData,
-          props.setPage,
-          props.setSiteId,
-          props.setSiteName,
-          history,
-          isTempMarkerChartDrawn,
-          props.setAdditionalChartData,
-          setTempOverlays,
-          props.setChartPageType,
-          props.userId,
-          present,
-        )
-        if (overlay) {
-          React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
-          })
-        }
-      })
-    }
-    return undefined
-  }, [invalidTempChartDataContainer])
-  useEffect(() => {
-    if (tempOverlays.length !== 0) {
-      const roots: ChartRoot[] = []
-      tempOverlays.map((tempOverlay: OverlayItem) => {
-        createTempChartForOverlay(tempOverlay.chartData, roots, tempOverlays)
-      })
-
-      return () => {
-        roots.forEach((root) => root.dispose())
-      }
-    }
-    return undefined
-  }, [tempOverlays])
-
-  // Valve Marker
-  useEffect(() => {
-    if (valveChartDataContainer.length !== 0) {
-      valveChartDataContainer.map((chartData: ChartDataItem) => {
-        const ValveCustomOverlayExport = initializeValveCustomOverlay(props.isGoogleApiLoaded)
-        if (!ValveCustomOverlayExport) return
-        const overlay = new ValveCustomOverlayExport(
-          chartData[1],
-          true,
-          chartData[0],
-          props.setChartData,
-          props.setPage,
-          props.setSiteId,
-          props.setSiteName,
-          props.setChartPageType,
-          history,
-          isValveMarkerChartDrawn,
-          setValveOverlays,
-          props.userId,
-        )
-        if (overlay) {
-          React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
-          })
-        }
-      })
-    }
-  }, [valveChartDataContainer])
-  useEffect(() => {
-    if (invalidValveChartDataContainer.length !== 0) {
-      invalidValveChartDataContainer.map((chartData: ChartDataItem) => {
-        const ValveCustomOverlayExport = initializeValveCustomOverlay(props.isGoogleApiLoaded)
-        if (!ValveCustomOverlayExport) return
-        const overlay = new ValveCustomOverlayExport(
-          chartData[1],
-          false,
-          chartData[0],
-          props.setChartData,
-          props.setPage,
-          props.setSiteId,
-          props.setSiteName,
-          props.setChartPageType,
-          history,
-          isValveMarkerChartDrawn,
-          setValveOverlays,
-          props.userId,
-        )
-        if (overlay) {
-          React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
-          })
-        }
-      })
-    }
-    return undefined
-  }, [invalidValveChartDataContainer])
-
-  useEffect(() => {
-    if (valveOverlays.length !== 0) {
-      const roots: ChartRoot[] = []
-      valveOverlays.map((valveOverlay: OverlayItem) => {
-        createValveChartForOverlay(valveOverlay.chartData, roots, valveOverlays)
-      })
-
-      return () => {
-        roots.forEach((root) => root.dispose())
-      }
-    }
-    return undefined
-  }, [valveOverlays])
-
-  // EXTL Marker
-  useEffect(() => {
-    if (extlDataContainer.length !== 0) {
-      extlDataContainer.map((data: ExtlDataContainerItem) => {
-        const ExtlCustomOverlayExport = initializeExtlCustomOverlay(props.isGoogleApiLoaded)
-        if (!ExtlCustomOverlayExport) return
-
-        // Преобразуем данные для ExtlCustomOverlay
-        const extlItem: ExtlSensorData = data[0] // Первый элемент - данные сенсора
-        const extlBounds: ExtlBounds = data[1] // Второй элемент - bounds
-
-        // Создаем LatLngBounds из extlBounds
-        const bounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(extlItem.lat - 0.001, extlItem.lng - 0.001),
-          new google.maps.LatLng(extlItem.lat + 0.001, extlItem.lng + 0.001),
-        )
-
-        // Преобразуем extlItem в ExtlChartData
-        const extlChartData = {
-          id: extlItem.sensorId,
-          layerName: "EXTL",
-          name: extlItem.name || `Sensor ${extlItem.sensorId}`,
-          graphic: extlItem.graphic,
-          chartType: "default",
-          width: extlItem.width,
-          height: extlItem.height,
-          sensorId: extlItem.sensorId,
-          mainId: extlItem.mainId,
-        }
-
-        const overlay = new ExtlCustomOverlayExport(bounds, extlChartData)
-        if (overlay) {
-          React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, setActiveOverlays, map)
-          })
-        }
-      })
-    }
-  }, [extlDataContainer])
+  // Chart overlay creation is now handled by useChartOverlays hook
 
   useEffect(() => {
     if (activeOverlays.length !== 0 && activeOverlays.length === amountOfSensors && !areBoundsFitted) {
@@ -1603,43 +508,20 @@ const MapPage: React.FC<MapProps> = (props) => {
     return undefined
   }, [activeOverlays])
 
-  useEffect(() => {
-    if (activeOverlays.length !== 0 && areBoundsFitted) {
-      CollisionResolver.resolve(activeOverlays)
-      const handleResize = () => {
-        new Promise((resolve: () => void) => {
-          activeOverlays.map((overlay: OverlayItem) => {
-            overlay.offset = { x: 0, y: 0 }
-          })
-          resolve()
-        }).then(() => {
-          CollisionResolver.resolve(activeOverlays)
-        })
-      }
-      window.addEventListener("resize", () => handleResize())
-      map.addListener("zoom_changed", () => handleResize())
-      return () => {
-        window.removeEventListener("resize", handleResize)
-        google.maps.event.clearListeners(map, "zoom_changed")
-      }
-    }
-  }, [activeOverlays, areBoundsFitted])
-  useEffect(() => {
-    if (map) {
-      if (activeTab !== "map") {
-        const mapDivs = document.querySelectorAll(".gm-style")
-        mapDivs.forEach((div) => {
-          (div as HTMLElement).style.visibility = "hidden"
-        })
-      } else {
-        const mapDivs = document.querySelectorAll(".gm-style")
-        mapDivs.forEach((div) => {
-          (div as HTMLElement).style.visibility = "visible"
-        })
-        google.maps.event.trigger(map, "resize")
-      }
-    }
-  }, [activeTab, map])
+  // Collision resolution is now handled by useCollisionResolution hook
+  useCollisionResolution({
+    map,
+    activeOverlays,
+    areBoundsFitted,
+  })
+
+  // Map visibility is now handled by useMapVisibility hook
+  useMapVisibility({
+    map,
+    mapRef,
+    activeTab,
+    coordinatesForFitting,
+  })
 
   // LayerList useEffect - initialize checked layers based on current site
   useEffect(() => {
@@ -1706,6 +588,8 @@ const MapPage: React.FC<MapProps> = (props) => {
             layerMapping={layerMapping}
             setLayerMapping={setLayerMapping}
             isLoadingLayers={isLoadingLayers}
+            showCreateNewSiteAlert={showCreateNewSiteAlert}
+            showCreateNewLayerAlert={showCreateNewLayerAlert}
           />
         )
       default:
@@ -1794,7 +678,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           </IonSegment>
         </div>
 
-        <SensorSelector
+        <SensorModal
           isOpen={isSensorModalOpen}
           onClose={handleCloseSensorModal}
           onConfirm={handleSensorSelect}
@@ -1802,79 +686,19 @@ const MapPage: React.FC<MapProps> = (props) => {
           sensors={availableSensors}
         />
 
-        {/* New Layer Modal */}
-        <IonModal isOpen={isNewLayerModalOpen} onDidDismiss={() => setIsNewLayerModalOpen(false)}>
-          <IonHeader>
-            <IonToolbar>
-              <IonTitle>Create New Layer</IonTitle>
-              <IonButtons slot="end">
-                <IonButton onClick={() => setIsNewLayerModalOpen(false)}>Cancel</IonButton>
-              </IonButtons>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent className="ion-padding">
-            <IonItem>
-              <IonLabel position="stacked">Layer Name</IonLabel>
-              <IonInput
-                placeholder="Enter Layer Name"
-                value={newLayerName}
-                onIonInput={(e) => setNewLayerName(e.detail.value!)}
-              />
-            </IonItem>
-
-            <IonItem>
-              <IonLabel position="stacked">Marker Type</IonLabel>
-              <IonSelect value={newLayerMarkerType} onIonChange={(e) => setNewLayerMarkerType(e.detail.value)}>
-                <IonSelectOption value="fuel">Fuel marker</IonSelectOption>
-                <IonSelectOption value="srs-green-fuel">SRS Green Fuel</IonSelectOption>
-                <IonSelectOption value="srs-ref-fuel">SRS Reference Fuel</IonSelectOption>
-                <IonSelectOption value="moist-fuel">Moisture Fuel</IonSelectOption>
-                <IonSelectOption value="temp_rh">Temperature/Relative Humidity</IonSelectOption>
-                <IonSelectOption value="temp-rh-v2">Temperature/RH Version 2</IonSelectOption>
-                <IonSelectOption value="wxet">Weather Station ET</IonSelectOption>
-                <IonSelectOption value="planthealth">Plant Health</IonSelectOption>
-                <IonSelectOption value="soiltemp">Soil Temperature</IonSelectOption>
-                <IonSelectOption value="psi">PSI (Pressure)</IonSelectOption>
-                <IonSelectOption value="vfd">VFD (Variable Frequency Drive)</IonSelectOption>
-                <IonSelectOption value="bflow">Budget/Flow</IonSelectOption>
-                <IonSelectOption value="valve">Valve</IonSelectOption>
-                <IonSelectOption value="graphic">Graphic</IonSelectOption>
-                <IonSelectOption value="disease">Disease</IonSelectOption>
-                <IonSelectOption value="pump">Pump</IonSelectOption>
-                <IonSelectOption value="chemical">Chemical</IonSelectOption>
-                <IonSelectOption value="infra-red">Infra-Red</IonSelectOption>
-                <IonSelectOption value="neutron">Neutron</IonSelectOption>
-                <IonSelectOption value="virtual-weather-station">Virtual Weather Station</IonSelectOption>
-              </IonSelect>
-            </IonItem>
-
-            <div style={{ marginTop: "20px", marginBottom: "10px", fontWeight: "bold", color: "#666" }}>
-              Data Source Configuration
-            </div>
-
-            <IonItem>
-              <IonLabel position="stacked">Table</IonLabel>
-              <IonInput
-                placeholder="Table"
-                value={newLayerTable}
-                onIonInput={(e) => setNewLayerTable(e.detail.value!)}
-              />
-            </IonItem>
-
-            <IonItem>
-              <IonLabel position="stacked">Column</IonLabel>
-              <IonInput
-                placeholder="Column"
-                value={newLayerColumn}
-                onIonInput={(e) => setNewLayerColumn(e.detail.value!)}
-              />
-            </IonItem>
-
-            <IonButton expand="block" onClick={handleFinishNewLayer} style={{ marginTop: "20px" }}>
-              Finish
-            </IonButton>
-          </IonContent>
-        </IonModal>
+        <NewLayerModal
+          isOpen={isNewLayerModalOpen}
+          onClose={() => setIsNewLayerModalOpen(false)}
+          onFinish={handleFinishNewLayer}
+          newLayerName={newLayerName}
+          setNewLayerName={setNewLayerName}
+          newLayerMarkerType={newLayerMarkerType}
+          setNewLayerMarkerType={setNewLayerMarkerType}
+          newLayerTable={newLayerTable}
+          setNewLayerTable={setNewLayerTable}
+          newLayerColumn={newLayerColumn}
+          setNewLayerColumn={setNewLayerColumn}
+        />
       </IonContent>
     </IonPage>
   )
