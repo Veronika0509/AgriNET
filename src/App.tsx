@@ -12,10 +12,6 @@ import {IonReactRouter} from '@ionic/react-router';
 import {home, informationCircle} from 'ionicons/icons';
 import {loadGoogleApi} from "./functions/loadGoogleApiFunc";
 import {useHistory} from 'react-router-dom';
-import {getSiteList} from "./pages/Map/data/getSiteList";
-
-// Типы
-import type { Site, SensorData, ChartPageType, UserId, SiteId } from './types';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -36,7 +32,7 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 // import '../../theme/variables.css';
 
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import Preloader from "./pages/Login/components/Preloader";
 import Login from "./pages/Login";
 import Info from "./pages/Info";
@@ -46,41 +42,41 @@ import TestOverlays from "./pages/TestOverlays";
 import VirtualValve from "./pages/VirtualValve";
 import AddValvePage from "./pages/AddValvePage";
 import QRCodeScanner from "./components/QRCodeScanner";
+import { AppProvider, useAppContext } from "./context/AppContext";
 import './App.css'
 
 setupIonicReact();
 
-const App: React.FC = () => {
-  const [page, setPage] = useState<number>(0);
-  const [userId, setUserId] = useState<UserId>(0 as UserId);
-  const [siteList, setSiteList] = useState<Site[]>([]);
-  const [siteId, setSiteId] = useState<SiteId>('' as SiteId);
-  const [siteName, setSiteName] = useState<string>('');
-  const [chartData, setChartData] = useState<SensorData[]>([]);
-  const [additionalChartData, setAdditionalChartData] = useState<SensorData[]>([]);
-  const [chartPageType, setChartPageType] = useState<ChartPageType>('moist');
-  const [isGoogleApiLoaded, setGoogleApiLoaded] = useState<boolean>(false);
-  const [mapPageKey, setMapPageKey] = useState<number>(0);
-  const [selectedSiteForAddUnit, setSelectedSiteForAddUnit] = useState<string>('');
-  const [selectedMoistureSensor, setSelectedMoistureSensor] = useState<any>(null);
+// Внутренний компонент приложения с доступом к контексту
+const AppContent: React.FC = () => {
+  const {
+    page,
+    userId,
+    siteList,
+    siteId,
+    siteName,
+    chartData,
+    additionalChartData,
+    chartPageType,
+    isGoogleApiLoaded,
+    mapPageKey,
+    selectedSiteForAddUnit,
+    selectedMoistureSensor,
+    setPage,
+    setUserId,
+    setSiteList,
+    setSiteId,
+    setSiteName,
+    setChartData,
+    setAdditionalChartData,
+    setChartPageType,
+    setGoogleApiLoaded,
+    setSelectedSiteForAddUnit,
+    setSelectedMoistureSensor,
+    reloadMapPage,
+  } = useAppContext();
+
   const history = useHistory();
-
-  const reloadMapPage = async (): Promise<void> => {
-    // Fetch fresh site list data
-    const sites = await getSiteList(userId);
-
-    // Check if API call was successful
-    if ('success' in sites && sites.success === false) {
-      console.error('Failed to reload site list:', sites.error);
-    } else {
-      // Update site list with fresh data
-      setSiteList(sites.data);
-    }
-
-    // DON'T force remount - just update the site list
-    // The map will react to the siteList change via useEffect
-    // setMapPageKey(prevKey => prevKey + 1);
-  };
 
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);
@@ -140,7 +136,7 @@ const App: React.FC = () => {
                   </IonTabs>
                 </IonReactRouter>
               </div>
-              : page === 2 
+              : page === 2
                 ? <div>
                     <IonReactRouter basename="/AgriNET">
                         <Route path="/chart">
@@ -152,23 +148,25 @@ const App: React.FC = () => {
                         </Route>
                     </IonReactRouter>
                   </div>
-                : page === 3 
+                : page === 3
                   ? <div>
-                      <VirtualValve 
-                        setPage={setPage} 
-                        siteList={siteList} 
+                      <VirtualValve
+                        setPage={setPage}
+                        siteList={siteList}
                         selectedSite={selectedSiteForAddUnit}
                         selectedMoistureSensor={selectedMoistureSensor}
                         setSelectedMoistureSensor={setSelectedMoistureSensor}
+                        userId={userId}
                       />
                     </div>
                   : page === 4
                     ? <div>
-                        <AddValvePage 
-                          setPage={setPage} 
-                          siteList={siteList} 
+                        <AddValvePage
+                          setPage={setPage}
+                          siteList={siteList}
                           selectedSite={selectedSiteForAddUnit}
                           selectedMoistureSensor={selectedMoistureSensor}
+                          userId={userId}
                         />
                       </div>
                     : null
@@ -185,6 +183,15 @@ const App: React.FC = () => {
         </IonApp>
       )}
     </div>
+  );
+};
+
+// Главный компонент App с Provider
+const App: React.FC = () => {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
   );
 };
 

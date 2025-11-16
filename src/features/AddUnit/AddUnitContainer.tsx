@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
-import { useIonAlert } from "@ionic/react"
+import { useIonAlert, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent } from "@ionic/react"
 import { getSiteList } from "../../pages/Map/data/getSiteList"
 import type { Site, UserId } from "../../types"
 
@@ -8,6 +8,9 @@ import AddUnitTab from "./components/AddUnitTab"
 import { useAddUnitForm } from "./hooks/useAddUnitForm"
 import { useAddUnitMap } from "./hooks/useAddUnitMap"
 import { useSiteGroups } from "./hooks/useSiteGroups"
+import QRCodeScanner from "../../components/QRCodeScanner"
+import { handleJSONQRData, handleKeyValueQRData } from "./handlers/qrScannerHandlers"
+import type { QRScanHandlers } from "./handlers/qrScannerHandlers"
 
 interface AddUnitContainerProps {
   userId: UserId
@@ -236,6 +239,15 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
         })
 
         console.log("Map created successfully:", map)
+
+        // Add listener for map movement to update coordinates
+        map.addListener("center_changed", () => {
+          const center = map.getCenter()
+          if (center) {
+            setUnitLatitude(center.lat().toString())
+            setUnitLongitude(center.lng().toString())
+          }
+        })
 
         // Store map reference for coordinate grabbing
         setAddUnitMap(map)
@@ -481,12 +493,98 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
     })
   }, [presentAlert])
 
+  // QR Scanner success handler
+  const handleQRScanSuccess = (decodedText: string) => {
+    console.log("QR Code scanned:", decodedText)
+    setIsQRScanned(true)
+    setShowQRScanner(false)
+
+    // Try to parse as JSON first
+    try {
+      const data = JSON.parse(decodedText)
+
+      const qrHandlers: QRScanHandlers = {
+        setSensorPrefix,
+        setSensorId,
+        setUnitName,
+        setUnitLatitude,
+        setUnitLongitude,
+        setSelectedSite,
+        setSelectedSiteForAddUnit,
+        setSelectedSiteGroup,
+        setSelectedLayer,
+        setMoistLevel,
+        setScannedSensorId,
+        setQrTimezone,
+        setQrCustomFields,
+        setQrBudgetLines,
+        setQrRawMetric,
+        setQrDisplayMetric,
+        setSiteGroups,
+        handleCreateNewSite: async (siteName: string) => {
+          try {
+            const newSiteList = await getSiteList(userId)
+            if (newSiteList && "data" in newSiteList) {
+              setSiteList(newSiteList.data)
+            }
+            setSelectedSite(siteName)
+            setSelectedSiteForAddUnit(siteName)
+            return newSiteList && "data" in newSiteList ? newSiteList.data.find(s => s.name === siteName) || null : null
+          } catch (error) {
+            console.error("Error creating site:", error)
+            return null
+          }
+        },
+      }
+
+      handleJSONQRData(data, siteList, qrHandlers)
+    } catch (e) {
+      // If not JSON, try key-value pairs
+      const qrHandlers: QRScanHandlers = {
+        setSensorPrefix,
+        setSensorId,
+        setUnitName,
+        setUnitLatitude,
+        setUnitLongitude,
+        setSelectedSite,
+        setSelectedSiteForAddUnit,
+        setSelectedSiteGroup,
+        setSelectedLayer,
+        setMoistLevel,
+        setScannedSensorId,
+        setQrTimezone,
+        setQrCustomFields,
+        setQrBudgetLines,
+        setQrRawMetric,
+        setQrDisplayMetric,
+        setSiteGroups,
+        handleCreateNewSite: async (siteName: string) => {
+          try {
+            const newSiteList = await getSiteList(userId)
+            if (newSiteList && "data" in newSiteList) {
+              setSiteList(newSiteList.data)
+            }
+            setSelectedSite(siteName)
+            setSelectedSiteForAddUnit(siteName)
+            return newSiteList && "data" in newSiteList ? newSiteList.data.find(s => s.name === siteName) || null : null
+          } catch (error) {
+            console.error("Error creating site:", error)
+            return null
+          }
+        },
+      }
+
+      handleKeyValueQRData(decodedText, siteList, qrHandlers)
+    }
+  }
+
   return (
-    <AddUnitTab
-      // Map refs and state
-      addUnitMapRef={addUnitMapRef}
-      addUnitMap={addUnitMap}
-      crosshairMarker={crosshairMarker}
+    <>
+      <AddUnitTab
+        // Map refs and state
+        addUnitMapRef={addUnitMapRef}
+        addUnitMap={addUnitMap}
+        crosshairMarker={crosshairMarker}
 
       // User and site data
       userId={userId}
@@ -580,6 +678,7 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
       // Sensor modal
       availableSensors={availableSensors}
       setAvailableSensors={setAvailableSensors}
+      isSensorModalOpen={isSensorModalOpen}
       setIsSensorModalOpen={setIsSensorModalOpen}
 
       // Navigation
@@ -590,7 +689,29 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
       showCreateNewSiteAlert={showCreateNewSiteAlert}
       showCreateNewLayerAlert={showCreateNewLayerAlert}
       showPurchaseRequestAlert={showPurchaseRequestAlert}
-    />
+      />
+
+      {/* QR Code Scanner Modal */}
+      <IonModal isOpen={showQRScanner} onDidDismiss={() => setShowQRScanner(false)}>
+        <IonHeader>
+          <IonToolbar>
+            <IonTitle>Scan QR Code</IonTitle>
+            <IonButtons slot="end">
+              <IonButton onClick={() => setShowQRScanner(false)}>
+                Close
+              </IonButton>
+            </IonButtons>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <QRCodeScanner
+            onScanSuccess={handleQRScanSuccess}
+            onScanCancel={() => setShowQRScanner(false)}
+            autoStart={true}
+          />
+        </IonContent>
+      </IonModal>
+    </>
   )
 }
 

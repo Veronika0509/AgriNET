@@ -17,6 +17,7 @@ import {
 } from "@ionic/react"
 import { add, cameraOutline, informationCircle } from "ionicons/icons"
 import s from "../../../pages/Map/style.module.css"
+import SensorModal from "../../../pages/Map/components/modals/SensorModal"
 
 // Type imports
 import type { Site, UserId, SiteId } from "../../../types"
@@ -88,7 +89,9 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
     setMarkers,
     setLayers,
     setLayerMapping,
+    availableSensors,
     setAvailableSensors,
+    isSensorModalOpen,
     setIsSensorModalOpen,
     setActiveTab,
     setNavigationHistory,
@@ -236,38 +239,128 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                   width: "100%",
                 }}
                 onClick={() => {
-                  // Сохраняем выбранный сайт в глобальном состоянии
-                  setSelectedSiteForAddUnit(selectedSite)
+                  // Collect all sites that have Moist sensors
+                  const sitesWithMoistSensors: Array<{ name: string; sensors: any[] }> = []
 
-                  // Выводим информацию в консоль
-
-                  // Собираем все Moist сенсоры из ВСЕХ сайтов
-                  const allSensors: any[] = []
-
-                  // Проходим по всем сайтам в списке
                   siteList.forEach((site: any) => {
+                    const moistSensors: any[] = []
                     if (site.layers) {
-                      // Ищем слои с именем Moist в каждом сайте
                       site.layers.forEach((layer: any) => {
                         if (layer.name === "Moist" && layer.markers && Array.isArray(layer.markers)) {
-                          // Добавляем все маркеры из слоя Moist
                           layer.markers.forEach((marker: any) => {
-                            allSensors.push({
+                            moistSensors.push({
                               layerName: layer.name,
                               sensorId: marker.sensorId,
                               name: marker.name,
-                              siteName: site.name, // Добавляем имя сайта для отображения
+                              siteName: site.name,
                               ...marker,
                             })
                           })
                         }
                       })
                     }
+                    if (moistSensors.length > 0) {
+                      sitesWithMoistSensors.push({
+                        name: site.name,
+                        sensors: moistSensors,
+                      })
+                    }
                   })
 
-                  // Устанавливаем доступные сенсоры и открываем модальное окно
-                  setAvailableSensors(allSensors)
-                  setIsSensorModalOpen(true)
+                  // If no sites with moisture sensors, show error
+                  if (sitesWithMoistSensors.length === 0) {
+                    presentAlert({
+                      header: 'No Applicable Sensors',
+                      message: 'You have to have at least one Moisture Sensor',
+                      buttons: ['OK'],
+                    })
+                    return
+                  }
+
+                  // Helper function to show moisture sensor selector
+                  const showMoistureSensorSelector = (sensors: any[], siteName: string) => {
+                    console.log('showMoistureSensorSelector called with', sensors.length, 'sensors')
+
+                    if (sensors.length === 0) {
+                      presentAlert({
+                        header: 'No Applicable Sensors',
+                        message: 'You have to have at least one Moisture Sensor',
+                        buttons: ['OK'],
+                      })
+                      return
+                    }
+
+                    // Step 3: Show moisture sensor selector with radio buttons
+                    // Use setTimeout to ensure previous alert is fully dismissed
+                    console.log('Setting timeout to show sensor selector...')
+                    setTimeout(() => {
+                      console.log('Timeout fired, presenting sensor selector alert')
+                      presentAlert({
+                        header: 'Select Moisture sensor for new Valve',
+                        inputs: sensors.map((sensor, index) => ({
+                          type: 'radio' as const,
+                          label: sensor.name || sensor.sensorId,
+                          value: index.toString(),
+                          checked: index === 0,
+                        })),
+                        buttons: [
+                          {
+                            text: 'Cancel Valve Creation',
+                            role: 'cancel',
+                          },
+                          {
+                            text: 'OK',
+                            handler: (selectedIndex: string) => {
+                              console.log('Sensor selected, index:', selectedIndex)
+                              const sensorIndex = parseInt(selectedIndex, 10)
+                              const selectedSensor = sensors[sensorIndex]
+                              console.log('Selected sensor:', selectedSensor)
+                              // Sensor selected, save it and navigate to Virtual Valve page
+                              setSelectedSiteForAddUnit(siteName)
+                              setSelectedMoistureSensor?.(selectedSensor)
+                              setPage(3) // Navigate to Virtual Valve page
+                            },
+                          },
+                        ],
+                      })
+                    }, 300)
+                  }
+
+                  // Step 2: If multiple sites, show site selector with radio buttons
+                  if (sitesWithMoistSensors.length > 1) {
+                    presentAlert({
+                      header: 'Select Site',
+                      inputs: sitesWithMoistSensors.map((site, index) => ({
+                        type: 'radio' as const,
+                        label: site.name,
+                        value: index.toString(),
+                        checked: index === 0,
+                      })),
+                      buttons: [
+                        {
+                          text: 'Cancel Valve Creation',
+                          role: 'cancel',
+                        },
+                        {
+                          text: 'OK',
+                          handler: (selectedIndex: string) => {
+                            console.log('Site selected, index:', selectedIndex)
+                            const siteIndex = parseInt(selectedIndex, 10)
+                            const selectedSiteData = sitesWithMoistSensors[siteIndex]
+                            console.log('Selected site data:', selectedSiteData)
+                            console.log('Number of sensors in site:', selectedSiteData.sensors.length)
+                            // Show moisture sensor selector for selected site
+                            showMoistureSensorSelector(selectedSiteData.sensors, selectedSiteData.name)
+                            return true // Important: return true to allow the handler to complete
+                          },
+                        },
+                      ],
+                    })
+                  } else {
+                    // Only one site, skip to sensor selector
+                    console.log('Only one site, showing sensors directly')
+                    showMoistureSensorSelector(sitesWithMoistSensors[0].sensors, sitesWithMoistSensors[0].name)
+                  }
                 }}
               >
                 ADD VALVE
@@ -905,6 +998,19 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                 onClick={async () => {
                   const userRole = localStorage.getItem("userRole")
 
+                  // Check if user role is allowed to create units
+                  // Only Admin, Dealer, and Superuser can create units
+                  const allowedRoles = ["Admin", "Dealer", "Superuser"]
+                  if (!userRole || !allowedRoles.includes(userRole)) {
+                    presentAlert({
+                      header: "Permission Denied",
+                      message:
+                        "Only Admin, Dealer, and Superuser roles can create new units.\nYour current role: " + (userRole || "Unknown"),
+                      buttons: ["OK"],
+                    })
+                    return
+                  }
+
                   // Check if user is in Demo mode
                   if (userRole === "Demo") {
                     presentAlert({
@@ -1102,6 +1208,18 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
           </IonButton>
         </IonContent>
       </IonModal>
+
+      <SensorModal
+        isOpen={isSensorModalOpen}
+        onClose={() => setIsSensorModalOpen(false)}
+        onConfirm={(sensor) => {
+          setIsSensorModalOpen(false)
+          setSelectedMoistureSensor?.(sensor)
+          setPage(3)
+        }}
+        selectedSensor={null}
+        sensors={availableSensors}
+      />
     </div>
   )
 }

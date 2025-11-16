@@ -33,9 +33,25 @@ const Login: React.FC<LoginProps> = (props) => {
         password: passwordInputValue,
       },
     }).then(response => {
-      if (response.data.role) {
-        localStorage.setItem('userRole', response.data.role);
+      // Store all user data from the response
+      if (response.data) {
+        // Store individual fields
+        if (response.data.role) {
+          localStorage.setItem('userRole', response.data.role);
+        }
+
+        // Store the complete user data object as JSON
+        localStorage.setItem('userData', JSON.stringify(response.data));
+
+        // Console log all user data received from server
+        console.log("=== USER DATA FROM LOGIN API ===");
+        console.log("Complete response.data:", response.data);
+        console.log("Individual fields:");
+        Object.keys(response.data).forEach(key => {
+          console.log(`  ${key}:`, response.data[key]);
+        });
       }
+
       props.setPage(1);
       history.push('/map');
       props.setUserId(response.data.id as UserId);

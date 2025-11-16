@@ -86,6 +86,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   const [isMarkerClicked, setIsMarkerClicked] = useState(false)
   const [, setAreArraysUpdated] = useState(false)
   const mapRefFunc = useRef(null);
+  const previousTabRef = useRef("map")
 
   // Keep layers state - it's shared with Map tab (using custom hook)
   const { layers, setLayers, layerMapping, setLayerMapping, isLoadingLayers } = useLayers()
@@ -425,7 +426,27 @@ const MapPage: React.FC<MapProps> = (props) => {
 
   // Fix map display after returning from overlay
   useEffect(() => {
-    if (activeTab === "map" && map && mapRef.current) {
+    // Only reset when switching TO map from another tab
+    const previousTab = previousTabRef.current
+    const isReturningToMap = activeTab === "map" && previousTab !== "map"
+
+    if (isReturningToMap && map && mapRef.current) {
+      // Clear all markers (both site and sensor markers)
+      markers.forEach((marker: any) => {
+        if (marker.setMap) {
+          marker.setMap(null)
+          if (marker.infoWindow) {
+            marker.infoWindow.close()
+          }
+        }
+      })
+
+      // Reset markers array to trigger re-creation of site markers
+      setMarkers([])
+
+      // Reset marker clicked state
+      setIsMarkerClicked(false)
+
       // Force Google Maps to resize and redraw
       setTimeout(() => {
         if (map && mapRef.current) {
@@ -441,6 +462,9 @@ const MapPage: React.FC<MapProps> = (props) => {
         }
       }, 100) // Small delay to ensure DOM is ready
     }
+
+    // Update previous tab reference
+    previousTabRef.current = activeTab
   }, [activeTab, map])
 
   // GPS Location functions are now handled by useUserLocation hook

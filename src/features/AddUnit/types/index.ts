@@ -133,6 +133,7 @@ export interface AddUnitTabProps {
   setAvailableSensors: (value: any[]) => void
 
   // Sensor modal state
+  isSensorModalOpen: boolean
   setIsSensorModalOpen: (value: boolean) => void
 
   // Navigation state
