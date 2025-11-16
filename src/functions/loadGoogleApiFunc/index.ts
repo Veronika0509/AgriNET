@@ -1,15 +1,15 @@
 // loadGoogleApiFunctions.ts
 export const loadGoogleApi = (setLoaded: React.Dispatch<React.SetStateAction<boolean>>) => {
-  // Проверяем, был ли Google Maps API уже загружен
+  // Check if Google Maps API has already been loaded
   if (window.google && window.google.maps) {
     setLoaded(true);
     return;
   }
 
-  // Проверяем, есть ли уже script тег для Google Maps API
+  // Check if script tag for Google Maps API already exists
   const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
   if (existingScript) {
-    // Если script уже существует, ждем его загрузки
+    // If script already exists, wait for it to load
     existingScript.addEventListener('load', () => {
       setLoaded(true);
     });

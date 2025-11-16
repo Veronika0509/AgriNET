@@ -42,7 +42,33 @@ interface ChartDataPoint {
 export const createMoistChartForOverlay = async (type: string, chartData: MoistChartData, roots: am5.Root[], moistOverlays: MoistOverlay[]) => {
   const chartId = `${type}-${chartData.id}`
   await checkOverlay(chartId, moistOverlays);
-  const root = am5.Root.new(chartId)
+
+  // Check if element exists and is valid
+  const chartElement = document.getElementById(chartId);
+  if (!chartElement) {
+    console.warn(`Chart element with id ${chartId} not found`);
+    return;
+  }
+
+  // Check if this element already has a root using amCharts registry
+  // This prevents the "multiple Roots on the same DOM node" error
+  const existingRoots = am5.registry.rootElements;
+  for (let i = 0; i < existingRoots.length; i++) {
+    const existingRoot = existingRoots[i];
+    if (existingRoot && existingRoot.dom && existingRoot.dom.id === chartId) {
+      console.log(`Root already exists for ${chartId}, skipping creation`);
+      return;
+    }
+  }
+
+  let root: am5.Root;
+  try {
+    root = am5.Root.new(chartId);
+  } catch (error) {
+    console.error(`Error creating root for ${chartId}:`, error);
+    return;
+  }
+
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);
 

@@ -68,39 +68,10 @@ export const createSites = async (props: CreateSitesProps) => {
       infoWindow.open(props.map, groupMarker);
       markers.push(groupMarker);
       // Auto-click disabled - user must manually click on site to see sensors
-      // if (props.siteList.length === 1) {
-      //   setTimeout(() => {
-      //     props.setIsMarkerClicked(props.siteList[0].name);
-      //     onSiteClick({
-      //       page: props.page,
-      //       userId: props.userId,
-      //       allCoordinatesOfMarkers: props.allCoordinatesOfMarkers,
-      //       setCoordinatesForFitting: props.setCoordinatesForFitting,
-      //       setAllCoordinatesOfMarkers: props.setAllCoordinatesOfMarkers,
-      //       siteList: props.siteList,
-      //       groupMarker,
-      //       sensorsGroupData,
-      //       setSecondMap: props.setSecondMap,
-      //       moistChartsAmount: props.moistChartsAmount,
-      //       setInvalidMoistChartDataContainer: props.setInvalidMoistChartDataContainer,
-      //       setMoistChartDataContainer: props.setMoistChartDataContainer,
-      //       wxetChartsAmount: props.wxetChartsAmount,
-      //       setInvalidWxetDataContainer: props.setInvalidWxetDataContainer,
-      //       setWxetDataContainer: props.setWxetDataContainer,
-      //       tempChartsAmount: props.tempChartsAmount,
-      //       setInvalidTempChartDataContainer: props.setInvalidTempChartDataContainer,
-      //       setTempChartDataContainer: props.setTempChartDataContainer,
-      //       valveChartsAmount: props.valveChartsAmount,
-      //       setInvalidValveChartDataContainer: props.setInvalidValveChartDataContainer,
-      //       setValveChartDataContainer: props.setValveChartDataContainer,
-      //       amountOfSensors: props.amountOfSensors,
-      //       setAmountOfSensors: props.setAmountOfSensors,
-      //       markers,
-      //       extlChartsAmount: props.extlChartsAmount,
-      //       setExtlDataContainer: props.setExtlDataContainer,
-      //     });
-      //   }, 2000);
-      // }
+
+
+
+
 
       groupMarker.addListener('click', async () => {
         props.setIsMarkerClicked(groupMarker.title);

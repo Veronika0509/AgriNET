@@ -12,10 +12,35 @@ export const createValveChartForOverlay = async (
   valveOverlays: any[]
 ): Promise<void> => {
   await checkOverlay(chartData.id, valveOverlays)
+
+  // Check if element exists and is valid
   const container: any = document.getElementById(chartData.id);
+  if (!container) {
+    console.warn(`Chart element with id ${chartData.id} not found`);
+    return;
+  }
+
   if (!container.style.width) container.style.width = "42px";
   if (!container.style.height) container.style.height = "48px";
-  const root = am5.Root.new(chartData.id);
+
+  // Check if this element already has a root using amCharts registry
+  const existingRoots = am5.registry.rootElements;
+  for (let i = 0; i < existingRoots.length; i++) {
+    const existingRoot = existingRoots[i];
+    if (existingRoot && existingRoot.dom && existingRoot.dom.id === chartData.id) {
+      console.log(`Root already exists for ${chartData.id}, skipping creation`);
+      return;
+    }
+  }
+
+  let root: am5.Root;
+  try {
+    root = am5.Root.new(chartData.id);
+  } catch (error) {
+    console.error(`Error creating root for ${chartData.id}:`, error);
+    return;
+  }
+
   roots.push(root);
 
   // Set themes

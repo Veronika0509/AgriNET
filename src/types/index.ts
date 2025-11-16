@@ -1,20 +1,20 @@
 // ============================================================================
-// ОСНОВНЫЕ ТИПЫ ДАННЫХ ДЛЯ AGRINET
+// CORE DATA TYPES FOR AGRINET
 // ============================================================================
 
-// Брендированные типы для строгой идентификации
+// Branded types for strict identification
 export type SensorId = string & { readonly __brand: 'SensorId' };
 export type SiteId = string & { readonly __brand: 'SiteId' };
 export type UserId = number & { readonly __brand: 'UserId' };
 
-// Union типы с константами
+// Union types with constants
 export type SensorType = 'moist' | 'temp' | 'valve' | 'wxet' | 'fuel';
 export type ChartPageType = 'moist' | 'temp' | 'valve' | 'wxet' | 'fuel';
 export type FreshnessType = '30m' | '60m' | '2h' | '6h' | '12h' | '24h' | 'old';
 export type MetricType = 'AMERICA' | 'METRIC';
 export type ValveStatus = 'ON' | 'OFF';
 
-// Утилитарные типы
+// Utility types
 export type NonEmptyArray<T> = [T, ...T[]];
 export type Timestamp = string; // ISO 8601 format
 
@@ -24,7 +24,7 @@ export type Timestamp = string; // ISO 8601 format
 
 export interface DataPoint {
   DateTime: string;
-  [key: string]: string | number | boolean | null; // Строгие типы вместо any
+  [key: string]: string | number | boolean | null; // Strict types instead of any
 }
 
 export interface MoistDataPoint extends DataPoint {
@@ -174,14 +174,14 @@ export interface ChartProps {
 
 export interface ValveSettings {
   id: string;
-  valvename: string; // именно valvename, а не valveName в API
+  valvename: string; // exactly valvename, not valveName in API
   probeId: string;
   enabled: boolean;
   priority: number;
-  setPointSensor: string; // именно setPointSensor в API
-  msetPoint: number; // именно msetPoint в API
+  setPointSensor: string; // exactly setPointSensor in API
+  msetPoint: number; // exactly msetPoint in API
   duration: string;
-  hrsAve: number; // именно hrsAve в API
+  hrsAve: number; // exactly hrsAve in API
   startDelay: number;
   waterDrainTime: number;
   concurrent: boolean;
@@ -230,7 +230,7 @@ export interface Comment {
   text: string;
   userId: number;
   sensorId: string;
-  [key: string]: string | number | boolean | null; // Строгие типы
+  [key: string]: string | number | boolean | null; // Strict types
 }
 
 export interface CommentsResponse {
@@ -244,7 +244,7 @@ export interface CommentsResponse {
 
 export interface TabularDataRow {
   DateTime: string;
-  [key: string]: string | number | boolean | null; // Строгие типы для данных
+  [key: string]: string | number | boolean | null; // Strict types for data
 }
 
 export interface TabularData {
@@ -290,13 +290,13 @@ export interface CustomOverlayProps {
     replace: (path: string) => void;
     goBack: () => void;
     location: { pathname: string; search: string; hash: string };
-  }; // Строгая типизация history
+  }; // Strict typing for history
   userId: UserId;
   siteList: Site[];
   setAdditionalChartData?: (data: SensorData[]) => void;
 }
 
-// Типы для кастомных оверлеев
+// Types for custom overlays
 export interface CustomOverlayClass {
   new (
     map: google.maps.Map,
@@ -313,14 +313,14 @@ export interface ChartContainer {
 
 export type ChartDataContainer = [SensorData, google.maps.LatLngBounds];
 
-// Типы для различных состояний карты
+// Types for various map states
 export interface MapState {
   activeTab: string;
   navigationHistory: string[];
   isMarkerClicked: boolean;
 }
 
-// Типы для amounts (счетчики графиков)
+// Types for amounts (chart counters)
 export interface ChartAmounts {
   moistChartsAmount: SensorData[];
   tempChartsAmount: SensorData[];
@@ -329,7 +329,7 @@ export interface ChartAmounts {
   extlChartsAmount: SensorData[];
 }
 
-// Координаты для fit bounds
+// Coordinates for fit bounds
 export interface Coordinates {
   lat: number;
   lng: number;

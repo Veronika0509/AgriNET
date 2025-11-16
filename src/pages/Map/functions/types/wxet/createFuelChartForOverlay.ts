@@ -37,7 +37,33 @@ interface ChartDataPoint {
 
 export const createFuelChartForOverlay = async (chartData: FuelChartData, roots: am5.Root[], fuelOverlays: FuelOverlay[]) => {
   await checkOverlay(chartData.id, fuelOverlays)
-  const root = am5.Root.new(chartData.id)
+
+  // Check if element exists and is valid
+  const chartElement = document.getElementById(chartData.id.toString());
+  if (!chartElement) {
+    console.warn(`Chart element with id ${chartData.id} not found`);
+    return;
+  }
+
+  // Check if this element already has a root using amCharts registry
+  const chartIdStr = chartData.id.toString();
+  const existingRoots = am5.registry.rootElements;
+  for (let i = 0; i < existingRoots.length; i++) {
+    const existingRoot = existingRoots[i];
+    if (existingRoot && existingRoot.dom && existingRoot.dom.id === chartIdStr) {
+      console.log(`Root already exists for ${chartIdStr}, skipping creation`);
+      return;
+    }
+  }
+
+  let root: am5.Root;
+  try {
+    root = am5.Root.new(chartData.id);
+  } catch (error) {
+    console.error(`Error creating root for ${chartData.id}:`, error);
+    return;
+  }
+
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);
 

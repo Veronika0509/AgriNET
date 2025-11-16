@@ -36,12 +36,37 @@ interface ChartDataPoint {
   value: unknown;
 }
 export const createTempChartForOverlay = async (
-  chartData: TempChartData, 
-  roots: am5.Root[], 
+  chartData: TempChartData,
+  roots: am5.Root[],
   tempOverlays: TempOverlay[]
 ): Promise<void> => {
   await checkOverlay(chartData.id, tempOverlays)
-  const root = am5.Root.new(chartData.id)
+
+  // Check if element exists and is valid
+  const chartElement = document.getElementById(chartData.id);
+  if (!chartElement) {
+    console.warn(`Chart element with id ${chartData.id} not found`);
+    return;
+  }
+
+  // Check if this element already has a root using amCharts registry
+  const existingRoots = am5.registry.rootElements;
+  for (let i = 0; i < existingRoots.length; i++) {
+    const existingRoot = existingRoots[i];
+    if (existingRoot && existingRoot.dom && existingRoot.dom.id === chartData.id) {
+      console.log(`Root already exists for ${chartData.id}, skipping creation`);
+      return;
+    }
+  }
+
+  let root: am5.Root;
+  try {
+    root = am5.Root.new(chartData.id);
+  } catch (error) {
+    console.error(`Error creating root for ${chartData.id}:`, error);
+    return;
+  }
+
   roots.push(root);
   root.setThemes([am5themes_Animated.new(root)]);
 

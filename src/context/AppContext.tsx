@@ -3,13 +3,13 @@ import type { Site, SensorData, ChartPageType, UserId, SiteId } from '../types'
 import { getSiteList } from '../pages/Map/data/getSiteList'
 
 /**
- * AppContext - Глобальное состояние приложения
+ * AppContext - Global application state
  *
- * Этот контекст заменяет prop drilling из App.tsx и предоставляет
- * глобальный доступ к основным данным приложения
+ * This context replaces prop drilling from App.tsx and provides
+ * global access to main application data
  */
 
-// Интерфейс состояния приложения
+// Application state interface
 export interface AppState {
   // Page navigation
   page: number
@@ -36,7 +36,7 @@ export interface AppState {
   selectedMoistureSensor: any | null
 }
 
-// Интерфейс для функций изменения состояния
+// Interface for state modification functions
 export interface AppActions {
   // Page navigation
   setPage: (page: number) => void
@@ -66,25 +66,25 @@ export interface AppActions {
   reloadMapPage: () => Promise<void>
 }
 
-// Полный контекст с состоянием и действиями
+// Full context with state and actions
 export interface AppContextType extends AppState, AppActions {}
 
-// Создаем контекст с undefined по умолчанию (будет установлен в Provider)
+// Create context with undefined as default (will be set in Provider)
 const AppContext = createContext<AppContextType | undefined>(undefined)
 
-// Props для Provider компонента
+// Props for Provider component
 interface AppProviderProps {
   children: ReactNode
 }
 
 /**
- * AppProvider - Provider компонент для глобального состояния
+ * AppProvider - Provider component for global state
  *
- * Оборачивает все приложение и предоставляет доступ к состоянию
- * через useAppContext hook
+ * Wraps the entire application and provides access to state
+ * through useAppContext hook
  */
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  // Инициализация всего состояния из App.tsx
+  // Initialize all state from App.tsx
   const [page, setPage] = useState<number>(0)
   const [userId, setUserId] = useState<UserId>(0 as UserId)
   const [siteList, setSiteList] = useState<Site[]>([])
@@ -98,7 +98,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [selectedSiteForAddUnit, setSelectedSiteForAddUnit] = useState<string>('')
   const [selectedMoistureSensor, setSelectedMoistureSensor] = useState<any>(null)
 
-  // Функция для перезагрузки списка сайтов
+  // Function to reload site list
   const handleReloadMapPage = useCallback(async () => {
     // Fetch fresh site list data
     const sites = await getSiteList(userId)
@@ -115,7 +115,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // The map will react to the siteList change via useEffect
   }, [userId])
 
-  // Собираем все значения в один объект контекста
+  // Combine all values into one context object
   const contextValue: AppContextType = {
     // State
     page,
@@ -155,12 +155,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 }
 
 /**
- * useAppContext - Hook для доступа к глобальному состоянию
+ * useAppContext - Hook for accessing global state
  *
- * Использование:
+ * Usage:
  * const { userId, setUserId, siteList, setSiteList } = useAppContext()
  *
- * @throws Error если используется вне AppProvider
+ * @throws Error if used outside AppProvider
  */
 export const useAppContext = (): AppContextType => {
   const context = useContext(AppContext)
@@ -172,5 +172,5 @@ export const useAppContext = (): AppContextType => {
   return context
 }
 
-// Экспортируем контекст для продвинутого использования (если нужно)
+// Export context for advanced usage (if needed)
 export default AppContext

@@ -47,7 +47,7 @@ import './App.css'
 
 setupIonicReact();
 
-// Внутренний компонент приложения с доступом к контексту
+// Internal application component with access to context
 const AppContent: React.FC = () => {
   const {
     page,
@@ -186,7 +186,7 @@ const AppContent: React.FC = () => {
   );
 };
 
-// Главный компонент App с Provider
+// Main App component with Provider
 const App: React.FC = () => {
   return (
     <AppProvider>

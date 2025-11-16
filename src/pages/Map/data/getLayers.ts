@@ -12,7 +12,7 @@ export interface LayersResponse {
   mapping: { [key: string]: string };
 }
 
-// Статичные данные слоев для использования в случае ошибки API
+// Static layer data to use in case of API error
 const defaultLayers: Layer[] = [
   { id: "1", name: "BFlow", value: "BFlow" },
   { id: "2", name: "CHEM", value: "CHEM" },
@@ -31,34 +31,34 @@ export const getLayers = async (): Promise<LayersResponse> => {
   try {
     const response = await axios.get('https://app.agrinet.us/api/map/layers');
     
-    // Проверяем, что ответ содержит массив слоев
+    // Check that the response contains an array of layers
     if (response.data && Array.isArray(response.data.layers) && response.data.layers.length > 0) {
-      // Преобразуем массив строк в объекты Layer, с необходимыми изменениями
+      // Transform the array of strings into Layer objects with necessary changes
       let layers = response.data.layers;
-      
-      // Удаляем Teros и SRS из списка
+
+      // Remove Teros and SRS from the list
       layers = layers.filter((layer: string) => layer !== 'Teros' && layer !== 'SRS');
 
-      // Заменяем SoilTemp на TempRH, но избегаем дубликатов
-      // Если TempRH уже есть в списке, удаляем SoilTemp вместо замены
+      // Replace SoilTemp with TempRH, but avoid duplicates
+      // If TempRH already exists in the list, remove SoilTemp instead of replacing
       const hasTempRH = layers.includes('TempRH');
       if (hasTempRH) {
-        // Если TempRH уже есть, удаляем SoilTemp
+        // If TempRH already exists, remove SoilTemp
         layers = layers.filter((layer: string) => layer !== 'SoilTemp');
       }
 
       const formattedLayers = layers.map((layerName: string, index: number) => {
-        // Если это SoilTemp и TempRH еще нет, заменяем на TempRH
+        // If this is SoilTemp and TempRH doesn't exist yet, replace with TempRH
         const name = layerName === 'SoilTemp' ? 'TempRH' : layerName;
 
         return {
           id: String(index + 1),
-          name: name,  // Используем (возможно измененное) имя слоя
-          value: name  // Используем то же имя как значение
+          name: name,  // Use the (possibly modified) layer name
+          value: name  // Use the same name as the value
         };
       });
-      
-      // Обновляем mapping, заменяя SoilTemp на TempRH
+
+      // Update mapping, replacing SoilTemp with TempRH
       const updatedMapping = { ...response.data.mapping };
       if (updatedMapping['SoilTemp']) {
         updatedMapping['TempRH'] = updatedMapping['SoilTemp'];

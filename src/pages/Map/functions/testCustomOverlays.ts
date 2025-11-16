@@ -1,4 +1,4 @@
-// Функция для тестирования кастомных оверлеев с тестовыми данными
+// Function for testing custom overlays with test data
 import {initializeMoistCustomOverlay} from "../components/types/moist/MoistCustomOverlay";
 import {initializeTempCustomOverlay} from "../components/types/temp/TempCustomOverlay";
 
@@ -19,17 +19,17 @@ export const testCustomOverlays = (
 
   console.log('Testing custom overlays...');
 
-  // Тестовые данные для влажностного сенсора
+  // Test data for moisture sensor
   const testMoistData = {
     data: [
-      { date: Date.now() - 86400000, value: 25.5 }, // вчера
-      { date: Date.now(), value: 30.2 } // сегодня
+      { date: Date.now() - 86400000, value: 25.5 }, // yesterday
+      { date: Date.now(), value: 30.2 } // today
     ],
     sensorId: 'test-moist-001',
     name: 'Test Moist Sensor'
   };
 
-  // Тестовые данные для температурного сенсора  
+  // Test data for temperature sensor
   const testTempData = {
     data: [
       { date: Date.now() - 86400000, value: 22.1 },
@@ -40,11 +40,11 @@ export const testCustomOverlays = (
   };
 
   try {
-    // Создаем тестовый влажностный оверлей
+    // Create test moisture overlay
     const MoistCustomOverlayExport = initializeMoistCustomOverlay(isGoogleApiLoaded);
     if (MoistCustomOverlayExport) {
       const moistBounds = new google.maps.LatLngBounds(
-        new google.maps.LatLng(40.7128, -74.0060), // Нью-Йорк
+        new google.maps.LatLng(40.7128, -74.0060), // New York
         new google.maps.LatLng(40.7138, -74.0050)
       );
 
@@ -74,11 +74,11 @@ export const testCustomOverlays = (
       console.log('Moist overlay created and added to map');
     }
 
-    // Создаем тестовый температурный оверлей
+    // Create test temperature overlay
     const TempCustomOverlayExport = initializeTempCustomOverlay(isGoogleApiLoaded);
     if (TempCustomOverlayExport) {
       const tempBounds = new google.maps.LatLngBounds(
-        new google.maps.LatLng(40.7148, -74.0040), // Рядом с влажностным
+        new google.maps.LatLng(40.7148, -74.0040), // Near moisture sensor
         new google.maps.LatLng(40.7158, -74.0030)
       );
 

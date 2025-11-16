@@ -389,14 +389,14 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                   onIonChange={(e) => {
                     const newSite = e.detail.value
 
-                    // Находим выбранный сайт в списке
+                    // Find the selected site in the list
                     const selectedSiteObj = siteList?.find((site) => site.name === newSite)
 
                     setSelectedSite(newSite)
                     setSelectedSiteForAddUnit(newSite)
 
                     if (selectedSiteObj) {
-                      // Обновляем координаты в полях ввода
+                      // Update coordinates in the input fields
                       if (selectedSiteObj.lat !== undefined) {
                         setUnitLatitude(selectedSiteObj.lat.toString())
                       }
@@ -633,7 +633,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                     onIonInput={(e) => {
                       const newLat = e.detail.value!
                       setUnitLatitude(newLat)
-                      // Сбрасываем ошибку latitude как только начинаем вводить
+                      // Clear latitude error as soon as we start typing
                       if (newLat) {
                         setFormErrors((prev) => ({ ...prev, latitude: false }))
                       }
@@ -673,7 +673,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                     onIonInput={(e) => {
                       const newLng = e.detail.value!
                       setUnitLongitude(newLng)
-                      // Сбрасываем ошибку longitude как только начинаем вводить
+                      // Clear longitude error as soon as we start typing
                       if (newLng) {
                         setFormErrors((prev) => ({ ...prev, longitude: false }))
                       }
@@ -735,7 +735,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                     className={formErrors.sensor ? "select-error" : ""}
                     onIonChange={(e) => {
                       setSensorPrefix(e.detail.value)
-                      // Сбрасываем ошибку если sensorId заполнен (prefix необязателен)
+                      // Clear error if sensorId is filled (prefix is optional)
                       if (sensorId.trim()) {
                         setFormErrors((prev) => ({ ...prev, sensor: false }))
                       }
@@ -768,7 +768,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                       value={sensorId}
                       onIonInput={(e) => {
                         setSensorId(e.detail.value!)
-                        // Сбрасываем ошибку если заполнен (prefix необязателен)
+                        // Clear error if filled (prefix is optional)
                         if (e.detail.value!.trim()) {
                           setFormErrors((prev) => ({ ...prev, sensor: false }))
                         }
@@ -799,7 +799,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                   onIonChange={(e) => {
                     const selectedLayerValue = e.detail.value
 
-                    // Выводим mapping для выбранного слоя
+                    // Log mapping for the selected layer
                     if (selectedLayerValue && layerMapping[selectedLayerValue]) {
                     }
 
@@ -912,7 +912,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                           value={moistLevel}
                           onIonInput={(e) => {
                             const inputValue = (e.target as HTMLIonInputElement).value
-                            // Если инпут пустой, не показываем ошибку
+                            // If input is empty, don't show error
                             if (!inputValue || inputValue === "") {
                               setMoistLevel(undefined)
                               setMoistLevelError(false)
@@ -1028,14 +1028,14 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                     return
                   }
 
-                  // Validate form data (sensorPrefix может быть пустым!)
+                  // Validate form data (sensorPrefix can be empty!)
                   const hasErrors = {
                     site: !selectedSite,
                     siteGroup: false, // Site group is optional
                     unitName: !unitName.trim(),
                     latitude: !unitLatitude,
                     longitude: !unitLongitude,
-                    sensor: !sensorId.trim(), // Только проверяем что sensorId не пустой
+                    sensor: !sensorId.trim(), // Only check that sensorId is not empty
                     layer: !selectedLayer,
                   }
 

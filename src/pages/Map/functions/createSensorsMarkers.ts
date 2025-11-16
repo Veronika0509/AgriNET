@@ -68,7 +68,7 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
   infoWindow.open(map, sensorMarker);
   sensorMarker.addListener('click', async () => {
     try {
-      // Создаем кастомный оверлей в зависимости от типа сенсора
+      // Create custom overlay depending on sensor type
       let overlay: any = null;
       
       if (sensorItem.markerType === 'moist' || sensorItem.markerType === 'moist-fuel') {
@@ -76,7 +76,7 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
         if (response.data.data && response.data.data.length > 0) {
           const MoistCustomOverlayExport = initializeMoistCustomOverlay(isGoogleApiLoaded);
           if (MoistCustomOverlayExport) {
-            // Создаем LatLngBounds для позиции оверлея
+            // Create LatLngBounds for overlay position
             const bounds = new google.maps.LatLngBounds(
               new google.maps.LatLng(lat - 0.001, lng - 0.001),
               new google.maps.LatLng(lat + 0.001, lng + 0.001)
@@ -109,13 +109,13 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
       } else if (sensorItem.markerType === 'temp') {
         const TempCustomOverlayExport = initializeTempCustomOverlay(isGoogleApiLoaded);
         if (TempCustomOverlayExport) {
-          // Создаем LatLngBounds для позиции оверлея
+          // Create LatLngBounds for overlay position
           const bounds = new google.maps.LatLngBounds(
             new google.maps.LatLng(lat - 0.001, lng - 0.001),
             new google.maps.LatLng(lat + 0.001, lng + 0.001)
           );
           
-          // Преобразуем SensorItem в TempChartData
+          // Transform SensorItem to TempChartData
           const tempChartData = {
             id: sensorItem.sensorId,
             layerName: 'Temp',
@@ -147,13 +147,13 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
       } else if (sensorItem.markerType === 'wxet') {
         const WxetCustomOverlayExport = initializeWxetCustomOverlay(isGoogleApiLoaded);
         if (WxetCustomOverlayExport) {
-          // Создаем LatLngBounds для позиции оверлея
+          // Create LatLngBounds for overlay position
           const bounds = new google.maps.LatLngBounds(
             new google.maps.LatLng(lat - 0.001, lng - 0.001),
             new google.maps.LatLng(lat + 0.001, lng + 0.001)
           );
           
-          // Преобразуем SensorItem в WxetChartData
+          // Transform SensorItem to WxetChartData
           const wxetChartData = {
             sensorId: sensorItem.sensorId,
             mainId: sensorItem.sensorId,
@@ -183,13 +183,13 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
       } else if (sensorItem.markerType === 'fuel') {
         const FuelCustomOverlayExport = initializeFuelCustomOverlay(isGoogleApiLoaded);
         if (FuelCustomOverlayExport) {
-          // Создаем LatLngBounds для позиции оверлея
+          // Create LatLngBounds for overlay position
           const bounds = new google.maps.LatLngBounds(
             new google.maps.LatLng(lat - 0.001, lng - 0.001),
             new google.maps.LatLng(lat + 0.001, lng + 0.001)
           );
           
-          // Преобразуем SensorItem в FuelChartData
+          // Transform SensorItem to FuelChartData
           const fuelChartData = {
             id: sensorItem.sensorId,
             mainId: sensorItem.sensorId,
@@ -218,13 +218,13 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
       } else if (sensorItem.markerType === 'valve') {
         const ValveCustomOverlayExport = initializeValveCustomOverlay(isGoogleApiLoaded);
         if (ValveCustomOverlayExport) {
-          // Создаем LatLngBounds для позиции оверлея
+          // Create LatLngBounds for overlay position
           const bounds = new google.maps.LatLngBounds(
             new google.maps.LatLng(lat - 0.001, lng - 0.001),
             new google.maps.LatLng(lat + 0.001, lng + 0.001)
           );
           
-          // Преобразуем SensorItem в ValveChartData
+          // Transform SensorItem to ValveChartData
           const valveChartData = {
             id: sensorItem.sensorId,
             sensorId: sensorItem.sensorId,
@@ -252,7 +252,7 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
       } else if (sensorItem.markerType === 'extl') {
         const ExtlCustomOverlayExport = initializeExtlCustomOverlay(isGoogleApiLoaded);
         if (ExtlCustomOverlayExport) {
-          // Создаем LatLngBounds для позиции оверлея
+          // Create LatLngBounds for overlay position
           const bounds = new google.maps.LatLngBounds(
             new google.maps.LatLng(lat - 0.001, lng - 0.001),
             new google.maps.LatLng(lat + 0.001, lng + 0.001)

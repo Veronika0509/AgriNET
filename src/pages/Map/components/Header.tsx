@@ -62,7 +62,7 @@ const Header = (props: HeaderProps) => {
         {props.activeTab === 'info' && (
           <IonTitle>About</IonTitle>
         )}
-        {props.activeTab === 'budgetEditor' && (
+        {(props.activeTab === 'budgetEditor' || props.activeTab === 'budget') && (
           <>
             <IonIcon
               onClick={onBudgetEditorBack}
