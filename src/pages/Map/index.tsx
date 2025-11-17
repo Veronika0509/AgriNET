@@ -326,7 +326,8 @@ const MapPage: React.FC<MapProps> = (props) => {
     if (activeOverlays.length !== 0) {
       CollisionResolver.resolve(activeOverlays)
     }
-    if (map && props.siteList.length > 0) {
+    if (map && props.siteList.length > 0 && markers.length === 0) {
+      console.log('*** Main useEffect calling createSites because markers is empty ***');
       // Map Site[] to SensorsGroupData[]
       const sitesAsSensorsGroupData = props.siteList.map((site: SiteWithLayers) => ({
         lat: site.lat,
@@ -611,6 +612,11 @@ const MapPage: React.FC<MapProps> = (props) => {
               value="map"
               onClick={() => {
                 setNavigationHistory((prev) => [...prev, "map"])
+                // Reset marker clicked state when clicking map tab (same as back arrow behavior)
+                // This ensures proper cleanup and return to site view
+                if (isMarkerClicked) {
+                  setIsMarkerClicked(false)
+                }
                 setActiveTab("map")
               }}
             >
@@ -645,6 +651,8 @@ const MapPage: React.FC<MapProps> = (props) => {
                 // Reset marker clicked state when navigating to add unit
                 // This ensures proper cleanup and zoom restoration when returning to map
                 setIsMarkerClicked(false)
+                // Also clear secondMap to avoid any lingering site-specific state
+                setSecondMap(null)
               }}
             >
               <IonIcon icon={add} />

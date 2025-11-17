@@ -42,19 +42,14 @@ export const useMapVisibility = ({ map, mapRef, activeTab, coordinatesForFitting
       if (map && mapRef.current) {
         google.maps.event.trigger(map, "resize")
 
-        // Optionally recenter the map if needed
-        if (coordinatesForFitting.length > 0) {
-          const bounds = new google.maps.LatLngBounds()
-          coordinatesForFitting.forEach((coord) => {
-            bounds.extend(new google.maps.LatLng(coord.lat, coord.lng))
-          })
-          map.fitBounds(bounds)
-        }
+        // Don't recenter here - let createSites handle centering properly
+        // coordinatesForFitting may contain sensor coordinates which would cause
+        // incorrect centering when returning from sensor view
       }
     }, 100) // Small delay to ensure DOM is ready
 
     return () => clearTimeout(timeout)
-  }, [activeTab, map, mapRef, coordinatesForFitting])
+  }, [activeTab, map, mapRef])
 
   return {
     // This hook primarily manages side effects, no state to return

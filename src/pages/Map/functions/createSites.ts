@@ -1,6 +1,7 @@
 import { onSiteClick } from "./onSiteClick";
 import {logoFacebook, logoHackernews} from "ionicons/icons";
 import { getSiteList } from "../data/getSiteList";
+import axios from "axios";
 
 interface SensorsGroupData {
   lat: number;
@@ -64,6 +65,7 @@ export const createSites = async (props: CreateSitesProps) => {
       const info: string = `<p class="infoWindowText">${sensorsGroupData.name}</p>`;
       const infoWindow = new google.maps.InfoWindow({
         content: info,
+        disableAutoPan: true, // Prevent auto-panning when opening info window
       });
       groupMarker.infoWindow = infoWindow;
       infoWindow.open(props.map, groupMarker);
@@ -149,16 +151,33 @@ export const createSites = async (props: CreateSitesProps) => {
         bounds.extend({ lat: site.lat, lng: site.lng });
       });
 
-      // Fit the map to show all markers with padding
-      props.map.fitBounds(bounds);
+      // Use setTimeout to ensure fitBounds happens after all markers are rendered
+      // and after any other map operations complete
+      setTimeout(() => {
+        console.log('Fitting bounds to show all sites:', props.siteList.length, 'sites');
+        console.log('Bounds:', bounds.toJSON());
 
-      // If there's only one marker, set a reasonable zoom level after a short delay
-      // to ensure fitBounds completes first
-      if (markers.length === 1) {
-        setTimeout(() => {
-          props.map.setZoom(15);
-        }, 100);
-      }
+        // Force the bounds fitting with multiple attempts to ensure it works
+        props.map.fitBounds(bounds);
+
+        // Use requestAnimationFrame for better timing
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            props.map.fitBounds(bounds);
+            console.log('Second fitBounds call completed');
+
+            // If there's only one marker, set a reasonable zoom level
+            if (markers.length === 1) {
+              setTimeout(() => {
+                props.map.setZoom(15);
+              }, 100);
+            }
+          }, 150);
+        });
+      }, 150);
     }
   }
 };
+
+
+///

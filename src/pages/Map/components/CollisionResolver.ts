@@ -21,8 +21,8 @@ interface OverlayItem {
 
 export class CollisionResolver {
   private static timerId: NodeJS.Timeout;
-  private static readonly MAX_ITERATIONS = 30; // Increased for more thorough resolution
-  private static readonly MIN_SPACING = 0.5; // Reduced to 0.5px for extremely tight packing
+  private static readonly MAX_ITERATIONS = 30;
+  private static readonly MIN_SPACING = 1;
   private static alreadyMoved: Map<OverlayItem, boolean> = new Map();
 
   static resolve(overlays: OverlayItem[]) {
