@@ -41,14 +41,18 @@ interface ChartDataPoint {
 
 export const createMoistChartForOverlay = async (type: string, chartData: MoistChartData, roots: am5.Root[], moistOverlays: MoistOverlay[]) => {
   const chartId = `${type}-${chartData.id}`
-  await checkOverlay(chartId, moistOverlays);
 
-  // Check if element exists and is valid
-  const chartElement = document.getElementById(chartId);
-  if (!chartElement) {
-    console.warn(`Chart element with id ${chartId} not found`);
-    return;
-  }
+  try {
+    await checkOverlay(chartId, moistOverlays);
+
+    // Check if element exists and is valid
+    const chartElement = document.getElementById(chartId);
+    if (!chartElement) {
+      console.error(`Chart element with id ${chartId} not found after waiting. Cannot create chart.`);
+      return;
+    }
+
+    console.log(`Creating moist chart for ${chartId}`);
 
   // Check if this element already has a root using amCharts registry
   // This prevents the "multiple Roots on the same DOM node" error
@@ -56,8 +60,32 @@ export const createMoistChartForOverlay = async (type: string, chartData: MoistC
   for (let i = 0; i < existingRoots.length; i++) {
     const existingRoot = existingRoots[i];
     if (existingRoot && existingRoot.dom && existingRoot.dom.id === chartId) {
-      console.log(`Root already exists for ${chartId}, skipping creation`);
-      return;
+      // Check if the root's DOM is still attached to the document
+      if (document.body.contains(existingRoot.dom)) {
+        console.log(`Root already exists for ${chartId}, skipping creation but updating overlay state`);
+
+        // Update overlay state even if chart already exists
+        moistOverlays.map((overlay: MoistOverlay) => {
+          if (type === 'm') {
+            if (overlay.chartData.mainId === chartData.mainId) {
+              overlay.isMoistMarkerChartDrawn = true
+              overlay.update();
+            }
+          } else {
+            if (overlay.chartData.id === chartData.id) {
+              overlay.isMoistMarkerChartDrawn = true
+              overlay.update();
+            }
+          }
+        });
+
+        return;
+      } else {
+        // Root exists but DOM is detached, dispose it and create a new one
+        console.log(`Root exists for ${chartId} but DOM is detached, disposing and recreating`);
+        existingRoot.dispose();
+        break;
+      }
     }
   }
 
@@ -178,7 +206,7 @@ export const createMoistChartForOverlay = async (type: string, chartData: MoistC
   series.appear(1000);
   chart.appear(1000, 100);
 
-  
+
   moistOverlays.map((overlay: MoistOverlay) => {
     if (type === 'm') {
       if (overlay.chartData.mainId === chartData.mainId) {
@@ -194,4 +222,10 @@ export const createMoistChartForOverlay = async (type: string, chartData: MoistC
       }
     }
   })
+
+  console.log(`Successfully created moist chart for ${chartId}`)
+  } catch (error) {
+    console.error(`Error creating moist chart for ${chartId}:`, error)
+    // Don't update overlay state on error so it can potentially retry
+  }
 }

@@ -11,25 +11,45 @@ export const createValveChartForOverlay = async (
   roots: am5.Root[],
   valveOverlays: any[]
 ): Promise<void> => {
-  await checkOverlay(chartData.id, valveOverlays)
+  try {
+    await checkOverlay(chartData.id, valveOverlays)
 
-  // Check if element exists and is valid
-  const container: any = document.getElementById(chartData.id);
-  if (!container) {
-    console.warn(`Chart element with id ${chartData.id} not found`);
-    return;
-  }
+    // Check if element exists and is valid
+    const container: any = document.getElementById(chartData.id);
+    if (!container) {
+      console.error(`Chart element with id ${chartData.id} not found after waiting. Cannot create chart.`);
+      return;
+    }
 
-  if (!container.style.width) container.style.width = "42px";
-  if (!container.style.height) container.style.height = "48px";
+    console.log(`Creating valve chart for ${chartData.id}`);
+
+    if (!container.style.width) container.style.width = "42px";
+    if (!container.style.height) container.style.height = "48px";
 
   // Check if this element already has a root using amCharts registry
   const existingRoots = am5.registry.rootElements;
   for (let i = 0; i < existingRoots.length; i++) {
     const existingRoot = existingRoots[i];
     if (existingRoot && existingRoot.dom && existingRoot.dom.id === chartData.id) {
-      console.log(`Root already exists for ${chartData.id}, skipping creation`);
-      return;
+      // Check if the root's DOM is still attached to the document
+      if (document.body.contains(existingRoot.dom)) {
+        console.log(`Root already exists for ${chartData.id}, skipping creation but updating overlay state`);
+
+        // Update overlay state even if chart already exists
+        valveOverlays.forEach((overlay: any) => {
+          if (overlay.chartData.mainId === chartData.mainId) {
+            overlay.isValveMarkerChartDrawn = true;
+            overlay.update();
+          }
+        });
+
+        return;
+      } else {
+        // Root exists but DOM is detached, dispose it and create a new one
+        console.log(`Root exists for ${chartData.id} but DOM is detached, disposing and recreating`);
+        existingRoot.dispose();
+        break;
+      }
     }
   }
 
@@ -221,5 +241,11 @@ export const createValveChartForOverlay = async (
       overlay.update();
     }
   });
+
+  console.log(`Successfully created valve chart for ${chartData.id}`)
+  } catch (error) {
+    console.error(`Error creating valve chart for ${chartData.id}:`, error)
+    // Don't update overlay state on error so it can potentially retry
+  }
 };
 

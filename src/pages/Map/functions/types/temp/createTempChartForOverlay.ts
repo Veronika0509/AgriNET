@@ -40,22 +40,42 @@ export const createTempChartForOverlay = async (
   roots: am5.Root[],
   tempOverlays: TempOverlay[]
 ): Promise<void> => {
-  await checkOverlay(chartData.id, tempOverlays)
+  try {
+    await checkOverlay(chartData.id, tempOverlays)
 
-  // Check if element exists and is valid
-  const chartElement = document.getElementById(chartData.id);
-  if (!chartElement) {
-    console.warn(`Chart element with id ${chartData.id} not found`);
-    return;
-  }
+    // Check if element exists and is valid
+    const chartElement = document.getElementById(chartData.id);
+    if (!chartElement) {
+      console.error(`Chart element with id ${chartData.id} not found after waiting. Cannot create chart.`);
+      return;
+    }
+
+    console.log(`Creating temp chart for ${chartData.id}`);
 
   // Check if this element already has a root using amCharts registry
   const existingRoots = am5.registry.rootElements;
   for (let i = 0; i < existingRoots.length; i++) {
     const existingRoot = existingRoots[i];
     if (existingRoot && existingRoot.dom && existingRoot.dom.id === chartData.id) {
-      console.log(`Root already exists for ${chartData.id}, skipping creation`);
-      return;
+      // Check if the root's DOM is still attached to the document
+      if (document.body.contains(existingRoot.dom)) {
+        console.log(`Root already exists for ${chartData.id}, skipping creation but updating overlay state`);
+
+        // Update overlay state even if chart already exists
+        tempOverlays.map((overlay: TempOverlay) => {
+          if (overlay.chartData.mainId === chartData.mainId) {
+            overlay.isTempMarkerChartDrawn = true
+            overlay.update();
+          }
+        });
+
+        return;
+      } else {
+        // Root exists but DOM is detached, dispose it and create a new one
+        console.log(`Root exists for ${chartData.id} but DOM is detached, disposing and recreating`);
+        existingRoot.dispose();
+        break;
+      }
     }
   }
 
@@ -204,4 +224,10 @@ export const createTempChartForOverlay = async (
       overlay.update();
     }
   })
+
+  console.log(`Successfully created temp chart for ${chartData.id}`)
+  } catch (error) {
+    console.error(`Error creating temp chart for ${chartData.id}:`, error)
+    // Don't update overlay state on error so it can potentially retry
+  }
 }

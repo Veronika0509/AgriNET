@@ -42,14 +42,6 @@ const Login: React.FC<LoginProps> = (props) => {
 
         // Store the complete user data object as JSON
         localStorage.setItem('userData', JSON.stringify(response.data));
-
-        // Console log all user data received from server
-        console.log("=== USER DATA FROM LOGIN API ===");
-        console.log("Complete response.data:", response.data);
-        console.log("Individual fields:");
-        Object.keys(response.data).forEach(key => {
-          console.log(`  ${key}:`, response.data[key]);
-        });
       }
 
       props.setPage(1);

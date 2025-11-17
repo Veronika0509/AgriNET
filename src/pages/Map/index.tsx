@@ -140,53 +140,6 @@ const MapPage: React.FC<MapProps> = (props) => {
     },
     [props],
   )
-
-  // Responsive design state
-  const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth < 768)
-
-  // Timezone modal state
-  const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState<boolean>(false)
-  const [selectedTimezone, setSelectedTimezone] = useState<string>("America/Los_Angeles")
-  // Timezone modal handlers
-  const handleCloseTimezoneModal = () => {
-    setIsTimezoneModalOpen(false)
-  }
-
-  const handleTimezoneSelect = (timezone: string) => {
-    setSelectedTimezone(timezone)
-    setIsTimezoneModalOpen(false)
-    // После выбора часового пояса переходим на страницу 3
-    props.setPage(3)
-  }
-
-  // Site and layer management logic is now handled by custom hooks
-
-  // Handle window resize for responsive design
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobileView(window.innerWidth < 768)
-    }
-
-    window.addEventListener("resize", handleResize)
-    return () => {
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [])
-
-  // Initialize form with site when sites are loaded or when selected site changes
-
-  // Function to grab coordinates from map center with rounding
-
-  // Layer loading is now handled by the useLayers hook
-
-  // Fetch user site groups when navigating to Add Unit page
-
-  // Handle site group error alert presentation at component level
-
-  // Initialize Add Unit map when tab is active and API is loaded
-
-  // Handle map resize when returning to Add Unit tab
-
   // All Types
   const [allCoordinatesOfMarkers, setAllCoordinatesOfMarkers] = useState<Coordinate[]>([])
   const [activeOverlays, setActiveOverlays] = useState<OverlayItem[]>([])
@@ -451,14 +404,8 @@ const MapPage: React.FC<MapProps> = (props) => {
       setTimeout(() => {
         if (map && mapRef.current) {
           google.maps.event.trigger(map, "resize")
-          // Optionally recenter the map if needed
-          if (coordinatesForFitting.length > 0) {
-            const bounds = new google.maps.LatLngBounds()
-            coordinatesForFitting.forEach((coord) => {
-              bounds.extend(new google.maps.LatLng(coord.lat, coord.lng))
-            })
-            map.fitBounds(bounds)
-          }
+          // Don't recenter here - let createSites handle centering properly
+          // based on site coordinates, not sensor coordinates
         }
       }, 100) // Small delay to ensure DOM is ready
     }
@@ -695,6 +642,9 @@ const MapPage: React.FC<MapProps> = (props) => {
               onClick={() => {
                 setNavigationHistory((prev) => [...prev, "add"])
                 setActiveTab("add")
+                // Reset marker clicked state when navigating to add unit
+                // This ensures proper cleanup and zoom restoration when returning to map
+                setIsMarkerClicked(false)
               }}
             >
               <IonIcon icon={add} />

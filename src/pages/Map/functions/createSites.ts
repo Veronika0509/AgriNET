@@ -53,7 +53,8 @@ export const createSites = async (props: CreateSitesProps) => {
   const markers: google.maps.marker.AdvancedMarkerElement[] = [];
   props.setAreArraysUpdated(false);
   if (props.markers.length === 0) {
-    const newMarkers = props.siteList.map((sensorsGroupData: SensorsGroupData) => {
+    // Create all markers first
+    props.siteList.forEach((sensorsGroupData: SensorsGroupData) => {
       const groupMarker = new google.maps.marker.AdvancedMarkerElement({
         map: props.map,
         position: { lat: sensorsGroupData.lat, lng: sensorsGroupData.lng },
@@ -67,11 +68,41 @@ export const createSites = async (props: CreateSitesProps) => {
       groupMarker.infoWindow = infoWindow;
       infoWindow.open(props.map, groupMarker);
       markers.push(groupMarker);
+
       // Auto-click disabled - user must manually click on site to see sensors
-
-
-
-
+      if (props.siteList.length === 1) {
+        setTimeout(() => {
+          props.setIsMarkerClicked(props.siteList[0].name);
+          onSiteClick({
+            page: props.page,
+            userId: props.userId,
+            allCoordinatesOfMarkers: props.allCoordinatesOfMarkers,
+            setCoordinatesForFitting: props.setCoordinatesForFitting,
+            setAllCoordinatesOfMarkers: props.setAllCoordinatesOfMarkers,
+            siteList: props.siteList,
+            groupMarker,
+            sensorsGroupData,
+            setSecondMap: props.setSecondMap,
+            moistChartsAmount: props.moistChartsAmount,
+            setInvalidMoistChartDataContainer: props.setInvalidMoistChartDataContainer,
+            setMoistChartDataContainer: props.setMoistChartDataContainer,
+            wxetChartsAmount: props.wxetChartsAmount,
+            setInvalidWxetDataContainer: props.setInvalidWxetDataContainer,
+            setWxetDataContainer: props.setWxetDataContainer,
+            tempChartsAmount: props.tempChartsAmount,
+            setInvalidTempChartDataContainer: props.setInvalidTempChartDataContainer,
+            setTempChartDataContainer: props.setTempChartDataContainer,
+            valveChartsAmount: props.valveChartsAmount,
+            setInvalidValveChartDataContainer: props.setInvalidValveChartDataContainer,
+            setValveChartDataContainer: props.setValveChartDataContainer,
+            amountOfSensors: props.amountOfSensors,
+            setAmountOfSensors: props.setAmountOfSensors,
+            markers,
+            extlChartsAmount: props.extlChartsAmount,
+            setExtlDataContainer: props.setExtlDataContainer,
+          });
+        }, 2000);
+      }
 
       groupMarker.addListener('click', async () => {
         props.setIsMarkerClicked(groupMarker.title);
@@ -104,57 +135,30 @@ export const createSites = async (props: CreateSitesProps) => {
           setExtlDataContainer: props.setExtlDataContainer,
         });
       });
-      if (markers.length === props.siteList.length) {
-        props.setMarkers(markers);
-      }
     });
 
-    if (props.map) {
+    // After all markers are created, update the state
+    props.setMarkers(markers);
+
+    // Center and zoom map to show all markers
+    if (markers.length > 0) {
       const bounds = new google.maps.LatLngBounds();
-      props.siteList.forEach((marker: any) => {
-        bounds.extend({
-          lat: marker.lat,
-          lng: marker.lng,
-        });
+
+      // Extend bounds with all marker positions
+      props.siteList.forEach((site: SensorsGroupData) => {
+        bounds.extend({ lat: site.lat, lng: site.lng });
       });
-      const calculateZoomLevel = (bounds: google.maps.LatLngBounds, mapDim: { height: number; width: number }) => {
-        const WORLD_DIM = { height: 256, width: 256 }
-        const ZOOM_MAX = 21
 
-        function latRad(lat: number) {
-          const sin = Math.sin((lat * Math.PI) / 180)
-          const radX2 = Math.log((1 + sin) / (1 - sin)) / 2
-          return Math.max(Math.min(radX2, Math.PI), -Math.PI) / 2
-        }
+      // Fit the map to show all markers with padding
+      props.map.fitBounds(bounds);
 
-        function zoom(mapPx: number, worldPx: number, fraction: number) {
-          return Math.floor(Math.log(mapPx / worldPx / fraction) / Math.LN2)
-        }
-
-        const ne = bounds.getNorthEast()
-        const sw = bounds.getSouthWest()
-
-        const latFraction = (latRad(ne.lat()) - latRad(sw.lat())) / Math.PI
-
-        const lngDiff = ne.lng() - sw.lng()
-        const lngFraction = (lngDiff < 0 ? lngDiff + 360 : lngDiff) / 360
-
-        const latZoom = zoom(mapDim.height, WORLD_DIM.height, latFraction)
-        const lngZoom = zoom(mapDim.width, WORLD_DIM.width, lngFraction)
-
-        return Math.min(latZoom, lngZoom, ZOOM_MAX)
+      // If there's only one marker, set a reasonable zoom level after a short delay
+      // to ensure fitBounds completes first
+      if (markers.length === 1) {
+        setTimeout(() => {
+          props.map.setZoom(15);
+        }, 100);
       }
-      const mapDiv = props.map.getDiv()
-      const mapDim = {
-        height: mapDiv.offsetHeight - 100,
-        width: mapDiv.offsetWidth - 100,
-      }
-      const calculatedZoom = calculateZoomLevel(bounds, mapDim)
-      google.maps.event.addListenerOnce(props.map, 'idle', () => {
-        props.map.setZoom(calculatedZoom)
-        props.map.fitBounds(bounds);
-        // props.map.fitBounds(bounds, { padding: 50 });
-      });
     }
   }
 };

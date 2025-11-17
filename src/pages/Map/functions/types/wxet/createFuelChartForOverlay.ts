@@ -36,14 +36,17 @@ interface ChartDataPoint {
 }
 
 export const createFuelChartForOverlay = async (chartData: FuelChartData, roots: am5.Root[], fuelOverlays: FuelOverlay[]) => {
-  await checkOverlay(chartData.id, fuelOverlays)
+  try {
+    await checkOverlay(chartData.id, fuelOverlays)
 
-  // Check if element exists and is valid
-  const chartElement = document.getElementById(chartData.id.toString());
-  if (!chartElement) {
-    console.warn(`Chart element with id ${chartData.id} not found`);
-    return;
-  }
+    // Check if element exists and is valid
+    const chartElement = document.getElementById(chartData.id.toString());
+    if (!chartElement) {
+      console.error(`Chart element with id ${chartData.id} not found after waiting. Cannot create chart.`);
+      return;
+    }
+
+    console.log(`Creating fuel chart for ${chartData.id}`);
 
   // Check if this element already has a root using amCharts registry
   const chartIdStr = chartData.id.toString();
@@ -51,8 +54,25 @@ export const createFuelChartForOverlay = async (chartData: FuelChartData, roots:
   for (let i = 0; i < existingRoots.length; i++) {
     const existingRoot = existingRoots[i];
     if (existingRoot && existingRoot.dom && existingRoot.dom.id === chartIdStr) {
-      console.log(`Root already exists for ${chartIdStr}, skipping creation`);
-      return;
+      // Check if the root's DOM is still attached to the document
+      if (document.body.contains(existingRoot.dom)) {
+        console.log(`Root already exists for ${chartIdStr}, skipping creation but updating overlay state`);
+
+        // Update overlay state even if chart already exists
+        fuelOverlays.map((overlay: FuelOverlay) => {
+          if (overlay.chartData.mainId === chartData.mainId) {
+            overlay.isFuelMarkerChartDrawn = true
+            overlay.update();
+          }
+        });
+
+        return;
+      } else {
+        // Root exists but DOM is detached, dispose it and create a new one
+        console.log(`Root exists for ${chartIdStr} but DOM is detached, disposing and recreating`);
+        existingRoot.dispose();
+        break;
+      }
     }
   }
 
@@ -150,4 +170,10 @@ export const createFuelChartForOverlay = async (chartData: FuelChartData, roots:
       overlay.update();
     }
   })
+
+  console.log(`Successfully created fuel chart for ${chartData.id}`)
+  } catch (error) {
+    console.error(`Error creating fuel chart for ${chartData.id}:`, error)
+    // Don't update overlay state on error so it can potentially retry
+  }
 }
