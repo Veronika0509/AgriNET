@@ -151,20 +151,27 @@ export const createSites = async (props: CreateSitesProps) => {
         bounds.extend({ lat: site.lat, lng: site.lng });
       });
 
-      // Use setTimeout to ensure fitBounds happens after all markers are rendered
-      // and after any other map operations complete
+      // Listen for when tiles finish loading, then trigger final resize
+      const tilesLoadedListener = google.maps.event.addListenerOnce(props.map, 'tilesloaded', () => {
+        google.maps.event.trigger(props.map, 'resize');
+      });
+
+      // Fit bounds immediately to avoid showing default position
+      // Use minimal delay for initial load, longer delays when returning from other tabs
+      const isInitialLoad = !props.initialZoom;
+      const initialDelay = isInitialLoad ? 50 : 500;
       setTimeout(() => {
-        console.log('Fitting bounds to show all sites:', props.siteList.length, 'sites');
-        console.log('Bounds:', bounds.toJSON());
 
-        // Force the bounds fitting with multiple attempts to ensure it works
-        props.map.fitBounds(bounds);
+        // Trigger resize first to ensure map is ready
+        google.maps.event.trigger(props.map, 'resize');
 
-        // Use requestAnimationFrame for better timing
-        requestAnimationFrame(() => {
+        // Fit bounds
+        setTimeout(() => {
+          props.map.fitBounds(bounds);
+
+          // Trigger another resize after bounds are set
           setTimeout(() => {
-            props.map.fitBounds(bounds);
-            console.log('Second fitBounds call completed');
+            google.maps.event.trigger(props.map, 'resize');
 
             // If there's only one marker, set a reasonable zoom level
             if (markers.length === 1) {
@@ -172,12 +179,18 @@ export const createSites = async (props: CreateSitesProps) => {
                 props.map.setZoom(15);
               }, 100);
             }
-          }, 150);
-        });
-      }, 150);
+          }, isInitialLoad ? 100 : 300);
+        }, isInitialLoad ? 100 : 300);
+      }, initialDelay);
     }
   }
 };
 
 
-///
+//await axios.delete('https://app.agrinet.us/api/map/remove-unit', {
+//         params: {
+//           sensorId: '2342341',
+//           userId: 103
+//         }, withCredentials: true}).then((result) => {
+//           console.log('Success:', result)
+//         })

@@ -395,20 +395,26 @@ const MapPage: React.FC<MapProps> = (props) => {
         }
       })
 
-      // Reset markers array to trigger re-creation of site markers
-      setMarkers([])
+      // Force Google Maps to resize and redraw FIRST
+      // Use multiple animation frames to ensure the map div is fully visible
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (map && mapRef.current) {
+            // Trigger resize multiple times to force tile loading
+            google.maps.event.trigger(map, "resize")
 
-      // Reset marker clicked state
-      setIsMarkerClicked(false)
+            setTimeout(() => {
+              google.maps.event.trigger(map, "resize")
 
-      // Force Google Maps to resize and redraw
-      setTimeout(() => {
-        if (map && mapRef.current) {
-          google.maps.event.trigger(map, "resize")
-          // Don't recenter here - let createSites handle centering properly
-          // based on site coordinates, not sensor coordinates
-        }
-      }, 100) // Small delay to ensure DOM is ready
+              // Now reset markers to trigger re-creation AFTER resize is done
+              setMarkers([])
+              setIsMarkerClicked(false)
+
+              console.log('Map resized and ready for site creation')
+            }, 200)
+          }
+        })
+      })
     }
 
     // Update previous tab reference

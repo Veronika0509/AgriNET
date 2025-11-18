@@ -30,6 +30,9 @@ import type { CreateUnitOptions } from "../handlers/unitHandlers"
 export { type AddUnitTabProps }
 
 const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
+  // State for tracking the type of sensor count error
+  const [moistLevelErrorMessage, setMoistLevelErrorMessage] = React.useState<string>("")
+
   // For backward compatibility, keep the old interface structure
   const {
     addUnitMapRef,
@@ -239,10 +242,18 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                   width: "100%",
                 }}
                 onClick={() => {
-                  // Collect all sites that have Moist sensors
-                  const sitesWithMoistSensors: Array<{ name: string; sensors: any[] }> = []
+                  // Check if there are any sites at all
+                  if (!siteList || siteList.length === 0) {
+                    presentAlert({
+                      header: 'No Sites Available',
+                      message: 'Please create a site first before adding a valve.',
+                      buttons: ['OK'],
+                    })
+                    return
+                  }
 
-                  siteList.forEach((site: any) => {
+                  // Helper function to get moisture sensors for a site
+                  const getMoistSensorsForSite = (site: any): any[] => {
                     const moistSensors: any[] = []
                     if (site.layers) {
                       site.layers.forEach((layer: any) => {
@@ -259,22 +270,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                         }
                       })
                     }
-                    if (moistSensors.length > 0) {
-                      sitesWithMoistSensors.push({
-                        name: site.name,
-                        sensors: moistSensors,
-                      })
-                    }
-                  })
-
-                  // If no sites with moisture sensors, show error
-                  if (sitesWithMoistSensors.length === 0) {
-                    presentAlert({
-                      header: 'No Applicable Sensors',
-                      message: 'You have to have at least one Moisture Sensor',
-                      buttons: ['OK'],
-                    })
-                    return
+                    return moistSensors
                   }
 
                   // Helper function to show moisture sensor selector
@@ -290,7 +286,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                       return
                     }
 
-                    // Step 3: Show moisture sensor selector with radio buttons
+                    // Show moisture sensor selector with radio buttons
                     // Use setTimeout to ensure previous alert is fully dismissed
                     console.log('Setting timeout to show sensor selector...')
                     setTimeout(() => {
@@ -326,41 +322,57 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                     }, 300)
                   }
 
-                  // Step 2: If multiple sites, show site selector with radio buttons
-                  if (sitesWithMoistSensors.length > 1) {
-                    presentAlert({
-                      header: 'Select Site',
-                      inputs: sitesWithMoistSensors.map((site, index) => ({
-                        type: 'radio' as const,
-                        label: site.name,
-                        value: index.toString(),
-                        checked: index === 0,
-                      })),
-                      buttons: [
-                        {
-                          text: 'Cancel Valve Creation',
-                          role: 'cancel',
+                  // Show ALL sites in the selector (not just sites with Moist sensors)
+                  console.log('Showing all sites:', siteList.length)
+                  console.log('Sites:', siteList.map((s: any) => s.name))
+
+                  presentAlert({
+                    header: 'Select Site',
+                    inputs: siteList.map((site: any, index: number) => ({
+                      type: 'radio' as const,
+                      label: site.name,
+                      value: index.toString(),
+                      checked: index === 0,
+                    })),
+                    buttons: [
+                      {
+                        text: 'Cancel',
+                        role: 'cancel',
+                        handler: () => {
+                          console.log('Site selection cancelled')
+                        }
+                      },
+                      {
+                        text: 'OK',
+                        handler: (selectedIndex: string) => {
+                          console.log('Site selected, index:', selectedIndex)
+                          const siteIndex = parseInt(selectedIndex, 10)
+                          const selectedSiteData = siteList[siteIndex]
+                          console.log('Selected site data:', selectedSiteData)
+
+                          // Get moist sensors for the selected site
+                          const moistSensors = getMoistSensorsForSite(selectedSiteData)
+                          console.log('Number of moist sensors in site:', moistSensors.length)
+
+                          // If no moist sensors, show error and prevent dialog from closing
+                          if (moistSensors.length === 0) {
+                            setTimeout(() => {
+                              presentAlert({
+                                header: 'No Applicable Sensors',
+                                message: 'You have to have at least one Moisture Sensor',
+                                buttons: ['OK'],
+                              })
+                            }, 300)
+                            return true // Allow dialog to close before showing error
+                          }
+
+                          // Show moisture sensor selector for selected site
+                          showMoistureSensorSelector(moistSensors, selectedSiteData.name)
+                          return true
                         },
-                        {
-                          text: 'OK',
-                          handler: (selectedIndex: string) => {
-                            console.log('Site selected, index:', selectedIndex)
-                            const siteIndex = parseInt(selectedIndex, 10)
-                            const selectedSiteData = sitesWithMoistSensors[siteIndex]
-                            console.log('Selected site data:', selectedSiteData)
-                            console.log('Number of sensors in site:', selectedSiteData.sensors.length)
-                            // Show moisture sensor selector for selected site
-                            showMoistureSensorSelector(selectedSiteData.sensors, selectedSiteData.name)
-                            return true // Important: return true to allow the handler to complete
-                          },
-                        },
-                      ],
-                    })
-                  } else {
-                    // Only one site, skip to sensor selector
-                    console.log('Only one site, showing sensors directly')
-                    showMoistureSensorSelector(sitesWithMoistSensors[0].sensors, sitesWithMoistSensors[0].name)
-                  }
+                      },
+                    ],
+                  })
                 }}
               >
                 ADD VALVE
@@ -903,31 +915,50 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                       layerMapping[selectedLayer.toLowerCase()] === "moist-fuel") && (
                       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                         <IonInput
-                          type="number"
-                          min="1"
-                          max="12"
-                          step="1"
+                          type="text"
                           placeholder="Sensor count"
                           inputmode="numeric"
                           value={moistLevel}
                           onIonInput={(e) => {
                             const inputValue = (e.target as HTMLIonInputElement).value
+                            console.log('Input value:', inputValue)
+
                             // If input is empty, don't show error
                             if (!inputValue || inputValue === "") {
                               setMoistLevel(undefined)
                               setMoistLevelError(false)
+                              setMoistLevelErrorMessage("")
                               return
                             }
-                            const v = Number(inputValue)
+
+                            // Only allow digits - remove any non-digit characters
+                            const digitsOnly = String(inputValue).replace(/\D/g, '')
+                            console.log('Digits only:', digitsOnly)
+
+                            // If user tried to enter non-digits, show error immediately
+                            if (digitsOnly === "") {
+                              console.log('Setting error: Only digits are allowed')
+                              setMoistLevelError(true)
+                              setMoistLevelErrorMessage("Only digits are allowed")
+                              setMoistLevel(undefined)
+                              return
+                            }
+
+                            const v = Number(digitsOnly)
                             if (Number.isNaN(v)) {
                               setMoistLevelError(false)
+                              setMoistLevelErrorMessage("")
                               return
                             }
                             setMoistLevel(v)
                             if (v < 1 || v > 12) {
+                              console.log('Setting error: out of range')
                               setMoistLevelError(true)
+                              setMoistLevelErrorMessage("Input sensor count from 1 to 12")
                             } else {
+                              console.log('Valid input')
                               setMoistLevelError(false)
+                              setMoistLevelErrorMessage("")
                             }
                           }}
                           style={
@@ -936,6 +967,12 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                               textAlign: "left",
                               "--padding-start": "0px",
                               "--padding-end": "0px",
+                              "--background": moistLevelError ? "#ffe6e6" : "transparent",
+                              "--color": moistLevelError ? "var(--ion-color-danger)" : "inherit",
+                              "--border-color": moistLevelError ? "var(--ion-color-danger)" : "transparent",
+                              "--border-width": moistLevelError ? "1px" : "0px",
+                              "--border-style": moistLevelError ? "solid" : "none",
+                              "--border-radius": "4px",
                             } as React.CSSProperties
                           }
                         />
@@ -943,11 +980,11 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                           <div
                             style={{
                               color: "var(--ion-color-danger)",
-                              fontSize: "14px",
-                              marginTop: "4px",
+                              fontSize: "12px",
+                              marginTop: "2px",
                             }}
                           >
-                            Input sensor count from 1 to 12
+                            {moistLevelErrorMessage || "Please enter a valid sensor count"}
                           </div>
                         )}
                       </div>
@@ -1025,6 +1062,16 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                   // If Site not selected, open new site creation modal
                   if (!selectedSite) {
                     showCreateNewSiteAlert()
+                    return
+                  }
+
+                  // Check if there's a moist level error first
+                  if (moistLevelError) {
+                    presentAlert({
+                      header: "Invalid Sensor Count",
+                      message: moistLevelErrorMessage || "Please fix the sensor count error before submitting.",
+                      buttons: ["OK"],
+                    })
                     return
                   }
 
