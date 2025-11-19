@@ -33,6 +33,19 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
   // State for tracking the type of sensor count error
   const [moistLevelErrorMessage, setMoistLevelErrorMessage] = React.useState<string>("")
 
+  // Check if screen is narrow (less than 340px)
+  const [isNarrowScreen, setIsNarrowScreen] = React.useState(window.innerWidth < 340)
+
+  // Listen for window resize events
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsNarrowScreen(window.innerWidth < 340)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   // For backward compatibility, keep the old interface structure
   const {
     addUnitMapRef,
@@ -226,6 +239,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                 style={{
                   width: "100%",
                   height: "36px",
+                  fontSize: isNarrowScreen ? "13px" : undefined,
                 }}
                 onClick={() => {
                   // Open QR Scanner modal
@@ -233,13 +247,14 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                 }}
               >
                 <IonIcon icon={cameraOutline} slot="start" />
-                SCAN QR CODE
+                TAKE A PICTURE
               </IonButton>
               <IonButton
                 fill="outline"
                 size="default"
                 style={{
                   width: "100%",
+                  fontSize: isNarrowScreen ? "13px" : undefined,
                 }}
                 onClick={() => {
                   // Check if there are any sites at all
