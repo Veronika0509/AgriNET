@@ -379,7 +379,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
               </IonButton>
             </div>
 
-            <div className={s.addUnitForm}>
+            <div className={s.addUnitForm} style={{ marginTop: "0px" }}>
               {/* Site Selection */}
               <IonItem className={s.addUnitFormItem}>
                 <IonLabel position="fixed" color="light" style={{ minWidth: "80px", alignSelf: "center" }}>

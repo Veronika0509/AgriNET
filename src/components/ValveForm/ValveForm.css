@@ -1,0 +1,99 @@
+.valve-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0;
+  width: 100%;
+}
+
+.valve-form-item {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+}
+
+.valve-form-input {
+  font-size: 16px;
+}
+
+.valve-form-label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.valve-form-checkbox-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+.pulse-count-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pulse-count-button {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.datetime-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+.datetime-button {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.valve-form-actions {
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.valve-form-button {
+  font-size: 15px;
+  font-weight: 500;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+/* Tablet and larger */
+@media (min-width: 768px) {
+  .valve-form-container {
+    padding: 0;
+  }
+
+  .valve-form-item {
+    margin-bottom: 20px;
+  }
+
+  .valve-form-actions {
+    flex-direction: row;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px 0;
+  }
+
+  .valve-form-button {
+    min-width: 180px;
+    max-width: 240px;
+    margin: 0;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .valve-form-container {
+    max-width: 700px;
+    padding: 0;
+  }
+}

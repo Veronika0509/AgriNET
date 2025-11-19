@@ -344,6 +344,7 @@
 
 /*   Responsibility   */
 
+
 @media (max-width: 560px) {
   /*   Main Table    */
 
@@ -402,5 +403,4 @@
   .tableRowItem {
     font-size: 14px;
   }
-
 }

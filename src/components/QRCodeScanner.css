@@ -14,9 +14,104 @@
   gap: 20px;
 }
 
-/* For native scanner */
+/* For native scanner - FULLSCREEN MODE */
 body.scanner-active {
   background: transparent !important;
+  visibility: visible !important;
+}
+
+/* Hide all elements except the scanner container and its button */
+body.scanner-active * {
+  visibility: hidden !important;
+}
+
+body.scanner-active .qr-scanner-container,
+body.scanner-active .qr-scanner-container * {
+  visibility: visible !important;
+}
+
+body.scanner-active ion-app {
+  background: transparent !important;
+}
+
+body.scanner-active ion-modal {
+  --background: transparent !important;
+  --ion-background-color: transparent !important;
+  background: transparent !important;
+}
+
+body.scanner-active ion-modal::part(content) {
+  background: transparent !important;
+}
+
+body.scanner-active ion-content {
+  --background: transparent !important;
+  --ion-background-color: transparent !important;
+  background: transparent !important;
+}
+
+body.scanner-active .qr-scanner-container {
+  background: transparent !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  padding-bottom: 80px !important;
+  visibility: visible !important;
+}
+
+/* QR Code scanning overlay with borders */
+body.scanner-active .qr-scanner-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 250px;
+  border: 3px solid #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  z-index: 100000;
+  visibility: visible !important;
+}
+
+/* Corner indicators for QR scanning area */
+body.scanner-active .qr-scanner-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 250px;
+  background:
+    linear-gradient(to right, #00ff00 0%, #00ff00 100%) 0 0 / 40px 4px no-repeat,
+    linear-gradient(to bottom, #00ff00 0%, #00ff00 100%) 0 0 / 4px 40px no-repeat,
+    linear-gradient(to right, #00ff00 0%, #00ff00 100%) 100% 0 / 40px 4px no-repeat,
+    linear-gradient(to bottom, #00ff00 0%, #00ff00 100%) 100% 0 / 4px 40px no-repeat,
+    linear-gradient(to right, #00ff00 0%, #00ff00 100%) 0 100% / 40px 4px no-repeat,
+    linear-gradient(to bottom, #00ff00 0%, #00ff00 100%) 0 100% / 4px 40px no-repeat,
+    linear-gradient(to right, #00ff00 0%, #00ff00 100%) 100% 100% / 40px 4px no-repeat,
+    linear-gradient(to bottom, #00ff00 0%, #00ff00 100%) 100% 100% / 4px 40px no-repeat;
+  z-index: 100001;
+  pointer-events: none;
+  visibility: visible !important;
+}
+
+body.scanner-active .qr-scanner-container ion-button {
+  z-index: 999999 !important;
+  position: relative !important;
   visibility: visible !important;
 }
 
@@ -26,9 +121,4 @@ body.scanner-active {
   max-width: 500px;
   margin: 0 auto;
   padding: 20px 0;
-}
-
-/* Hide UI elements when scanner is active */
-body.scanner-active ion-content > * {
-  display: none;
 }

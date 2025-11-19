@@ -51,7 +51,8 @@ export const createTempMarker = async (
   tempChartData: TempChartDataItem[],
   tempBoundsArray: TempBounds[],
   tempInvalidChartData: Array<[TempChartDataItem, TempBounds]>,
-  countTemp: number
+  countTemp: number,
+  layer: string
 ): Promise<void> => {
   const exists = tempChartsAmount.some((secondItemTemp: SensorItem) => secondItemTemp.id === sensorItem.id);
   if (!exists) {
@@ -82,7 +83,8 @@ export const createTempMarker = async (
         boundsArray: tempBoundsArray,
         invalidChartData: tempInvalidChartData,
         response,
-        countTemp
+        countTemp,
+        layer,
       })
     }
   }

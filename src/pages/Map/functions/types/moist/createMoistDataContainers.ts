@@ -40,6 +40,7 @@ interface MoistDataContainerProps {
   invalidChartData: Array<[MoistChartDataItem, MoistBounds]>;
   setInvalidMoistChartDataContainer: (data: Array<[MoistChartDataItem, MoistBounds]>) => void;
   setMoistChartDataContainer: (data: Array<[MoistChartDataItem, MoistBounds]>) => void;
+  layer: string;
 }
 
 export const createMoistDataContainers = async (props: MoistDataContainerProps) => {
@@ -51,7 +52,7 @@ export const createMoistDataContainers = async (props: MoistDataContainerProps) 
     battery: props.response.data.battery,
     data: props.response.data.data,
     budgetLines: props.response.data.budgetLines,
-    layerName: 'Moist',
+    layerName: props.layer,
     freshness: props.response.data.freshness
   }
   props.moistChartData.push(moistChartDataItem)

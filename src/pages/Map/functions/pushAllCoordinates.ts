@@ -1,3 +1,5 @@
+import {getSensorItems} from "@/pages/Map/data/getSensorItems";
+
 interface SensorItem {
   lat: number;
   lng: number;
@@ -33,7 +35,7 @@ export const pushAllCoordinates = (
   allCoordinatesOfMarkers: Coordinate[],
   siteList: Site[],
   setCoordinatesForFitting: (coords: Coordinate[]) => void,
-  setAllCoordinatesOfMarkers: (coords: Coordinate[]) => void,
+  allSensorItems: Marker[],
   siteName: string,
   type: string
 ): void => {
@@ -42,19 +44,26 @@ export const pushAllCoordinates = (
   const id = sensorItem.sensorId
   const mainId = sensorItem.id
   const neededSensorItemsArray: Marker[] = []
-  siteList.map((site: Site) => {
-    if (site.name === siteName) {
-      site.layers.map((layer: Layer) => {
-        if (layer.name === 'Moist' || layer.name === 'moist' || layer.name === 'SoilTemp' || layer.name === 'WXET' || layer.name === 'Valve' || layer.name === 'EXTL') {
-          layer.markers.map((marker: Marker) => {
-            if (!neededSensorItemsArray.some((item: Marker) => item.id === marker.id)) {
-              neededSensorItemsArray.push(marker);
-            }
-          })
-        }
-      })
+  allSensorItems.map((sensItem: Marker) => {
+    if (sensItem.markerType === 'moist-fuel' || sensItem.markerType === 'wxet' || sensItem.markerType === 'fuel' || sensItem.markerType === 'temp-rh-v2' || sensItem.markerType === 'soiltemp' || sensItem.markerType === 'temp-rh' || sensItem.markerType === 'valve' || sensItem.markerType === 'extl') {
+      if (!neededSensorItemsArray.some((item: Marker) => item.id === sensItem.id)) {
+        neededSensorItemsArray.push(sensItem);
+      }
     }
   })
+  // siteList.map((site: Site) => {
+  //   if (site.name === siteName) {
+  //     site.layers.map((layer: Layer) => {
+  //       if (layer.name === 'Moist' || layer.name === 'moist' || layer.name === 'SoilTemp' || layer.name === 'WXET' || layer.name === 'Valve' || layer.name === 'EXTL') {
+  //         layer.markers.map((marker: Marker) => {
+  //           if (!neededSensorItemsArray.some((item: Marker) => item.id === marker.id)) {
+  //             neededSensorItemsArray.push(marker);
+  //           }
+  //         })
+  //       }
+  //     })
+  //   }
+  // })
   if (type === 'Moist' || type === 'WXET' || type === 'SoilTemp' || type === 'Valve' || type === 'EXTL') {
     const exists = allCoordinatesOfMarkers.some((marker: Coordinate) => marker.mainId === mainId);
 

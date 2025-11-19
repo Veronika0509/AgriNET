@@ -432,6 +432,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Chart overlay creation is now handled by useChartOverlays hook
 
   useEffect(() => {
+    console.log(activeOverlays, amountOfSensors)
     if (activeOverlays.length !== 0 && activeOverlays.length === amountOfSensors && !areBoundsFitted) {
       CollisionResolver.resolve(activeOverlays)
       setAllOverlays(activeOverlays)

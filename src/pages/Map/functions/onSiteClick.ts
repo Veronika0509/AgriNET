@@ -5,6 +5,7 @@ import {createWxetMarker} from "./types/wxet/createWxetMarker";
 import {createTempMarker} from "./types/temp/createTempMarker";
 import {createValveMarker} from "./types/valve/createValveMarker";
 import {createExtlMarker} from "./types/extl/createExtlMarker";
+import {getSensorItems} from "../../Map/data/getSensorItems";
 
 interface Marker {
   sensorId: string | number;
@@ -76,7 +77,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
     marker.infoWindow.close()
   })
   props.setSecondMap(props.sensorsGroupData.name)
-  // const sensorItems = getSensorItems(undefined, props.siteList, props.groupMarker.title)
+  const allSensorItems = getSensorItems(undefined, props.siteList, props.groupMarker.title)
   // moist props
   const moistId: IdCounter = { value: 0 }
   const moistChartData: unknown[] = []
@@ -109,47 +110,80 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   const countValve: Marker[] = []
 
   props.siteList.map((site: Site) => {
-
     if (site.name === props.groupMarker.title) {
-
-      site.layers.map((layer: Layer) => {
-        if (layer.name === 'Moist' || layer.name === 'moist') {
-          layer.markers.map((marker: Marker) => {
-            if (!countMoistFuel.some((item: Marker) => item.id === marker.id)) {
-              countMoistFuel.push(marker)
-            }
-          })
-        } else if (layer.name === 'SoilTemp') {
-          layer.markers.map((marker: Marker) => {
-            if (!countTemp.some((item: Marker) => item.id === marker.id)) {
-              countTemp.push(marker)
-            }
-          })
-        } else if (layer.name === 'WXET') {
-          layer.markers.map((marker: Marker) => {
-            if (!countWxet.some((item: Marker) => item.id === marker.id)) {
-              countWxet.push(marker)
-            }
-          })
-        } else if (layer.name === 'Valve') {
-          layer.markers.map((marker: Marker) => {
-            if (!countValve.some((item: Marker) => item.id === marker.id)) {
-              countValve.push(marker)
-            }
-          })
-        } else if (layer.name === 'EXTL') {
-          layer.markers.map((marker: Marker) => {
-            if (!countExtl.some((item: Marker) => item.id === marker.id)) {
-              countExtl.push(marker)
-            }
-          })
+      allSensorItems.map((sensItem: any) => {
+        if (sensItem.markerType === 'moist-fuel') {
+          if (!countMoistFuel.some((item: Marker) => item.id === sensItem.id)) {
+            countMoistFuel.push(sensItem)
+          }
+        } else if (sensItem.markerType === 'temp-rh-v2' || sensItem.markerType === 'temp_rh' || sensItem.markerType === 'soiltemp') {
+          if (!countTemp.some((item: Marker) => item.id === sensItem.id)) {
+            countTemp.push(sensItem)
+          }
+        } else if (sensItem.markerType === 'wxet' || sensItem.markerType === 'fuel') {
+          if (!countWxet.some((item: Marker) => item.id === sensItem.id)) {
+            countWxet.push(sensItem)
+          }
+        } else if (sensItem.markerType === 'valve') {
+          if (!countValve.some((item: Marker) => item.id === sensItem.id)) {
+            countValve.push(sensItem)
+          }
+        } else if (sensItem.markerType === 'extl') {
+          if (!countExtl.some((item: Marker) => item.id === sensItem.id)) {
+            countExtl.push(sensItem)
+          }
         }
       })
+      // site.layers.map((layer: Layer) => {
+      //   if (layer.name === 'Moist' || layer.name === 'moist') {
+      //     layer.markers.map((marker: Marker) => {
+      //
+      //     })
+      //   } else if (layer.name === 'SoilTemp') {
+      //     layer.markers.map((marker: Marker) => {
+      //       if (!countTemp.some((item: Marker) => item.id === marker.id)) {
+      //         countTemp.push(marker)
+      //       }
+      //     })
+      //   } else if (layer.name === 'WXET') {
+      //     layer.markers.map((marker: Marker) => {
+      //       if (!countWxet.some((item: Marker) => item.id === marker.id)) {
+      //         countWxet.push(marker)
+      //       }
+      //     })
+      //   } else if (layer.name === 'Valve') {
+      //     layer.markers.map((marker: Marker) => {
+      //       if (!countValve.some((item: Marker) => item.id === marker.id)) {
+      //         countValve.push(marker)
+      //       }
+      //     })
+      //   } else if (layer.name === 'EXTL') {
+      //     layer.markers.map((marker: Marker) => {
+      //       if (!countExtl.some((item: Marker) => item.id === marker.id)) {
+      //         countExtl.push(marker)
+      //       }
+      //     })
+      //   }
+      // })
     }
   })
 
+  const getLayerName = (markerMainId: any) => {
+    // Find the site that matches the group marker title
+    const site = props.siteList.find((sites: any) => sites.name === props.groupMarker.title)
+
+    if (!site) return undefined
+
+    // Find the layer that contains the marker with the given ID
+    const layer = site.layers.find((layer: any) =>
+      layer.markers.find((markerItem: any) => markerItem.id === markerMainId)
+    )
+
+    return layer?.name
+  }
   countMoistFuel.length !== 0 && countMoistFuel.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
+    const layer: string = getLayerName(marker.id)
     createMoistMarker(
       props.moistChartsAmount,
       marker,
@@ -161,20 +195,22 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       moistInvalidChartData,
       moistChartData,
       moistBoundsArray,
-      countMoistFuel.length
+      countMoistFuel.length,
+      layer
     )
     pushAllCoordinates(
       marker,
       props.allCoordinatesOfMarkers,
       props.siteList,
       props.setCoordinatesForFitting,
-      props.setAllCoordinatesOfMarkers,
+      allSensorItems,
       props.groupMarker.title,
       'Moist'
     )
   })
   countWxet.length !== 0 && countWxet.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
+    const layer: string = getLayerName(marker.id)
     createWxetMarker(
       props.wxetChartsAmount,
       marker,
@@ -186,20 +222,22 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       wxetData,
       wxetBoundsArray,
       wxetInvalidChartData,
-      countWxet.length
+      countWxet.length,
+      layer
     )
     pushAllCoordinates(
       marker,
       props.allCoordinatesOfMarkers,
       props.siteList,
       props.setCoordinatesForFitting,
-      props.setAllCoordinatesOfMarkers,
+      allSensorItems,
       props.groupMarker.title,
       'WXET'
     )
   })
   countExtl.length !== 0 && countExtl.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
+    const layer: string = getLayerName(marker.id)
     createExtlMarker(
       props.extlChartsAmount,
       marker,
@@ -208,20 +246,22 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       extlId,
       extlData,
       extlBoundsArray,
-      countExtl.length
+      countExtl.length,
+      layer
     )
     pushAllCoordinates(
       marker,
       props.allCoordinatesOfMarkers,
       props.siteList,
       props.setCoordinatesForFitting,
-      props.setAllCoordinatesOfMarkers,
+      allSensorItems,
       props.groupMarker.title,
       'EXTL'
     )
   })
   countTemp.length !== 0 && countTemp.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
+    const layer: string = getLayerName(marker.id)
     createTempMarker(
       props.tempChartsAmount,
       marker,
@@ -233,20 +273,22 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       tempChartData,
       tempBoundsArray,
       tempInvalidChartData,
-      countTemp.length
+      countTemp.length,
+      layer
     )
     pushAllCoordinates(
       marker,
       props.allCoordinatesOfMarkers,
       props.siteList,
       props.setCoordinatesForFitting,
-      props.setAllCoordinatesOfMarkers,
+      allSensorItems,
       props.groupMarker.title,
       'SoilTemp'
     )
   })
   countValve.length !== 0 && countValve.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
+    const layer: string = getLayerName(marker.id)
     createValveMarker(
       props.valveChartsAmount,
       marker,
@@ -258,14 +300,15 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       valveChartData,
       valveBoundsArray,
       valveInvalidChartData,
-      countValve.length
+      countValve.length,
+      layer
     )
     pushAllCoordinates(
       marker,
       props.allCoordinatesOfMarkers,
       props.siteList,
       props.setCoordinatesForFitting,
-      props.setAllCoordinatesOfMarkers,
+      allSensorItems,
       props.groupMarker.title,
       'Valve'
     )

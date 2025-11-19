@@ -26,7 +26,8 @@ export const createExtlMarker = async (
   extlId: ExtlIdCounter,
   extlData: ExtlSensorItem[],
   extlBoundsArray: ExtlBounds[],
-  countExtl: number
+  countExtl: number,
+  layer: string
 ) => {
   const exists = extlChartsAmount.some((secondItemTemp: ExtlSensorItem) => secondItemTemp.id === sensorItem.id);
   if (!exists) {
@@ -47,7 +48,8 @@ export const createExtlMarker = async (
         extlData,
         boundsArray: extlBoundsArray,
         countExtl,
-        item: sensorItem
+        item: sensorItem,
+        layer
       });
     }
   }

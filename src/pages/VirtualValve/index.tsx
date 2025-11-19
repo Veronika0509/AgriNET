@@ -331,7 +331,7 @@ const VirtualValve: React.FC<VirtualValveProps> = ({
   return (
     <IonPage>
       <Header setPage={setPage} />
-      <IonContent className={s.settingsWrapper}>
+      <IonContent className={s.settingsWrapper} style={{ '--padding-start': '20px', '--padding-end': '20px' } as React.CSSProperties}>
         <IonItem className={s.settingsInputWrapper}>
           <IonInput
             className={s.settingsInput}

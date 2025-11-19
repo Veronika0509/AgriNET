@@ -51,7 +51,8 @@ export const createWxetMarker = async (
   wxetData: WxetDataItem[],
   wxetBoundsArray: WxetBounds[],
   wxetInvalidChartData: Array<[WxetDataItem, WxetBounds]>,
-  countWxet: number
+  countWxet: number,
+  layer: string
 ): Promise<void> => {
   const exists = wxetChartsAmount.some((secondItemTemp: SensorItem) => secondItemTemp.id === sensorItem.id);
   if (!exists) {
@@ -97,7 +98,8 @@ export const createWxetMarker = async (
         invalidChartData: wxetInvalidChartData,
         response: response!,
         countWxet,
-        markerType: sensorItem.markerType
+        markerType: sensorItem.markerType,
+        layer
       });
     }
   }

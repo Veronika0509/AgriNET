@@ -44,7 +44,8 @@ export const createValveMarker = async (
   valveChartData: ValveChartDataItem[],
   valveBoundsArray: ValveBounds[],
   valveInvalidChartData: Array<[ValveChartDataItem, ValveBounds]>,
-  countValve: number
+  countValve: number,
+  layer: string
 ): Promise<void> => {
   const exists = valveChartsAmount.some((secondItemValve: SensorItem) => secondItemValve.id === sensorItem.id);
   if (!exists) {
@@ -75,7 +76,8 @@ export const createValveMarker = async (
         boundsArray: valveBoundsArray,
         invalidChartData: valveInvalidChartData,
         data: response.data,
-        countValve
+        countValve,
+        layer
       })
     }
   }

@@ -127,9 +127,8 @@ export const MapTab: React.FC<MapTabProps> = ({
   // Extract layer names from site data
   const renderLayerList = () => {
     const hasSites = siteList && Array.isArray(siteList) && siteList.length > 0
-    const hasCustomOverlays = activeOverlays && activeOverlays.length > 0
 
-    if (!hasSites || !hasCustomOverlays) {
+    if (!hasSites) {
       return null
     }
 

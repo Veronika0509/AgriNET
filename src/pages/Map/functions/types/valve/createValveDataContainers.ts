@@ -35,6 +35,7 @@ interface ValveDataContainerProps {
   invalidChartData: Array<[ValveChartDataItem, ValveBounds]>;
   setInvalidValveChartDataContainer: (data: Array<[ValveChartDataItem, ValveBounds]>) => void;
   setValveChartDataContainer: (data: Array<[ValveChartDataItem, ValveBounds]>) => void;
+  layer: string
 }
 
 export const createValveDataContainers = async (props: ValveDataContainerProps) => {
@@ -43,7 +44,7 @@ export const createValveDataContainers = async (props: ValveDataContainerProps) 
     mainId: props.mainId,
     sensorId: props.sensorId,
     name: props.name,
-    layerName: 'Valve',
+    layerName: props.layer,
     events: props.data.events,
     nowMinutes: props.data.nowMinutes,
     bgColor: props.data.bgColor,

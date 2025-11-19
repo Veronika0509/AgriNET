@@ -148,41 +148,21 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
   const [isSensorModalOpen, setIsSensorModalOpen] = useState(false)
   const [availableSensors, setAvailableSensors] = useState<any[]>([])
 
-  // Initialize coordinates when component mounts or props change
-  useEffect(() => {
-    if (selectedSiteForAddUnit && siteList && siteList.length > 0) {
-      const site = siteList.find((s) => s.id === selectedSiteForAddUnit)
-      if (site) {
-        setUnitLatitude(site.lat.toString())
-        setUnitLongitude(site.lng.toString())
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSiteForAddUnit, siteList])
+  // Track if we just created a new site to prevent coordinate updates
+  const justCreatedSiteRef = useRef(false)
 
-  // Update coordinates when selected site changes
+  // Initialize form with site when sites are loaded - only runs once on mount
   useEffect(() => {
-    if (selectedSite && siteList && siteList.length > 0) {
-      const site = siteList.find((s) => s.name === selectedSite)
-      if (site) {
-        setUnitLatitude(site.lat.toString())
-        setUnitLongitude(site.lng.toString())
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSite, siteList])
-
-  // Initialize form with site when sites are loaded or when selected site changes
-  useEffect(() => {
-    if (siteList && siteList.length > 0) {
-      const site = siteList.find((s) => s.name === selectedSite || s.name === selectedSiteForAddUnit)
+    if (siteList && siteList.length > 0 && !selectedSite) {
+      const site = siteList.find((s) => s.name === selectedSiteForAddUnit)
       if (site) {
         setSelectedSite(site.name)
         if (site.lat && site.lng) {
           setUnitLatitude(site.lat.toString())
           setUnitLongitude(site.lng.toString())
         }
-      } else if (!selectedSite && siteList.length > 0) {
+      } else {
+        // No matching site, select first one
         const firstSite = siteList[0]
         setSelectedSite(firstSite.name)
         setSelectedSiteForAddUnit(firstSite.name)
@@ -193,7 +173,31 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [siteList, selectedSiteForAddUnit])
+  }, [siteList])
+
+  // Update coordinates ONLY when user explicitly selects a different site from dropdown
+  // Don't update when creating a new site (coordinates should stay at map center)
+  useEffect(() => {
+    if (justCreatedSiteRef.current) {
+      // Skip coordinate update if we just created a site
+      justCreatedSiteRef.current = false
+      return
+    }
+
+    if (selectedSite && siteList && siteList.length > 0) {
+      const site = siteList.find((s) => s.name === selectedSite)
+      if (site && site.lat !== 0 && site.lng !== 0) {
+        setUnitLatitude(site.lat.toString())
+        setUnitLongitude(site.lng.toString())
+
+        // Also update map center when selecting a site
+        if (addUnitMap) {
+          addUnitMap.setCenter({ lat: site.lat, lng: site.lng })
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSite])
 
   // Initialize Add Unit map when tab is active and API is loaded
   useEffect(() => {
@@ -273,18 +277,11 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
     if (activeTab === "add" && addUnitMap && addUnitMapRef.current) {
       setTimeout(() => {
         window.google.maps.event.trigger(addUnitMap, "resize")
-        // Re-center the map
-        let centerCoords = { lat: 41.9106638, lng: -87.6828648 } // Chicago default
-        if (siteList && siteList.length > 0) {
-          const firstSite = siteList[0]
-          if (firstSite.lat && firstSite.lng) {
-            centerCoords = { lat: firstSite.lat, lng: firstSite.lng }
-          }
-        }
-        addUnitMap.setCenter(centerCoords)
+        // Don't re-center the map - keep current coordinates
+        // This allows users to manually position the map and create sites at that location
       }, 100)
     }
-  }, [activeTab, addUnitMap, siteList])
+  }, [activeTab, addUnitMap])
 
   // Fetch user site groups when navigating to Add Unit page
   useSiteGroups({
@@ -325,7 +322,7 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
         },
         {
           text: "Create",
-          handler: async (data) => {
+          handler: (data) => {
             const siteName = data.siteName?.trim()
             if (!siteName) {
               presentEmptyNameAlert({
@@ -336,22 +333,49 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
               return false
             }
 
-            // Create new site
-            try {
-              const newSiteList = await getSiteList(userId)
-              if (newSiteList && "data" in newSiteList) {
-                setSiteList(newSiteList.data)
-              }
-              setSelectedSite(siteName)
-              setSelectedSiteForAddUnit(siteName)
-            } catch (error) {
-              console.error("Error creating site:", error)
+            // Check if site name already exists
+            if (siteList.some(site => site.name === siteName)) {
+              presentEmptyNameAlert({
+                header: "Error",
+                message: "A site with this name already exists",
+                buttons: ["OK"],
+              })
+              return false
             }
+
+            // Get coordinates from map center if available, otherwise use current form values
+            let lat = parseFloat(unitLatitude) || 0
+            let lng = parseFloat(unitLongitude) || 0
+
+            // If map is available, use its center coordinates
+            if (addUnitMap) {
+              const center = addUnitMap.getCenter()
+              if (center) {
+                lat = center.lat()
+                lng = center.lng()
+              }
+            }
+
+            // Add new site to local site list (will be created on server when user clicks Add Unit)
+            const newSite: Site = {
+              id: `temp-${Date.now()}`, // Temporary ID
+              name: siteName,
+              lat: lat,
+              lng: lng,
+              layers: [],
+            }
+
+            // Set flag to prevent coordinate update when selecting the new site
+            justCreatedSiteRef.current = true
+
+            setSiteList([...siteList, newSite])
+            setSelectedSite(siteName)
+            setSelectedSiteForAddUnit(siteName)
           },
         },
       ],
     })
-  }, [presentAlert, presentEmptyNameAlert, userId, setSiteList, setSelectedSite, setSelectedSiteForAddUnit])
+  }, [presentAlert, presentEmptyNameAlert, addUnitMap, unitLatitude, unitLongitude, siteList, setSiteList, setSelectedSite, setSelectedSiteForAddUnit])
 
   // Handler for opening new layer modal
   const showCreateNewLayerAlert = useCallback(() => {

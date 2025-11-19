@@ -47,3 +47,15 @@ p, h1, h2, h3, h4, h5, h6, div, img, a, button {
 .sensor-id-duplicate-alert .alert-button-cancel {
   color: #04a65b !important;
 }
+
+/* Remove padding from alert messages */
+.alert-message {
+  padding-top: 0 !important;
+  padding-bottom: 8px !important;
+}
+
+/* Remove top and bottom padding from alert inputs */
+.alert-input-group {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}

@@ -14,6 +14,7 @@ import {
 } from "@ionic/react"
 import { addOutline, removeOutline } from "ionicons/icons"
 import { getDatetime } from "../../pages/Chart/components/DateTimePicker/functions/getDatetime"
+import './ValveForm.css'
 
 interface ValveFormProps {
   initialValues?: {
@@ -96,40 +97,50 @@ const ValveForm: React.FC<ValveFormProps> = ({
   };
 
   return (
-    <div className="ion-padding">
-      <IonItem className="ion-margin-bottom">
+    <div className="valve-form-container">
+        <IonItem className="valve-form-item" lines="none">
         <IonInput
+          className="valve-form-input"
           label="Valve Name"
+          labelPlacement="stacked"
           value={valveName}
           onIonChange={(e) => setValveName(e.detail.value || '')}
           placeholder="Enter valve name"
         />
       </IonItem>
 
-      <IonItem className="ion-margin-bottom">
+      <IonItem className="valve-form-item" lines="none">
         <IonInput
+          className="valve-form-input"
           label="Probe ID"
+          labelPlacement="stacked"
           value={probeId}
           onIonChange={(e) => setProbeId(e.detail.value || '')}
           placeholder="Enter probe ID"
+          readonly
         />
       </IonItem>
 
-      <IonItem className="ion-margin-bottom">
+      <IonItem className="valve-form-item" lines="none">
         <IonInput
+          className="valve-form-input"
           type="number"
           label="Priority"
+          labelPlacement="stacked"
           value={priority}
           onIonChange={(e) => setPriority(Number(e.detail.value) || 0)}
-          placeholder="Enter priority"
+          placeholder="Enter priority (0-9)"
+          min={0}
+          max={9}
         />
       </IonItem>
 
       {showPulseIrrigation && (
         <>
-          <IonItem className="ion-margin-bottom">
-            <IonLabel>Pulse Irrigation</IonLabel>
+          <IonItem className="valve-form-item valve-form-checkbox-item" lines="none">
+            <IonLabel className="valve-form-label">Pulse Irrigation</IonLabel>
             <IonCheckbox
+              slot="end"
               checked={isPulseIrrigation}
               onIonChange={(e) => setIsPulseIrrigation(e.detail.checked)}
             />
@@ -137,23 +148,37 @@ const ValveForm: React.FC<ValveFormProps> = ({
 
           {isPulseIrrigation && (
             <>
-              <IonItem className="ion-margin-bottom">
-                <IonLabel>Pulse Count: {pulseCount}</IonLabel>
-                <IonButton fill="clear" onClick={() => handlePulseCount(-1)}>
-                  <IonIcon icon={removeOutline} />
-                </IonButton>
-                <IonButton fill="clear" onClick={() => handlePulseCount(1)}>
-                  <IonIcon icon={addOutline} />
-                </IonButton>
+              <IonItem className="valve-form-item" lines="none">
+                <IonLabel className="valve-form-label">Pulse Count: {pulseCount}</IonLabel>
+                <div slot="end" className="pulse-count-controls">
+                  <IonButton
+                    className="pulse-count-button"
+                    fill="clear"
+                    onClick={() => handlePulseCount(-1)}
+                    disabled={pulseCount <= 2}
+                  >
+                    <IonIcon slot="icon-only" icon={removeOutline} />
+                  </IonButton>
+                  <IonButton
+                    className="pulse-count-button"
+                    fill="clear"
+                    onClick={() => handlePulseCount(1)}
+                  >
+                    <IonIcon slot="icon-only" icon={addOutline} />
+                  </IonButton>
+                </div>
               </IonItem>
 
-              <IonItem className="ion-margin-bottom">
+              <IonItem className="valve-form-item" lines="none">
                 <IonInput
+                  className="valve-form-input"
                   type="number"
                   label="Pulse Off (minutes)"
+                  labelPlacement="stacked"
                   value={pulseOffMinutes}
                   onIonChange={(e) => setPulseOffMinutes(Number(e.detail.value) || 0)}
                   placeholder="Enter minutes"
+                  min={1}
                 />
               </IonItem>
             </>
@@ -161,23 +186,25 @@ const ValveForm: React.FC<ValveFormProps> = ({
         </>
       )}
 
-      <IonItem className="ion-margin-bottom">
-        <IonLabel>Start Time</IonLabel>
-        <IonDatetimeButton datetime="start-time" />
+      <IonItem className="valve-form-item datetime-item" lines="none">
+        <IonLabel className="valve-form-label" position="stacked">Start Time</IonLabel>
+        <IonDatetimeButton className="datetime-button" datetime="start-time" />
       </IonItem>
 
-      <IonItem className="ion-margin-bottom">
+      <IonItem className="valve-form-item" lines="none">
         <IonInput
+          className="valve-form-input"
           type="time"
           label="Duration"
+          labelPlacement="stacked"
           value={duration}
           onIonChange={(e) => setDuration(e.detail.value || '00:00')}
         />
       </IonItem>
 
-      <IonItem className="ion-margin-bottom">
-        <IonLabel>Stop Time</IonLabel>
-        <IonDatetimeButton datetime="stop-time" />
+      <IonItem className="valve-form-item datetime-item" lines="none">
+        <IonLabel className="valve-form-label" position="stacked">Stop Time</IonLabel>
+        <IonDatetimeButton className="datetime-button" datetime="stop-time" />
       </IonItem>
 
       <IonModal keepContentsMounted={true}>
@@ -185,6 +212,7 @@ const ValveForm: React.FC<ValveFormProps> = ({
           id="start-time"
           value={startTime.toISOString()}
           onIonChange={(e) => setStartTime(new Date(e.detail.value as string))}
+          showDefaultButtons={true}
         />
       </IonModal>
 
@@ -205,15 +233,23 @@ const ValveForm: React.FC<ValveFormProps> = ({
               setDuration(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`);
             }
           }}
+          showDefaultButtons={true}
         />
       </IonModal>
 
-      <div className="ion-padding">
-        <IonButton expand="block" onClick={handleSave} className="ion-margin-bottom">
-          Save
+      <div className="valve-form-actions">
+        <IonButton
+          className="valve-form-button"
+          onClick={handleSave}
+        >
+          Save Virtual Valve
         </IonButton>
         {onCancel && (
-          <IonButton expand="block" fill="outline" onClick={onCancel}>
+          <IonButton
+            className="valve-form-button"
+            fill="outline"
+            onClick={onCancel}
+          >
             Cancel
           </IonButton>
         )}

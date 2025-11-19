@@ -16,6 +16,7 @@ interface CreateExtlDataContainerProps {
   extlChartsAmount: unknown[];
   countExtl: number;
   setExtlChartDataContainer: (data: Array<[ExtlItem, ExtlBounds]>) => void;
+  layer: string;
 }
 
 export const createExtlDataContainer = (props: CreateExtlDataContainerProps) => {
@@ -23,7 +24,7 @@ export const createExtlDataContainer = (props: CreateExtlDataContainerProps) => 
   const itemData: ExtlItem = {
     ...rest,
     mainId: props.item.id,
-    layerName: 'EXTL'
+    layerName: props.layer
   }
   props.extlData.push(itemData)
   props.boundsArray.push(props.bounds)

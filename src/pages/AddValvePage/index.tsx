@@ -3,6 +3,7 @@ import { IonContent, IonPage, useIonToast } from "@ionic/react";
 import Header from "../Chart/components/Header";
 import ValveForm from "../../components/ValveForm";
 import type { UserId } from "../../types";
+import styles from "./style.module.css";
 
 interface MoistureSensor {
   id: string | number;
@@ -106,25 +107,46 @@ const AddValvePage: React.FC<AddValvePageProps> = ({
   return (
     <IonPage>
       <Header type="addValveModal" setPage={setPage} />
-      <IonContent>
-        <ValveForm 
-          onSave={handleSave}
-          onCancel={handleCancel}
-          initialValues={{
-            valveName: selectedMoistureSensor?.name || '',
-            probeId: selectedMoistureSensor?.id?.toString() || '',
-            priority: 0,
-            isPulseIrrigation: false,
-            pulseCount: 2,
-            pulseOffMinutes: 60,
-            duration: '06:00',
-            startTime: new Date(new Date().getTime() + 2 * 60 * 1000),
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-          }}
-        />
+      <IonContent className={styles.addValveContent}>
+        <div style={{padding: '20px !important'}}>
+          <ValveForm
+            onSave={handleSave}
+            onCancel={handleCancel}
+            initialValues={{
+              valveName: selectedMoistureSensor?.name || '',
+              probeId: selectedMoistureSensor?.id?.toString() || '',
+              priority: 0,
+              isPulseIrrigation: false,
+              pulseCount: 2,
+              pulseOffMinutes: 60,
+              duration: '06:00',
+              startTime: new Date(new Date().getTime() + 2 * 60 * 1000),
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            }}
+          />
+        </div>
       </IonContent>
     </IonPage>
   )
 }
 
 export default AddValvePage;
+
+//fetch("https://app.agrinet.us/api/add-unit", {
+//     "body": "{\"name\":\"innov\",\"lat\":46.096405,\"lng\":-118.276291,\"userId\":103,\"site\":\"asda\",\"layer\":\"Moist\",\"siteGroup\":\"Innov8\",\"installDate\":\"2025-11-19\",\"timezone\":\"America/Los_Angeles\",\"warnIfSensorIdExist\":false,\"askOverrideInstallDate\":false,\"requestHardware\":false,\"sensorId\":\"ANM02377\",\"sensorCount\":6,\"customFields\":{},\"budgetLines\":{},\"rawMetric\":0,\"displayMetric\":0,\"pictureBase64\":null}",
+//     "cache": "default",
+//     "credentials": "omit",
+//     "headers": {
+//         "Accept": "*/*",
+//         "Accept-Language": "en-GB,en;q=0.9",
+//         "Content-Type": "application/json",
+//         "Priority": "u=3, i",
+//         "User": "103",
+//         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Safari/605.1.15"
+//     },
+//     "method": "POST",
+//     "mode": "cors",
+//     "redirect": "follow",
+//     "referrer": "https://localhost:5173/",
+//     "referrerPolicy": "strict-origin-when-cross-origin"
+// })

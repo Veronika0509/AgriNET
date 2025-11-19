@@ -51,6 +51,7 @@ interface TempDataContainerProps {
   invalidChartData: Array<[TempChartDataItem, TempBounds]>;
   setInvalidTempChartDataContainer: (data: Array<[TempChartDataItem, TempBounds]>) => void;
   setTempChartDataContainer: (data: Array<[TempChartDataItem, TempBounds]>) => void;
+  layer: string;
 }
 
 export const createTempDataContainers = async (props: TempDataContainerProps) => {
@@ -63,7 +64,7 @@ export const createTempDataContainers = async (props: TempDataContainerProps) =>
     mainId: props.mainId,
     sensorId: props.sensorId,
     name: props.name,
-    layerName: 'SoilTemp',
+    layerName: props.layer,
     bgColor: props.response.data.bgColor,
     lines: props.response.data.lines,
     line1Color: props.response.data.line1Color,

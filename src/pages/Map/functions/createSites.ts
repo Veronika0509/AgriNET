@@ -70,7 +70,6 @@ export const createSites = async (props: CreateSitesProps) => {
       groupMarker.infoWindow = infoWindow;
       infoWindow.open(props.map, groupMarker);
       markers.push(groupMarker);
-
       // Auto-click disabled - user must manually click on site to see sensors
       if (props.siteList.length === 1) {
         setTimeout(() => {
@@ -185,12 +184,3 @@ export const createSites = async (props: CreateSitesProps) => {
     }
   }
 };
-
-
-//await axios.delete('https://app.agrinet.us/api/map/remove-unit', {
-//         params: {
-//           sensorId: '2342341',
-//           userId: 103
-//         }, withCredentials: true}).then((result) => {
-//           console.log('Success:', result)
-//         })

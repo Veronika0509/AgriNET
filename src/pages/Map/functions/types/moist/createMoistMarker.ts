@@ -31,9 +31,9 @@ export const createMoistMarker = async (
   moistInvalidChartData: unknown[],
   moistChartData: unknown[],
   boundsArray: MoistBounds[],
-  countMoistFuel: number
+  countMoistFuel: number,
+  layer: string
 ) => {
-
   const exists = moistChartsAmount.some((secondItemMoist: SensorItem) => secondItemMoist.id === sensorItem.id);
   if (!exists) {
     const response = await getMoistMarkerChartData(sensorItem.sensorId, userId)
@@ -44,7 +44,6 @@ export const createMoistMarker = async (
       new google.maps.LatLng(sensorItem.lat + 0.0001, sensorItem.lng + 0.0001)
     )
     if (page === 1) {
-
       createMoistDataContainers({
         mainId: sensorItem.id,
         sensorId: sensorItem.sensorId,
@@ -58,7 +57,8 @@ export const createMoistMarker = async (
         boundsArray: boundsArray as unknown[],
         invalidChartData: moistInvalidChartData as unknown[],
         response,
-        countMoistFuel
+        countMoistFuel,
+        layer
       });
     }
   }

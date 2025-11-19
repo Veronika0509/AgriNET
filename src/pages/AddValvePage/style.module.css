@@ -1,3 +1,11 @@
+/* Add Valve Page Content */
+.addValveContent {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+}
+
 /* Create Modal Styles */
 .createModalContent {
   padding: 20px;
@@ -95,5 +103,34 @@
 
 .createButton {
   width: 100%;
-  margin-top: 5px;
+  max-width: 400px;
+  height: 48px;
+  margin: 5px auto 0;
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Tablet and larger */
+@media (min-width: 768px) {
+  .addValveContent {
+    --padding-start: 24px;
+    --padding-end: 24px;
+    --padding-top: 24px;
+    --padding-bottom: 24px;
+  }
+
+  .createButton {
+    max-width: 300px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .addValveContent {
+    --padding-start: 32px;
+    --padding-end: 32px;
+    --padding-top: 32px;
+    --padding-bottom: 32px;
+  }
 }

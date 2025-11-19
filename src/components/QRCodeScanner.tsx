@@ -20,6 +20,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   const [isScanning, setIsScanning] = useState(false);
   const [isPermissionGranted, setIsPermissionGranted] = useState(false);
   const [shouldStartScan, setShouldStartScan] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const scannerContainerRef = useRef<HTMLDivElement | null>(null);
   const scannerContainerId = 'html5-qrcode-scanner';
@@ -46,7 +47,10 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
         BarcodeScanner.showBackground();
         BarcodeScanner.stopScan();
         document.body.classList.remove('scanner-active');
+        document.querySelector('ion-app')?.classList.remove('scanner-active');
         document.querySelector('ion-content')?.classList.remove('scanner-active');
+        document.querySelector('ion-modal')?.classList.remove('scanner-active');
+        document.querySelector('ion-header')?.classList.remove('scanner-active');
       }
     };
   }, [isMobile]);
@@ -81,19 +85,22 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
         if (status.granted) {
           setIsPermissionGranted(true);
           return true;
-        } else if (status.denied) {
-          const askAgain = await BarcodeScanner.checkPermission({ force: true });
-          if (askAgain.granted) {
-            setIsPermissionGranted(true);
-            return true;
-          } else {
-            setIsPermissionGranted(false);
-            return false;
-          }
         }
+
+        // If not granted, request permission
+        const requestResult = await BarcodeScanner.checkPermission({ force: true });
+        if (requestResult.granted) {
+          setIsPermissionGranted(true);
+          return true;
+        }
+
+        // Permission denied
+        setIsPermissionGranted(false);
+        onScanError('Camera permission is required to scan QR codes. Please enable camera permission in your device settings.');
         return false;
       } catch (error) {
         console.error('Error checking camera permissions:', error);
+        onScanError('Failed to check camera permissions');
         return false;
       }
     } else {
@@ -106,12 +113,18 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     try {
       // Make background transparent
       document.body.classList.add('scanner-active');
+      document.querySelector('ion-app')?.classList.add('scanner-active');
       document.querySelector('ion-content')?.classList.add('scanner-active');
-      
+      document.querySelector('ion-modal')?.classList.add('scanner-active');
+      document.querySelector('ion-header')?.classList.add('scanner-active');
+
+      // Wait for modal to be fully rendered with transparent background
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Start scanning
       await BarcodeScanner.hideBackground();
       const result = await BarcodeScanner.startScan();
-      
+
       if (result.hasContent) {
         onScanSuccess(result.content);
       }
@@ -127,7 +140,10 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     BarcodeScanner.showBackground();
     BarcodeScanner.stopScan();
     document.body.classList.remove('scanner-active');
+    document.querySelector('ion-app')?.classList.remove('scanner-active');
     document.querySelector('ion-content')?.classList.remove('scanner-active');
+    document.querySelector('ion-modal')?.classList.remove('scanner-active');
+    document.querySelector('ion-header')?.classList.remove('scanner-active');
     setIsScanning(false);
   };
 
@@ -177,7 +193,22 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
       );
     } catch (error) {
       console.error('Error starting web scanner:', error);
-      onScanError(error instanceof Error ? error.message : String(error));
+      let userMessage = 'Failed to start camera scanner.';
+
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          userMessage = 'Camera permission denied. Please allow camera access in your browser settings and try again.';
+        } else if (error.name === 'NotFoundError') {
+          userMessage = 'No camera found on this device.';
+        } else if (error.name === 'NotReadableError') {
+          userMessage = 'Camera is already in use by another application.';
+        } else {
+          userMessage = error.message;
+        }
+      }
+
+      setErrorMessage(userMessage);
+      onScanError(userMessage);
       setIsScanning(false);
     }
   };
@@ -229,12 +260,26 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
 
   return (
     <div className="qr-scanner-container">
+      {errorMessage && (
+        <div style={{
+          padding: '16px',
+          backgroundColor: '#fee',
+          color: '#c00',
+          borderRadius: '8px',
+          marginBottom: '16px'
+        }}>
+          {errorMessage}
+        </div>
+      )}
       {!isScanning ? (
-        !autoStart && (
-          <IonButton onClick={startScan}>
-            Scan QR Code
-          </IonButton>
-        )
+        <>
+          {!autoStart && (
+            <IonButton onClick={startScan}>
+              Scan QR Code
+            </IonButton>
+          )}
+          {autoStart && !errorMessage && <div>Initializing scanner...</div>}
+        </>
       ) : (
         <>
           {!isMobile && (

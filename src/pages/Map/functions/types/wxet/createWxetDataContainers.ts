@@ -41,6 +41,7 @@ interface WxetDataContainerProps {
   invalidChartData: Array<[WxetDataItem, WxetBounds]>;
   setWxetChartDataContainer: (data: Array<[WxetDataItem, WxetBounds]>) => void;
   setInvalidWxetChartDataContainer: (data: Array<[WxetDataItem, WxetBounds]>) => void;
+  layer: string
 }
 
 export const createWxetDataContainers = async (props: WxetDataContainerProps): Promise<void> => {
@@ -50,7 +51,7 @@ export const createWxetDataContainers = async (props: WxetDataContainerProps): P
     sensorId: props.sensorId,
     name: props.name,
     data: props.response.data,
-    layerName: 'WXET',
+    layerName: props.layer,
     freshness: props.response.data.freshness,
     markerType: props.markerType,
   }

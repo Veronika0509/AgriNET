@@ -19,9 +19,11 @@ export const getSiteList = async (userId: string | number): Promise<ApiSuccessRe
     const response: AxiosResponse<Site[]> = await axios.get('https://app.agrinet.us/api/map/sites', {
       params: {
         userId: userId,
+        _t: Date.now(), // Cache-busting timestamp to ensure fresh data
       },
       timeout: 10000, // 10 second timeout
     });
+    console.log(response)
     return response;
   } catch (error) {
     console.error('Error fetching site list:', error);

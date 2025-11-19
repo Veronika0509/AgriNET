@@ -38,11 +38,13 @@
 /* Settings Styles */
 .settingsWrapper {
   width: 100%;
+  padding: 16px;
 }
 
 .settingsInputWrapper {
   --padding-start: 0;
-  width: 500px;
+  width: 100%;
+  max-width: 600px;
   margin: 0 auto;
   outline: none;
   border-bottom: 2px solid #33db64;
@@ -50,7 +52,7 @@
 }
 
 .settingsInputWrapper:nth-child(1) {
-  margin-top: 40px;
+  margin-top: 24px;
 }
 
 .settingsInputWrapper::part(native) {
@@ -60,6 +62,10 @@
 .settingsInputWrapper:has(.settingsInput:global(.has-focus)) {
   border-color: var(--ion-color-primary);
   border-width: 2px;
+}
+
+.settingsInput {
+  font-size: 16px;
 }
 
 .settingsInput > label > div:nth-child(1) {
@@ -77,10 +83,35 @@
 }
 
 .settingsButton {
-  width: 500px;
+  width: 100%;
+  max-width: 600px;
+  height: 36px;
   display: block;
   margin-left: auto;
   margin-right: auto;
   margin-top: 20px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
+/* Tablet and larger */
+@media (min-width: 768px) {
+  .settingsWrapper {
+    padding: 24px 32px;
+  }
+
+  .settingsInputWrapper:nth-child(1) {
+    margin-top: 40px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .settingsWrapper {
+    padding: 32px 48px;
+  }
+
+  .settingsInputWrapper {
+    max-width: 700px;
+  }
+}

@@ -353,6 +353,7 @@ export const createUnit = async (
     }
 
     const result = await response.json()
+    console.log(unitData, result)
 
     // Check if the operation was successful
     if (result.success === false) {
