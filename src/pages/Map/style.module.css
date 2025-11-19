@@ -410,7 +410,9 @@
 /*   Budget Editor   */
 
 .budget_container {
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
 }
 
 .budget_firstHalfWrapper {
@@ -500,12 +502,12 @@
 
 .budget_secondHalf {
   width: 100%;
-  height: 100%;
+  height: auto;
 }
 
 .budget_map {
   width: 100%;
-  height: 54%;
+  height: 400px;
 }
 
 .budget_lineInput {
@@ -683,12 +685,13 @@
 
   .budget_map {
     width: 100%;
-    height: 35.5%;
+    height: 300px;
   }
 
   .budget_secondHalf {
     width: 100%;
-    height: 100%;
+    height: auto;
+    padding-bottom: 50px;
   }
 }
 
@@ -700,10 +703,6 @@
 
   .budget_settings {
     display: block;
-  }
-
-  .budget_map {
-    display: none;
   }
 
   .budget_menu {
