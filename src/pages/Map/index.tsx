@@ -634,6 +634,11 @@ const MapPage: React.FC<MapProps> = (props) => {
               value="comments"
               onClick={() => {
                 setNavigationHistory((prev) => [...prev, "comments"])
+                // Reset marker clicked state when navigating to comments
+                // This ensures site markers are properly restored when returning to map
+                if (isMarkerClicked) {
+                  setIsMarkerClicked(false)
+                }
                 setActiveTab("comments")
               }}
             >

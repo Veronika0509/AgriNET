@@ -98,7 +98,7 @@ export const createSites = async (props: CreateSitesProps) => {
             setValveChartDataContainer: props.setValveChartDataContainer,
             amountOfSensors: props.amountOfSensors,
             setAmountOfSensors: props.setAmountOfSensors,
-            markers,
+            markers: props.markers.length > 0 ? props.markers : markers,
             extlChartsAmount: props.extlChartsAmount,
             setExtlDataContainer: props.setExtlDataContainer,
           });
@@ -131,7 +131,7 @@ export const createSites = async (props: CreateSitesProps) => {
           setValveChartDataContainer: props.setValveChartDataContainer,
           amountOfSensors: props.amountOfSensors,
           setAmountOfSensors: props.setAmountOfSensors,
-          markers,
+          markers: props.markers.length > 0 ? props.markers : markers,
           extlChartsAmount: props.extlChartsAmount,
           setExtlDataContainer: props.setExtlDataContainer,
         });
