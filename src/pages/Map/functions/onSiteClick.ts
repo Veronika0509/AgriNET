@@ -6,6 +6,7 @@ import {createTempMarker} from "./types/temp/createTempMarker";
 import {createValveMarker} from "./types/valve/createValveMarker";
 import {createExtlMarker} from "./types/extl/createExtlMarker";
 import {getSensorItems} from "../../Map/data/getSensorItems";
+// import axios from "axios";
 
 interface Marker {
   sensorId: string | number;
@@ -70,7 +71,6 @@ interface OnSiteClickProps {
 }
 
 export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
-
   props.markers.map((marker: Marker) => {
     marker.visible = false
     marker.setMap(null)
@@ -314,3 +314,11 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
     )
   })
 }
+
+//await axios.delete('https://app.agrinet.us/api/map/remove-unit', {
+//             params: {
+//               sensorId: markk.sensorId,
+//               userId: 103
+//             }, withCredentials: true}).then((result) => {
+//             console.log('Success:', result)
+//           })
