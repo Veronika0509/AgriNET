@@ -124,9 +124,16 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
     }
   }, [isLocationEnabled, userLocationMarker, getCurrentLocation]);
 
-  // Automatically get user location when map is available
+  // Automatically get user location when map is available (only on mobile/tablet devices)
   useEffect(() => {
-    if (map && !userLocation && !isLocationEnabled && !locationError) {
+    // Check if this is a mobile or tablet device
+    const userAgent = navigator.userAgent;
+    const screenWidth = window.screen?.width || window.innerWidth;
+    const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|IEMobile|Opera Mini|Mobile|Tablet/i.test(userAgent);
+    const isDesktop = /Windows NT|Macintosh|Linux/i.test(userAgent) && screenWidth > 1024;
+    const shouldEnableLocation = isMobileUserAgent && !isDesktop;
+
+    if (map && !userLocation && !isLocationEnabled && !locationError && shouldEnableLocation) {
       getCurrentLocation(map);
     }
   }, [map, userLocation, isLocationEnabled, locationError, getCurrentLocation]);

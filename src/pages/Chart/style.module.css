@@ -3,6 +3,12 @@
   --min-height: auto;
 }
 
+.header_mainToolbar::part(native) {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .header_contentWrapper {
   display: flex;
   align-items: center;
@@ -15,16 +21,37 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 
 .header_backIcon {
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .header_title {
-  padding: 0;
+  padding: 0 !important;
   margin-left: 10px;
   text-align: left;
+  flex: 1;
+  min-width: 0;
+  overflow: visible;
+  position: static !important;
+}
+
+.header_title::part(native) {
+  padding: 0;
+}
+
+.header_titleText {
+  display: inline;
+  white-space: wrap;
+  margin: 0;
+}
+
+.header_titleText > span {
+  display: inline;
 }
 
 .header_valveButtons {
@@ -48,6 +75,11 @@
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+  }
+
+  .header_titleSection {
+    flex-direction: row !important;
+    align-items: center !important;
   }
 
   .header_valveButtons {
@@ -548,11 +580,6 @@
 
   .moistTopSectionContainer {
     display: block;
-  }
-
-  .header_titleText > span {
-    display: flex;
-    flex-direction: column;
   }
 
   .topSection_nwsForecast {

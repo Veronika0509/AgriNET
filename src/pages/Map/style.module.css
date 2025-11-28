@@ -16,6 +16,14 @@
   background-color: white;
   border-top: 1px solid #ddd;
   z-index: 1000;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  place-items: center;
+}
+
+.appMenuButton {
+  justify-self: center;
+  align-self: center;
 }
 
 .contentWrapper > div > div {
@@ -225,8 +233,7 @@
   border: 1px solid #000;
   border-radius: 6px;
   width: 130px;
-  height: 131px;
-  padding: 4px 4px 0 4px;
+  padding: 4px;
   cursor: pointer;
 }
 
@@ -234,7 +241,7 @@
   border: 1px solid #000;
   width: 100%;
   border-radius: 2px;
-  padding: 5px;
+  padding: 5px 5px 5px 5px;
   position: relative;
 }
 
@@ -781,15 +788,22 @@
 /* GPS Location Button */
 .locationButtonContainer {
   position: absolute;
-  top: 20px;
-  right: 60px; /* Move left to avoid fullscreen button */
-  z-index: 10000; /* Higher z-index to ensure visibility above Google Maps */
-  pointer-events: auto; /* Ensure button is clickable */
+  top: 7px;
+  right: 60px;
+  z-index: 10000;
+  pointer-events: auto;
+}
+
+/* Hide location button on desktop */
+@media (min-width: 1025px) {
+  .locationButtonContainer {
+    display: none !important;
+  }
 }
 
 .locationButton {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px !important;
   border-radius: 50%;
   background-color: white;
   color: #666;
@@ -805,6 +819,7 @@
   --padding-bottom: 0;
   margin: 0;
   transition: all 0.2s ease;
+  overflow: hidden;
 }
 
 .locationButton:hover {
@@ -846,13 +861,14 @@
 
 @media (max-width: 600px) {
   .locationButtonContainer {
-    top: 15px;
-    right: 15px;
+    top: 10px;
+    right: 60px;
   }
   
   .locationButton {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px !important;
+    min-height: 0 !important;
   }
   
   .locationIcon {
@@ -867,9 +883,8 @@
 
 @media (max-width: 450px) {
   .appMenu {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
   }
   .appMenuButton {
     max-width: 75px !important;
@@ -1254,4 +1269,10 @@
   --border-width: 0;
   --highlight-height: 0;
   --highlight-color-focused: transparent;
+}
+
+@media screen and (max-width: 340px) {
+  .locationButtonContainer {
+    right: 50px;
+  }
 }
