@@ -327,7 +327,6 @@ const MapPage: React.FC<MapProps> = (props) => {
       CollisionResolver.resolve(activeOverlays)
     }
     if (map && props.siteList.length > 0 && markers.length === 0) {
-      console.log('*** Main useEffect calling createSites because markers is empty ***');
       // Map Site[] to SensorsGroupData[]
       const sitesAsSensorsGroupData = props.siteList.map((site: SiteWithLayers) => ({
         lat: site.lat,
@@ -409,8 +408,6 @@ const MapPage: React.FC<MapProps> = (props) => {
               // Now reset markers to trigger re-creation AFTER resize is done
               setMarkers([])
               setIsMarkerClicked(false)
-
-              console.log('Map resized and ready for site creation')
             }, 200)
           }
         })
@@ -432,7 +429,6 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Chart overlay creation is now handled by useChartOverlays hook
 
   useEffect(() => {
-    console.log(activeOverlays, amountOfSensors)
     if (activeOverlays.length !== 0 && activeOverlays.length === amountOfSensors && !areBoundsFitted) {
       CollisionResolver.resolve(activeOverlays)
       setAllOverlays(activeOverlays)
