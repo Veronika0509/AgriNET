@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
-export const useUserLocation = () => {
+export const useUserLocation = (map?: google.maps.Map | null) => {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [userLocationMarker, setUserLocationMarker] = useState<google.maps.Marker | null>(null);
   const [isLocationEnabled, setIsLocationEnabled] = useState(false);
@@ -123,6 +123,13 @@ export const useUserLocation = () => {
       getCurrentLocation(map);
     }
   }, [isLocationEnabled, userLocationMarker, getCurrentLocation]);
+
+  // Automatically get user location when map is available
+  useEffect(() => {
+    if (map && !userLocation && !isLocationEnabled && !locationError) {
+      getCurrentLocation(map);
+    }
+  }, [map, userLocation, isLocationEnabled, locationError, getCurrentLocation]);
 
   return {
     userLocation,

@@ -164,7 +164,7 @@ const MapPage: React.FC<MapProps> = (props) => {
     locationError,
     getCurrentLocation: getUserLocation,
     centerOnUserLocation,
-  } = useUserLocation()
+  } = useUserLocation(map)
 
   // Chart overlays (using custom hook)
   const {
