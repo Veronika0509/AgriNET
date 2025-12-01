@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { Geolocation } from '@capacitor/geolocation';
 
 export const useUserLocation = (map?: google.maps.Map | null) => {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
@@ -6,98 +7,61 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
   const [isLocationEnabled, setIsLocationEnabled] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
-  const getCurrentLocation = useCallback((map: google.maps.Map | null) => {
+  const getCurrentLocation = useCallback(async (map: google.maps.Map | null) => {
     if (!map) return;
 
-    if (navigator.geolocation) {
+    try {
       setLocationError(null);
-      
-      // Try high accuracy first
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const newLocation = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
-          
-          setUserLocation(newLocation);
-          setIsLocationEnabled(true);
-          
-          // Update or create marker
-          if (userLocationMarker) {
-            userLocationMarker.setPosition(newLocation);
-          } else {
-            const marker = new google.maps.Marker({
-              position: newLocation,
-              map: map,
-              icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 8,
-                fillColor: '#4285F4',
-                fillOpacity: 1,
-                strokeColor: '#FFFFFF',
-                strokeWeight: 2
-              },
-              title: 'Your Location'
-            });
-            setUserLocationMarker(marker);
-          }
-        },
-        (error) => {
-          console.warn('High accuracy geolocation failed, trying low accuracy:', error);
-          
-          // Fallback to low accuracy
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              const newLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-              };
-              
-              setUserLocation(newLocation);
-              setIsLocationEnabled(true);
-              
-              if (userLocationMarker) {
-                userLocationMarker.setPosition(newLocation);
-              } else {
-                const marker = new google.maps.Marker({
-                  position: newLocation,
-                  map: map,
-                  icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 8,
-                    fillColor: '#4285F4',
-                    fillOpacity: 0.6,
-                    strokeColor: '#FFFFFF',
-                    strokeWeight: 2
-                  },
-                  title: 'Your Location (Low Accuracy)'
-                });
-                setUserLocationMarker(marker);
-              }
-            },
-            (lowAccError) => {
-              const errorMessage = `Location error: ${lowAccError.message}`;
-              setLocationError(errorMessage);
-              console.error('Geolocation error:', lowAccError);
-            },
-            {
-              enableHighAccuracy: false,
-              timeout: 10000,
-              maximumAge: 300000 // 5 minutes
-            }
-          );
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
+
+      // Check and request permissions using Capacitor
+      const permission = await Geolocation.checkPermissions();
+
+      if (permission.location === 'denied') {
+        const requestResult = await Geolocation.requestPermissions();
+        if (requestResult.location === 'denied') {
+          setLocationError('Location permission denied');
+          return;
         }
-      );
-    } else {
-      const errorMessage = 'Geolocation is not supported by this browser';
+      }
+
+      // Get current position using Capacitor
+      const position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
+
+      const newLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+
+      setUserLocation(newLocation);
+      setIsLocationEnabled(true);
+
+      // Update or create marker
+      if (userLocationMarker) {
+        userLocationMarker.setPosition(newLocation);
+      } else {
+        const marker = new google.maps.Marker({
+          position: newLocation,
+          map: map,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: '#4285F4',
+            fillOpacity: 1,
+            strokeColor: '#FFFFFF',
+            strokeWeight: 2
+          },
+          title: 'Your Location'
+        });
+        setUserLocationMarker(marker);
+      }
+    } catch (error: any) {
+      const errorMessage = `Location error: ${error.message || 'Unknown error'}`;
       setLocationError(errorMessage);
-      console.error(errorMessage);
+      console.error('Geolocation error:', error);
     }
   }, [userLocationMarker]);
 
@@ -134,7 +98,10 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
     const shouldEnableLocation = isMobileUserAgent && !isDesktop;
 
     if (map && !userLocation && !isLocationEnabled && !locationError && shouldEnableLocation) {
-      getCurrentLocation(map);
+      // Call async function properly
+      getCurrentLocation(map).catch(error => {
+        console.error('Failed to get location on mount:', error);
+      });
     }
   }, [map, userLocation, isLocationEnabled, locationError, getCurrentLocation]);
 
