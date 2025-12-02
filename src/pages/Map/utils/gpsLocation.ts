@@ -153,7 +153,7 @@ export const centerMapOnUserLocation = (
   if (userLocation && map) {
     requestAnimationFrame(() => {
       map.setCenter(userLocation)
-      map.setZoom(16)
+      map.setZoom(14)
     })
   } else {
     // Try to get location if not available

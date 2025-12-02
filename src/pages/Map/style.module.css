@@ -26,6 +26,10 @@
   align-self: center;
 }
 
+.appMenuButton::before {
+  content: none;
+}
+
 .contentWrapper > div > div {
   display: none !important;
 }
@@ -851,10 +855,10 @@
 /* GPS Location Button */
 .locationButtonContainer {
   position: absolute;
-  top: 7px;
-  right: 60px;
   z-index: 10000;
   pointer-events: auto;
+  right: 10px;
+  bottom: 190px;
 }
 
 /* Hide location button on desktop */
@@ -923,11 +927,6 @@
 }
 
 @media (max-width: 600px) {
-  .locationButtonContainer {
-    top: 10px;
-    right: 60px;
-  }
-
   .locationButton {
     width: 40px;
     height: 40px !important;

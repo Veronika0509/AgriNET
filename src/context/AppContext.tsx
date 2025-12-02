@@ -44,6 +44,7 @@ export interface AppActions {
 
   // User data
   setUserId: (userId: UserId) => void
+  logout: () => void
 
   // Site data
   setSiteList: (siteList: Site[]) => void
@@ -115,6 +116,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // The map will react to the siteList change via useEffect
   }, [userId])
 
+  // Function to logout and clear session
+  const logout = useCallback(() => {
+    // Clear localStorage
+    localStorage.removeItem('userId')
+    localStorage.removeItem('userData')
+    localStorage.removeItem('userRole')
+
+    // Reset state
+    setUserId(0 as UserId)
+    setSiteList([])
+    setSiteId('' as SiteId)
+    setSiteName('')
+    setChartData([])
+    setAdditionalChartData([])
+    setSelectedSiteForAddUnit('')
+    setSelectedMoistureSensor(null)
+  }, [])
+
   // Combine all values into one context object
   const contextValue: AppContextType = {
     // State
@@ -134,6 +153,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // Actions
     setPage,
     setUserId,
+    logout,
     setSiteList,
     setSiteId,
     setSiteName,

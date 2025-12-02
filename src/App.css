@@ -2,10 +2,6 @@ body {
   background: #fff;
 }
 
-.gm-ui-hover-effect {
-  display: none !important;
-}
-
 p, h1, h2, h3, h4, h5, h6, div, img, a, button {
   margin: 0;
   padding: 0;
@@ -17,6 +13,19 @@ p, h1, h2, h3, h4, h5, h6, div, img, a, button {
 
 .infoWindowText {
   color: #000;
+}
+
+/* Hide close button on InfoWindow for site markers */
+.gm-style-iw-c button.gm-ui-hover-effect {
+  display: none !important;
+}
+
+.gm-style-iw button[aria-label="Close"] {
+  display: none !important;
+}
+
+.gm-style .gm-style-iw-t button {
+  display: none !important;
 }
 
 /* Sensor ID Validation Alert Styles */

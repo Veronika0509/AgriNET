@@ -53,13 +53,18 @@ interface CreateSitesProps {
 export const createSites = async (props: CreateSitesProps) => {
   const markers: google.maps.marker.AdvancedMarkerElement[] = [];
   props.setAreArraysUpdated(false);
+  const template = document.createElement("div");
+  template.className = "my-advanced-marker";
+  template.innerHTML = `<img src="https://app.agrinet.us/Tier1Markr_20.svg" alt="m">`;
   if (props.markers.length === 0) {
-    // Create all markers first
     props.siteList.forEach((sensorsGroupData: SensorsGroupData) => {
+      const el = template.cloneNode(true) as HTMLElement;
+      console.log(el)
       const groupMarker = new google.maps.marker.AdvancedMarkerElement({
         map: props.map,
         position: { lat: sensorsGroupData.lat, lng: sensorsGroupData.lng },
         title: sensorsGroupData.name,
+        content: el
       });
 
       const info: string = `<p class="infoWindowText">${sensorsGroupData.name}</p>`;

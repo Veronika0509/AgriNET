@@ -25,9 +25,9 @@ const Header = (props: HeaderProps) => {
       props.setIsMarkerClicked(false)
       // Don't call reloadMapPage() - let the cleanup effect in Map component handle everything
     } else {
-      history.push('/AgriNET/');
+      // Navigate back to menu page
+      history.push('/AgriNET/menu');
       props.setPage(0);
-      window.location.reload()
     }
   };
   const onBudgetEditorBack = () => {

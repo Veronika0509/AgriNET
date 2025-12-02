@@ -6,6 +6,7 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
   const [userLocationMarker, setUserLocationMarker] = useState<google.maps.Marker | null>(null);
   const [isLocationEnabled, setIsLocationEnabled] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [watchId, setWatchId] = useState<string | null>(null);
 
   const getCurrentLocation = useCallback(async (map: google.maps.Map | null) => {
     if (!map) return;
@@ -24,27 +25,25 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
         }
       }
 
-      // Get current position using Capacitor
-      const position = await Geolocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      });
+      // First try to get an initial position with relaxed settings
+      try {
+        const initialPosition = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: false,
+          timeout: 15000,
+          maximumAge: 60000 // Allow cached position up to 1 minute old
+        });
 
-      const newLocation = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
+        const initialLocation = {
+          lat: initialPosition.coords.latitude,
+          lng: initialPosition.coords.longitude
+        };
 
-      setUserLocation(newLocation);
-      setIsLocationEnabled(true);
+        setUserLocation(initialLocation);
+        setIsLocationEnabled(true);
 
-      // Update or create marker
-      if (userLocationMarker) {
-        userLocationMarker.setPosition(newLocation);
-      } else {
+        // Create initial marker
         const marker = new google.maps.Marker({
-          position: newLocation,
+          position: initialLocation,
           map: map,
           icon: {
             path: google.maps.SymbolPath.CIRCLE,
@@ -57,24 +56,93 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
           title: 'Your Location'
         });
         setUserLocationMarker(marker);
+      } catch (initialError) {
+        console.warn('Initial position failed, will wait for watch:', initialError);
       }
+
+      // Start watching position for real-time updates with more relaxed settings
+      const id = await Geolocation.watchPosition(
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 5000 // Accept positions up to 5 seconds old
+        },
+        (position, err) => {
+          if (err) {
+            // Only log POSITION_UNAVAILABLE errors, don't show them to user if we have a position
+            if (err.code === 2) { // POSITION_UNAVAILABLE
+              console.warn('Location temporarily unavailable:', err.message);
+              // Don't set error if we already have a location
+              if (!userLocation) {
+                setLocationError('Searching for GPS signal...');
+              }
+              return;
+            }
+
+            const errorMessage = `Location error: ${err.message || 'Unknown error'}`;
+            setLocationError(errorMessage);
+            console.error('Geolocation error:', err);
+            return;
+          }
+
+          if (position) {
+            const newLocation = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude
+            };
+
+            setUserLocation(newLocation);
+            setIsLocationEnabled(true);
+            setLocationError(null); // Clear any previous errors
+
+            // Update or create marker
+            setUserLocationMarker((prevMarker) => {
+              if (prevMarker) {
+                prevMarker.setPosition(newLocation);
+                return prevMarker;
+              } else {
+                const marker = new google.maps.Marker({
+                  position: newLocation,
+                  map: map,
+                  icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 8,
+                    fillColor: '#4285F4',
+                    fillOpacity: 1,
+                    strokeColor: '#FFFFFF',
+                    strokeWeight: 2
+                  },
+                  title: 'Your Location'
+                });
+                return marker;
+              }
+            });
+          }
+        }
+      );
+
+      setWatchId(id);
     } catch (error: any) {
       const errorMessage = `Location error: ${error.message || 'Unknown error'}`;
       setLocationError(errorMessage);
       console.error('Geolocation error:', error);
     }
-  }, [userLocationMarker]);
+  }, []);
 
   const centerOnUserLocation = useCallback((map: google.maps.Map | null) => {
     if (map && userLocation) {
       map.setCenter(userLocation);
-      map.setZoom(16);
+      map.setZoom(20);
     }
   }, [userLocation]);
 
-  const toggleLocationTracking = useCallback((map: google.maps.Map | null) => {
+  const toggleLocationTracking = useCallback(async (map: google.maps.Map | null) => {
     if (isLocationEnabled) {
       // Disable location
+      if (watchId) {
+        await Geolocation.clearWatch({ id: watchId });
+        setWatchId(null);
+      }
       if (userLocationMarker) {
         userLocationMarker.setMap(null);
         setUserLocationMarker(null);
@@ -86,7 +154,7 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
       // Enable location
       getCurrentLocation(map);
     }
-  }, [isLocationEnabled, userLocationMarker, getCurrentLocation]);
+  }, [isLocationEnabled, watchId, userLocationMarker, getCurrentLocation]);
 
   // Automatically get user location when map is available (only on mobile/tablet devices)
   useEffect(() => {
@@ -104,6 +172,17 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
       });
     }
   }, [map, userLocation, isLocationEnabled, locationError, getCurrentLocation]);
+
+  // Cleanup watch on unmount
+  useEffect(() => {
+    return () => {
+      if (watchId) {
+        Geolocation.clearWatch({ id: watchId }).catch(error => {
+          console.error('Failed to clear watch on unmount:', error);
+        });
+      }
+    };
+  }, [watchId]);
 
   return {
     userLocation,

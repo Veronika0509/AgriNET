@@ -16,11 +16,23 @@ export const createMap = (
       disableDefaultUI: true,
       // Re-enable only the controls we want
       zoomControl: true,
+      zoomControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_BOTTOM,
+      },
       mapTypeControl: true,
+      mapTypeControlOptions: {
+        position: google.maps.ControlPosition.TOP_LEFT,
+      },
       scaleControl: true,
       streetViewControl: true,
+      streetViewControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_BOTTOM,
+      },
       rotateControl: true,
       fullscreenControl: true,
+      fullscreenControlOptions: {
+        position: google.maps.ControlPosition.RIGHT_TOP,
+      },
       // Note: By not including any location/geolocation control, the built-in location button is disabled
     });
     setMap(initMap);

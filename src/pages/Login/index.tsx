@@ -39,13 +39,16 @@ const Login: React.FC<LoginProps> = (props) => {
         if (response.data.role) {
           localStorage.setItem('userRole', response.data.role);
         }
+        if (response.data.id) {
+          localStorage.setItem('userId', response.data.id.toString());
+        }
 
         // Store the complete user data object as JSON
         localStorage.setItem('userData', JSON.stringify(response.data));
       }
 
-      props.setPage(1);
-      history.push('/map');
+      props.setPage(0);
+      history.push('/menu');
       props.setUserId(response.data.id as UserId);
     }).catch(() => {
       setMessage(true)

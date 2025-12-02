@@ -35,6 +35,7 @@ import '@ionic/react/css/display.css';
 import React, {useEffect} from "react";
 import Preloader from "./pages/Login/components/Preloader";
 import Login from "./pages/Login";
+import Menu from "./pages/Menu";
 import Info from "./pages/Info";
 import Map from "./pages/Map";
 import Chart from "./pages/Chart";
@@ -77,10 +78,28 @@ const AppContent: React.FC = () => {
   } = useAppContext();
 
   const history = useHistory();
+  const [isInitialLoad, setIsInitialLoad] = React.useState(true);
 
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);
-    history.push('/AgriNET/login');
+
+    // Check for stored session
+    const storedUserId = localStorage.getItem('userId');
+    const storedUserData = localStorage.getItem('userData');
+
+    if (storedUserId && storedUserData) {
+      // User has a stored session, auto-login
+      setUserId(parseInt(storedUserId) as UserId);
+      history.push('/AgriNET/menu');
+    } else {
+      // No stored session, go to login
+      history.push('/AgriNET/login');
+    }
+
+    // Mark initial load as complete after a short delay
+    setTimeout(() => {
+      setIsInitialLoad(false);
+    }, 1500);
   }, []);
 
   return (
@@ -90,12 +109,15 @@ const AppContent: React.FC = () => {
           <div>
             {page === 0
               ? <div>
-                <Preloader/>
+                {isInitialLoad && <Preloader/>}
                 <IonReactRouter basename="/AgriNET">
                   <IonTabs>
                     <IonRouterOutlet>
                       <Route exact path="/login">
                         <Login setPage={setPage} setUserId={setUserId}/>
+                      </Route>
+                      <Route exact path="/menu">
+                        <Menu setPage={setPage} />
                       </Route>
                       <Route exact path="/info">
                         <Info showHeader={true} />
