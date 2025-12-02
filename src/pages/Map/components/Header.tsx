@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react'
 import s from "../style.module.css";
-import {IonHeader, IonIcon, IonTitle, IonToolbar} from "@ionic/react";
-import {arrowBackOutline} from "ionicons/icons";
+import {IonHeader, IonIcon, IonTitle, IonToolbar, IonButtons} from "@ionic/react";
+import {arrowBackOutline, menuOutline} from "ionicons/icons";
 import { useHistory } from 'react-router-dom';
 
 interface HeaderProps {
@@ -11,6 +11,10 @@ interface HeaderProps {
   setPage: (page: number) => void;
   navigationHistory: string[];
   setNavigationHistory: (history: string[]) => void;
+  isMobileScreen?: boolean;
+  isLayerListVisible?: boolean;
+  hasLayersToShow?: boolean;
+  toggleLayerList?: () => void;
   [key: string]: unknown;
 }
 
@@ -57,6 +61,16 @@ const Header = (props: HeaderProps) => {
               icon={arrowBackOutline}
             ></IonIcon>
             <IonTitle>{props.isMarkerClicked ? `Fields of ${props.isMarkerClicked}` : 'Site Map'}</IonTitle>
+            {props.isMobileScreen && !props.isLayerListVisible && props.hasLayersToShow && props.toggleLayerList && (
+              <IonButtons slot='end'>
+                <IonIcon
+                  onClick={props.toggleLayerList}
+                  className={s.headerMenuIconButton}
+                  size='large'
+                  icon={menuOutline}
+                ></IonIcon>
+              </IonButtons>
+            )}
           </>
         )}
         {props.activeTab === 'info' && (

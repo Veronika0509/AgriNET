@@ -88,6 +88,14 @@ const MapPage: React.FC<MapProps> = (props) => {
   const mapRefFunc = useRef(null);
   const previousTabRef = useRef("map")
 
+  // Layer list state for mobile menu icon
+  const [layerListState, setLayerListState] = useState({
+    isMobileScreen: false,
+    isLayerListVisible: true,
+    hasLayersToShow: false,
+    toggleLayerList: () => {},
+  })
+
   // Keep layers state - it's shared with Map tab (using custom hook)
   const { layers, setLayers, layerMapping, setLayerMapping, isLoadingLayers } = useLayers()
 
@@ -583,6 +591,10 @@ const MapPage: React.FC<MapProps> = (props) => {
         setActiveTab={setActiveTab}
         navigationHistory={navigationHistory}
         setNavigationHistory={setNavigationHistory}
+        isMobileScreen={layerListState.isMobileScreen}
+        isLayerListVisible={layerListState.isLayerListVisible}
+        hasLayersToShow={layerListState.hasLayersToShow}
+        toggleLayerList={layerListState.toggleLayerList}
       />
       <IonContent className={s.ionContent} style={{ "--background": "white" }}>
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -604,6 +616,7 @@ const MapPage: React.FC<MapProps> = (props) => {
                 checkedLayers={checkedLayers}
                 setCheckedLayers={setCheckedLayers}
                 setActiveOverlays={setActiveOverlays}
+                onLayerStateChange={setLayerListState}
               />
             </div>
             {/* Render other tabs */}
