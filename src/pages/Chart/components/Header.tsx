@@ -36,16 +36,14 @@ const Header = (props: HeaderProps) => {
   const onBackClick = () => {
     if (props.type === 'chartPage') {
       if (props.setPage) {
-        // Clear ALL budget editor flags to prevent budget tab from opening on back navigation
         setOpenBudgetEditor(false);
         setReturnToMapTab(null);
         setBudgetEditorReturnPage(null);
-        // Set flag to force Map page to show the map tab
         setForceMapTab(true);
         back(props.setPage, history, returnToMapTab)
       }
     } else if (props.type === 'alarmPage') {
-      props.setAlarm?.(false)
+      props.setAlarm(false)
       if (props.alarmOddBack) {
         props.setAlarmOddBack?.(false)
         props.setChartPageType?.('valve')

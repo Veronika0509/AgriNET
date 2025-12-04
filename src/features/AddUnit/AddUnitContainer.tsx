@@ -283,6 +283,19 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
     }
   }, [activeTab, addUnitMap])
 
+  // Update map zoom when sites are loaded and a site is selected
+  useEffect(() => {
+    if (activeTab === "add" && addUnitMap && siteList.length > 0) {
+      const site = siteList.find((s) => s.name === selectedSite || s.name === selectedSiteForAddUnit)
+      if (site && site.lat && site.lng) {
+        // Set zoom to 16 for better visibility when a site is selected
+        addUnitMap.setZoom(16)
+        // Center on the selected site
+        addUnitMap.setCenter({ lat: site.lat, lng: site.lng })
+      }
+    }
+  }, [activeTab, addUnitMap, siteList, selectedSite, selectedSiteForAddUnit])
+
   // Fetch user site groups when navigating to Add Unit page
   useSiteGroups({
     activeTab,

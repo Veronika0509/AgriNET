@@ -10,6 +10,12 @@ export const getFreshSiteList = async (props: any) => {
 
   props.setSites(checkedSites)
 
+  // Early return if no sites with Moist layers
+  if (checkedSites.length === 0) {
+    console.log('No sites with Moist layers found')
+    return
+  }
+
   // Find the site that contains the current sensor if it's set
   let siteToUse = checkedSites[0]
   if (props.currentSensorId) {

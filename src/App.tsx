@@ -9,7 +9,7 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import {home, informationCircle} from 'ionicons/icons';
+import {home, informationCircle, settings} from 'ionicons/icons';
 import {loadGoogleApi} from "./functions/loadGoogleApiFunc";
 import {useHistory} from 'react-router-dom';
 
@@ -42,6 +42,9 @@ import Chart from "./pages/Chart";
 import TestOverlays from "./pages/TestOverlays";
 import VirtualValve from "./pages/VirtualValve";
 import AddValvePage from "./pages/AddValvePage";
+import CommentsPage from "./pages/Comments";
+import AddUnitPage from "./pages/AddUnit";
+import BudgetEditorPage from "./pages/BudgetEditor";
 import QRCodeScanner from "./components/QRCodeScanner";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import './App.css'
@@ -117,10 +120,34 @@ const AppContent: React.FC = () => {
                         <Login setPage={setPage} setUserId={setUserId}/>
                       </Route>
                       <Route exact path="/menu">
-                        <Menu setPage={setPage} />
+                        <Menu setPage={setPage} userId={userId} />
+                      </Route>
+                      <Route exact path="/comments">
+                        <CommentsPage userId={userId} setPage={setPage} />
+                      </Route>
+                      <Route exact path="/addunit">
+                        <AddUnitPage
+                          userId={userId}
+                          siteList={siteList}
+                          setSiteList={setSiteList}
+                          selectedSiteForAddUnit={selectedSiteForAddUnit}
+                          setSelectedSiteForAddUnit={setSelectedSiteForAddUnit}
+                          setSelectedMoistureSensor={setSelectedMoistureSensor}
+                          setPage={setPage}
+                          isGoogleApiLoaded={isGoogleApiLoaded}
+                        />
+                      </Route>
+                      <Route exact path="/budget">
+                        <BudgetEditorPage
+                          userId={userId}
+                          siteList={siteList}
+                          setSiteList={setSiteList}
+                          isGoogleApiLoaded={isGoogleApiLoaded}
+                          setPage={setPage}
+                        />
                       </Route>
                       <Route exact path="/info">
-                        <Info showHeader={true} />
+                        <Info showHeader={true} setPage={setPage} />
                       </Route>
                       <Route exact path="/test-overlays">
                         <TestOverlays />
@@ -148,8 +175,11 @@ const AppContent: React.FC = () => {
                       </Route>
                     </IonRouterOutlet>
                     <IonTabBar slot="bottom">
-                      <IonTabButton tab="login" layout="icon-start" href="/login">
+                      <IonTabButton tab="menu" layout="icon-start" href="/menu">
                         <IonIcon icon={home}/>
+                      </IonTabButton>
+                      <IonTabButton tab="budget" href="/budget">
+                        <IonIcon icon={settings}/>
                       </IonTabButton>
                       <IonTabButton tab="info" href="/info">
                         <IonIcon icon={informationCircle}/>
@@ -191,7 +221,46 @@ const AppContent: React.FC = () => {
                           userId={userId}
                         />
                       </div>
-                    : null
+                    : page === 5
+                      ? <div>
+                          <IonReactRouter basename="/AgriNET">
+                            <Route path="/comments">
+                              <CommentsPage userId={userId} setPage={setPage} />
+                            </Route>
+                          </IonReactRouter>
+                        </div>
+                      : page === 6
+                        ? <div>
+                            <IonReactRouter basename="/AgriNET">
+                              <Route path="/addunit">
+                                <AddUnitPage
+                                  userId={userId}
+                                  siteList={siteList}
+                                  setSiteList={setSiteList}
+                                  selectedSiteForAddUnit={selectedSiteForAddUnit}
+                                  setSelectedSiteForAddUnit={setSelectedSiteForAddUnit}
+                                  setSelectedMoistureSensor={setSelectedMoistureSensor}
+                                  setPage={setPage}
+                                  isGoogleApiLoaded={isGoogleApiLoaded}
+                                />
+                              </Route>
+                            </IonReactRouter>
+                          </div>
+                        : page === 7
+                          ? <div>
+                              <IonReactRouter basename="/AgriNET">
+                                <Route path="/budget">
+                                  <BudgetEditorPage
+                                    userId={userId}
+                                    siteList={siteList}
+                                    setSiteList={setSiteList}
+                                    isGoogleApiLoaded={isGoogleApiLoaded}
+                                    setPage={setPage}
+                                  />
+                                </Route>
+                              </IonReactRouter>
+                            </div>
+                          : null
             }
           </div>
           <div style={{display: page === 1 ? 'block' : 'none'}}>

@@ -25,9 +25,8 @@ import {
 import SensorModal from "./components/modals/SensorModal"
 import { NewLayerModal } from "./components/modals/NewLayerModal"
 import { useHistory } from "react-router-dom"
-import { documentText, home, informationCircle, add, settings, cameraOutline } from "ionicons/icons"
+import { home, informationCircle, settings, cameraOutline } from "ionicons/icons"
 import type { Site, SensorData, ChartPageType, UserId, SiteId } from "../../types"
-import { AddUnitContainer } from "../../features/AddUnit"
 import type { LayerListLayer, SiteWithLayers, Coordinate } from "./types"
 import type { OverlayItem } from "./types/OverlayItem"
 import Header from "./components/Header"
@@ -40,7 +39,6 @@ import s from "./style.module.css"
 // Tab components
 import { MapTab } from "./components/tabs/MapTab"
 import { InfoTab } from "./components/tabs/InfoTab"
-import { CommentsTab } from "./components/tabs/CommentsTab"
 import { BudgetEditorTab } from "./components/tabs/BudgetEditorTab"
 // Custom hooks
 import { useUserLocation } from "./hooks/useUserLocation"
@@ -713,37 +711,8 @@ const MapPage: React.FC<MapProps> = (props) => {
             setActiveOverlays={setActiveOverlays}
           />
         )
-      case "budget":
-        return <BudgetEditorTab siteList={props.siteList} userId={props.userId} isGoogleApiLoaded={props.isGoogleApiLoaded} />
       case "info":
         return <InfoTab />
-      case "comments":
-        return <CommentsTab userId={props.userId} />
-      case "add":
-        return (
-          <AddUnitContainer
-            userId={props.userId}
-            siteList={props.siteList}
-            setSiteList={props.setSiteList}
-            selectedSiteForAddUnit={props.selectedSiteForAddUnit}
-            setSelectedSiteForAddUnit={props.setSelectedSiteForAddUnit}
-            setSelectedMoistureSensor={props.setSelectedMoistureSensor}
-            setPage={props.setPage}
-            isGoogleApiLoaded={props.isGoogleApiLoaded}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            setNavigationHistory={setNavigationHistory}
-            markers={markers}
-            setMarkers={setMarkers}
-            layers={layers}
-            setLayers={setLayers}
-            layerMapping={layerMapping}
-            setLayerMapping={setLayerMapping}
-            isLoadingLayers={isLoadingLayers}
-            showCreateNewSiteAlert={showCreateNewSiteAlert}
-            showCreateNewLayerAlert={showCreateNewLayerAlert}
-          />
-        )
       default:
         return null
     }
@@ -768,8 +737,8 @@ const MapPage: React.FC<MapProps> = (props) => {
       <IonContent className={s.ionContent} style={{ "--background": "white" }}>
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           <div
-            className={activeTab === "map" ? undefined : activeTab === "add" ? undefined : s.contentWrapper}
-            style={{ flex: 1, marginBottom: "48px", position: "relative" }}
+            className={activeTab === "map" ? undefined : s.contentWrapper}
+            style={{ flex: 1, position: "relative" }}
           >
             {/* Keep map always mounted, just hide it */}
             <div style={{ display: activeTab === "map" ? "block" : "none", height: "100%", width: "100%" }}>
@@ -791,63 +760,6 @@ const MapPage: React.FC<MapProps> = (props) => {
             {/* Render other tabs */}
             {activeTab !== "map" && renderContent()}
           </div>
-          <IonSegment value={activeTab} className={s.appMenu}>
-            <IonSegmentButton
-              className={s.appMenuButton}
-              value="map"
-              onClick={() => {
-                setNavigationHistory((prev) => [...prev, "map"])
-                // Reset marker clicked state when clicking map tab (same as back arrow behavior)
-                // This ensures proper cleanup and return to site view
-                if (isMarkerClicked) {
-                  setIsMarkerClicked(false)
-                }
-                setActiveTab("map")
-              }}
-            >
-              <IonIcon icon={home} />
-            </IonSegmentButton>
-            <IonSegmentButton
-              className={s.appMenuButton}
-              value="comments"
-              onClick={() => {
-                setNavigationHistory((prev) => [...prev, "comments"])
-                // Reset marker clicked state when navigating to comments
-                // This ensures site markers are properly restored when returning to map
-                if (isMarkerClicked) {
-                  setIsMarkerClicked(false)
-                }
-                setActiveTab("comments")
-              }}
-            >
-              <IonIcon icon={documentText} />
-            </IonSegmentButton>
-            <IonSegmentButton
-              className={s.appMenuButton}
-              value="budget"
-              onClick={() => {
-                setNavigationHistory((prev) => [...prev, "budget"])
-                setActiveTab("budget")
-              }}
-            >
-              <IonIcon icon={settings} />
-            </IonSegmentButton>
-            <IonSegmentButton
-              className={s.appMenuButton}
-              value="add"
-              onClick={() => {
-                setNavigationHistory((prev) => [...prev, "add"])
-                setActiveTab("add")
-                // Reset marker clicked state when navigating to add unit
-                // This ensures proper cleanup and zoom restoration when returning to map
-                setIsMarkerClicked(false)
-                // Also clear secondMap to avoid any lingering site-specific state
-                setSecondMap(null)
-              }}
-            >
-              <IonIcon icon={add} />
-            </IonSegmentButton>
-          </IonSegment>
         </div>
 
         <SensorModal

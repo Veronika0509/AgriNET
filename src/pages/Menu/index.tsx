@@ -2,25 +2,48 @@ import {
   IonButton,
   IonContent,
   IonPage,
-  IonText,
   IonIcon,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
-import { mapOutline, logOutOutline } from 'ionicons/icons';
+import { logOutOutline } from 'ionicons/icons';
 import s from './style.module.css';
 import { useAppContext } from '../../context/AppContext';
 
 interface MenuProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
+  userId: any;
 }
 
 const Menu: React.FC<MenuProps> = (props) => {
   const history = useHistory();
   const { logout } = useAppContext();
 
+  // Get username from localStorage
+  const userData = localStorage.getItem('userData');
+  const username = userData ? JSON.parse(userData).name : 'User';
+
   const navigateToMap = () => {
     props.setPage(1);
     history.push('/map');
+  };
+
+  const navigateToComments = () => {
+    props.setPage(5);
+    history.push('/comments');
+  };
+
+  const navigateToAddUnit = () => {
+    props.setPage(6);
+    history.push('/addunit');
+  };
+
+  const navigateToInfo = () => {
+    props.setPage(0);
+    history.push('/info');
   };
 
   const handleLogout = () => {
@@ -30,32 +53,52 @@ const Menu: React.FC<MenuProps> = (props) => {
 
   return (
     <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle slot="start">{username}</IonTitle>
+          <IonButtons slot="end">
+            <IonButton fill="clear" onClick={handleLogout}>
+              Logout
+              <IonIcon slot="end" icon={logOutOutline} />
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
       <IonContent className={s.content}>
         <div className={s.container}>
-          <IonText>
-            <h1 className={s.title}>Welcome to AgriNET</h1>
-          </IonText>
-
-          <div className={s.menuButtons}>
+          <div className={s.menuGrid}>
+            <div className={s.menuRow}>
+              <IonButton
+                className={s.menuBlock}
+                onClick={navigateToMap}
+              >
+                Map
+              </IonButton>
+              <IonButton
+                className={s.menuBlock}
+                onClick={navigateToComments}
+              >
+                Comments
+              </IonButton>
+            </div>
+            <div className={s.menuRow}>
+              <IonButton
+                className={s.menuBlock}
+                onClick={navigateToAddUnit}
+              >
+                Add Unit
+              </IonButton>
+              <IonButton
+                className={s.menuBlock}
+              >
+                Block 4
+              </IonButton>
+            </div>
             <IonButton
-              expand="block"
-              size="large"
-              className={s.menuButton}
-              onClick={navigateToMap}
+              className={`${s.menuBlockWide} ${s.menuBlock}`}
+              onClick={navigateToInfo}
             >
-              <IonIcon slot="start" icon={mapOutline} />
-              Map
-            </IonButton>
-
-            <IonButton
-              expand="block"
-              size="large"
-              color="danger"
-              className={s.menuButton}
-              onClick={handleLogout}
-            >
-              <IonIcon slot="start" icon={logOutOutline} />
-              Logout
+              AgriNET Contact
             </IonButton>
           </div>
         </div>

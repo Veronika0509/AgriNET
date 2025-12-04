@@ -64,26 +64,39 @@ const BudgetEditor = ({ previousPage, initialSensorId, ...props }: BudgetEditorP
   }, [props.userId]);
 
   useEffect(() => {
-    getFreshSiteList({
-      siteList: props.siteList,
-      setSites,
-      setCurrentSite,
-      setMoistSensors,
-      setCurrentSensorId,
-      setMap,
-      mapRef,
-      currentAmountOfDays,
-      currentSensorId,
-      setChartData,
-      setDataExists
-    })
-    setCurrentAmountOfDays(14)
+    // Only run if we have sites loaded AND Google Maps API is loaded
+    if (props.siteList && props.siteList.length > 0 && props.isGoogleApiLoaded && mapRef.current) {
+      getFreshSiteList({
+        siteList: props.siteList,
+        setSites,
+        setCurrentSite,
+        setMoistSensors,
+        setCurrentSensorId,
+        setMap,
+        mapRef,
+        currentAmountOfDays,
+        currentSensorId,
+        setChartData,
+        setDataExists
+      })
+      setCurrentAmountOfDays(14)
+    }
     return () => {
       moistOverlaysRef.current.forEach((overlay) => overlay.setMap(null));
       moistOverlaysRef.current = [];
       setMoistOverlays([]);
     };
-  }, []);
+  }, [props.siteList, props.isGoogleApiLoaded]);
+  // Trigger map resize when map is created
+  useEffect(() => {
+    if (map) {
+      // Give the map a moment to render
+      setTimeout(() => {
+        window.google.maps.event.trigger(map, 'resize');
+      }, 100);
+    }
+  }, [map]);
+
   useEffect(() => {
     const overlaysExistInDOM = document.querySelector('[id^="overlay-b-"]');
     if (!overlaysExistInDOM && map && moistSensors.length > 0) {

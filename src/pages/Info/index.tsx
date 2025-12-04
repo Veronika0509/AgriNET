@@ -1,19 +1,35 @@
-import {IonContent, IonHeader, IonIcon, IonImg, IonPage, IonRow, IonText, IonTitle, IonToolbar} from '@ionic/react';
+import {IonContent, IonHeader, IonIcon, IonImg, IonPage, IonRow, IonText, IonTitle, IonToolbar, IonButtons, IonButton} from '@ionic/react';
 import s from './style.module.css'
 import Logo from '../../assets/images/logo.png'
-import {star} from "ionicons/icons";
+import {star, arrowBackOutline} from "ionicons/icons";
 import React from "react";
+import { useHistory } from 'react-router-dom';
 
 interface InfoProps {
   showHeader?: boolean;
+  setPage?: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const Info = (props: InfoProps) => {
+  const history = useHistory();
+
+  const handleBack = () => {
+    if (props.setPage) {
+      props.setPage(0);
+    }
+    history.push('/menu');
+  };
+
   return (
     <IonPage>
       {props.showHeader && (
         <IonHeader>
           <IonToolbar>
+            <IonButtons slot="start">
+              <IonButton onClick={handleBack}>
+                <IonIcon slot="icon-only" icon={arrowBackOutline} />
+              </IonButton>
+            </IonButtons>
             <IonTitle>About</IonTitle>
           </IonToolbar>
         </IonHeader>
