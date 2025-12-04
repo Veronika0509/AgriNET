@@ -52,6 +52,7 @@ import { useLayerCreation } from "./hooks/useLayerCreation"
 import { useMapBounds } from "./hooks/useMapBounds"
 import { useCollisionResolution } from "./hooks/useCollisionResolution"
 import { useMapVisibility } from "./hooks/useMapVisibility"
+import { useAppContext } from "../../context/AppContext"
 
 interface MapProps {
   page: number
@@ -76,17 +77,22 @@ interface MapProps {
 const MapPage: React.FC<MapProps> = (props) => {
   if (!props.reloadMapPage) {
   }
+  const { openBudgetEditor, setOpenBudgetEditor, budgetEditorReturnPage, setBudgetEditorReturnPage, setReturnToMapTab, returnToMapTab, originalMapTab, setOriginalMapTab, preservedIsMarkerClicked, setPreservedIsMarkerClicked, preservedSecondMap, setPreservedSecondMap, forceMapTab, setForceMapTab } = useAppContext()
+  const location = useHistory().location
   const present = useIonToast()
   const [presentAlert] = useIonAlert()
   const userRole = localStorage.getItem("userRole")
   const [presentEmptyNameAlert] = useIonAlert()
   const [activeTab, setActiveTab] = useState("map")
   const [navigationHistory, setNavigationHistory] = useState<string[]>(["map"])
+  const [hasOpenedBudgetEditor, setHasOpenedBudgetEditor] = useState(false)
   const [centerMarker, setCenterMarker] = useState<google.maps.Marker | null>(null)
   const [isMarkerClicked, setIsMarkerClicked] = useState(false)
   const [, setAreArraysUpdated] = useState(false)
   const mapRefFunc = useRef(null);
   const previousTabRef = useRef("map")
+  const previousPageRef = useRef(props.page)
+  const isHandlingBackNavRef = useRef(false)
 
   // Layer list state for mobile menu icon
   const [layerListState, setLayerListState] = useState({
@@ -334,6 +340,10 @@ const MapPage: React.FC<MapProps> = (props) => {
     if (activeOverlays.length !== 0) {
       CollisionResolver.resolve(activeOverlays)
     }
+    // Only create site markers if:
+    // 1. Map exists and site list is loaded
+    // 2. Markers array is empty
+    // Note: Create markers even when restoring, as they're needed for overlay recreation
     if (map && props.siteList.length > 0 && markers.length === 0) {
       // Map Site[] to SensorsGroupData[]
       const sitesAsSensorsGroupData = props.siteList.map((site: SiteWithLayers) => ({
@@ -387,11 +397,18 @@ const MapPage: React.FC<MapProps> = (props) => {
 
   // Fix map display after returning from overlay
   useEffect(() => {
-    // Only reset when switching TO map from another tab
+    // Only reset when switching TO map from another tab within the SAME page
+    // Don't reset when coming back from a different page (like chart page)
     const previousTab = previousTabRef.current
+    const previousPage = previousPageRef.current
     const isReturningToMap = activeTab === "map" && previousTab !== "map"
+    const isComingBackFromAnotherPage = props.page === 1 && previousPage !== 1
 
-    if (isReturningToMap && map && mapRef.current) {
+    // Don't reset if we have preserved state waiting to be restored
+    const hasPreservedState = preservedIsMarkerClicked && preservedSecondMap
+
+    // Don't reset if we're handling back navigation (forceMapTab just ran)
+    if (isReturningToMap && !isComingBackFromAnotherPage && !hasPreservedState && !isHandlingBackNavRef.current && map && mapRef.current) {
       // Clear all markers (both site and sensor markers)
       markers.forEach((marker: any) => {
         if (marker.setMap) {
@@ -422,9 +439,10 @@ const MapPage: React.FC<MapProps> = (props) => {
       })
     }
 
-    // Update previous tab reference
+    // Update previous tab and page references
     previousTabRef.current = activeTab
-  }, [activeTab, map])
+    previousPageRef.current = props.page
+  }, [activeTab, map, props.page, preservedIsMarkerClicked, preservedSecondMap])
 
   // GPS Location functions are now handled by useUserLocation hook
   // Wrapper for MapTab component that doesn't pass map parameter
@@ -525,6 +543,157 @@ const MapPage: React.FC<MapProps> = (props) => {
   }, [secondMap, props.siteList])
 
   // Initialize Add Unit map when Google API is loaded and activeTab is 'add'
+
+  // Force map tab when coming back from Chart page
+  useEffect(() => {
+    if (forceMapTab) {
+      // Force the active tab to 'map'
+      setActiveTab('map')
+      setNavigationHistory(['map'])
+      // Clear the flag
+      setForceMapTab(false)
+      // Prevent budget tab from opening
+      isHandlingBackNavRef.current = true
+      setTimeout(() => {
+        isHandlingBackNavRef.current = false
+      }, 300)
+    }
+  }, [forceMapTab, setForceMapTab])
+
+  // Navigate to budget editor when flag is set from Chart page
+  useEffect(() => {
+    // Only open budget editor if the flag is explicitly set AND we're not forcing map tab
+    if (openBudgetEditor && !isHandlingBackNavRef.current) {
+      setActiveTab("budget")
+      setNavigationHistory((prev) => [...prev, "budget"])
+      setHasOpenedBudgetEditor(true)
+      // Reset the flag after navigation
+      setOpenBudgetEditor(false)
+      // Only clear preserved state if we're opening budget editor directly from Map page
+      // If budgetEditorReturnPage is 'chart', we're coming from Chart page and need to keep preserved state
+      if (budgetEditorReturnPage !== 'chart' && (preservedIsMarkerClicked || preservedSecondMap)) {
+        setPreservedIsMarkerClicked(false)
+        setPreservedSecondMap(null)
+      }
+    }
+  }, [openBudgetEditor, setOpenBudgetEditor, preservedIsMarkerClicked, preservedSecondMap, setPreservedIsMarkerClicked, setPreservedSecondMap, hasOpenedBudgetEditor, budgetEditorReturnPage])
+
+  // Reset budgetEditorReturnPage when leaving budget editor tab
+  // Only reset if we've actually opened the budget editor (to avoid resetting on initial mount)
+  useEffect(() => {
+    // Reset when:
+    // 1. Switching away from budget tab to another tab within map page (but NOT to another page)
+    const isLeavingBudgetTabWithinMapPage = activeTab !== "budget" && props.page === 1
+
+    if (isLeavingBudgetTabWithinMapPage && budgetEditorReturnPage && hasOpenedBudgetEditor) {
+      setBudgetEditorReturnPage(null)
+      setHasOpenedBudgetEditor(false)
+      // Only clear returnToMapTab when staying on map page, not when going to chart
+      if (returnToMapTab === 'budget') {
+        setReturnToMapTab(null)
+      }
+    }
+  }, [activeTab, props.page, budgetEditorReturnPage, hasOpenedBudgetEditor, returnToMapTab, setBudgetEditorReturnPage, setReturnToMapTab])
+
+  // Clear openBudgetEditor flag FIRST when returning from chart page
+  // This must run before other useEffects to prevent budget tab from opening
+  useEffect(() => {
+    const previousPage = previousPageRef.current
+    const isComingBackFromAnotherPage = props.page === 1 && previousPage !== 1
+
+    // Immediately clear the flag when returning via back button
+    if (isComingBackFromAnotherPage && openBudgetEditor) {
+      setOpenBudgetEditor(false)
+    }
+  }, [props.page, openBudgetEditor, setOpenBudgetEditor])
+
+  // Reset to original tab when returning from chart page (unless opening budget editor)
+  useEffect(() => {
+    // Skip this useEffect if we're currently handling back navigation
+    // The fromBack useEffect will handle tab setting
+    if (isHandlingBackNavRef.current) {
+      return
+    }
+
+    const params = new URLSearchParams(location.search)
+    const tab = params.get('tab')
+    const fromBack = params.get('fromBack')
+    const previousPage = previousPageRef.current
+    const isComingBackFromAnotherPage = props.page === 1 && previousPage !== 1
+
+    // Skip if fromBack parameter is present - let the other useEffect handle it
+    if (fromBack) {
+      return
+    }
+
+    // If there's a tab parameter in the URL, use it
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab)
+      setNavigationHistory((prev) => [...prev, tab])
+      // Clear the query parameter from URL after reading
+      setReturnToMapTab(null)
+      // Remove the query parameter from the URL
+      history.replace('/map')
+    }
+    // When returning from chart page, always restore to the map tab
+    else if (isComingBackFromAnotherPage) {
+      // Always restore to 'map' tab when clicking back from chart
+      if (activeTab !== 'map') {
+        setActiveTab('map')
+        setNavigationHistory(['map'])
+      }
+
+      // Clear all restoration flags after restoring
+      if (originalMapTab) {
+        setOriginalMapTab(null)
+      }
+      if (returnToMapTab) {
+        setReturnToMapTab(null)
+      }
+      if (budgetEditorReturnPage) {
+        setBudgetEditorReturnPage(null)
+      }
+    }
+  }, [location.search, activeTab, history, returnToMapTab, props.page, hasOpenedBudgetEditor, preservedIsMarkerClicked, preservedSecondMap, originalMapTab, setOriginalMapTab, budgetEditorReturnPage, setBudgetEditorReturnPage, setReturnToMapTab])
+
+  // Save isMarkerClicked, secondMap, and activeTab when navigating away from map page
+  useEffect(() => {
+    const isLeavingMapPage = props.page !== 1
+    const previousPage = previousPageRef.current
+
+    if (isLeavingMapPage && previousPage === 1) {
+      // Save the current active tab when first leaving map page to chart
+      setOriginalMapTab(activeTab)
+
+      if (isMarkerClicked) {
+        setPreservedIsMarkerClicked(true)
+        setPreservedSecondMap(secondMap)
+      }
+    }
+  }, [props.page, isMarkerClicked, secondMap, activeTab, setPreservedIsMarkerClicked, setPreservedSecondMap, setOriginalMapTab])
+
+  // Restore isMarkerClicked and secondMap state when returning from chart page
+  useEffect(() => {
+    const previousPage = previousPageRef.current
+    const isComingBackFromAnotherPage = props.page === 1 && previousPage !== 1
+
+    // Only restore when coming back to map page and not actively opening budget editor
+    const isNavigatingToBudgetTab = openBudgetEditor
+
+    if (isComingBackFromAnotherPage && preservedIsMarkerClicked && preservedSecondMap && !isNavigatingToBudgetTab) {
+      // Extract the site name from preservedSecondMap
+      const siteName = typeof preservedSecondMap === 'string' ? preservedSecondMap : preservedSecondMap?.getDiv?.()?.id || ''
+
+      // Just restore the state without recreating overlays
+      // The overlays should still be in memory if the map stayed mounted
+      setIsMarkerClicked(siteName)
+      setSecondMap(preservedSecondMap)
+
+      // Clear preserved state immediately after restoring
+      setPreservedIsMarkerClicked(false)
+      setPreservedSecondMap(null)
+    }
+  }, [props.page, preservedIsMarkerClicked, preservedSecondMap, openBudgetEditor, setPreservedIsMarkerClicked, setPreservedSecondMap])
 
   const renderContent = () => {
     switch (activeTab) {

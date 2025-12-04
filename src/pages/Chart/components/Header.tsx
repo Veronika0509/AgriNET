@@ -6,6 +6,7 @@ import {useHistory} from "react-router-dom";
 import {addOutline} from "ionicons/icons";
 import {timeOutline} from "ionicons/icons";
 import {settings} from "ionicons/icons";
+import {useAppContext} from "../../../context/AppContext";
 
 interface HeaderProps {
   type: 'chartPage' | 'alarmPage' | 'valveArchiveModal' | 'valveSettingsModal' | 'valveCreateModal' | 'addValveModal'
@@ -30,11 +31,18 @@ interface HeaderProps {
 
 const Header = (props: HeaderProps) => {
   const history = useHistory();
+  const { returnToMapTab, setOpenBudgetEditor, setReturnToMapTab, setBudgetEditorReturnPage, setForceMapTab } = useAppContext();
 
   const onBackClick = () => {
     if (props.type === 'chartPage') {
       if (props.setPage) {
-        back(props.setPage, history)
+        // Clear ALL budget editor flags to prevent budget tab from opening on back navigation
+        setOpenBudgetEditor(false);
+        setReturnToMapTab(null);
+        setBudgetEditorReturnPage(null);
+        // Set flag to force Map page to show the map tab
+        setForceMapTab(true);
+        back(props.setPage, history, returnToMapTab)
       }
     } else if (props.type === 'alarmPage') {
       props.setAlarm?.(false)

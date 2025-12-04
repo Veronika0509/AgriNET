@@ -3,6 +3,7 @@ import s from "../style.module.css";
 import {IonHeader, IonIcon, IonTitle, IonToolbar, IonButtons} from "@ionic/react";
 import {arrowBackOutline, menuOutline} from "ionicons/icons";
 import { useHistory } from 'react-router-dom';
+import { useAppContext } from '../../../context/AppContext';
 
 interface HeaderProps {
   isMarkerClicked: boolean;
@@ -20,6 +21,8 @@ interface HeaderProps {
 
 const Header = (props: HeaderProps) => {
   const history = useHistory();
+  const { budgetEditorReturnPage, setBudgetEditorReturnPage, setReturnToMapTab } = useAppContext();
+
   const back = () => {
     if (props.isMarkerClicked) {
       props.setIsMarkerClicked(false)
@@ -31,6 +34,15 @@ const Header = (props: HeaderProps) => {
     }
   };
   const onBudgetEditorBack = () => {
+    // Check if we should navigate back to the chart page
+    if (budgetEditorReturnPage === 'chart') {
+      setBudgetEditorReturnPage(null);
+      // Don't clear returnToMapTab here - the chart page needs it for its back button
+      props.setPage(2);
+      history.push('/AgriNET/chart');
+      return;
+    }
+
     if (props.navigationHistory.length > 1) {
       const newHistory = [...props.navigationHistory];
       newHistory.pop()

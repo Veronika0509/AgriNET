@@ -11,20 +11,22 @@ import {getNewData} from "./functions/getNewData";
 import {getFreshSiteList} from "./functions/getFreshSiteList";
 import {updateSite} from "./functions/updateSite";
 import {onIncreaseDaysCountClick} from "./functions/onIncreaseDaysCountClick";
+import axios from 'axios';
 
 interface BudgetEditorProps {
   previousPage?: string;
   siteList: unknown[];
   userId: string | number;
   isGoogleApiLoaded: boolean;
+  initialSensorId?: string | number | null;
   [key: string]: unknown;
 }
 
-const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
+const BudgetEditor = ({ previousPage, initialSensorId, ...props }: BudgetEditorProps) => {
   const [sites, setSites] = useState<unknown[]>([])
   const [currentSite, setCurrentSite] = useState<string | undefined>()
   const [moistSensors, setMoistSensors] = useState<unknown[]>([])
-  const [currentSensorId, setCurrentSensorId] = useState<string | number | undefined>()
+  const [currentSensorId, setCurrentSensorId] = useState<string | number | undefined>(initialSensorId || undefined)
   const [chartData, setChartData] = useState<{ data?: unknown[]; budgetLines?: unknown[] }>({})
   const chartRoot = useRef<unknown>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -36,6 +38,30 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
   const [presentAlert] = useIonAlert();
   const [presentErrorAlert] = useIonAlert();
   const [currentAmountOfDays, setCurrentAmountOfDays] = useState(0)
+  const [userSiteGroups, setUserSiteGroups] = useState<unknown[]>([])
+
+  // Fetch user site groups on mount
+  useEffect(() => {
+    const fetchUserSiteGroups = async () => {
+      try {
+        const response = await axios.get('https://app.agrinet.us/api/add-unit/user-site-groups', {
+          params: {
+            v: 43,
+            userId: props.userId
+          }
+        });
+        setUserSiteGroups(response.data);
+        console.log('User site groups:', response.data);
+        console.log(props.siteList)
+      } catch (error) {
+        console.error('Error fetching user site groups:', error);
+      }
+    };
+
+    if (props.userId) {
+      fetchUserSiteGroups();
+    }
+  }, [props.userId]);
 
   useEffect(() => {
     getFreshSiteList({

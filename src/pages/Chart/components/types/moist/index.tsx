@@ -27,6 +27,8 @@ import { getAddCommentItemShowed } from "../../../functions/types/moist/getAddCo
 import { handleResizeForChartLegend } from "../../../functions/types/moist/handleResizeForChartLegend"
 import {getDaysFromChartData} from "../../../functions/getDaysFromChartData";
 import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
+import { useAppContext } from "../../../../../context/AppContext";
+import { useHistory } from 'react-router-dom';
 
 // Define TypeScript interfaces
 interface ChartData {
@@ -112,6 +114,9 @@ interface MoistChartPageProps {
 }
 
 export const MoistChartPage = (props: MoistChartPageProps) => {
+  const { setPage, setOpenBudgetEditor, setSelectedSensorIdForBudgetEditor, setBudgetEditorReturnPage, setReturnToMapTab } = useAppContext();
+  const history = useHistory();
+
   // Chart refs
   const root = useRef<HTMLDivElement>(null)
   const batteryRoot = useRef<HTMLDivElement>(null)
@@ -970,6 +975,17 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
                 />
                 <IonButton className={s.autowaterButton} onClick={() => props.setAutowater(true)}>
                   Autowater
+                </IonButton>
+                <IonButton className={s.autowaterButton} onClick={() => {
+                  setSelectedSensorIdForBudgetEditor(props.sensorId);
+                  setBudgetEditorReturnPage('chart');
+                  // DON'T overwrite returnToMapTab - keep the original tab saved when first navigating to chart
+                  setReturnToMapTab('budget');  // This tells map page to open budget editor
+                  setOpenBudgetEditor(true);
+                  setPage(1);
+                  history.push('/map');
+                }}>
+                  Budget Lines Editor
                 </IonButton>
               </div>
 

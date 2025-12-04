@@ -14,6 +14,14 @@ export interface AppState {
   // Page navigation
   page: number
   mapPageKey: number
+  openBudgetEditor: boolean
+  selectedSensorIdForBudgetEditor: string | number | null
+  budgetEditorReturnPage: 'chart' | 'map' | null
+  returnToMapTab: string | null
+  originalMapTab: string | null
+  preservedIsMarkerClicked: boolean
+  preservedSecondMap: any
+  forceMapTab: boolean
 
   // User data
   userId: UserId
@@ -41,6 +49,14 @@ export interface AppActions {
   // Page navigation
   setPage: (page: number) => void
   setMapPageKey: (key: number | ((prev: number) => number)) => void
+  setOpenBudgetEditor: (open: boolean) => void
+  setSelectedSensorIdForBudgetEditor: (sensorId: string | number | null) => void
+  setBudgetEditorReturnPage: (page: 'chart' | 'map' | null) => void
+  setReturnToMapTab: (tab: string | null) => void
+  setOriginalMapTab: (tab: string | null) => void
+  setPreservedIsMarkerClicked: (value: boolean) => void
+  setPreservedSecondMap: (value: any) => void
+  setForceMapTab: (value: boolean) => void
 
   // User data
   setUserId: (userId: UserId) => void
@@ -98,6 +114,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [mapPageKey, setMapPageKey] = useState<number>(0)
   const [selectedSiteForAddUnit, setSelectedSiteForAddUnit] = useState<string>('')
   const [selectedMoistureSensor, setSelectedMoistureSensor] = useState<any>(null)
+  const [openBudgetEditor, setOpenBudgetEditor] = useState<boolean>(false)
+  const [selectedSensorIdForBudgetEditor, setSelectedSensorIdForBudgetEditor] = useState<string | number | null>(null)
+  const [budgetEditorReturnPage, setBudgetEditorReturnPage] = useState<'chart' | 'map' | null>(null)
+  const [returnToMapTab, setReturnToMapTab] = useState<string | null>(null)
+  const [originalMapTab, setOriginalMapTab] = useState<string | null>(null)
+  const [preservedIsMarkerClicked, setPreservedIsMarkerClicked] = useState<boolean>(false)
+  const [preservedSecondMap, setPreservedSecondMap] = useState<any>(null)
+  const [forceMapTab, setForceMapTab] = useState<boolean>(false)
 
   // Function to reload site list
   const handleReloadMapPage = useCallback(async () => {
@@ -149,6 +173,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     mapPageKey,
     selectedSiteForAddUnit,
     selectedMoistureSensor,
+    openBudgetEditor,
+    selectedSensorIdForBudgetEditor,
+    budgetEditorReturnPage,
+    returnToMapTab,
+    originalMapTab,
+    preservedIsMarkerClicked,
+    preservedSecondMap,
+    forceMapTab,
 
     // Actions
     setPage,
@@ -164,6 +196,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setMapPageKey,
     setSelectedSiteForAddUnit,
     setSelectedMoistureSensor,
+    setOpenBudgetEditor,
+    setSelectedSensorIdForBudgetEditor,
+    setBudgetEditorReturnPage,
+    setReturnToMapTab,
+    setOriginalMapTab,
+    setPreservedIsMarkerClicked,
+    setPreservedSecondMap,
+    setForceMapTab,
     reloadMapPage: handleReloadMapPage,
   }
 
