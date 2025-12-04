@@ -14,10 +14,7 @@ const Info = (props: InfoProps) => {
   const history = useHistory();
 
   const handleBack = () => {
-    if (props.setPage) {
-      props.setPage(0);
-    }
-    history.push('/menu');
+    history.goBack();
   };
 
   return (

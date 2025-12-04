@@ -57,8 +57,7 @@ const BudgetEditorPage: React.FC<BudgetEditorPageProps> = (props) => {
   }, [props.userId, props.siteList.length]);
 
   const handleBack = () => {
-    props.setPage(0);
-    history.push('/menu');
+    history.goBack();
   };
 
   return (
