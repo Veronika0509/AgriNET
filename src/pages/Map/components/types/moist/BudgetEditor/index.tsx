@@ -169,20 +169,79 @@ const BudgetEditor = ({ previousPage, initialSensorId, ...props }: BudgetEditorP
       });
     }
   }, [moistSensors, map]);
-  // create chart for overlays
+  // create chart for overlays - use polling to detect when overlays are ready
   useEffect(() => {
-    if (moistOverlays.length !== 0) {
-      const roots: any[] = [];
-      moistOverlaysRef.current.forEach((moistOverlay: any) => {
-        if (moistOverlay.isValidChartData && moistOverlay.toUpdate) {
-          createMoistChartForOverlay('b', moistOverlay.chartData, roots, moistOverlaysRef.current)
+    if (moistSensors.length === 0 || !map) return;
+
+    let isCancelled = false;
+    let pollInterval: NodeJS.Timeout;
+    const createdCharts = new Set<string>();
+
+    const checkAndCreateCharts = () => {
+      if (isCancelled) return;
+
+      const validOverlays = moistOverlaysRef.current.filter(
+        (overlay: any) => overlay.isValidChartData && overlay.toUpdate
+      );
+
+      validOverlays.forEach((moistOverlay: any) => {
+        const chartId = `b-${moistOverlay.chartData.id}`;
+
+        if (createdCharts.has(chartId)) {
+          return;
+        }
+
+        const chartElement = document.getElementById(chartId);
+
+        if (chartElement) {
+          try {
+            createMoistChartForOverlay('b', moistOverlay.chartData, [], moistOverlaysRef.current);
+            createdCharts.add(chartId);
+          } catch (error) {
+            console.error(`Error creating chart for ${chartId}:`, error);
+          }
         }
       });
-      return () => {
-        roots.forEach(root => root.dispose());
-      };
-    }
-  }, [moistOverlays]);
+
+      // Stop polling when all charts are created
+      if (createdCharts.size === validOverlays.length && validOverlays.length > 0) {
+        clearInterval(pollInterval);
+
+        // Update overlays multiple times to ensure charts become visible
+        const updateOverlays = () => {
+          moistOverlaysRef.current.forEach((overlay) => {
+            overlay.update(currentSensorId);
+          });
+        };
+
+        // Update immediately
+        updateOverlays();
+
+        // Update again after delays to catch any late renders
+        setTimeout(updateOverlays, 100);
+        setTimeout(updateOverlays, 300);
+        setTimeout(updateOverlays, 500);
+      }
+    };
+
+    // Start polling
+    pollInterval = setInterval(checkAndCreateCharts, 300);
+    // Also try immediately
+    setTimeout(checkAndCreateCharts, 100);
+
+    // Stop polling after 10 seconds
+    const timeout = setTimeout(() => {
+      if (!isCancelled) {
+        clearInterval(pollInterval);
+      }
+    }, 10000);
+
+    return () => {
+      isCancelled = true;
+      clearInterval(pollInterval);
+      clearTimeout(timeout);
+    };
+  }, [moistSensors, map, moistOverlays, currentSensorId]);
 
   useEffect(() => {
     if (currentAmountOfDays > 0) {

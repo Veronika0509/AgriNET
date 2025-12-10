@@ -144,9 +144,13 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
             this.div.addEventListener('mouseleave', this._onMouseLeave);
           }
 
+          // Always re-render for budget editor overlays to update loader state
           if (this.div && this.root) {
-            const shouldRender = !this.isValidChartData || (this.isValidChartData && this.isMoistMarkerChartDrawn);
+            // For budget editor overlays, always render
+            // For regular map overlays, only render when chart is ready
+            const shouldRender = this.prefix === 'b' || !this.isValidChartData || (this.isValidChartData && this.isMoistMarkerChartDrawn);
             if (shouldRender) {
+              console.log(`Rendering overlay ${this.chartData.id}, isMoistMarkerChartDrawn: ${this.isMoistMarkerChartDrawn}`);
               this.root.render(this.renderContent());
             }
           }
@@ -195,12 +199,20 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
                     ? '0 0 20px 10px rgba(255, 255, 0, 0.8)'
                     : 'none',
                   border: this.isCurrentOverlay ? '3px solid #ffff00' : '1px solid #000',
-                  background: this.borderColor
+                  background: this.borderColor,
+                  position: 'relative'
                 }}>
-                  <div style={{display: this.isMoistMarkerChartDrawn ? 'block' : 'none'}}
-                       id={`${this.prefix}-${String(this.chartData.id)}`} className={s.overlay_chart}></div>
+                  <div id={`${this.prefix}-${String(this.chartData.id)}`} className={s.overlay_chart}></div>
                   {this.isMoistMarkerChartDrawn ? null : (
-                    <div className={s.overlay_loader}></div>
+                    <div className={s.overlay_loader} style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: this.borderColor,
+                      zIndex: 10
+                    }}></div>
                   )}
                   <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>

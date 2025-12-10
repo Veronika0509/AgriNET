@@ -210,13 +210,11 @@ export const createMoistChartForOverlay = async (type: string, chartData: MoistC
   moistOverlays.map((overlay: MoistOverlay) => {
     if (type === 'm') {
       if (overlay.chartData.mainId === chartData.mainId) {
-
         overlay.isMoistMarkerChartDrawn = true
         overlay.update();
       }
     } else {
       if (overlay.chartData.id === chartData.id) {
-
         overlay.isMoistMarkerChartDrawn = true
         overlay.update();
       }
