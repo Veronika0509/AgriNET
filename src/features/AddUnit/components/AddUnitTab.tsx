@@ -290,7 +290,6 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
 
                   // Helper function to show moisture sensor selector
                   const showMoistureSensorSelector = (sensors: any[], siteName: string) => {
-                    console.log('showMoistureSensorSelector called with', sensors.length, 'sensors')
 
                     if (sensors.length === 0) {
                       presentAlert({
@@ -303,9 +302,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
 
                     // Show moisture sensor selector with radio buttons
                     // Use setTimeout to ensure previous alert is fully dismissed
-                    console.log('Setting timeout to show sensor selector...')
                     setTimeout(() => {
-                      console.log('Timeout fired, presenting sensor selector alert')
                       presentAlert({
                         header: 'Select Moisture sensor for new Valve',
                         inputs: sensors.map((sensor, index) => ({
@@ -322,10 +319,8 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                           {
                             text: 'OK',
                             handler: (selectedIndex: string) => {
-                              console.log('Sensor selected, index:', selectedIndex)
                               const sensorIndex = parseInt(selectedIndex, 10)
                               const selectedSensor = sensors[sensorIndex]
-                              console.log('Selected sensor:', selectedSensor)
                               // Sensor selected, save it and navigate to Virtual Valve page
                               setSelectedSiteForAddUnit(siteName)
                               setSelectedMoistureSensor?.(selectedSensor)
@@ -338,8 +333,6 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                   }
 
                   // Show ALL sites in the selector (not just sites with Moist sensors)
-                  console.log('Showing all sites:', siteList.length)
-                  console.log('Sites:', siteList.map((s: any) => s.name))
 
                   presentAlert({
                     header: 'Select Site',
@@ -354,20 +347,16 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                         text: 'Cancel',
                         role: 'cancel',
                         handler: () => {
-                          console.log('Site selection cancelled')
                         }
                       },
                       {
                         text: 'OK',
                         handler: (selectedIndex: string) => {
-                          console.log('Site selected, index:', selectedIndex)
                           const siteIndex = parseInt(selectedIndex, 10)
                           const selectedSiteData = siteList[siteIndex]
-                          console.log('Selected site data:', selectedSiteData)
 
                           // Get moist sensors for the selected site
                           const moistSensors = getMoistSensorsForSite(selectedSiteData)
-                          console.log('Number of moist sensors in site:', moistSensors.length)
 
                           // If no moist sensors, show error and prevent dialog from closing
                           if (moistSensors.length === 0) {
@@ -840,7 +829,6 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                     // and if we're switching away from it
                     if (newLayerConfigData && selectedLayer !== selectedLayerValue) {
                       // Find if the newly selected layer already existed (not the one we just created)
-                      console.log(layers)
                       const existingLayer = layers.find(
                         (layer) => (layer.value || layer.id) === selectedLayerValue,
                       )
@@ -936,7 +924,6 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                           value={moistLevel}
                           onIonInput={(e) => {
                             const inputValue = (e.target as HTMLIonInputElement).value
-                            console.log('Input value:', inputValue)
 
                             // If input is empty, don't show error
                             if (!inputValue || inputValue === "") {
@@ -948,11 +935,9 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
 
                             // Only allow digits - remove any non-digit characters
                             const digitsOnly = String(inputValue).replace(/\D/g, '')
-                            console.log('Digits only:', digitsOnly)
 
                             // If user tried to enter non-digits, show error immediately
                             if (digitsOnly === "") {
-                              console.log('Setting error: Only digits are allowed')
                               setMoistLevelError(true)
                               setMoistLevelErrorMessage("Only digits are allowed")
                               setMoistLevel(undefined)
@@ -967,11 +952,9 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                             }
                             setMoistLevel(v)
                             if (v < 1 || v > 12) {
-                              console.log('Setting error: out of range')
                               setMoistLevelError(true)
                               setMoistLevelErrorMessage("Input sensor count from 1 to 12")
                             } else {
-                              console.log('Valid input')
                               setMoistLevelError(false)
                               setMoistLevelErrorMessage("")
                             }

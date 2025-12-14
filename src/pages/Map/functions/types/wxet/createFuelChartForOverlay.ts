@@ -46,7 +46,6 @@ export const createFuelChartForOverlay = async (chartData: FuelChartData, roots:
       return;
     }
 
-    console.log(`Creating fuel chart for ${chartData.id}`);
 
   // Check if this element already has a root using amCharts registry
   const chartIdStr = chartData.id.toString();
@@ -56,7 +55,6 @@ export const createFuelChartForOverlay = async (chartData: FuelChartData, roots:
     if (existingRoot && existingRoot.dom && existingRoot.dom.id === chartIdStr) {
       // Check if the root's DOM is still attached to the document
       if (document.body.contains(existingRoot.dom)) {
-        console.log(`Root already exists for ${chartIdStr}, skipping creation but updating overlay state`);
 
         // Update overlay state even if chart already exists
         fuelOverlays.map((overlay: FuelOverlay) => {
@@ -69,7 +67,6 @@ export const createFuelChartForOverlay = async (chartData: FuelChartData, roots:
         return;
       } else {
         // Root exists but DOM is detached, dispose it and create a new one
-        console.log(`Root exists for ${chartIdStr} but DOM is detached, disposing and recreating`);
         existingRoot.dispose();
         break;
       }
@@ -171,7 +168,6 @@ export const createFuelChartForOverlay = async (chartData: FuelChartData, roots:
     }
   })
 
-  console.log(`Successfully created fuel chart for ${chartData.id}`)
   } catch (error) {
     console.error(`Error creating fuel chart for ${chartData.id}:`, error)
     // Don't update overlay state on error so it can potentially retry

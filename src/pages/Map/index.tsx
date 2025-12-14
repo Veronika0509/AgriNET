@@ -268,7 +268,6 @@ const MapPage: React.FC<MapProps> = (props) => {
 
         // Only fetch if siteList is empty (fallback)
         if (!sitesData || sitesData.length === 0) {
-          console.log("Site list empty, fetching as fallback...");
           const sites = await getSiteList(props.userId);
 
           // Check if API call failed

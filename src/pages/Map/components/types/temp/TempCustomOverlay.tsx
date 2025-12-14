@@ -104,7 +104,6 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
 
       renderContent() {
         if (this.isValidChartData && !this.chartData.freshness) {
-          console.log('chart data is valid but freshness id undefined', this.chartData.sensorId, this.chartData.freshness)
         }
         return (
           <div className={s.overlay_container}>

@@ -149,10 +149,6 @@ const VirtualValve: React.FC<VirtualValveProps> = ({
       // Allowed roles: Admin, Dealer, Superuser, User (NOT Demo)
       // Must also have Premium = true
       const allowedRoles = ['Admin', 'Dealer', 'Superuser', 'User'];
-      console.log("=== PERMISSION CHECK ===");
-      console.log("User Role:", userRole);
-      console.log("Is Premium:", isPremium);
-      console.log("Allowed Roles:", allowedRoles);
 
       // Check if user is Demo
       if (userRole === 'Demo') {
@@ -205,40 +201,6 @@ const VirtualValve: React.FC<VirtualValveProps> = ({
         return;
       }
 
-      console.log("✅ Permission check passed!");
-
-      // Console log ALL user fields from the server
-      console.log("\n=== COMPLETE USER DATA FROM SERVER ===");
-      if (userData) {
-        console.log("All user fields:");
-        Object.keys(userData).forEach(key => {
-          console.log(`  ${key}:`, userData[key]);
-        });
-        console.log("\nComplete userData object:", userData);
-      } else {
-        console.log("No userData found in localStorage");
-      }
-
-      console.log("\n=== USER ID (from prop) ===");
-      console.log("User ID:", userId);
-
-      // Log selected moisture sensor information
-      console.log("\n=== SELECTED MOISTURE SENSOR ===");
-      console.log("Selected Sensor:", selectedMoistureSensor);
-
-      // Log all form values
-      console.log("\n=== FORM VALUES ===");
-      console.log("Valve Name:", valveName);
-      console.log("Probe ID:", probeId);
-      console.log("Priority:", priority);
-      console.log("Setpoint Sensor:", setpointSensor);
-      console.log("Moisture Setpoint:", moistureSetpoint);
-      console.log("Duration:", duration);
-      console.log("Hours Ave:", hoursAve);
-      console.log("Start Delay:", startDelay);
-      console.log("Water Drain Time:", waterDrainTime);
-      console.log("Concurrent:", concurrent);
-
       // Map form values to API request format (convert strings to numbers)
       const requestBody = {
         probeId: probeId || "",
@@ -255,9 +217,6 @@ const VirtualValve: React.FC<VirtualValveProps> = ({
         waterDrainTime: Number(waterDrainTime) || 0,
         valvename: valveName || ""
       };
-
-      console.log("\n=== API REQUEST BODY (sending to server) ===");
-      console.log(JSON.stringify(requestBody, null, 2));
 
       const response = await fetch("https://app.agrinet.us/api/valve/settings?virtual=true", {
         method: "POST",
@@ -298,8 +257,6 @@ const VirtualValve: React.FC<VirtualValveProps> = ({
       }
 
       const responseData = await response.json();
-      console.log("\n=== API RESPONSE ===");
-      console.log(responseData);
 
       // Get the sensor ID from the response or use probe ID as fallback
       const sensorId = responseData?.id || responseData?.sensorId || probeId;
@@ -311,7 +268,6 @@ const VirtualValve: React.FC<VirtualValveProps> = ({
           {
             text: 'OK',
             handler: () => {
-              console.log("\n✅ Virtual valve created successfully.");
               // Return to Add Unit page
               setPage(1);
             }

@@ -150,7 +150,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
             // For regular map overlays, only render when chart is ready
             const shouldRender = this.prefix === 'b' || !this.isValidChartData || (this.isValidChartData && this.isMoistMarkerChartDrawn);
             if (shouldRender) {
-              console.log(`Rendering overlay ${this.chartData.id}, isMoistMarkerChartDrawn: ${this.isMoistMarkerChartDrawn}`);
               this.root.render(this.renderContent());
             }
           }
@@ -187,7 +186,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
           }
         }
         if (this.isValidChartData && !this.chartData.freshness) {
-          console.log('chart data is valid but freshness id undefined', this.chartData.sensorId, this.chartData.freshness)
         }
         return (
           <div className={s.overlay_container} onClick={onMarkerClick}

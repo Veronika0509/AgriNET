@@ -86,12 +86,10 @@ export const handleJSONQRData = (data: QRData, siteList: Site[], handlers: QRSca
   // Handle site name from QR data
   if (data.siteName || data.site) {
     const qrSiteName = data.siteName || data.site
-    console.log("Site Name from QR:", qrSiteName)
 
     const siteExists = siteList.some((site) => site.name.toLowerCase() === qrSiteName.toLowerCase())
 
     if (siteExists) {
-      console.log("Site exists, selecting:", qrSiteName)
       handlers.setSelectedSite(qrSiteName)
       handlers.setSelectedSiteForAddUnit(qrSiteName)
 
@@ -101,7 +99,6 @@ export const handleJSONQRData = (data: QRData, siteList: Site[], handlers: QRSca
         handlers.setUnitLongitude(String(site.lng))
       }
     } else {
-      console.log("Site does not exist, creating:", qrSiteName)
       handlers.handleCreateNewSite(qrSiteName)
     }
   }
@@ -202,12 +199,10 @@ export const handleKeyValueQRData = (decodedText: string, siteList: Site[], hand
 
   // Handle site name from QR data
   if (qrSiteName) {
-    console.log("Site Name from QR:", qrSiteName)
 
     const siteExists = siteList.some((site) => site.name.toLowerCase() === qrSiteName.toLowerCase())
 
     if (siteExists) {
-      console.log("Site exists, selecting:", qrSiteName)
       handlers.setSelectedSite(qrSiteName)
       handlers.setSelectedSiteForAddUnit(qrSiteName)
 
@@ -217,7 +212,6 @@ export const handleKeyValueQRData = (decodedText: string, siteList: Site[], hand
         handlers.setUnitLongitude(String(site.lng))
       }
     } else {
-      console.log("Site does not exist, creating:", qrSiteName)
       handlers.handleCreateNewSite(qrSiteName)
     }
   }

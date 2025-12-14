@@ -191,12 +191,10 @@ export const reloadAndLogChanges = async (options: {
   // Compare old and new site lists
   const newSites = siteList.filter((newSite: any) => !oldSiteList.some((oldSite: any) => oldSite.id === newSite.id))
   if (newSites.length > 0) {
-    console.log("New sites added:", newSites.length)
   }
 
   const removedSites = oldSiteList.filter((oldSite: any) => !siteList.some((newSite: any) => newSite.id === oldSite.id))
   if (removedSites.length > 0) {
-    console.log("Sites removed:", removedSites.length)
   }
 
   // Check for modified sites
@@ -207,7 +205,6 @@ export const reloadAndLogChanges = async (options: {
       const newLayers = newSite.layers || []
 
       if (oldLayers.length !== newLayers.length) {
-        console.log(`Site "${newSite.name}" layer count changed: ${oldLayers.length} → ${newLayers.length}`)
       }
 
       // Check each layer for new markers
@@ -219,21 +216,10 @@ export const reloadAndLogChanges = async (options: {
           const newMarkers = newLayer.markers || []
 
           if (oldMarkers.length !== newMarkers.length) {
-            console.log(
-              `Layer "${newLayer.name}" in site "${newSite.name}" marker count changed: ${oldMarkers.length} → ${newMarkers.length}`,
-            )
-
             const addedMarkers = newMarkers.filter(
               (newMarker: any) =>
                 !oldMarkers.some((oldMarker: any) => oldMarker.chartData?.sensorId === newMarker.chartData?.sensorId),
             )
-
-            if (addedMarkers.length > 0) {
-              console.log(`NEW MARKERS ADDED (${addedMarkers.length})`)
-              addedMarkers.forEach((marker: any) => {
-                console.log(`- Sensor ID: ${marker.chartData?.sensorId}`)
-              })
-            }
           }
         }
       })
@@ -249,7 +235,6 @@ export const reloadAndLogChanges = async (options: {
             (marker: any) => marker.chartData && marker.chartData.sensorId === fullSensorId,
           )
           if (foundMarker) {
-            console.log("Found new unit in site:", site.name, "layer:", layer.name)
           }
         }
       })
@@ -353,7 +338,6 @@ export const createUnit = async (
     }
 
     const result = await response.json()
-    console.log(unitData, result)
 
     // Check if the operation was successful
     if (result.success === false) {
@@ -425,11 +409,6 @@ export const createUnit = async (
         const invalidGroup = result.siteGroup || selectedSiteGroup
         const correctGroups = result.userSiteGroups || []
 
-        console.log("Setting siteGroupError state:", {
-          invalidGroup,
-          correctGroups,
-        })
-
         setTimeout(() => {
           setSiteGroupError({
             invalidGroup: invalidGroup,
@@ -486,7 +465,6 @@ export const createUnit = async (
             text: "Add next",
             handler: () => {
               clearFormFields(options)
-              console.log("Form cleared, ready for next unit")
             },
           },
         ],

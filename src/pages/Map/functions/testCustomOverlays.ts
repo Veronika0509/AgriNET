@@ -13,11 +13,9 @@ export const testCustomOverlays = (
   setChartPageType: (type: string) => void
 ) => {
   if (!map || !isGoogleApiLoaded) {
-    console.log('Map or Google API not loaded');
     return;
   }
 
-  console.log('Testing custom overlays...');
 
   // Test data for moisture sensor
   const testMoistData = {
@@ -71,7 +69,6 @@ export const testCustomOverlays = (
       );
 
       moistOverlay.setMap(map);
-      console.log('Moist overlay created and added to map');
     }
 
     // Create test temperature overlay
@@ -100,7 +97,6 @@ export const testCustomOverlays = (
       );
 
       tempOverlay.setMap(map);
-      console.log('Temp overlay created and added to map');
     }
 
   } catch (error) {

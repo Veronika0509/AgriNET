@@ -59,7 +59,6 @@ export const createSites = async (props: CreateSitesProps) => {
   if (props.markers.length === 0) {
     props.siteList.forEach((sensorsGroupData: SensorsGroupData) => {
       const el = template.cloneNode(true) as HTMLElement;
-      console.log(el)
       const groupMarker = new google.maps.marker.AdvancedMarkerElement({
         map: props.map,
         position: { lat: sensorsGroupData.lat, lng: sensorsGroupData.lng },

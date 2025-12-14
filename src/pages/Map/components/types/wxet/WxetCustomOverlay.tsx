@@ -103,7 +103,6 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
         const isBattery: boolean = this.chartData.data.battery !== undefined && this.chartData.data.battery !== null
         const isBatteryPercentage: boolean = this.chartData.data.batteryPercentage !== undefined && this.chartData.data.batteryPercentage !== null
         if (this.isValidData && !this.chartData.freshness) {
-          console.log('chart data is valid but freshness id undefined', this.chartData.sensorId, this.chartData.freshness)
         }
         return (
           <div className={s.overlay_wxetOverlay}>

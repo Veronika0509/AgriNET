@@ -98,7 +98,6 @@ export const createTempDataContainers = async (props: TempDataContainerProps) =>
         }
       }
       new Promise<void>((resolve: () => void) => {
-        // console.log(props.invalidChartData.length, updatedTempChartData.length)
         if (props.invalidChartData.length + updatedTempChartData.length === props.countTemp) {
           props.setInvalidTempChartDataContainer(props.invalidChartData)
           props.setTempChartDataContainer(updatedTempChartData)

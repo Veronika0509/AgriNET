@@ -273,7 +273,6 @@ export const handleToggleLayer = (options: ToggleLayerOptions) => {
   // This function would handle showing/hiding markers for a specific layer
   // The implementation depends on how markers are stored and managed
   // For now, we'll just log the toggle action
-  console.log(`Layer ${layerId} toggled to ${isChecked ? "visible" : "hidden"}`)
 
   // TODO: Implement actual layer visibility toggle logic
   // This would typically involve:

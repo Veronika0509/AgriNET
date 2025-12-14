@@ -100,16 +100,13 @@ export const MapTab: React.FC<MapTabProps> = ({
     const isMobile = screenWidth < 500
 
     if (isMobile && hasLayersToShow) {
-      console.log('Layer list is now visible. Will hide in 4 seconds. Screen width:', screenWidth)
       const hideTimer = setTimeout(() => {
-        console.log('Hiding layer list now')
         setIsLayerListVisible(false)
       }, 4000)
 
       return () => clearTimeout(hideTimer)
     } else if (!isMobile && hasLayersToShow) {
       // On desktop, always keep layer list visible
-      console.log('Screen width is >= 500px, layer list will stay visible. Width:', screenWidth)
       setIsLayerListVisible(true)
     }
   }, [hasLayersToShow])

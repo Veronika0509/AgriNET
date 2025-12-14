@@ -19,7 +19,6 @@ export const checkOverlay = async (id: string, overlays: Overlay[]): Promise<voi
       const element = document.getElementById(id)
 
       if (element) {
-        console.log(`Element ${id} found after ${attempts} attempt(s)`)
         resolve()
       } else if (attempts >= maxAttempts) {
         console.warn(`Element ${id} not found after ${maxAttempts} attempts. Giving up.`)

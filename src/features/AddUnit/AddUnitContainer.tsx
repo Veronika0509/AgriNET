@@ -209,7 +209,6 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
       addUnitMapRef.current &&
       !addUnitMap // Only create map if it doesn't exist
     ) {
-      console.log("Initializing Add Unit map...")
       try {
         // Determine center coordinates based on sites availability
         let centerCoords = { lat: 41.9106638, lng: -87.6828648 } // Chicago default
@@ -233,7 +232,6 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
           }
         }
 
-        console.log("Creating map with center:", centerCoords, "zoom:", zoomLevel)
 
         // Create the map
         const map = new window.google.maps.Map(addUnitMapRef.current, {
@@ -242,7 +240,6 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
           mapTypeId: window.google.maps.MapTypeId.SATELLITE,
         })
 
-        console.log("Map created successfully:", map)
 
         // Add listener for map movement to update coordinates
         map.addListener("center_changed", () => {
@@ -259,13 +256,11 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
         // Small delay to ensure map is properly rendered before centering
         setTimeout(() => {
           map.setCenter(centerCoords)
-          console.log("Map centered")
         }, 100)
       } catch (error) {
         console.error("Error initializing Add Unit map:", error)
       }
     } else if (activeTab !== "add" && addUnitMap) {
-      console.log("Cleaning up Add Unit map...")
       // Clean up map when leaving the tab
       setAddUnitMap(null)
     }
@@ -532,7 +527,6 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
 
   // QR Scanner success handler
   const handleQRScanSuccess = (decodedText: string) => {
-    console.log("QR Code scanned:", decodedText)
     setIsQRScanned(true)
     setShowQRScanner(false)
 
