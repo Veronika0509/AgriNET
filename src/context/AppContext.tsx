@@ -9,11 +9,21 @@ import { getSiteList } from '../pages/Map/data/getSiteList'
  * global access to main application data
  */
 
+// Navigation history entry
+export interface NavigationHistoryEntry {
+  path: string
+  page: number
+  timestamp: number
+}
+
 // Application state interface
 export interface AppState {
   // Page navigation
   page: number
   mapPageKey: number
+  budgetEditorReturnPage: 'chart' | 'menu' | null
+  budgetEditorNavigationStack: string[]
+  navigationHistory: NavigationHistoryEntry[]
 
   // User data
   userId: UserId
@@ -41,6 +51,13 @@ export interface AppActions {
   // Page navigation
   setPage: (page: number) => void
   setMapPageKey: (key: number | ((prev: number) => number)) => void
+  setBudgetEditorReturnPage: (page: 'chart' | 'menu' | null) => void
+  setBudgetEditorNavigationStack: (stack: string[]) => void
+  pushToBudgetEditorNavigationStack: (page: string) => void
+  popFromBudgetEditorNavigationStack: () => string | undefined
+  pushToNavigationHistory: (path: string, page: number) => void
+  popFromNavigationHistory: () => NavigationHistoryEntry | undefined
+  clearNavigationHistory: () => void
 
   // User data
   setUserId: (userId: UserId) => void
@@ -98,6 +115,43 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [mapPageKey, setMapPageKey] = useState<number>(0)
   const [selectedSiteForAddUnit, setSelectedSiteForAddUnit] = useState<string>('')
   const [selectedMoistureSensor, setSelectedMoistureSensor] = useState<any>(null)
+  const [budgetEditorReturnPage, setBudgetEditorReturnPage] = useState<'chart' | 'menu' | null>(null)
+  const [budgetEditorNavigationStack, setBudgetEditorNavigationStack] = useState<string[]>([])
+  const [navigationHistory, setNavigationHistory] = useState<NavigationHistoryEntry[]>([])
+
+  // Helper functions for navigation stack
+  const pushToBudgetEditorNavigationStack = useCallback((page: string) => {
+    setBudgetEditorNavigationStack(prev => [...prev, page])
+  }, [])
+
+  const popFromBudgetEditorNavigationStack = useCallback(() => {
+    let poppedPage: string | undefined
+    setBudgetEditorNavigationStack(prev => {
+      const newStack = [...prev]
+      poppedPage = newStack.pop()
+      return newStack
+    })
+    return poppedPage
+  }, [])
+
+  // Navigation history helper functions
+  const pushToNavigationHistory = useCallback((path: string, page: number) => {
+    setNavigationHistory(prev => [...prev, { path, page, timestamp: Date.now() }])
+  }, [])
+
+  const popFromNavigationHistory = useCallback(() => {
+    let poppedEntry: NavigationHistoryEntry | undefined
+    setNavigationHistory(prev => {
+      const newHistory = [...prev]
+      poppedEntry = newHistory.pop()
+      return newHistory
+    })
+    return poppedEntry
+  }, [])
+
+  const clearNavigationHistory = useCallback(() => {
+    setNavigationHistory([])
+  }, [])
 
   // Function to reload site list
   const handleReloadMapPage = useCallback(async () => {
@@ -149,6 +203,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     mapPageKey,
     selectedSiteForAddUnit,
     selectedMoistureSensor,
+    budgetEditorReturnPage,
+    budgetEditorNavigationStack,
+    navigationHistory,
 
     // Actions
     setPage,
@@ -164,6 +221,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setMapPageKey,
     setSelectedSiteForAddUnit,
     setSelectedMoistureSensor,
+    setBudgetEditorReturnPage,
+    setBudgetEditorNavigationStack,
+    pushToBudgetEditorNavigationStack,
+    popFromBudgetEditorNavigationStack,
+    pushToNavigationHistory,
+    popFromNavigationHistory,
+    clearNavigationHistory,
     reloadMapPage: handleReloadMapPage,
   }
 

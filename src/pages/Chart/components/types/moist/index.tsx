@@ -114,7 +114,7 @@ interface MoistChartPageProps {
 }
 
 export const MoistChartPage = (props: MoistChartPageProps) => {
-  const { setPage } = useAppContext();
+  const { setPage, setBudgetEditorReturnPage, pushToNavigationHistory } = useAppContext();
   const history = useHistory();
 
   // Chart refs
@@ -977,6 +977,8 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
                   Autowater
                 </IonButton>
                 <IonButton className={s.autowaterButton} onClick={() => {
+                  pushToNavigationHistory('/chart', 2);
+                  setBudgetEditorReturnPage('chart');
                   setPage(0);
                   history.push('/budget');
                 }}>

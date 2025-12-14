@@ -77,6 +77,7 @@ const AppContent: React.FC = () => {
     setSelectedSiteForAddUnit,
     setSelectedMoistureSensor,
     reloadMapPage,
+    pushToNavigationHistory,
   } = useAppContext();
 
   const history = useHistory();
@@ -164,13 +165,22 @@ const AppContent: React.FC = () => {
                       </Route>
                     </IonRouterOutlet>
                     <IonTabBar slot="bottom">
-                      <IonTabButton tab="menu" layout="icon-start" href="/menu">
+                      <IonTabButton tab="menu" layout="icon-start" href="/menu" onClick={() => {
+                        const currentPath = window.location.pathname.replace('/AgriNET', '');
+                        pushToNavigationHistory(currentPath, page);
+                      }}>
                         <IonIcon icon={home}/>
                       </IonTabButton>
-                      <IonTabButton tab="budget" href="/budget">
+                      <IonTabButton tab="budget" href="/budget" onClick={() => {
+                        const currentPath = window.location.pathname.replace('/AgriNET', '');
+                        pushToNavigationHistory(currentPath, page);
+                      }}>
                         <IonIcon icon={settings}/>
                       </IonTabButton>
-                      <IonTabButton tab="info" href="/info">
+                      <IonTabButton tab="info" href="/info" onClick={() => {
+                        const currentPath = window.location.pathname.replace('/AgriNET', '');
+                        pushToNavigationHistory(currentPath, page);
+                      }}>
                         <IonIcon icon={informationCircle}/>
                       </IonTabButton>
                     </IonTabBar>

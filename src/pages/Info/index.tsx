@@ -4,6 +4,7 @@ import Logo from '../../assets/images/logo.png'
 import {star, arrowBackOutline} from "ionicons/icons";
 import React from "react";
 import { useHistory } from 'react-router-dom';
+import { useAppContext } from '../../context/AppContext';
 
 interface InfoProps {
   showHeader?: boolean;
@@ -12,9 +13,28 @@ interface InfoProps {
 
 const Info = (props: InfoProps) => {
   const history = useHistory();
+  const { popFromNavigationHistory, setPage } = useAppContext();
 
   const handleBack = () => {
-    history.goBack();
+    const previousPage = popFromNavigationHistory();
+
+    if (previousPage) {
+      // Navigate to the previous page from our custom history
+      // First navigate with router
+      history.push(previousPage.path);
+
+      // Then set page state if different from current (page 0)
+      if (previousPage.page !== 0) {
+        if (props.setPage) {
+          props.setPage(previousPage.page);
+        } else {
+          setPage(previousPage.page);
+        }
+      }
+    } else {
+      // Fallback to browser history if our custom stack is empty
+      history.goBack();
+    }
   };
 
   return (
