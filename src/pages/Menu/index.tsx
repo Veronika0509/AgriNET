@@ -7,11 +7,14 @@ import {
   IonToolbar,
   IonTitle,
   IonButtons,
+  useIonToast,
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { logOutOutline } from 'ionicons/icons';
+import { useEffect } from 'react';
 import s from './style.module.css';
 import { useAppContext } from '../../context/AppContext';
+import { getSiteList } from '../Map/data/getSiteList';
 
 interface MenuProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -20,7 +23,8 @@ interface MenuProps {
 
 const Menu: React.FC<MenuProps> = (props) => {
   const history = useHistory();
-  const { logout } = useAppContext();
+  const { logout, setSiteList } = useAppContext();
+  const [present] = useIonToast();
 
   // Get username from localStorage
   const userData = localStorage.getItem('userData');
@@ -50,6 +54,35 @@ const Menu: React.FC<MenuProps> = (props) => {
     logout();
     history.push('/login');
   };
+
+  // Fetch site list when menu page loads
+  useEffect(() => {
+    const fetchSiteList = async () => {
+      if (!props.userId) return;
+
+      const sites = await getSiteList(props.userId);
+
+      // Check if API call failed
+      if ("success" in sites && sites.success === false) {
+        console.error("Failed to load sites:", sites.error);
+        present({
+          message: sites.error,
+          duration: 5000,
+          color: "danger",
+          position: "top",
+          buttons: ["Dismiss"],
+        });
+        // Set empty array to prevent crashes
+        setSiteList([]);
+        return;
+      }
+
+      // API call successful
+      setSiteList(sites.data);
+    };
+
+    fetchSiteList();
+  }, [props.userId, setSiteList, present]);
 
   return (
     <IonPage>

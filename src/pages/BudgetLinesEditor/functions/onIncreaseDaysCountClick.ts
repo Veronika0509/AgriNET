@@ -1,5 +1,5 @@
 import {setDays} from "./setDays";
-import s from '../../../../../style.module.css'
+import s from '../../Map/style.module.css'
 
 interface OnIncreaseDaysCountClickProps {
   presentAlert: (options: {

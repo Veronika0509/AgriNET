@@ -1,32 +1,31 @@
 import React, {useEffect, useRef, useState} from 'react';
-import s from '../../../../style.module.css'
-import {createBudgetChart} from "../../../../functions/types/moist/createBudgetChart";
-import {IonButton, IonIcon, IonSelect, IonSelectOption, useIonAlert} from "@ionic/react";
-import BudgetEditorLine from "./components/BudgetEditorLine";
-import {getMoistMarkerChartData} from "../../../../data/types/moist/getMoistMarkerChartData";
-import {initializeMoistCustomOverlay} from "../MoistCustomOverlay";
-import invalidChartDataImage from "../../../../../../assets/images/invalidChartData.png";
-import {createMoistChartForOverlay} from "../../../../functions/types/moist/createMoistChartForOverlay";
-import {getNewData} from "./functions/getNewData";
+import {IonButton, IonSelect, IonSelectOption, useIonAlert} from "@ionic/react";
 import {getFreshSiteList} from "./functions/getFreshSiteList";
-import {updateSite} from "./functions/updateSite";
+import {createBudgetChart} from "./functions/createBudgetChart";
+import {getNewData} from "./functions/getNewData";
+import {getMoistMarkerChartData} from "../Map/data/types/moist/getMoistMarkerChartData";
+import {initializeMoistCustomOverlay} from "../Map/components/types/moist/MoistCustomOverlay";
+import invalidChartDataImage from "../../assets/images/invalidChartData.png";
+import {createMoistChartForOverlay} from "../Map/functions/types/moist/createMoistChartForOverlay";
 import {onIncreaseDaysCountClick} from "./functions/onIncreaseDaysCountClick";
-import axios from 'axios';
+import s from '../Map/style.module.css'
+import BudgetEditorLine from "./components/BudgetEditorLine";
+import {updateSite} from "./functions/updateSite";
+
 
 interface BudgetEditorProps {
   previousPage?: string;
   siteList: unknown[];
   userId: string | number;
   isGoogleApiLoaded: boolean;
-  initialSensorId?: string | number | null;
   [key: string]: unknown;
 }
 
-const BudgetEditor = ({ previousPage, initialSensorId, ...props }: BudgetEditorProps) => {
+const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
   const [sites, setSites] = useState<unknown[]>([])
   const [currentSite, setCurrentSite] = useState<string | undefined>()
   const [moistSensors, setMoistSensors] = useState<unknown[]>([])
-  const [currentSensorId, setCurrentSensorId] = useState<string | number | undefined>(initialSensorId || undefined)
+  const [currentSensorId, setCurrentSensorId] = useState<string | number | undefined>()
   const [chartData, setChartData] = useState<{ data?: unknown[]; budgetLines?: unknown[] }>({})
   const chartRoot = useRef<unknown>(null);
   const mapRef = useRef<HTMLDivElement>(null);
@@ -38,65 +37,28 @@ const BudgetEditor = ({ previousPage, initialSensorId, ...props }: BudgetEditorP
   const [presentAlert] = useIonAlert();
   const [presentErrorAlert] = useIonAlert();
   const [currentAmountOfDays, setCurrentAmountOfDays] = useState(0)
-  const [userSiteGroups, setUserSiteGroups] = useState<unknown[]>([])
-
-  // Fetch user site groups on mount
-  useEffect(() => {
-    const fetchUserSiteGroups = async () => {
-      try {
-        const response = await axios.get('https://app.agrinet.us/api/add-unit/user-site-groups', {
-          params: {
-            v: 43,
-            userId: props.userId
-          }
-        });
-        setUserSiteGroups(response.data);
-        console.log('User site groups:', response.data);
-        console.log(props.siteList)
-      } catch (error) {
-        console.error('Error fetching user site groups:', error);
-      }
-    };
-
-    if (props.userId) {
-      fetchUserSiteGroups();
-    }
-  }, [props.userId]);
 
   useEffect(() => {
-    // Only run if we have sites loaded AND Google Maps API is loaded
-    if (props.siteList && props.siteList.length > 0 && props.isGoogleApiLoaded && mapRef.current) {
-      getFreshSiteList({
-        siteList: props.siteList,
-        setSites,
-        setCurrentSite,
-        setMoistSensors,
-        setCurrentSensorId,
-        setMap,
-        mapRef,
-        currentAmountOfDays,
-        currentSensorId,
-        setChartData,
-        setDataExists
-      })
-      setCurrentAmountOfDays(14)
-    }
+    getFreshSiteList({
+      siteList: props.siteList,
+      setSites,
+      setCurrentSite,
+      setMoistSensors,
+      setCurrentSensorId,
+      setMap,
+      mapRef,
+      currentAmountOfDays,
+      currentSensorId,
+      setChartData,
+      setDataExists
+    })
+    setCurrentAmountOfDays(14)
     return () => {
       moistOverlaysRef.current.forEach((overlay) => overlay.setMap(null));
       moistOverlaysRef.current = [];
       setMoistOverlays([]);
     };
-  }, [props.siteList, props.isGoogleApiLoaded]);
-  // Trigger map resize when map is created
-  useEffect(() => {
-    if (map) {
-      // Give the map a moment to render
-      setTimeout(() => {
-        window.google.maps.event.trigger(map, 'resize');
-      }, 100);
-    }
-  }, [map]);
-
+  }, []);
   useEffect(() => {
     const overlaysExistInDOM = document.querySelector('[id^="overlay-b-"]');
     if (!overlaysExistInDOM && map && moistSensors.length > 0) {
@@ -169,79 +131,20 @@ const BudgetEditor = ({ previousPage, initialSensorId, ...props }: BudgetEditorP
       });
     }
   }, [moistSensors, map]);
-  // create chart for overlays - use polling to detect when overlays are ready
+  // create chart for overlays
   useEffect(() => {
-    if (moistSensors.length === 0 || !map) return;
-
-    let isCancelled = false;
-    let pollInterval: NodeJS.Timeout;
-    const createdCharts = new Set<string>();
-
-    const checkAndCreateCharts = () => {
-      if (isCancelled) return;
-
-      const validOverlays = moistOverlaysRef.current.filter(
-        (overlay: any) => overlay.isValidChartData && overlay.toUpdate
-      );
-
-      validOverlays.forEach((moistOverlay: any) => {
-        const chartId = `b-${moistOverlay.chartData.id}`;
-
-        if (createdCharts.has(chartId)) {
-          return;
-        }
-
-        const chartElement = document.getElementById(chartId);
-
-        if (chartElement) {
-          try {
-            createMoistChartForOverlay('b', moistOverlay.chartData, [], moistOverlaysRef.current);
-            createdCharts.add(chartId);
-          } catch (error) {
-            console.error(`Error creating chart for ${chartId}:`, error);
-          }
+    if (moistOverlays.length !== 0) {
+      const roots: any[] = [];
+      moistOverlaysRef.current.forEach((moistOverlay: any) => {
+        if (moistOverlay.isValidChartData && moistOverlay.toUpdate) {
+          createMoistChartForOverlay('b', moistOverlay.chartData, roots, moistOverlaysRef.current)
         }
       });
-
-      // Stop polling when all charts are created
-      if (createdCharts.size === validOverlays.length && validOverlays.length > 0) {
-        clearInterval(pollInterval);
-
-        // Update overlays multiple times to ensure charts become visible
-        const updateOverlays = () => {
-          moistOverlaysRef.current.forEach((overlay) => {
-            overlay.update(currentSensorId);
-          });
-        };
-
-        // Update immediately
-        updateOverlays();
-
-        // Update again after delays to catch any late renders
-        setTimeout(updateOverlays, 100);
-        setTimeout(updateOverlays, 300);
-        setTimeout(updateOverlays, 500);
-      }
-    };
-
-    // Start polling
-    pollInterval = setInterval(checkAndCreateCharts, 300);
-    // Also try immediately
-    setTimeout(checkAndCreateCharts, 100);
-
-    // Stop polling after 10 seconds
-    const timeout = setTimeout(() => {
-      if (!isCancelled) {
-        clearInterval(pollInterval);
-      }
-    }, 10000);
-
-    return () => {
-      isCancelled = true;
-      clearInterval(pollInterval);
-      clearTimeout(timeout);
-    };
-  }, [moistSensors, map, moistOverlays, currentSensorId]);
+      return () => {
+        roots.forEach(root => root.dispose());
+      };
+    }
+  }, [moistOverlays]);
 
   useEffect(() => {
     if (currentAmountOfDays > 0) {

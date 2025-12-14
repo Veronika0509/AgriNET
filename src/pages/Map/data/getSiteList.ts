@@ -23,7 +23,6 @@ export const getSiteList = async (userId: string | number): Promise<ApiSuccessRe
       },
       timeout: 10000, // 10 second timeout
     });
-    console.log(response)
     return response;
   } catch (error) {
     console.error('Error fetching site list:', error);

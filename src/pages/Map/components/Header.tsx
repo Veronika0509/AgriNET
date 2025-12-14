@@ -21,7 +21,6 @@ interface HeaderProps {
 
 const Header = (props: HeaderProps) => {
   const history = useHistory();
-  const { budgetEditorReturnPage, setBudgetEditorReturnPage, setReturnToMapTab } = useAppContext();
 
   const back = () => {
     if (props.isMarkerClicked) {
@@ -34,15 +33,6 @@ const Header = (props: HeaderProps) => {
     }
   };
   const onBudgetEditorBack = () => {
-    // Check if we should navigate back to the chart page
-    if (budgetEditorReturnPage === 'chart') {
-      setBudgetEditorReturnPage(null);
-      // Don't clear returnToMapTab here - the chart page needs it for its back button
-      props.setPage(2);
-      history.push('/AgriNET/chart');
-      return;
-    }
-
     if (props.navigationHistory.length > 1) {
       const newHistory = [...props.navigationHistory];
       newHistory.pop()
@@ -87,18 +77,6 @@ const Header = (props: HeaderProps) => {
         )}
         {props.activeTab === 'info' && (
           <IonTitle>About</IonTitle>
-        )}
-        {(props.activeTab === 'budgetEditor' || props.activeTab === 'budget') && (
-          <>
-            <IonIcon
-              onClick={onBudgetEditorBack}
-              className={`${s.header_backIcon} ${'ion-margin-start'}`}
-              slot='start'
-              size='large'
-              icon={arrowBackOutline}
-            ></IonIcon>
-            <IonTitle>Budget Lines Editor</IonTitle>
-          </>
         )}
         {props.activeTab === 'comments' && (
           <>

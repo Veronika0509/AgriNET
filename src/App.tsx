@@ -1,4 +1,4 @@
-import {Route} from 'react-router-dom';
+import {Route, Redirect} from 'react-router-dom';
 import {
   IonApp,
   IonIcon,
@@ -44,10 +44,9 @@ import VirtualValve from "./pages/VirtualValve";
 import AddValvePage from "./pages/AddValvePage";
 import CommentsPage from "./pages/Comments";
 import AddUnitPage from "./pages/AddUnit";
-import BudgetEditorPage from "./pages/BudgetEditor";
-import QRCodeScanner from "./components/QRCodeScanner";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import './App.css'
+import {BudgetEditorTab} from "./pages/BudgetLinesEditor/components/BudgetEditorTab";
 
 setupIonicReact();
 
@@ -92,7 +91,7 @@ const AppContent: React.FC = () => {
 
     if (storedUserId && storedUserData) {
       // User has a stored session, auto-login
-      setUserId(parseInt(storedUserId) as UserId);
+      setUserId(parseInt(storedUserId));
       history.push('/AgriNET/menu');
     } else {
       // No stored session, go to login
@@ -137,15 +136,6 @@ const AppContent: React.FC = () => {
                           isGoogleApiLoaded={isGoogleApiLoaded}
                         />
                       </Route>
-                      <Route exact path="/budget">
-                        <BudgetEditorPage
-                          userId={userId}
-                          siteList={siteList}
-                          setSiteList={setSiteList}
-                          isGoogleApiLoaded={isGoogleApiLoaded}
-                          setPage={setPage}
-                        />
-                      </Route>
                       <Route exact path="/info">
                         <Info showHeader={true} setPage={setPage} />
                       </Route>
@@ -166,12 +156,11 @@ const AppContent: React.FC = () => {
                              selectedSiteForAddUnit={selectedSiteForAddUnit} setSelectedSiteForAddUnit={setSelectedSiteForAddUnit}
                              setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage} />
                       </Route>
-                      <Route path="/settings">
-                        <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData}
-                             setPage={setPage} userId={userId} siteList={siteList} setSiteList={setSiteList} setSiteId={setSiteId}
-                             setSiteName={setSiteName} setAdditionalChartData={setAdditionalChartData}
-                             selectedSiteForAddUnit={selectedSiteForAddUnit} setSelectedSiteForAddUnit={setSelectedSiteForAddUnit}
-                             setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage} />
+                      <Route exact path="/budget">
+                        <BudgetEditorTab siteList={siteList} userId={userId} isGoogleApiLoaded={isGoogleApiLoaded} />
+                      </Route>
+                      <Route exact path="/">
+                        <Redirect to="/menu" />
                       </Route>
                     </IonRouterOutlet>
                     <IonTabBar slot="bottom">
@@ -246,21 +235,7 @@ const AppContent: React.FC = () => {
                               </Route>
                             </IonReactRouter>
                           </div>
-                        : page === 7
-                          ? <div>
-                              <IonReactRouter basename="/AgriNET">
-                                <Route path="/budget">
-                                  <BudgetEditorPage
-                                    userId={userId}
-                                    siteList={siteList}
-                                    setSiteList={setSiteList}
-                                    isGoogleApiLoaded={isGoogleApiLoaded}
-                                    setPage={setPage}
-                                  />
-                                </Route>
-                              </IonReactRouter>
-                            </div>
-                          : null
+                        : null
             }
           </div>
           <div style={{display: page === 1 ? 'block' : 'none'}}>

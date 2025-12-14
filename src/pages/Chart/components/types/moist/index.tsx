@@ -114,7 +114,7 @@ interface MoistChartPageProps {
 }
 
 export const MoistChartPage = (props: MoistChartPageProps) => {
-  const { setPage, setOpenBudgetEditor, setSelectedSensorIdForBudgetEditor, setBudgetEditorReturnPage, setReturnToMapTab } = useAppContext();
+  const { setPage } = useAppContext();
   const history = useHistory();
 
   // Chart refs
@@ -977,13 +977,8 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
                   Autowater
                 </IonButton>
                 <IonButton className={s.autowaterButton} onClick={() => {
-                  setSelectedSensorIdForBudgetEditor(props.sensorId);
-                  setBudgetEditorReturnPage('chart');
-                  // DON'T overwrite returnToMapTab - keep the original tab saved when first navigating to chart
-                  setReturnToMapTab('budget');  // This tells map page to open budget editor
-                  setOpenBudgetEditor(true);
-                  setPage(1);
-                  history.push('/map');
+                  setPage(0);
+                  history.push('/budget');
                 }}>
                   Budget Lines Editor
                 </IonButton>

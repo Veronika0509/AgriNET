@@ -31,16 +31,11 @@ interface HeaderProps {
 
 const Header = (props: HeaderProps) => {
   const history = useHistory();
-  const { returnToMapTab, setOpenBudgetEditor, setReturnToMapTab, setBudgetEditorReturnPage, setForceMapTab } = useAppContext();
 
   const onBackClick = () => {
     if (props.type === 'chartPage') {
       if (props.setPage) {
-        setOpenBudgetEditor(false);
-        setReturnToMapTab(null);
-        setBudgetEditorReturnPage(null);
-        setForceMapTab(true);
-        back(props.setPage, history, returnToMapTab)
+        back(props.setPage, history, null)
       }
     } else if (props.type === 'alarmPage') {
       props.setAlarm(false)

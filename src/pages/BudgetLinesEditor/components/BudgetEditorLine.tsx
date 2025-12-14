@@ -1,9 +1,9 @@
 import {useEffect, useState} from 'react';
-import s from "../../../../../style.module.css";
+import s from "../../Map/style.module.css";
 import {IonButton, useIonAlert} from "@ionic/react";
-import {updateBudgetLine} from "../../../../../data/types/moist/updateBudgetLine";
 import {getNewData} from "../functions/getNewData";
 import {updateChart} from "../functions/updateChart";
+import {updateBudgetLine} from "../functions/updateBudgetLine";
 
 interface BudgetLine {
   value: number;

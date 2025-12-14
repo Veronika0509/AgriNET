@@ -1,5 +1,5 @@
-import {formatDate} from "../../../../../../Chart/functions/formatDate";
-import {getSumChartData} from "../../../../../../Chart/data/types/moist/getSumChartData";
+import {formatDate} from "../../Chart/functions/formatDate";
+import {getSumChartData} from "../../Chart/data/types/moist/getSumChartData";
 
 export const getNewData = async (
   currentAmountOfDays: any,
