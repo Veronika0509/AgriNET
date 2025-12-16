@@ -12,6 +12,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { logOutOutline } from 'ionicons/icons';
 import { useEffect } from 'react';
+import axios from 'axios';
 import s from './style.module.css';
 import { useAppContext } from '../../context/AppContext';
 import { getSiteList } from '../Map/data/getSiteList';
@@ -83,6 +84,27 @@ const Menu: React.FC<MenuProps> = (props) => {
 
     fetchSiteList();
   }, [props.userId, setSiteList, present]);
+
+  // Fetch and log user site groups when menu page loads
+  useEffect(() => {
+    const fetchSiteGroups = async () => {
+      if (!props.userId) return;
+
+      try {
+        const response = await axios.get('https://app.agrinet.us/api/add-unit/user-site-groups', {
+          params: {
+            userId: props.userId,
+          },
+        });
+        console.log('User Site Groups:', response.data);
+        console.log('Request sent with userId:', props.userId);
+      } catch (error) {
+        console.error('Error fetching user site groups:', error);
+      }
+    };
+
+    fetchSiteGroups();
+  }, [props.userId]);
 
   return (
     <IonPage>

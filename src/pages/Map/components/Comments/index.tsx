@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from "react";
+import React, {useEffect, useState, useRef, useMemo} from "react";
 import {getCommentsTypes} from "./data/getCommentsTypes";
 import {getCommentsData} from "./data/getCommentsData";
 import {
@@ -18,7 +18,7 @@ import {saveComment} from "./data/saveComment";
 
 export const Comments = (props: any) => {
   const [types, setTypes] = useState<any>()
-  const [data, setData] = useState<any[]>([])
+  const [rawData, setRawData] = useState<any[]>([])
   const [currentType, setCurrentType] = useState(0)
   const [currentSort, setCurrentSort] = useState('dateDesc')
   const [currentSensorId, setCurrentSensorId] = useState('')
@@ -28,6 +28,7 @@ export const Comments = (props: any) => {
   const lastElementRef = useRef<HTMLTableRowElement | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   // Modal
   const [modalId, setModalId] = useState()
   const [modalChart, setModalChart] = useState()
@@ -73,14 +74,29 @@ export const Comments = (props: any) => {
     {code: "WL", name: "Weather Station"}
   ];
 
+  // Memoized filtered data for current year
+  const data = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return rawData.filter((comment: any) => {
+      if (!comment.date) return false;
+      const commentYear = parseInt(comment.date.split('-')[0]);
+      return commentYear === currentYear;
+    });
+  }, [rawData]);
+
   const loadMoreData = async () => {
     if (isMoreLoading || !hasMore) return;
+
+    // Clear any existing timeout
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+    }
 
     setIsMoreLoading(true);
     try {
       const newData = await getCommentsData({
         sort: currentSort,
-        startIndex: data.length,
+        startIndex: rawData.length,
         type: currentType,
         userId: props.userId,
         sensorId: currentSensorId,
@@ -88,12 +104,16 @@ export const Comments = (props: any) => {
 
       if (newData.data.length === 0) {
         setHasMore(false);
+        setIsMoreLoading(false);
       } else {
-        setData(prev => [...prev, ...newData.data]);
+        setRawData(prev => [...prev, ...newData.data]);
+        // Delay hiding the spinner to prevent rapid toggling
+        loadingTimeoutRef.current = setTimeout(() => {
+          setIsMoreLoading(false);
+        }, 300);
       }
     } catch (error) {
       console.error('Error loading more data:', error);
-    } finally {
       setIsMoreLoading(false);
     }
   };
@@ -115,20 +135,24 @@ export const Comments = (props: any) => {
       Object.assign(params, { sort: 'dateDesc', type: 0, sensorId: '' });
     }
 
-    const newData = await getCommentsData(params);
-    setData(newData.data);
-    if (type === 'initial') {
+    try {
+      const newData = await getCommentsData(params);
+      setRawData(newData.data);
       setHasMore(newData.data.length > 0);
-    } else {
-      setHasMore(true);
+    } catch (error) {
+      console.error('Error loading comments:', error);
+    } finally {
+      // Use requestAnimationFrame for smoother rendering
+      requestAnimationFrame(() => {
+        setIsLoading(false);
+      });
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {
     observer.current = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting && hasMore) {
+        if (entries[0].isIntersecting && hasMore && !isMoreLoading) {
           loadMoreData();
         }
       },
@@ -140,7 +164,7 @@ export const Comments = (props: any) => {
         observer.current.disconnect();
       }
     };
-  }, [data.length, currentSort, currentType, currentSensorId]);
+  }, [data.length, currentSort, currentType, currentSensorId, hasMore, isMoreLoading]);
   useEffect(() => {
     const currentElement = lastElementRef.current;
     if (currentElement && observer.current) {
@@ -159,6 +183,13 @@ export const Comments = (props: any) => {
       await updateData('initial')
     };
     setInitialData();
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
   }, []);
 
   const onTypeChange = async (value: any) => {
@@ -298,7 +329,6 @@ export const Comments = (props: any) => {
       })
     }
   }
-
   return (
     <div>
       <div className={s.comments_settings}>
@@ -365,6 +395,13 @@ export const Comments = (props: any) => {
               </td>
             </tr>
           ))}
+          {!isLoading && (!data || data.length === 0) && (
+            <tr>
+              <td colSpan={6} style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+                No comments found for the current year ({new Date().getFullYear()}).
+              </td>
+            </tr>
+          )}
           {isMoreLoading && (
             <tr>
               <td colSpan={6} style={{textAlign: 'center', padding: '20px'}}>

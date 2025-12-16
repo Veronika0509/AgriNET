@@ -89,7 +89,7 @@ interface ScreenSizeState {
 
 interface CommentModal {
   type: string
-  date: string
+  date: string | number | Date
 }
 
 // Chart type constants
@@ -1090,7 +1090,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             type={moistAddCommentModal.type}
             userId={props.userId}
             sensorId={props.sensorId}
-            addCommentModal={moistAddCommentModal.date}
+            addCommentModal={new Date(moistAddCommentModal.date)}
             setMoistAddCommentModal={setMoistAddCommentModal}
             setMoistMainComments={(data: Comment[]) => updateComments("main", data)}
             setAddCommentItemShowed={getSetAddCommentItemShowed(

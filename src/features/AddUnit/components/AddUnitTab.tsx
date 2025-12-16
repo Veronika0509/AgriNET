@@ -1063,16 +1063,6 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                     return
                   }
 
-                  // Check if there's a moist level error first
-                  if (moistLevelError) {
-                    presentAlert({
-                      header: "Invalid Sensor Count",
-                      message: moistLevelErrorMessage || "Please fix the sensor count error before submitting.",
-                      buttons: ["OK"],
-                    })
-                    return
-                  }
-
                   // Validate form data (sensorPrefix can be empty!)
                   const hasErrors = {
                     site: !selectedSite,
@@ -1086,8 +1076,19 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
 
                   setFormErrors(hasErrors)
 
-                  // Check if there are any errors
-                  if (Object.values(hasErrors).some((error) => error)) {
+                  // Check if moist layer is selected and sensor count is empty
+                  let hasMoistError = false
+                  if (selectedLayer.toLowerCase() === "moist" && (moistLevel === undefined || moistLevel === null || moistLevel === 0)) {
+                    setMoistLevelError(true)
+                    setMoistLevelErrorMessage("Sensor count is required for Moist layer")
+                    hasMoistError = true
+                  } else if (moistLevelError) {
+                    // Check if there's a moist level validation error (like out of range)
+                    hasMoistError = true
+                  }
+
+                  // Check if there are any errors (form errors or moist level error)
+                  if (Object.values(hasErrors).some((error) => error) || hasMoistError) {
                     return
                   }
 

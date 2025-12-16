@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import type { Site } from '../../../types';
 import type { SiteGroup, FormErrors } from '../types';
+import axios from "axios";
 
 interface UseAddUnitFormProps {
   selectedSiteForAddUnit: string;
   siteList: Site[];
   activeTab: string;
+  userId: any
 }
 
 export const useAddUnitForm = (props: UseAddUnitFormProps) => {
@@ -68,8 +70,9 @@ export const useAddUnitForm = (props: UseAddUnitFormProps) => {
   // Fetch user site groups when navigating to Add Unit page
   useEffect(() => {
     if (props.activeTab === 'add') {
-      fetch('https://app.agrinet.us/api/add-unit/user-site-groups')
+      axios.get('https://app.agrinet.us/api/add-unit/user-site-groups')
         .then((response) => {
+          console.log(response)
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
             return response.json();

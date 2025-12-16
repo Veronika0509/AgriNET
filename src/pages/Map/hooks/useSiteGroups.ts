@@ -13,7 +13,7 @@ export const useSiteGroups = (
 ) => {
   useEffect(() => {
     if (activeTab === "add") {
-      fetch("https://app.agrinet.us/api/add-unit/user-site-groups")
+      fetch("https://app.agrinet.us/api/add-unit/user-site-groups?userId=")
         .then((response) => {
           const contentType = response.headers.get("content-type")
           if (contentType && contentType.includes("application/json")) {

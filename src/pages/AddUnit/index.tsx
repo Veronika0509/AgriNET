@@ -97,6 +97,11 @@ const AddUnitPage: React.FC<AddUnitPageProps> = (props) => {
     history.push('/menu');
   };
 
+  const handleNavigateToMap = () => {
+    props.setPage(1);
+    history.push('/map');
+  };
+
   return (
     <IonPage>
       <IonHeader>
@@ -121,7 +126,11 @@ const AddUnitPage: React.FC<AddUnitPageProps> = (props) => {
             setPage={props.setPage}
             isGoogleApiLoaded={props.isGoogleApiLoaded}
             activeTab="add"
-            setActiveTab={() => {}}
+            setActiveTab={(tab) => {
+              if (tab === "map") {
+                handleNavigateToMap();
+              }
+            }}
             setNavigationHistory={() => {}}
             markers={markers}
             setMarkers={setMarkers}
