@@ -241,7 +241,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
         let apiChartType: string
         let commentType: keyof CommentsState
         let currentData: Record<string, unknown>[] | undefined
-
         switch (chartType) {
           case CHART_TYPES.MAIN:
             apiChartType = "M"
@@ -428,7 +427,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           if (addCommentItemShowed.sum === "comments") {
             updateAddCommentItemShowed("sum", false)
           }
-
           createAdditionalChart(
             "sum",
             days || currentSumChartData.data,
