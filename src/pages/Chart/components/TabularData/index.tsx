@@ -86,13 +86,13 @@ export const TabularData: React.FC<TabularDataProps> = ({
               {data.length ? (
                 <div>
                   {(data as TabularDataItem[]).map((tabularData: TabularDataItem, index: number) => (
-                    <TempTable key={index} tabularData={tabularData} colors={colors} isMobile={isMobile}
+                    <TempTable key={index} tabularData={tabularData} isMobile={isMobile}
                                freshnessColors={freshnessColors}/>
                   ))}
                 </div>
               ) : (
                 <div>
-                  <TempTable tabularData={data} colors={colors} isMobile={isMobile} freshnessColors={freshnessColors}/>
+                  <TempTable tabularData={data} isMobile={isMobile} freshnessColors={freshnessColors}/>
                 </div>
               )}
             </div>

@@ -1,7 +1,7 @@
 import s from "./style.module.css"
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { getCurrentDatetime } from "../../DateTimePicker/functions/getCurrentDatetime"
-import { getStartDate } from "../../DateTimePicker/functions/getStartDate"
+import { getDatetime } from "../../DateTimePicker/functions/getDatetime"
 import { getIrrigationDates } from "../../../data/types/moist/getIrrigationDates"
 import { getSumChartData } from "../../../data/types/moist/getSumChartData"
 import { IonButton, IonContent } from "@ionic/react"
@@ -27,8 +27,10 @@ import { getAddCommentItemShowed } from "../../../functions/types/moist/getAddCo
 import { handleResizeForChartLegend } from "../../../functions/types/moist/handleResizeForChartLegend"
 import {getDaysFromChartData} from "../../../functions/getDaysFromChartData";
 import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
+import { formatDate } from "../../../functions/formatDate";
 import { useAppContext } from "../../../../../context/AppContext";
 import { useHistory } from 'react-router-dom';
+import { loadChartPreferences } from "../../../../../utils/chartPreferences";
 
 // Define TypeScript interfaces
 interface ChartData {
@@ -123,13 +125,28 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
   const soilTempRoot = useRef<HTMLDivElement>(null)
   const sumRoot = useRef<HTMLDivElement>(null)
 
-  // Date state
+  // Date state - Load saved preference from storage
   const currentDate: string = getCurrentDatetime()
-  const initialStartDate: string = getStartDate(getCurrentDatetime())
+  const savedPreferences = loadChartPreferences()
+  const savedDays = Number(savedPreferences.dateDifferenceInDays) || 14
+
+  const [dateDifferenceInDays, setDateDifferenceInDays] = useState<string>(savedPreferences.dateDifferenceInDays)
+
+  // Calculate initial start date based on saved preference
+  const initialStartDate = (() => {
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() - savedDays);
+    return getDatetime(date);
+  })()
+
   const [startDate, setStartDate] = useState<string>(initialStartDate)
   const [endDate, setEndDate] = useState<string>(currentDate)
-  const [currentDates, setCurrentDates] = useState<string[]>([])
-  const [dateDifferenceInDays, setDateDifferenceInDays] = useState<string>("14")
+
+  // Initialize currentDates with saved preference so initial server request uses correct date range
+  const [currentDates, setCurrentDates] = useState<string[]>(() => {
+    const endDateFormatted = formatDate(new Date(currentDate));
+    return [savedDays.toString(), endDateFormatted];
+  })
 
   // Chart data state
   const [currentChartData, setCurrentChartData] = useState<Record<string, unknown>[]>([])

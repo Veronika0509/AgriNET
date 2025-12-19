@@ -11,6 +11,7 @@ interface ChartDataItem {
 
 interface AdditionalChartData {
   linesCount: number;
+  legend: object;
 }
 
 interface MoistComment {
@@ -137,8 +138,6 @@ export const createMainChart = (props: CreateMainChartProps): void => {
       }),
     )
 
-    yAxis.set("visible", false)
-
     function createChartData(chartDate: number, chartCount: number, valueToShow: number) {
       return {
         date: chartDate,
@@ -177,9 +176,9 @@ export const createMainChart = (props: CreateMainChartProps): void => {
     const ordinarySeriesArray: am5xy.SmoothedXLineSeries[] = []
     const seriesColors: string[] = []
     listOfSeries.map((seriesItem: SeriesItem, index: number) => {
-      let count = 4
+      let count = 1
       for (let i = 0; i < props.additionalChartData.linesCount; i++) {
-        const name = count + " inch"
+        const name = props.additionalChartData.legend[`s${count}`]
         let tooltip: am5.Tooltip | undefined
         if (seriesItem.name === "ordinarySeries") {
           tooltip = am5.Tooltip.new(props.root.current, {
@@ -237,7 +236,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           series.set("stroke", am5.color(seriesColors[i]))
         }
 
-        count += 4
+        count += 1
 
         const data = createChartDataArray(i + 1, seriesItem.prefix)
 

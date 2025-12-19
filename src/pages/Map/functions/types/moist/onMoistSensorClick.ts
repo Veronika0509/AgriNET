@@ -18,7 +18,7 @@ export const onMoistSensorClick = async (
   const newMoistChartData = await getMoistMainChartData(sensorId, false)
   getSensorItems('moist-fuel', siteList).map((sensorItem: any) => {
     if (sensorItem.id === mainId) {
-      setAdditionalChartData({linesCount: sensorItem.sensorCount})
+      setAdditionalChartData({linesCount: sensorItem.sensorCount, legend: newMoistChartData.data.legend})
     }
   })
   setChartData(newMoistChartData.data.data)

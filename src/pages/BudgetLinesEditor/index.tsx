@@ -37,7 +37,6 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
   const [presentAlert] = useIonAlert();
   const [presentErrorAlert] = useIonAlert();
   const [currentAmountOfDays, setCurrentAmountOfDays] = useState(0)
-
   useEffect(() => {
     getFreshSiteList({
       siteList: props.siteList,
@@ -92,7 +91,7 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
   // create overlays
   useEffect(() => {
     if (moistOverlaysRef.current.length === 0 && map) {
-      const currentSensors = [...moistSensors];
+      const currentSensors = [...moistSensors]
       currentSensors.forEach(async (marker: { sensorId: string | number; lat: number; lng: number; [key: string]: unknown }) => {
         const overlayChartData = await getMoistMarkerChartData(marker.sensorId, props.userId);
         const bounds = new google.maps.LatLngBounds(

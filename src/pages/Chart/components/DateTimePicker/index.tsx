@@ -5,11 +5,17 @@ import {logoPwa, refreshOutline} from "ionicons/icons";
 import DatetimeCalendar from "./components/DatetimeCalendar";
 import {getDatetime} from "./functions/getDatetime";
 import {updateChartsWithNewDatetime} from "./functions/updateChartsWithNewDatetime";
+import { loadChartPreferences, saveChartPreferences } from "../../../../utils/chartPreferences";
 
 const DateTimePicker = (props: any) => {
   const [wasYearsMode, setWasYearsMode] = useState(false)
   const [present] = useIonToast();
-  const [selectedTab, setSelectedTab] = React.useState('days');
+
+  // Load preferences from cookies on mount
+  const [selectedTab, setSelectedTab] = React.useState<'days' | 'years'>(() => {
+    const preferences = loadChartPreferences();
+    return preferences.selectedTab;
+  });
 
   const presentToast = () => {
     present({
@@ -39,6 +45,23 @@ const DateTimePicker = (props: any) => {
     const fromDate: any = new Date(toDate).setDate(toDate.getDate() - Number(days));
     props.setStartDate(getDatetime(new Date(fromDate)))
   }
+  // Load initial preferences on mount
+  useEffect(() => {
+    const preferences = loadChartPreferences();
+    // Only set if parent hasn't already initialized with a different value
+    if (props.dateDifferenceInDays === '14') {
+      props.setDateDifferenceInDays(preferences.dateDifferenceInDays);
+    }
+  }, []);
+
+  // Save preferences when they change
+  useEffect(() => {
+    saveChartPreferences({
+      dateDifferenceInDays: props.dateDifferenceInDays,
+      selectedTab,
+    });
+  }, [props.dateDifferenceInDays, selectedTab]);
+
   useEffect(() => {
     if (selectedTab === 'years') {
       const fromDate = new Date(props.startDate).getTime()

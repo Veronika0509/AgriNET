@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentDatetime";
-import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
+import {getDatetime} from "../../DateTimePicker/functions/getDatetime";
 import TopSection from "../../TopSection";
 import s from "../wxet/style.module.css";
 import {IonContent, useIonToast} from "@ionic/react";
@@ -19,20 +19,37 @@ import {compareDates} from "../../../functions/types/moist/compareDates";
 import {formatDate} from "../../../functions/formatDate";
 import {getDaysFromChartData} from "../../../functions/getDaysFromChartData";
 import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
+import { loadChartPreferences } from "../../../../../utils/chartPreferences";
 
 export const TempChartPage = (props: any) => {
   const root = useRef<any>(null);
   const [currentChartData, setCurrentChartData] = useState<any>()
   const currentDate: any = getCurrentDatetime()
-  const initialStartDate: any = getStartDate(getCurrentDatetime())
+
+  // Load saved preference from storage
+  const savedPreferences = loadChartPreferences()
+  const savedDays = Number(savedPreferences.dateDifferenceInDays) || 14
+
+  const [dateDifferenceInDays, setDateDifferenceInDays] = React.useState(savedPreferences.dateDifferenceInDays);
+
+  // Calculate initial start date based on saved preference
+  const initialStartDate = (() => {
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() - savedDays);
+    return getDatetime(date);
+  })()
+
   const [startDate, setStartDate] = useState<string>(initialStartDate);
   const [endDate, setEndDate] = useState<string>(currentDate);
-  const [currentDates, setCurrentDates] = useState([])
-  const [dateDifferenceInDays, setDateDifferenceInDays] = React.useState('14');
+
+  // Initialize currentDates with saved preference so initial server request uses correct date range
+  const [currentDates, setCurrentDates] = useState(() => {
+    const endDateFormatted = formatDate(new Date(currentDate));
+    return [savedDays, endDateFormatted];
+  })
   const [nwsForecast, setNwsForecast] = useState(false)
   const [nwsForecastDays, setNwsForecastDays] = useState(1)
   const [nwsForecastData, setNwsForecastData] = useState(undefined)
-  const [tabularDataColors, setTabularDataColors] = useState()
   const [present] = useIonToast();
   const [tempTabularData, setTempTabularData] = useState<any>(null)
   const [isTempTabularDataLoading, setIsTempTabularDataLoading] = useState(false)
@@ -67,8 +84,7 @@ export const TempChartPage = (props: any) => {
         updateCommentsArray,
         props.userId,
         props.sensorId,
-        isTempCommentsShowed,
-        setTabularDataColors
+        isTempCommentsShowed
       )
     } else if (updateReason === 'nwsForecast') {
       let newChartData: any
@@ -128,7 +144,6 @@ export const TempChartPage = (props: any) => {
         props.userId,
         props.sensorId,
         isTempCommentsShowed,
-        setTabularDataColors
       )
     } else {
       const newData: any = await getTempMainChartData(present, props.sensorId, props.userId, currentDates[0], currentDates[1])
@@ -146,7 +161,6 @@ export const TempChartPage = (props: any) => {
         props.userId,
         props.sensorId,
         isTempCommentsShowed,
-        setTabularDataColors
       )
     }
   }
@@ -266,7 +280,6 @@ export const TempChartPage = (props: any) => {
           <TabularData
             type={'temp'}
             sensorId={props.sensorId}
-            colors={tabularDataColors}
             data={tempTabularData}
             setData={setTempTabularData}
             isLoading={isTempTabularDataLoading}

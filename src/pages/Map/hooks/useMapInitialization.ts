@@ -114,7 +114,6 @@ export const useMapInitialization = (props: UseMapInitializationProps) => {
         name: site.name,
         layers: site.layers || []
       }));
-
       createSites({
         page: props.page,
         map,

@@ -12,20 +12,25 @@ export const getFreshSiteList = async (props: any) => {
   props.setCurrentSite(checkedSites[0].name)
   checkedSites[0].layers.map((layer: any) => {
     if (layer.name === 'Moist' || layer.name === 'moist') {
+      // Remove duplicates by sensorId - keep only the first occurrence
+      const uniqueMarkers = layer.markers.filter((marker: any, index: number, self: any[]) =>
+        index === self.findIndex((m: any) => m.sensorId === marker.sensorId)
+      )
+
       props.setMoistSensors((prev: any[]) => {
         const existingIds = new Set(prev.map(marker => marker.sensorId))
-        const newMarkers = layer.markers.filter((marker: any) => !existingIds.has(marker.sensorId))
+        const newMarkers = uniqueMarkers.filter((marker: any) => !existingIds.has(marker.sensorId))
         return [...prev, ...newMarkers]
       })
-      props.setCurrentSensorId(layer.markers[0].sensorId)
+      props.setCurrentSensorId(uniqueMarkers[0].sensorId)
       props.setMap(
         new window.google.maps.Map(props.mapRef.current, {
-          center: {lat: layer.markers[0].lat, lng: layer.markers[0].lng},
+          center: {lat: uniqueMarkers[0].lat, lng: uniqueMarkers[0].lng},
           zoom: 15,
           mapTypeId: "satellite",
         })
       );
-      getNewData(props.currentAmountOfDays, props.currentSensorId, props.setChartData, props.setDataExists, layer.markers[0].sensorId)
+      getNewData(props.currentAmountOfDays, props.currentSensorId, props.setChartData, props.setDataExists, uniqueMarkers[0].sensorId)
     }
   })
 }

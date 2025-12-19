@@ -27,30 +27,41 @@ const Login: React.FC<LoginProps> = (props) => {
   const history = useHistory();
   const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    console.log('[LOGIN] Attempting login with username:', usernameInputValue);
+
     axios.get('https://app.agrinet.us/api/auth/try?v=43', {
       params: {
         username: usernameInputValue,
         password: passwordInputValue,
       },
     }).then(response => {
+      console.log('[LOGIN] Login successful, response data:', response.data);
+
       // Store all user data from the response
       if (response.data) {
         // Store individual fields
         if (response.data.role) {
+          console.log('[LOGIN] Storing userRole:', response.data.role);
           localStorage.setItem('userRole', response.data.role);
         }
         if (response.data.id) {
+          console.log('[LOGIN] Storing userId:', response.data.id);
           localStorage.setItem('userId', response.data.id.toString());
         }
 
         // Store the complete user data object as JSON
+        console.log('[LOGIN] Storing complete userData');
         localStorage.setItem('userData', JSON.stringify(response.data));
       }
 
+      console.log('[LOGIN] Setting page to 0 and userId to:', response.data.id);
       props.setPage(0);
+      console.log('[LOGIN] Redirecting to /menu');
       history.push('/menu');
       props.setUserId(response.data.id as UserId);
-    }).catch(() => {
+      console.log('[LOGIN] Login flow completed');
+    }).catch((error) => {
+      console.error('[LOGIN] Login failed:', error);
       setMessage(true)
     })
   };

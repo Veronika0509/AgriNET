@@ -1,6 +1,7 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
+import {logoHackernews} from "ionicons/icons";
 
 interface ChartDataItem {
   DateTime: string;
@@ -39,6 +40,7 @@ interface DataLabel {
   label: string;
   name: string;
   metric: string;
+  color: string;
 }
 
 export const createWxetChart = (
@@ -48,6 +50,7 @@ export const createWxetChart = (
   additionalChartData: AdditionalChartData,
   nwsForecastData: NwsForecastData | null,
 ): void => {
+
   if (root.current) {
     root.current.dispose();
     root.current = null;
@@ -142,29 +145,39 @@ export const createWxetChart = (
     const barometricMetric: string = additionalChartData.metric === 'AMERICA' ? 'inHg' : 'kPa'
 
     const dataLabels: DataLabel[] = [
-      {label: 'Solar', name: 'Solar Radiation', metric: ' W/m2'},
-      {label: 'RH', name: 'RH', metric: '%'},
-      {label: 'Temp', name: 'Air Temp', metric: tempMetric},
-      {label: 'rain_display', name: 'Rain', metric: rainMetric},
-      {label: 'wind_display', name: 'Wind Speed', metric: windMetric},
-      {label: 'gust_display', name: 'Wind Gust', metric: windMetric},
+      {label: 'Solar', name: 'Solar Radiation', metric: ' W/m2', color: '#FFFF00'},
+      {label: 'RH', name: 'RH', metric: '%', color: '#800080'},
+      {label: 'Temp', name: 'Air Temp', metric: tempMetric, color: '#FF0000'},
+      {label: 'rain_display', name: 'Rain', metric: rainMetric, color: '#84b1f5'},
+      {label: 'wind_display', name: 'Wind Speed', metric: windMetric, color: '#f6b23b'},
+      {label: 'gust_display', name: 'Wind Gust', metric: windMetric, color: '#cd8406'},
     ]
     if (additionalChartData.type === 'ATMOS') {
       dataLabels.push(
-        {label: 'Barometric Pressure', name: 'Barometric Pressure', metric: barometricMetric},
-        {label: 'vaporPressure_display', name: 'Vapor Pressure', metric: barometricMetric}
+        {label: 'Barometric Pressure', name: 'Barometric Pressure', metric: barometricMetric, color: '#06d6fc'},
+        {label: 'vaporPressure_display', name: 'Vapor Pressure', metric: barometricMetric, color: '#FF00FF'}
       )
     } else {
-      dataLabels.push({label: 'LW', name: 'Leaf Wetness', metric: ''})
+      dataLabels.push({label: 'LW', name: 'Leaf Wetness', metric: '', color: '#06d6fc'})
     }
     if (nwsForecastData) {
-        dataLabels.push({label: 'forecastTemp', name: 'Forecast Temp', metric: tempMetric},)
+        dataLabels.push({label: 'forecastTemp', name: 'Forecast Temp', metric: tempMetric, color: '#FF0000'},)
+        dataLabels.push({label: 'forecastWindSpeed', name: 'Forecast Wind Speed', metric: windMetric, color: '#f6b23b'},)
     }
 
     let lastSeries: am5xy.SmoothedXLineSeries | null = null;
     dataLabels.forEach((dataLabel) => {
       const name = dataLabel.name
-
+      const tooltip: am5.Tooltip = am5.Tooltip.new(root.current, {
+        pointerOrientation: "horizontal",
+        getFillFromSprite: false,
+        labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + ' - ' + "{value}" + dataLabel.metric,
+      })
+      if (tooltip) {
+        tooltip.get("background").setAll({
+          fill: am5.color(dataLabel.color),
+        })
+      }
       const series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
         name: name,
         xAxis: xAxis,
@@ -173,12 +186,10 @@ export const createWxetChart = (
         valueXField: "date",
         legendValueText: "{valueY}",
         tension: 0.5,
-        tooltip: am5.Tooltip.new(root.current, {
-          pointerOrientation: "horizontal",
-          labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + ' - ' + "{value}" + dataLabel.metric
-        }),
+        tooltip: tooltip,
         snapTooltip: true,
       }));
+      series.set("stroke", am5.color(dataLabel.color))
       series.strokes.template.setAll({
         strokeWidth: 2,
       });

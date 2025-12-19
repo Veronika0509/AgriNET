@@ -75,7 +75,6 @@ export const createTempChart = (
   userId: UserId,
   sensorId: SensorId,
   isTempCommentsShowed: boolean,
-  setTabularDataColors?: (colors: string[]) => void,
 ) => {
   if (root.current) {
     root.current.dispose()
@@ -167,20 +166,35 @@ export const createTempChart = (
 
     const metricSign = additionalChartData.metric === "AMERICA" ? "°F" : "°C"
 
-    // Only use data0, data1, and data2 as requested
     const dataLabels = [
-      { label: "MS 1", name: "Temperature", tooltip: "Temp", metric: metricSign },
-      { label: "MS DU", name: "Dew Point", tooltip: "Dew Point", metric: metricSign },
-      { label: "MS 3", name: "Relative Humidity", tooltip: "RH", metric: "%" },
+      { label: "MS 1", name: "Temperature", tooltip: "Temp", metric: metricSign, color: '#FF8F8F'},
+      { label: "MS DU", name: "Dew Point", tooltip: "Dew Point", metric: metricSign, color: '#28B2F7'},
+      { label: "MS 3", name: "Relative Humidity", tooltip: "RH", metric: "%", color: '#9e14f5'},
     ]
 
     if (nwsForecastData) {
-      dataLabels.push({ label: "forecastTemp", name: "Forecast Temp", tooltip: "Forecast Temp", metric: metricSign })
+      dataLabels.push({ label: "forecastTemp", name: "Forecast Temp", tooltip: "Forecast Temp", metric: metricSign, color: '#FF8F8F'})
     }
 
     let series: any
-    const seriesColors: string[] = []
     dataLabels.map((dataLabel) => {
+      const tooltip: am5.Tooltip = am5.Tooltip.new(root.current, {
+        pointerOrientation: "horizontal",
+        labelText:
+          "{valueX.formatDate('yyyy-MM-dd hh:mm')}" +
+          "\n" +
+          "[bold]" +
+          dataLabel.tooltip +
+          " - " +
+          "{value}" +
+          dataLabel.metric,
+        getFillFromSprite: false,
+      })
+      if (tooltip) {
+        tooltip.get("background").setAll({
+          fill: am5.color(dataLabel.color),
+        })
+      }
       series = chart.series.push(
         am5xy.SmoothedXLineSeries.new(root.current, {
           name: dataLabel.name,
@@ -190,27 +204,17 @@ export const createTempChart = (
           valueXField: "date",
           legendValueText: "{valueY}",
           tension: 0.5,
-          tooltip: am5.Tooltip.new(root.current, {
-            pointerOrientation: "horizontal",
-            labelText:
-              "{valueX.formatDate('yyyy-MM-dd hh:mm')}" +
-              "\n" +
-              "[bold]" +
-              dataLabel.tooltip +
-              " - " +
-              "{value}" +
-              dataLabel.metric,
-          }),
+          tooltip: tooltip,
           snapTooltip: true,
         }),
       )
+      series.set("stroke", am5.color(dataLabel.color))
       series.strokes.template.setAll({
         strokeWidth: 2,
       })
 
       const data = createChartDataArray(dataLabel.label)
       series.data.setAll(data)
-      seriesColors.push(series.get("stroke"))
       const visibilityRaw = sessionStorage.getItem("tempChartLinesVisibility")
       let visibilityMap: { name: string; visible: boolean }[] = []
 
@@ -235,10 +239,6 @@ export const createTempChart = (
         series.appear()
       }
     })
-
-    if (setTabularDataColors) {
-      setTabularDataColors(seriesColors)
-    }
 
     // Nws Forecast
     if (nwsForecastData) {

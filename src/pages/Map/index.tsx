@@ -83,7 +83,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   const [navigationHistory, setNavigationHistory] = useState<string[]>(["map"])
   const [centerMarker, setCenterMarker] = useState<google.maps.Marker | null>(null)
   const [isMarkerClicked, setIsMarkerClicked] = useState(false)
-  const [, setAreArraysUpdated] = useState(false)
+  const [areArraysUpdated, setAreArraysUpdated] = useState(false)
   const mapRefFunc = useRef(null);
   const previousTabRef = useRef("map")
   const previousPageRef = useRef(props.page)
@@ -260,8 +260,53 @@ const MapPage: React.FC<MapProps> = (props) => {
     setInitialZoom,
   })
 
+  // Reset map state when userId changes (e.g., after logout/login with different user)
+  useEffect(() => {
+    console.log('[MAP] UserId changed, resetting map state. New userId:', props.userId);
+
+    // Clear existing markers from the map
+    if (markers.length > 0) {
+      console.log('[MAP] Clearing', markers.length, 'existing markers');
+      markers.forEach((marker: any) => {
+        if (marker.setMap) {
+          marker.setMap(null);
+          if (marker.infoWindow) {
+            marker.infoWindow.close();
+          }
+        }
+      });
+    }
+
+    // Reset all map-related state
+    setMapInitialized(false);
+    setMap(null);
+    setSecondMap(null);
+    setInitialZoom(0);
+    setMarkers([]);
+    setAllCoordinatesOfMarkers([]);
+    setActiveOverlays([]);
+    setAllOverlays([]);
+    setCoordinatesForFitting([]);
+    setAmountOfSensors(0);
+    setAreBoundsFitted(false);
+    setMoistOverlays([]);
+    setTempOverlays([]);
+    setValveOverlays([]);
+    setFuelOverlays([]);
+
+    console.log('[MAP] Map state reset completed');
+  }, [props.userId]);
+
   useEffect(() => {
     const initializeMap = async () => {
+      console.log('[MAP] Initialize map useEffect triggered:', {
+        page: props.page,
+        activeTab,
+        mapInitialized,
+        siteListLength: props.siteList.length,
+        userId: props.userId
+      });
+
       if (props.page === 1 && activeTab === "map" && !mapInitialized) {
         // Use existing siteList from context (fetched on Menu page) or fetch as fallback
         let sitesData = props.siteList;
@@ -302,6 +347,7 @@ const MapPage: React.FC<MapProps> = (props) => {
               layers: site.layers || [],
             }))
             createSites({
+              setAreArraysUpdated,
               page: props.page,
               map,
               siteList: sitesAsSensorsGroupData,

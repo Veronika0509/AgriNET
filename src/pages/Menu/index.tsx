@@ -52,20 +52,30 @@ const Menu: React.FC<MenuProps> = (props) => {
   };
 
   const handleLogout = () => {
+    console.log('[MENU] Logout button clicked');
+    console.log('[MENU] Current userId:', props.userId);
     logout();
+    console.log('[MENU] Logout function called, redirecting to /login');
     history.push('/login');
+    console.log('[MENU] Redirect to login completed');
   };
 
   // Fetch site list when menu page loads
   useEffect(() => {
-    const fetchSiteList = async () => {
-      if (!props.userId) return;
+    console.log('[MENU] Fetching site list for userId:', props.userId);
 
+    const fetchSiteList = async () => {
+      if (!props.userId) {
+        console.log('[MENU] No userId, skipping site list fetch');
+        return;
+      }
+
+      console.log('[MENU] Calling getSiteList API with userId:', props.userId);
       const sites = await getSiteList(props.userId);
 
       // Check if API call failed
       if ("success" in sites && sites.success === false) {
-        console.error("Failed to load sites:", sites.error);
+        console.error("[MENU] Failed to load sites:", sites.error);
         present({
           message: sites.error,
           duration: 5000,
@@ -79,7 +89,10 @@ const Menu: React.FC<MenuProps> = (props) => {
       }
 
       // API call successful
+      console.log('[MENU] Site list loaded successfully:', sites.data.length, 'sites');
+      console.log('[MENU] First site:', sites.data[0]?.name);
       setSiteList(sites.data);
+      console.log('[MENU] Site list set in context');
     };
 
     fetchSiteList();
