@@ -52,25 +52,17 @@ const Menu: React.FC<MenuProps> = (props) => {
   };
 
   const handleLogout = () => {
-    console.log('[MENU] Logout button clicked');
-    console.log('[MENU] Current userId:', props.userId);
     logout();
-    console.log('[MENU] Logout function called, redirecting to /login');
     history.push('/login');
-    console.log('[MENU] Redirect to login completed');
   };
 
   // Fetch site list when menu page loads
   useEffect(() => {
-    console.log('[MENU] Fetching site list for userId:', props.userId);
-
     const fetchSiteList = async () => {
       if (!props.userId) {
-        console.log('[MENU] No userId, skipping site list fetch');
         return;
       }
 
-      console.log('[MENU] Calling getSiteList API with userId:', props.userId);
       const sites = await getSiteList(props.userId);
 
       // Check if API call failed
@@ -89,10 +81,7 @@ const Menu: React.FC<MenuProps> = (props) => {
       }
 
       // API call successful
-      console.log('[MENU] Site list loaded successfully:', sites.data.length, 'sites');
-      console.log('[MENU] First site:', sites.data[0]?.name);
       setSiteList(sites.data);
-      console.log('[MENU] Site list set in context');
     };
 
     fetchSiteList();
@@ -104,13 +93,11 @@ const Menu: React.FC<MenuProps> = (props) => {
       if (!props.userId) return;
 
       try {
-        const response = await axios.get('https://app.agrinet.us/api/add-unit/user-site-groups', {
+        await axios.get('https://app.agrinet.us/api/add-unit/user-site-groups', {
           params: {
             userId: props.userId,
           },
         });
-        console.log('User Site Groups:', response.data);
-        console.log('Request sent with userId:', props.userId);
       } catch (error) {
         console.error('Error fetching user site groups:', error);
       }

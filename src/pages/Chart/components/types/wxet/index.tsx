@@ -8,6 +8,7 @@ import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import {createWxetChart} from "../../../functions/types/wxet/createWxetChart";
 import {getWxetMainChartData} from "../../../../Map/data/types/wxet/getWxetMainChartData";
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
+import {getBatteryChartData} from "../../../data/types/wxet/getBatteryChartData";
 import {TabularData} from "../../TabularData";
 import {Export} from "../../Export";
 import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
@@ -16,11 +17,14 @@ import {AddCommentMessage} from "../../AddComment/components/AddCommentMessage";
 import {compareDates} from "../../../functions/types/moist/compareDates";
 import {formatDate} from "../../../functions/formatDate";
 import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
+import {createAdditionalChart} from "../../../functions/types/moist/createAdditionalChart";
 import login from "../../../../Login";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
+  const batteryRoot = useRef<any>(null);
   const [currentChartData, setCurrentChartData] = useState<any>()
+  const [currentBatteryChartData, setCurrentBatteryChartData] = useState<any>([])
   const currentDate: any = getCurrentDatetime()
   const initialStartDate: any = getStartDate(getCurrentDatetime())
   const [startDate, setStartDate] = useState<string>(initialStartDate);
@@ -31,8 +35,32 @@ export const WxetChartPage = (props: any) => {
   const [nwsForecastData, setNwsForecastData] = useState(undefined)
   const [wxetTabularData, setWxetTabularData] = useState<any>(null)
   const [isWxetTabularDataLoading, setIsWxetTabularDataLoading] = useState(false)
+  const [batteryChartShowed, setBatteryChartShowed] = useState<boolean>(false)
   const chartCode: string = 'weather_leaf'
   const [dateDifferenceInDays, setDateDifferenceInDays] = React.useState('14');
+
+  const updateChart = async (chartType: string) => {
+    if (chartType === 'battery') {
+      const endDatetime = currentDates ? new Date(currentDates[1]).setHours(0, 0, 0, 0) : new Date().setHours(0, 0, 0, 0)
+      const days = currentDates ? (endDatetime - new Date(currentDates[0]).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000) : 14
+      const newBatteryChartData = await getBatteryChartData(props.sensorId, days, formatDate(new Date(endDatetime + (1000 * 60 * 60 * 24))))
+      setCurrentBatteryChartData(newBatteryChartData.data)
+      createAdditionalChart(
+        "battery",
+        newBatteryChartData.data,
+        batteryRoot,
+        undefined,
+        undefined,
+        props.sensorId,
+        undefined,
+        false,
+        undefined,
+        props.userId,
+        undefined,
+        false,
+      )
+    }
+  };
 
   useEffect(() => {
     setCurrentChartData({
@@ -106,8 +134,19 @@ export const WxetChartPage = (props: any) => {
             setAlarm={props.setAlarm}
             dateDifferenceInDays={dateDifferenceInDays}
             setDateDifferenceInDays={setDateDifferenceInDays}
+            batteryChartShowed={batteryChartShowed}
+            setBatteryChartShowed={setBatteryChartShowed}
+            batteryRoot={batteryRoot}
+            updateChart={updateChart}
           />
         </div>
+
+        {/* Battery Chart Section */}
+        <div style={{display: batteryChartShowed ? 'block' : 'none'}} className="ion-margin-top">
+          <h2 className="ion-text-center">Battery Volts</h2>
+          <div className={s.additionalChart} id="batteryChart"></div>
+        </div>
+
         <div data-chart-section="main-header">
           <h2 className='ion-text-center ion-margin-top'>Weather Station</h2>
           <div className={s.additionalButtons}>

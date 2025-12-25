@@ -84,38 +84,25 @@ const AppContent: React.FC = () => {
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
 
   useEffect(() => {
-    console.log('[APP] Application initializing');
     loadGoogleApi(setGoogleApiLoaded);
 
     // Check for stored session
     const storedUserId = localStorage.getItem('userId');
     const storedUserData = localStorage.getItem('userData');
 
-    console.log('[APP] Checking for stored session:', {
-      hasStoredUserId: !!storedUserId,
-      hasStoredUserData: !!storedUserData,
-      storedUserId
-    });
-
     if (storedUserId && storedUserData) {
       // User has a stored session, auto-login
-      console.log('[APP] Found stored session, auto-logging in');
       const parsedUserId = parseInt(storedUserId);
-      console.log('[APP] Parsed userId:', parsedUserId);
       setUserId(parsedUserId);
       setPage(0);
-      console.log('[APP] Redirecting to /AgriNET/menu');
       history.push('/AgriNET/menu');
-      console.log('[APP] Auto-login completed');
     } else {
       // No stored session, go to login
-      console.log('[APP] No stored session found, redirecting to login');
       history.push('/AgriNET/login');
     }
 
     // Mark initial load as complete after a short delay
     setTimeout(() => {
-      console.log('[APP] Initial load completed, hiding preloader');
       setIsInitialLoad(false);
     }, 1500);
   }, []);

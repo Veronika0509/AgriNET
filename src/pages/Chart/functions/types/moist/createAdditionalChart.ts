@@ -124,7 +124,7 @@ export const createAdditionalChart = (
     // Create chart
     const chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
       wheelY: "zoomX",
-      maxTooltipDistance: 0,
+      maxTooltipDistance: undefined,
       paddingLeft: 0
     }));
 

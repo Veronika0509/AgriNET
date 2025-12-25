@@ -155,6 +155,21 @@ const TopSection = (props: TopSectionProps) => {
 
         {(props.type === "temp" || props.type === "wxet") && (
           <div className={`${s.topSection_wxetAddAlarm} ${s.topSection_tempAddAlarm}`}>
+            {props.type === "wxet" && (
+              <div className={s.topSection_chartsSection}>
+                <span className={s.topSection_sectionLabel}>Charts:</span>
+                <div className={s.topSection_chartsButtons}>
+                  <IonButton
+                    fill={props.batteryChartShowed ? "outline" : "solid"}
+                    size="small"
+                    className={s.topSection_chartButton}
+                    onClick={() => props.setBatteryChartShowed(!props.batteryChartShowed)}
+                  >
+                    Battery
+                  </IonButton>
+                </div>
+              </div>
+            )}
             <div
               className={`${s.topSection_forecastSection} ${props.type === 'wxet' && s.topSection_wxetForecastSection} ${props.type === 'temp' && s.topSection_tempForecastSection}`}>
               <span className={s.topSection_sectionLabel}>Forecast:</span>

@@ -717,11 +717,11 @@ export const createMainChart = (props: CreateMainChartProps): void => {
 
         // Selection Data
         const xAxisValue = chart.xAxes.getIndex(0)
-        
+
         if (xAxisValue && xAxisValue instanceof am5xy.DateAxis) {
           const downPosX = getPrivateValue(selection, "downPositionX") ?? 0
           const posX = getPrivateValue(selection, "positionX") ?? 0
-          
+
           const x1 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(downPosX)).getTime()
           const x2 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(posX)).getTime()
           chart.series.each((series: am5xy.SmoothedXLineSeries) => {

@@ -65,7 +65,7 @@ export const createFuelChart = (
 // Create chart
     const chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
       wheelY: "zoomX",
-      maxTooltipDistance: 0,
+      maxTooltipDistance: undefined,
       layout: root.current.horizontalLayout,
       paddingLeft: 0,
       paddingTop: 20,

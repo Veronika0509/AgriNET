@@ -1,6 +1,12 @@
-.chart {
+.chart,
+.additionalChart {
   width: 100%;
   margin: 0 auto;
+}
+
+.additionalChart {
+  height: 300px;
+  margin-top: 20px;
 }
 
 .wrapper {

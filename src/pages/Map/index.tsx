@@ -262,11 +262,8 @@ const MapPage: React.FC<MapProps> = (props) => {
 
   // Reset map state when userId changes (e.g., after logout/login with different user)
   useEffect(() => {
-    console.log('[MAP] UserId changed, resetting map state. New userId:', props.userId);
-
     // Clear existing markers from the map
     if (markers.length > 0) {
-      console.log('[MAP] Clearing', markers.length, 'existing markers');
       markers.forEach((marker: any) => {
         if (marker.setMap) {
           marker.setMap(null);
@@ -293,20 +290,10 @@ const MapPage: React.FC<MapProps> = (props) => {
     setTempOverlays([]);
     setValveOverlays([]);
     setFuelOverlays([]);
-
-    console.log('[MAP] Map state reset completed');
   }, [props.userId]);
 
   useEffect(() => {
     const initializeMap = async () => {
-      console.log('[MAP] Initialize map useEffect triggered:', {
-        page: props.page,
-        activeTab,
-        mapInitialized,
-        siteListLength: props.siteList.length,
-        userId: props.userId
-      });
-
       if (props.page === 1 && activeTab === "map" && !mapInitialized) {
         // Use existing siteList from context (fetched on Menu page) or fetch as fallback
         let sitesData = props.siteList;
@@ -451,6 +438,12 @@ const MapPage: React.FC<MapProps> = (props) => {
     const previousPage = previousPageRef.current
     const isReturningToMap = activeTab === "map" && previousTab !== "map"
     const isComingBackFromAnotherPage = props.page === 1 && previousPage !== 1
+    const isComingBackFromChartPage = props.page === 1 && previousPage === 2
+
+    // Call Collision Resolver when returning from Chart page
+    if (isComingBackFromChartPage && activeOverlays.length > 0) {
+      CollisionResolver.resolve(activeOverlays)
+    }
 
     if (isReturningToMap && !isComingBackFromAnotherPage && map && mapRef.current) {
       // Clear all markers (both site and sensor markers)
@@ -486,7 +479,7 @@ const MapPage: React.FC<MapProps> = (props) => {
     // Update previous tab and page references
     previousTabRef.current = activeTab
     previousPageRef.current = props.page
-  }, [activeTab, map, props.page])
+  }, [activeTab, map, props.page, activeOverlays])
 
   // GPS Location functions are now handled by useUserLocation hook
   // Wrapper for MapTab component that doesn't pass map parameter

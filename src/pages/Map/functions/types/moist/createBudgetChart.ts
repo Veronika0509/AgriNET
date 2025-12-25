@@ -50,7 +50,7 @@ export const createBudgetChart = (props: CreateBudgetChartProps) => {
     // Create chart
     const chart = props.chartRoot.current.container.children.push(am5xy.XYChart.new(props.chartRoot.current, {
       wheelY: "zoomX",
-      maxTooltipDistance: 0,
+      maxTooltipDistance: undefined,
       paddingLeft: 0
     }));
 

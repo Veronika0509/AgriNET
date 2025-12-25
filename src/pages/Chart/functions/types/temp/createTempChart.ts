@@ -105,7 +105,7 @@ export const createTempChart = (
     const chart = root.current.container.children.push(
       am5xy.XYChart.new(root.current, {
         wheelY: "zoomX",
-        maxTooltipDistance: 0,
+        maxTooltipDistance: undefined,
         layout: isMobile ? root.current.verticalLayout : root.current.horizontalLayout,
         paddingLeft: 0,
         paddingTop: 20,

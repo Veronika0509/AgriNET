@@ -72,7 +72,6 @@ export const useAddUnitForm = (props: UseAddUnitFormProps) => {
     if (props.activeTab === 'add') {
       axios.get('https://app.agrinet.us/api/add-unit/user-site-groups')
         .then((response) => {
-          console.log(response)
           const contentType = response.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
             return response.json();

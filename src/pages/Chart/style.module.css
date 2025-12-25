@@ -194,7 +194,7 @@
 }
 
 .topSection_daysInput {
-  width: 80px;
+  width: 88px;
   min-height: 32px !important;
   --padding-start: 8px;
   --padding-end: 8px;
@@ -230,7 +230,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1190px) {
+@media (max-width: 1320px) {
   .topSection_wxetPrimaryRow {
     display: block;
   }

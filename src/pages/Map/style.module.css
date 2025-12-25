@@ -1339,9 +1339,3 @@
   --highlight-height: 0;
   --highlight-color-focused: transparent;
 }
-
-@media screen and (max-width: 340px) {
-  .locationButtonContainer {
-    right: 50px;
-  }
-}

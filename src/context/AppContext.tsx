@@ -172,26 +172,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   // Function to logout and clear session
   const logout = useCallback(() => {
-    console.log('[LOGOUT] Starting logout process');
-    console.log('[LOGOUT] Current state before logout:', {
-      userId,
-      page,
-      siteListLength: siteList.length,
-      siteId,
-      mapPageKey,
-      chartPageType,
-      navigationHistoryLength: navigationHistory.length,
-      budgetEditorNavigationStackLength: budgetEditorNavigationStack.length
-    });
-
     // Clear localStorage
-    console.log('[LOGOUT] Clearing localStorage items');
     localStorage.removeItem('userId')
     localStorage.removeItem('userData')
     localStorage.removeItem('userRole')
 
     // Reset state
-    console.log('[LOGOUT] Resetting application state');
     setUserId(0 as UserId)
     setSiteList([])
     setSiteId('' as SiteId)
@@ -205,8 +191,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setBudgetEditorReturnPage(null)
     setBudgetEditorNavigationStack([])
     clearNavigationHistory()
-
-    console.log('[LOGOUT] Logout process completed');
   }, [userId, page, siteList, siteId, mapPageKey, chartPageType, navigationHistory, budgetEditorNavigationStack, clearNavigationHistory])
 
   // Combine all values into one context object
