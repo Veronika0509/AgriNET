@@ -17,13 +17,13 @@ import { addOverlayToOverlaysArray } from "../functions/types/moist/addOverlayTo
 import invalidChartDataImage from "../../../assets/images/invalidChartData.png"
 
 interface ChartDataItem {
-  sensorId: string | number
+  sensorId: string
   markerType?: string
   [key: string]: unknown
 }
 
 interface ExtlSensorData {
-  sensorId: string | number
+  sensorId: string
   name?: string
   lat: number
   lng: number

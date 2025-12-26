@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const getBatteryChartData = async (sensorId: string | number, daysProps?: number, endDate?: string) => {
+export const getBatteryChartData = async (sensorId: string, daysProps?: number, endDate?: string) => {
   if (daysProps && endDate) {
     return await axios.get('https://app.agrinet.us/api/chart/weather-station-battery?v=43', {
       params: {

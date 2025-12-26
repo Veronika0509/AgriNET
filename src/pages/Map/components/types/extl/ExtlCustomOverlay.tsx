@@ -12,7 +12,7 @@ interface ExtlChartData {
   chartType: string;
   width: number;
   height: number;
-  sensorId: string | number;
+  sensorId: string;
   [key: string]: unknown;
 }
 

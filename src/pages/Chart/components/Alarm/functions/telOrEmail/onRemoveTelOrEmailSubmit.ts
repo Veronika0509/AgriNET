@@ -4,7 +4,7 @@ import {enableSetpoint} from "../../data/setpoints/enableSetpoint";
 
 export const onRemoveTelOrEmailSubmit = async (
   sensorId: string,
-  name: number,
+  name: string | number,
   setEmailOrTel: (value: string) => void,
   setIsLowSetpointEnabled: (enabled: boolean) => void,
   setIsHighSetpointEnabled: (enabled: boolean) => void,
@@ -12,12 +12,14 @@ export const onRemoveTelOrEmailSubmit = async (
 ) => {
   const alarmData = await getAlarmData(sensorId)
 
-  const indicesToCheck: number[] = [0, 1, 2].filter(index => index !== name - 1);
+  const nameNum = typeof name === 'number' ? name : Number(name);
+  const indicesToCheck: number[] = [0, 1, 2].filter(index => index !== nameNum - 1);
   const isNoEmailsOrTelMore: boolean = indicesToCheck.every(index => !alarmData.data.emailsAndPhoneNumbers[index]);
 
   const removeTelOrEmailFunc = () => {
+    const nameNum = typeof name === 'number' ? name : Number(name);
     new Promise<void>((resolve) => {
-      removeTelOrEmail(sensorId, name, resolve)
+      removeTelOrEmail(sensorId, nameNum, resolve)
     }).then(() => {
       setEmailOrTel('Unset')
     })

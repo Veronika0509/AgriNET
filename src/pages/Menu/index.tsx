@@ -19,7 +19,7 @@ import { getSiteList } from '../Map/data/getSiteList';
 
 interface MenuProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
-  userId: any;
+  userId: number;
 }
 
 const Menu: React.FC<MenuProps> = (props) => {

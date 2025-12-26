@@ -7,6 +7,11 @@ export type SensorId = string & { readonly __brand: 'SensorId' };
 export type SiteId = string & { readonly __brand: 'SiteId' };
 export type UserId = number & { readonly __brand: 'UserId' };
 
+// Branded type constructors (safe type casting)
+export const createSensorId = (id: string): SensorId => id as SensorId;
+export const createSiteId = (id: string): SiteId => id as SiteId;
+export const createUserId = (id: number): UserId => id as UserId;
+
 // Union types with constants
 export type SensorType = 'moist' | 'temp' | 'valve' | 'wxet' | 'fuel';
 export type ChartPageType = 'moist' | 'temp' | 'valve' | 'wxet' | 'fuel';

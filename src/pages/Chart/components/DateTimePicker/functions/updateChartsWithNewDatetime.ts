@@ -14,9 +14,10 @@ export const updateChartsWithNewDatetime = async (
 ) => {
   if (type === 'moist') {
     if (selectedTab === 'years') {
-      const newEndDate = new Date().setHours(0, 0, 0, 0)
-      const newStartDate = new Date(newEndDate - ((365 * dateDifferenceInDays) * 24 * 60 * 60 * 1000))
-      updateMoistChartWithNewDates(newStartDate, newEndDate, setCurrentDates, setShowForecast, updateChart)
+      const endDate = new Date()
+      endDate.setHours(0, 0, 0, 0)
+      const startDate = new Date(endDate.getTime() - ((365 * dateDifferenceInDays) * 24 * 60 * 60 * 1000))
+      updateMoistChartWithNewDates(startDate, endDate, setCurrentDates, setShowForecast, updateChart)
     } else {
       if (checkDateValidity(startDate, endDate)) {
         presentToast()
@@ -26,10 +27,11 @@ export const updateChartsWithNewDatetime = async (
     }
   } else if (type === 'wxet' || type === 'temp' || type === 'fuel') {
     if (selectedTab === 'years') {
-      const newEndDate = new Date().setHours(0, 0, 0, 0)
-      const newStartDate = new Date(newEndDate - ((365 * dateDifferenceInDays) * 24 * 60 * 60 * 1000))
+      const endDate = new Date()
+      endDate.setHours(0, 0, 0, 0)
+      const startDate = new Date(endDate.getTime() - ((365 * dateDifferenceInDays) * 24 * 60 * 60 * 1000))
 
-      setCurrentDates([newStartDate, newEndDate])
+      setCurrentDates([startDate, endDate])
     } else {
       if (checkDateValidity(startDate, endDate)) {
         presentToast()

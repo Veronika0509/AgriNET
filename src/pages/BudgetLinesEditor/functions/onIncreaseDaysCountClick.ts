@@ -2,22 +2,10 @@ import {setDays} from "./setDays";
 import s from '../../Map/style.module.css'
 
 interface OnIncreaseDaysCountClickProps {
-  presentAlert: (options: {
-    header: string;
-    inputs: Array<{
-      type: string;
-      value: number;
-      cssClass: string;
-    }>;
-    buttons: Array<{
-      text: string;
-      role: string;
-      handler?: (event: string[]) => void;
-    }>;
-  }) => void;
+  presentAlert: (options: unknown) => void;
   currentAmountOfDays: number;
   setCurrentAmountOfDays: (days: number) => void;
-  presentErrorAlert: (options: { header: string; message: string; buttons: string[] }) => void;
+  presentErrorAlert: (options: unknown) => void;
 }
 
 export const onIncreaseDaysCountClick = (props: OnIncreaseDaysCountClickProps) => {

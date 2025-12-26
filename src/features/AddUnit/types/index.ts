@@ -1,7 +1,7 @@
 import type { Site, UserId } from "../../../types"
 
 export interface SiteGroup {
-  id: string | number
+  id: number
   name: string
 }
 
@@ -57,8 +57,8 @@ export interface AddUnitTabProps {
   setSelectedSite: (value: string) => void
   selectedSiteGroup: string
   setSelectedSiteGroup: (value: string) => void
-  siteGroups: Array<{ id: string; name: string }>
-  setSiteGroups: React.Dispatch<React.SetStateAction<Array<{ id: string; name: string }>>>
+  siteGroups: SiteGroup[]
+  setSiteGroups: React.Dispatch<React.SetStateAction<SiteGroup[]>>
   siteGroupError: { invalidGroup: string; correctGroups: string[] } | null
   setSiteGroupError: React.Dispatch<
     React.SetStateAction<{ invalidGroup: string; correctGroups: string[] } | null>
@@ -78,7 +78,7 @@ export interface AddUnitTabProps {
   formErrors: FormErrors
   setFormErrors: React.Dispatch<React.SetStateAction<FormErrors>>
   validateSensorId: (sensorId: string) => { isValid: boolean; message?: string }
-  getAllSensorIds: () => string[]
+  getAllSensorIds: () => Promise<string[]>
 
   // Layer state
   layers: Array<Layer>

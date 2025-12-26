@@ -1,21 +1,14 @@
+import * as React from "react";
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import {updateCommentDate} from "../../../components/AddComment/data/updateCommentDate";
 import {removeComment} from "../../../components/AddComment/data/removeComment";
 import login from "../../../../Login";
+import { TimeSeriesDataItem } from "../../../../../types/api";
 
 // Интерфейсы для данных графика
-interface ChartDataItem {
-  DateTime: string;
-  SumAve?: number;
-  H_SumAve?: number;
-  P_SumAve?: number;
-  Battery?: number;
-  time?: string; // For battery chart compatibility
-  value?: number; // For battery chart compatibility
-  [key: string]: string | number | undefined;
-}
+type ChartDataItem = TimeSeriesDataItem;
 
 interface BudgetLine {
   value: number;
@@ -29,9 +22,7 @@ interface MoistComment {
   id: string;
 }
 
-interface RootRef {
-  current: am5.Root | null;
-}
+type RootRef = React.RefObject<am5.Root | null>;
 
 interface SeriesItem {
   name: string;
@@ -63,9 +54,9 @@ export const createAdditionalChart = (
   chartType: string,
   chartData: ChartDataItem[],
   root: RootRef,
-  setMoistAddCommentModal: SetterFunction<{isOpen: boolean; date?: number; type?: string}>,
+  setMoistAddCommentModal: (params: {isOpen: boolean; date?: number; type?: string} | ((prev: any) => any)) => void,
   updateCommentsArray: UpdateCommentsArrayFunction,
-  sensorId: string | number,
+  sensorId: string,
   updateComments: () => void,
   moistAddCommentItemShowed: boolean,
   moistComments: MoistComment[],

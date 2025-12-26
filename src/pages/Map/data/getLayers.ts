@@ -1,15 +1,16 @@
 import axios from "axios";
+import type { LayersApiResponse } from "../../../types/api";
 
 export interface Layer {
   id: string;
   name: string;
   value: string;
-  // Add other fields from the API response as needed
 }
 
 export interface LayersResponse {
   layers: Layer[];
-  mapping: { [key: string]: string };
+  mapping: Record<string, string>;
+  markerTypes?: string[];
 }
 
 // Static layer data to use in case of API error
@@ -30,7 +31,7 @@ const defaultLayers: Layer[] = [
 export const getLayers = async (): Promise<LayersResponse> => {
   try {
     const response = await axios.get('https://app.agrinet.us/api/map/layers');
-    
+
     // Check that the response contains an array of layers
     if (response.data && Array.isArray(response.data.layers) && response.data.layers.length > 0) {
       // Transform the array of strings into Layer objects with necessary changes

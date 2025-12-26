@@ -1,9 +1,6 @@
 import React from "react"
 import type { Site, UserId } from "../../../../types"
-import BudgetEditor from "../types/moist/BudgetEditor"
-import {findFirstResult, isHigherPrecedenceThanAwait} from "@typescript-eslint/eslint-plugin/dist/util";
-import axios from "axios";
-import { useAppContext } from "../../../../context/AppContext";
+import BudgetEditor from "../../../BudgetLinesEditor"
 
 export interface BudgetTabProps {
   siteList: Site[]
@@ -14,9 +11,7 @@ export interface BudgetTabProps {
 /**
  * Budget Editor Tab - Wrapper for BudgetEditor component
  */
-const BudgetTab: React.FC<BudgetTabProps> = async ({ siteList, userId, isGoogleApiLoaded }) => {
-  const { selectedSensorIdForBudgetEditor } = useAppContext();
-
+const BudgetTab: React.FC<BudgetTabProps> = ({ siteList, userId, isGoogleApiLoaded }) => {
   return (
     <div style={{ height: "100%" }}>
       <section style={{ height: "100%" }}>
@@ -24,7 +19,6 @@ const BudgetTab: React.FC<BudgetTabProps> = async ({ siteList, userId, isGoogleA
           siteList={siteList}
           userId={userId}
           isGoogleApiLoaded={isGoogleApiLoaded}
-          initialSensorId={selectedSensorIdForBudgetEditor}
         />
       </section>
     </div>

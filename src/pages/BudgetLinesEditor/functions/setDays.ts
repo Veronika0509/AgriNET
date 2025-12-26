@@ -1,6 +1,14 @@
 import {onIncreaseDaysCountClick} from "./onIncreaseDaysCountClick";
 
-export const setDays = (props: any) => {
+interface SetDaysProps {
+  value: number;
+  setCurrentAmountOfDays: (days: number) => void;
+  presentErrorAlert: (options: unknown) => void;
+  presentAlert: (options: unknown) => void;
+  currentAmountOfDays: number;
+}
+
+export const setDays = (props: SetDaysProps) => {
   new Promise<void>((resolve, reject) => {
     if (/^\d+?$/.test(String(props.value))) resolve(); else reject("Value should be positive integer")
   })

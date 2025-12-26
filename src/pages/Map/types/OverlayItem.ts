@@ -1,6 +1,6 @@
 export interface OverlayItem {
   chartData: {
-    sensorId: string | number;
+    sensorId: string;
     [key: string]: unknown;
   };
   setMap: (map: google.maps.Map | null) => void;

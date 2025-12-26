@@ -9,10 +9,10 @@ interface ActionSheetButton {
 export const onEmailOrTelChange = (
   emailOrTel: string,
   setActionSheetButtons: (buttons: ActionSheetButton[] | ((prev: ActionSheetButton[]) => ActionSheetButton[])) => void,
-  setTextRef: (ref: unknown) => void,
+  setTextRef: { current: string },
   presentAlert: (alert: unknown) => void,
   sensorId: string,
-  name: string,
+  name: string | number,
   setEmailOrTel: (value: string) => void,
   setIsLowSetpointEnabled: (enabled: boolean) => void,
   setIsHighSetpointEnabled: (enabled: boolean) => void,

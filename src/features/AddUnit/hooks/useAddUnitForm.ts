@@ -7,7 +7,7 @@ interface UseAddUnitFormProps {
   selectedSiteForAddUnit: string;
   siteList: Site[];
   activeTab: string;
-  userId: any
+  userId: number;
 }
 
 export const useAddUnitForm = (props: UseAddUnitFormProps) => {
@@ -70,16 +70,11 @@ export const useAddUnitForm = (props: UseAddUnitFormProps) => {
   // Fetch user site groups when navigating to Add Unit page
   useEffect(() => {
     if (props.activeTab === 'add') {
-      axios.get('https://app.agrinet.us/api/add-unit/user-site-groups')
+      axios.get<string[]>('https://app.agrinet.us/api/add-unit/user-site-groups')
         .then((response) => {
-          const contentType = response.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            return response.json();
-          } else {
-            return response.text().then((text) => text);
-          }
-        })
-        .then((data) => {
+          // Axios automatically parses JSON, data is in response.data
+          const data = response.data;
+
           if (data && Array.isArray(data) && data.length > 0) {
             const formattedGroups = data.map((group, index) => ({
               id: index + 1,

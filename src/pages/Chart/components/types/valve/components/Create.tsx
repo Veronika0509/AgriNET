@@ -21,7 +21,7 @@ import {getDatetime} from "../../../DateTimePicker/functions/getDatetime"
 import {createScheduler} from "../../../../data/types/valve/createScheduler";
 
 interface CreateProps {
-  sensorId: string | number;
+  sensorId: string;
   userId: string | number;
   isCreateOpen: boolean;
   setIsCreateOpen: (open: boolean) => void;

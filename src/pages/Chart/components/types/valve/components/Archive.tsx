@@ -5,7 +5,7 @@ import React, {useCallback, useEffect, useRef, useState} from "react";
 import {getValveArchiveData} from "../../../../data/types/valve/getValveArchiveData";
 
 interface ArchiveProps {
-  sensorId: string | number;
+  sensorId: string;
   valveArchive: boolean;
   setValveArchive: (open: boolean) => void;
   [key: string]: unknown;
@@ -14,7 +14,7 @@ interface ArchiveProps {
 interface ArchiveItem {
   id: string | number;
   fieldName: string;
-  sensorId: string | number;
+  sensorId: string;
   localTime: string;
   duration: string;
   [key: string]: unknown;

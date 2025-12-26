@@ -1,22 +1,34 @@
+interface Bounds {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}
+
+interface Position {
+  lat: () => number;
+  lng: () => number;
+}
+
+interface Offset {
+  x: number;
+  y: number;
+}
+
+interface CollisionData {
+  overlapX: number;
+  overlapY: number;
+  centerDiffX: number;
+  centerDiffY: number;
+}
+
 interface OverlayItem {
-  getBounds: () => {
-    north: number;
-    south: number;
-    east: number;
-    west: number;
-  };
-  getPosition: () => {
-    lat: () => number;
-    lng: () => number;
-  };
+  getBounds: () => Bounds;
+  getPosition: () => Position;
   setPosition: (lat: number, lng: number) => void;
   getDiv: () => HTMLElement | null;
   draw: () => void;
-  offset?: {
-    x: number;
-    y: number;
-  };
-  [key: string]: unknown;
+  offset?: Offset;
 }
 
 export class CollisionResolver {
@@ -82,7 +94,7 @@ export class CollisionResolver {
     }
   }
 
-  private static checkCollision(overlay1: OverlayItem, overlay2: OverlayItem) {
+  private static checkCollision(overlay1: OverlayItem, overlay2: OverlayItem): CollisionData | null {
     const div1 = overlay1.getDiv();
     const div2 = overlay2.getDiv();
     if (!div1 || !div2) return null;
@@ -107,7 +119,7 @@ export class CollisionResolver {
     return null;
   }
 
-  private static resolveCollision(overlay1: OverlayItem, overlay2: OverlayItem, collision: { overlapX: number; overlapY: number; centerDiffX: number; centerDiffY: number }) {
+  private static resolveCollision(overlay1: OverlayItem, overlay2: OverlayItem, collision: CollisionData): void {
     const div1 = overlay1.getDiv();
     const div2 = overlay2.getDiv();
     if (!div1 || !div2) return;

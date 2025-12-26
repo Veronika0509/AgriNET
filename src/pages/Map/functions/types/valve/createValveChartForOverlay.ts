@@ -17,7 +17,6 @@ export const createValveChartForOverlay = async (
     // Check if element exists and is valid
     const container: any = document.getElementById(chartData.id);
     if (!container) {
-      console.error(`Chart element with id ${chartData.id} not found after waiting. Cannot create chart.`);
       return;
     }
 

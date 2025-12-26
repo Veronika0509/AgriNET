@@ -16,12 +16,12 @@ interface ModalWindowProps {
   isModalOpen: boolean;
   setIsModalOpen: (isOpen: boolean) => void;
   sensorName: string;
-  sensorId: string | number;
+  sensorId: string;
   sensorChartType: string;
   isChartDataIsLoading: boolean;
   isSelectDisabled: boolean;
   onSensorClick: (
-    sensorId: string | number,
+    sensorId: string,
     sensorName: string,
     sensorIdParam: string | number,
     setChartData: (data: unknown) => void,

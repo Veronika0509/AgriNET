@@ -3,16 +3,15 @@
  */
 
 // Simple tab wrappers
-export { default as MapTab } from "./MapTab"
+export { MapTab } from "./MapTab"
 export type { MapTabProps } from "./MapTab"
 
 export { default as BudgetTab } from "./BudgetTab"
 export type { BudgetTabProps } from "./BudgetTab"
 
-export { default as InfoTab } from "./InfoTab"
+export { InfoTab } from "./InfoTab"
 
-export { default as CommentsTab } from "./CommentsTab"
-export type { CommentsTabProps } from "./CommentsTab"
+export { CommentsTab } from "./CommentsTab"
 
 // AddUnitTab - Complex tab that needs further refactoring
 // TODO: Extract AddUnitTab (1,200+ lines)

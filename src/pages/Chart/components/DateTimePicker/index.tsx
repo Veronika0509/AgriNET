@@ -32,9 +32,10 @@ const DateTimePicker = (props: any) => {
       setWasYearsMode(false)
     }
   }
-  const onDaysNumberChange = (e: any) => {
-    if (!isNaN(Number(e.detail.value)) && Number(e.detail.value) >= 0) {
-      setNewDates(e.detail.value!)
+  const onDaysNumberChange = (e: CustomEvent) => {
+    const value = (e.detail as { value?: string | number | null }).value;
+    if (value !== null && value !== undefined && !isNaN(Number(value)) && Number(value) >= 0) {
+      setNewDates(String(value))
     } else {
       setNewDates('0')
     }
@@ -88,14 +89,17 @@ const DateTimePicker = (props: any) => {
               className={s.datetimePicker_tabsInput}
             />
             <IonSegment className={s.datetimePicker_segment} value={selectedTab}
-                        onIonChange={(e: any) => setSelectedTab(e.detail.value!)}>
+                        onIonChange={(e: CustomEvent) => {
+                          const value = (e.detail as { value?: 'days' | 'years' }).value;
+                          if (value) setSelectedTab(value);
+                        }}>
               <IonSegmentButton className={s.datetimePicker_segmentButton} value="days" onClick={onDaysClick}>Days</IonSegmentButton>
               <IonSegmentButton className={s.datetimePicker_segmentButton} value="years">Years</IonSegmentButton>
             </IonSegment>
           </div>
           {selectedTab !== 'years' && (
             <div className={s.datetimePicker_calendars}>
-              <DatetimeCalendar title={'From'} startDate={props.startDate} setStartDate={props.setStartDate} endDate={props.endDate} setEndDate={props.setEndDate} setDateDifferenceInDays={props.setDateDifferenceInDays} />
+              <DatetimeCalendar title={'From'} startDate={props.startDate} setStartDate={props.setStartDate} endDate={props.endDate} setEndDate={props.setEndDate} dateDifferenceInDays={props.dateDifferenceInDays} setDateDifferenceInDays={props.setDateDifferenceInDays} />
               <DatetimeCalendar title={'To'} startDate={props.startDate} setStartDate={props.setStartDate} endDate={props.endDate} setEndDate={props.setEndDate} dateDifferenceInDays={props.dateDifferenceInDays} setDateDifferenceInDays={props.setDateDifferenceInDays} />
             </div>
           )}

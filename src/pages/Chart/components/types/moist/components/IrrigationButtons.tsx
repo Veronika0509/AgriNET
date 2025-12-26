@@ -2,20 +2,21 @@ import React from 'react'
 import s from "../style.module.css";
 import {IonButton, IonText} from "@ionic/react";
 import {onIrrigationButtonClick} from "../../../../functions/types/moist/onIrrigationButtonClick";
+import { TimeSeriesDataItem } from "../../../../../../types/api";
 
 interface IrrigationButtonsProps {
   isIrrigationDataIsLoading: boolean;
   isIrrigationButtons: boolean;
   disablePrevButton: boolean;
   disableNextButton: boolean;
-  currentChartData: unknown;
-  irrigationDates: unknown;
-  setStartDate: (date: unknown) => void;
-  setEndDate: (date: unknown) => void;
+  currentChartData: TimeSeriesDataItem[];
+  irrigationDates: string[];
+  setStartDate: (date: string) => void;
+  setEndDate: (date: string) => void;
   setDateDifferenceInDays: (days: number) => void;
-  setCurrentDates: (dates: unknown) => void;
+  setCurrentDates: (dates: [number, string]) => void;
   setShowForecast: (show: boolean) => void;
-  updateChartsWithDates: (params: unknown) => void;
+  updateChartsWithDates: (params: {days?: number; newEndDateFormatted?: string; endDatetime?: number}) => void;
 }
 
 const IrrigationButtons = (props: IrrigationButtonsProps) => {

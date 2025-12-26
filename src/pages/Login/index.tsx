@@ -14,6 +14,7 @@ import Logo from '../../assets/images/logo.png';
 import {useState} from "react";
 import { useHistory } from 'react-router-dom';
 import type { UserId } from '../../types';
+import { createUserId } from '../../types';
 
 interface LoginProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -50,7 +51,7 @@ const Login: React.FC<LoginProps> = (props) => {
 
       props.setPage(0);
       history.push('/menu');
-      props.setUserId(response.data.id as UserId);
+      props.setUserId(createUserId(response.data.id));
     }).catch((error) => {
       console.error('[LOGIN] Login failed:', error);
       setMessage(true)

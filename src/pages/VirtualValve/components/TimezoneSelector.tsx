@@ -6,7 +6,7 @@ import {
 
 interface Sensor {
   layerName: string;
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   [key: string]: any;
 }

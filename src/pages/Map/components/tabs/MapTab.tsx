@@ -15,7 +15,7 @@ interface LayerListLayer {
 
 interface LayerListMarker {
   chartData: {
-    sensorId: string | number
+    sensorId: string
     [key: string]: unknown
   }
   [key: string]: unknown

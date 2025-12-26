@@ -11,7 +11,7 @@ import {onEmailOrTelChange} from "../functions/telOrEmail/onEmailOrTelChange";
 
 interface AlarmItemTelOrEmailProps {
   name: string;
-  sensorId: string | number;
+  sensorId: string;
   emailOrTel: string;
   setEmailOrTel: (value: string) => void;
   setIsLowSetpointEnabled: (value: boolean) => void;
@@ -23,14 +23,20 @@ export const AlarmItemTelOrEmail = (props: AlarmItemTelOrEmailProps) => {
   const [presentErrorAlert] = useIonAlert();
   const [presentRemoveAlert] = useIonAlert();
   const setTextRef = useRef(props.emailOrTel);
+
+  // Helper to convert string | number to string
+  const toString = (value: string | number): string => {
+    return typeof value === 'string' ? value : String(value);
+  };
+
   const [actionSheetButtons, setActionSheetButtons] = useState([
     {
       text: 'Email',
-      handler: () => presentTelOrEmail(props.sensorId, props.name, props.setEmailOrTel, presentErrorAlert, presentAlert, 'email')
+      handler: () => presentTelOrEmail(toString(props.sensorId), props.name, props.setEmailOrTel, presentErrorAlert, presentAlert, 'email')
     },
     {
       text: 'SMS',
-      handler: () => presentTelOrEmail(props.sensorId, props.name, props.setEmailOrTel, presentErrorAlert, presentAlert, 'sms')
+      handler: () => presentTelOrEmail(toString(props.sensorId), props.name, props.setEmailOrTel, presentErrorAlert, presentAlert, 'sms')
     }
   ])
 
@@ -44,7 +50,7 @@ export const AlarmItemTelOrEmail = (props: AlarmItemTelOrEmailProps) => {
       setActionSheetButtons,
       setTextRef,
       presentAlert,
-      props.sensorId,
+      toString(props.sensorId),
       props.name,
       props.setEmailOrTel,
       props.setIsLowSetpointEnabled,

@@ -9,7 +9,7 @@ import {getSensorItems} from "../../Map/data/getSensorItems";
 // import axios from "axios";
 
 interface Marker {
-  sensorId: string | number;
+  sensorId: string;
   visible: boolean;
   setMap: (map: google.maps.Map | null) => void;
   infoWindow: google.maps.InfoWindow;
@@ -24,7 +24,7 @@ interface Layer {
   markers: Marker[];
 }
 
-interface Site {
+interface SiteWithLayers {
   name: string;
   layers: Layer[];
 }
@@ -45,12 +45,12 @@ interface OnSiteClickProps {
   markers: Marker[];
   setSecondMap: (name: string) => void;
   sensorsGroupData: SensorsGroupData;
-  siteList: Site[];
+  siteList: SiteWithLayers[];
   groupMarker: GroupMarker;
   setAmountOfSensors: (amount: number) => void;
   amountOfSensors: number;
   page: string | number;
-  userId: string | number;
+  userId: number;
   moistChartsAmount: number;
   wxetChartsAmount: number;
   extlChartsAmount: number;
@@ -109,7 +109,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   const valveInvalidChartData: unknown[] = []
   const countValve: Marker[] = []
 
-  props.siteList.map((site: Site) => {
+  props.siteList.map((site: SiteWithLayers) => {
     if (site.name === props.groupMarker.title) {
       allSensorItems.map((sensItem: any) => {
         if (sensItem.markerType === 'moist-fuel') {

@@ -8,7 +8,7 @@ interface LayerListLayer {
   name: string;
   markers: Array<{
     chartData: {
-      sensorId: string | number;
+      sensorId: string;
       [key: string]: unknown;
     };
     [key: string]: unknown;

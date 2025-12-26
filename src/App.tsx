@@ -45,6 +45,7 @@ import AddValvePage from "./pages/AddValvePage";
 import CommentsPage from "./pages/Comments";
 import AddUnitPage from "./pages/AddUnit";
 import { AppProvider, useAppContext } from "./context/AppContext";
+import { createUserId } from "./types";
 import './App.css'
 import {BudgetEditorTab} from "./pages/BudgetLinesEditor/components/BudgetEditorTab";
 
@@ -93,7 +94,7 @@ const AppContent: React.FC = () => {
     if (storedUserId && storedUserData) {
       // User has a stored session, auto-login
       const parsedUserId = parseInt(storedUserId);
-      setUserId(parsedUserId);
+      setUserId(createUserId(parsedUserId));
       setPage(0);
       history.push('/AgriNET/menu');
     } else {

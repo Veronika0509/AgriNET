@@ -132,7 +132,7 @@ export const createBudgetChart = (props: CreateBudgetChartProps) => {
         inside: true,
         fontSize: 12,
         centerX: 0,
-        centerY: "0%",
+        centerY: am5.p0,
         y: -10,
         visible: true
       });

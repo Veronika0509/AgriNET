@@ -3,11 +3,9 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated"
 import * as am5xy from "@amcharts/amcharts5/xy"
 import { removeComment } from "../../../components/AddComment/data/removeComment"
 import { updateCommentDate } from "../../../components/AddComment/data/updateCommentDate"
+import { TimeSeriesDataItem } from "../../../../../types/api"
 
-interface ChartDataItem {
-  DateTime: string;
-  [key: string]: unknown;
-}
+type ChartDataItem = TimeSeriesDataItem;
 
 interface AdditionalChartData {
   linesCount: number;

@@ -1,7 +1,7 @@
 interface TempChartDataItem {
   id: string;
   mainId: string | number;
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   layerName: string;
   bgColor: string;
@@ -41,7 +41,7 @@ interface TempDataContainerProps {
   };
   id: { value: string | number };
   mainId: string | number;
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   tempChartData: TempChartDataItem[];
   boundsArray: TempBounds[];

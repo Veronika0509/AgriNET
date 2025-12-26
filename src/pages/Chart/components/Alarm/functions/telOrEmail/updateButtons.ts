@@ -11,7 +11,7 @@ export const updateButtons = (
   setTextRef: { current: string },
   presentAlert: (options: unknown) => void,
   sensorId: string,
-  name: number,
+  name: string | number,
   setEmailOrTel: (value: string) => void,
   setIsLowSetpointEnabled: (enabled: boolean) => void,
   setIsHighSetpointEnabled: (enabled: boolean) => void,

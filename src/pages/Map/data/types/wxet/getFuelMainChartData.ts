@@ -1,7 +1,7 @@
 import axios from "axios";
 import {formatDate} from "../../../../Chart/functions/formatDate";
 
-export const getFuelMainChartData = async (sensorId: string | number, daysProp?: number, endDateProp?: string) => {
+export const getFuelMainChartData = async (sensorId: string, daysProp?: number, endDateProp?: string) => {
   if (daysProp && endDateProp) {
     const endDatetime = new Date(daysProp).setHours(0, 0, 0, 0)
     const days = (endDatetime - new Date(endDateProp).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000)

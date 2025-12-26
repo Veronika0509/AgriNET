@@ -334,7 +334,7 @@ export const Comments = (props: any) => {
       <div className={s.comments_settings}>
         <div className={s.comments_settingsTypes}
              style={{background: currentType !== 0 && types.find((item: any) => item.id === currentType).color}}>
-          <IonSelect label="Type" value={currentType} onIonChange={(e: any) => onTypeChange(e.detail.value)}
+          <IonSelect label="Type" value={currentType} onIonChange={(e: CustomEvent) => onTypeChange((e.detail as { value: number }).value)}
                      className={s.comments_types}>
             <IonSelectOption value={0}>Any</IonSelectOption>
             {types && types.map((type: any) => (
@@ -346,8 +346,8 @@ export const Comments = (props: any) => {
           </button>
         </div>
         <IonInput label="Sensor ID:" placeholder='Any' value={currentSensorId}
-                  onIonBlur={(e: any) => onSensorIdChange(e.target.value)}></IonInput>
-        <IonSelect label="Sort:" value={currentSort} onIonChange={(e: any) => onSortChangeChange(e.detail.value)}
+                  onIonBlur={(e: CustomEvent) => onSensorIdChange((e.target as HTMLIonInputElement).value)}></IonInput>
+        <IonSelect label="Sort:" value={currentSort} onIonChange={(e: CustomEvent) => onSortChangeChange((e.detail as { value: string }).value)}
                    className={s.comments_types}>
           {sortOptions && sortOptions.map((sort: any) => (
             <IonSelectOption key={sort.name} value={sort.name}>{sort.label}</IonSelectOption>
@@ -422,9 +422,10 @@ export const Comments = (props: any) => {
             </IonHeader>
             <div className={s.comments_modalBody}>
               <IonItem className={s.comments_modalItem}>
-                <IonSelect label="Chart" value={modalChart} onIonChange={(e: any) => {
-                  setModalChart(e.detail.value)
-                  updateFormValue('chart', e.detail.value)
+                <IonSelect label="Chart" value={modalChart} onIonChange={(e: CustomEvent) => {
+                  const value = (e.detail as { value: string }).value;
+                  setModalChart(value)
+                  updateFormValue('chart', value)
                 }}>
                   {chartKinds && chartKinds.map((chartKind: any) => (
                     <IonSelectOption key={chartKind.code} value={chartKind.code}>{chartKind.name}</IonSelectOption>

@@ -12,7 +12,7 @@ interface SensorItem {
   lat: number;
   lng: number;
   name: string;
-  sensorId: string | number;
+  sensorId: string;
   markerType: string;
   graphic?: string;
   width?: number;

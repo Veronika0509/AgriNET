@@ -9,7 +9,7 @@ import skull from "../../../../../assets/images/skull.svg";
 import alarm from '../../../../../assets/images/icons/wxetAlarm.png'
 
 interface WxetChartData {
-  sensorId: string | number;
+  sensorId: string;
   mainId: string | number;
   name: string;
   freshness?: string;

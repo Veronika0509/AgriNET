@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import type { Site, SensorData, ChartPageType, UserId, SiteId } from '../types'
+import { createUserId, createSiteId } from '../types'
 import { getSiteList } from '../pages/Map/data/getSiteList'
 
 /**
@@ -104,9 +105,9 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   // Initialize all state from App.tsx
   const [page, setPage] = useState<number>(0)
-  const [userId, setUserId] = useState<UserId>(0 as UserId)
+  const [userId, setUserId] = useState<UserId>(createUserId(0))
   const [siteList, setSiteList] = useState<Site[]>([])
-  const [siteId, setSiteId] = useState<SiteId>('' as SiteId)
+  const [siteId, setSiteId] = useState<SiteId>(createSiteId(''))
   const [siteName, setSiteName] = useState<string>('')
   const [chartData, setChartData] = useState<SensorData[]>([])
   const [additionalChartData, setAdditionalChartData] = useState<SensorData[]>([])
@@ -178,9 +179,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     localStorage.removeItem('userRole')
 
     // Reset state
-    setUserId(0 as UserId)
+    setUserId(createUserId(0))
     setSiteList([])
-    setSiteId('' as SiteId)
+    setSiteId(createSiteId(''))
     setSiteName('')
     setChartData([])
     setAdditionalChartData([])

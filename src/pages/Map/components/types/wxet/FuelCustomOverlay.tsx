@@ -11,7 +11,7 @@ interface FuelChartData {
   mainId: string | number;
   layerName: string;
   name: string;
-  sensorId: string | number;
+  sensorId: string;
   batteryPercentage?: number;
   freshness?: string;
   [key: string]: unknown;

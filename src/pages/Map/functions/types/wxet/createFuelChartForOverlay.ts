@@ -42,7 +42,6 @@ export const createFuelChartForOverlay = async (chartData: FuelChartData, roots:
     // Check if element exists and is valid
     const chartElement = document.getElementById(chartData.id.toString());
     if (!chartElement) {
-      console.error(`Chart element with id ${chartData.id} not found after waiting. Cannot create chart.`);
       return;
     }
 

@@ -2,13 +2,10 @@ import {getDatetime} from "../../../components/DateTimePicker/functions/getDatet
 import {updateMoistChartWithNewDates} from "./updateMoistChartWithNewDates";
 import {loadGoogleApi} from "../../../../../functions/loadGoogleApiFunc";
 import {getCurrentDatetime} from "../../../components/DateTimePicker/functions/getCurrentDatetime";
+import { TimeSeriesDataItem } from "../../../../../types/api";
 
 // Интерфейсы для данных графика
-interface ChartDataItem {
-  DateTime: string;
-  'MS 1'?: number;
-  [key: string]: string | number | undefined;
-}
+type ChartDataItem = TimeSeriesDataItem;
 
 export const onIrrigationButtonClick = async (
   buttonProps: number,
@@ -17,9 +14,9 @@ export const onIrrigationButtonClick = async (
   setStartDate: (value: string) => void,
   setEndDate: (value: string) => void,
   setDateDifferenceInDays: (value: number) => void,
-  setCurrentDates: (value: unknown) => void,
+  setCurrentDates: (value: [number, string]) => void,
   setShowForecast: (value: boolean) => void,
-  updateChartsWithDates: (startDate: string, endDate: string) => void,
+  updateChartsWithDates: (params: {days?: number; newEndDateFormatted?: string; endDatetime?: number}) => void,
 ): Promise<void> => {
   let currentDate: string
   if (buttonProps === 1) {
@@ -61,6 +58,6 @@ export const onIrrigationButtonClick = async (
   const startDatetime = getDatetime(new Date(startDatetimeDefault.setDate(startDatetimeDefault.getDate() - 14)))
   setStartDate(startDatetime)
 
-  setDateDifferenceInDays('14')
+  setDateDifferenceInDays(14)
   updateMoistChartWithNewDates(startDatetime, endDatetime, setCurrentDates, setShowForecast, updateChartsWithDates)
 }

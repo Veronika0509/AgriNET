@@ -4,7 +4,7 @@ import axios from "axios";
 // Интерфейсы для типизации
 interface SensorItem {
   id: string | number;
-  sensorId: string | number;
+  sensorId: string;
   mainId: string | number;
   lat: number;
   lng: number;
@@ -15,7 +15,7 @@ interface SensorItem {
 interface ValveChartDataItem {
   id: string;
   mainId: string | number;
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   layerName: string;
   events: unknown[];

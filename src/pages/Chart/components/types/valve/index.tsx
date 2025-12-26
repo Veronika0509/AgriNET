@@ -13,7 +13,7 @@ import {deleteValveRecord} from "../../../data/types/valve/deleteValveRecord";
 import {Create} from "./components/Create";
 
 interface ValveChartPageProps {
-  sensorId: string | number;
+  sensorId: string;
   userId: string | number;
   chartData: unknown[];
   [key: string]: unknown;

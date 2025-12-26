@@ -7,7 +7,7 @@ import alarm from "../../../../../assets/images/icons/wxetAlarm.png";
 
 interface TempChartData {
   id: string | number;
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   freshness?: string;
   batteryPercentage?: number;

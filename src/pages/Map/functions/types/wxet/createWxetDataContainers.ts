@@ -1,7 +1,7 @@
 interface WxetDataItem {
   mainId: string | number;
   id: string | number;
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   data: {
     temp?: number | null;
@@ -23,7 +23,7 @@ interface WxetDataContainerProps {
   mainId: string | number;
   markerType: string;
   wxetId: { value: string | number };
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   response: {
     data: {

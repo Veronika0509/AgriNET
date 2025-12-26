@@ -3,7 +3,7 @@
 interface MoistChartDataItem {
   mainId: string | number;
   id: string | number;
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   battery: number;
   data: unknown[];
@@ -20,7 +20,7 @@ interface MoistBounds {
 interface MoistDataContainerProps {
   mainId: string | number;
   moistId: { value: string | number };
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   response: {
     data: {

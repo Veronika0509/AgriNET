@@ -457,11 +457,11 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                     "--padding-start": "8px",
                     "--padding-end": "8px",
                     height: "32px",
-                    "font-size": "12px",
-                    "font-weight": "500",
-                    "text-transform": "uppercase",
-                    "letter-spacing": "0.5px",
-                    "margin-left": "8px",
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    marginLeft: "8px",
                   }}
                 >
                   New Site
@@ -881,10 +881,10 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                     "--padding-start": "8px",
                     "--padding-end": "8px",
                     height: "32px",
-                    "font-size": "12px",
-                    "font-weight": "500",
-                    "text-transform": "uppercase",
-                    "letter-spacing": "0.5px",
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
                     alignSelf: "center",
                   }}
                 >

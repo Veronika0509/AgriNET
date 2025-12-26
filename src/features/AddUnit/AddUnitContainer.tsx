@@ -2,12 +2,12 @@ import React, { useState, useEffect, useRef, useCallback } from "react"
 import { useIonAlert, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent } from "@ionic/react"
 import { getSiteList } from "../../pages/Map/data/getSiteList"
 import type { Site, UserId } from "../../types"
+import { createSiteId } from "../../types"
 
 // Import our modularized components
 import AddUnitTab from "./components/AddUnitTab"
 import { useAddUnitForm } from "./hooks/useAddUnitForm"
 import { useAddUnitMap } from "./hooks/useAddUnitMap"
-import { useSiteGroups } from "./hooks/useSiteGroups"
 import QRCodeScanner from "../../components/QRCodeScanner"
 import { handleJSONQRData, handleKeyValueQRData } from "./handlers/qrScannerHandlers"
 import type { QRScanHandlers } from "./handlers/qrScannerHandlers"
@@ -292,13 +292,6 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
     }
   }, [activeTab, addUnitMap, siteList, selectedSite, selectedSiteForAddUnit])
 
-  // Fetch user site groups when navigating to Add Unit page
-  useSiteGroups({
-    activeTab,
-    setSiteGroups,
-    setSelectedSiteGroup,
-  })
-
   // Clear temporary layer when navigating away from Add Unit tab
   useEffect(() => {
     if (activeTab !== "add") {
@@ -367,11 +360,10 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
 
             // Add new site to local site list (will be created on server when user clicks Add Unit)
             const newSite: Site = {
-              id: `temp-${Date.now()}`, // Temporary ID
+              id: createSiteId(`temp-${Date.now()}`), // Temporary ID
               name: siteName,
               lat: lat,
               lng: lng,
-              layers: [],
             }
 
             // Set flag to prevent coordinate update when selecting the new site

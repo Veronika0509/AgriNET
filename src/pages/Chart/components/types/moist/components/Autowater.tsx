@@ -3,16 +3,41 @@ import {IonButton, IonContent, IonModal, IonSpinner, IonText, IonTitle, useIonVi
 import React, {useEffect, useRef, useState} from "react";
 import {getAutowaterData} from "../../../../data/types/moist/getAutowaterData";
 
+interface ValveData {
+  sensorId: string;
+  msetPoint: number;
+  enabled?: boolean;
+  hrsAve?: number;
+  setPointSensor?: string | number;
+  duration?: number;
+  priority?: number;
+  waterDrainTime?: number;
+  [key: string]: unknown;
+}
+
+interface AutowaterData {
+  averageMoisture: number;
+  valve: ValveData;
+  drainSpeed: number;
+  hoursToIrrigate: number;
+  [key: string]: unknown;
+}
+
 interface AutowaterProps {
   autowater: boolean;
-  sensorId: string | number;
+  sensorId: string;
   setAutowater: (value: boolean) => void;
+  setValveSettings?: (value: boolean) => void;
+  setChartPageType?: (value: string) => void;
+  setSiteId?: (value: string) => void;
+  setSettingsOddBack?: (value: boolean) => void;
+  [key: string]: unknown;
 }
 
 export const Autowater = (props: AutowaterProps) => {
   const [isAutowaterLoading, setIsAutowaterLoading] = useState(false)
   const [irrigationNeeded, setIrrigationNeeded] = useState(false)
-  const [autowaterData, setAutowaterData] = useState<unknown[]>([])
+  const [autowaterData, setAutowaterData] = useState<AutowaterData | null>(null)
   const modalRef = useRef<HTMLIonModalElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -29,7 +54,7 @@ export const Autowater = (props: AutowaterProps) => {
   useEffect(() => {
     if (isAutowaterLoading) {
       setIsAutowaterLoading(false)
-      if (autowaterData.length !== 0) {
+      if (autowaterData !== null) {
         setIrrigationNeeded(autowaterData.averageMoisture < autowaterData.valve.msetPoint)
       }
       adjustModalHeight()
@@ -50,10 +75,11 @@ export const Autowater = (props: AutowaterProps) => {
     }
   };
   const redirectToSettings = async () => {
-    props.setValveSettings(true)
-    props.setChartPageType('valve')
-    props.setSiteId(autowaterData.valve.sensorId)
-    props.setSettingsOddBack(true)
+    if (!autowaterData) return;
+    props.setValveSettings?.(true)
+    props.setChartPageType?.('valve')
+    props.setSiteId?.(autowaterData.valve.sensorId)
+    props.setSettingsOddBack?.(true)
     props.setAutowater(false)
   }
   const getAutowaterFormattedDays = (hours: number) => {
@@ -87,7 +113,7 @@ export const Autowater = (props: AutowaterProps) => {
           <IonSpinner name="circular" className={s.autowaterLoading}></IonSpinner>
         ) : (
           <div className={s.autowaterModalWrapper} ref={contentRef}>
-            {autowaterData.length !== 0 ? (
+            {autowaterData !== null ? (
               <div>
                 <h2>AutoWATER {autowaterData.valve.enabled ? 'Enabled' : 'Disabled'}</h2>
                 <IonText className={`${s.autowaterModalText} ${s.autowaterModalTextOne}`}>Irrigation

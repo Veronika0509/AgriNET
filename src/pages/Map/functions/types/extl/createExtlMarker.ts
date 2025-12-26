@@ -3,7 +3,7 @@ import {createExtlDataContainer} from "./createExtlDataContainer";
 // Интерфейсы для типизации
 interface ExtlSensorItem {
   id: string | number;
-  sensorId: string | number;
+  sensorId: string;
   mainId: string | number;
   lat: number;
   lng: number;
@@ -22,7 +22,7 @@ export const createExtlMarker = async (
   extlChartsAmount: ExtlSensorItem[],
   sensorItem: ExtlSensorItem,
   page: number,
-  setExtlChartDataContainer: (data: Array<[{ sensorId: string | number; layerName?: string; [key: string]: unknown; }, ExtlBounds]>) => void,
+  setExtlChartDataContainer: (data: Array<[{ sensorId: string; layerName?: string; [key: string]: unknown; }, ExtlBounds]>) => void,
   extlId: ExtlIdCounter,
   extlData: ExtlSensorItem[],
   extlBoundsArray: ExtlBounds[],

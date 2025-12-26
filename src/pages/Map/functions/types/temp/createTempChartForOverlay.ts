@@ -46,7 +46,6 @@ export const createTempChartForOverlay = async (
     // Check if element exists and is valid
     const chartElement = document.getElementById(chartData.id);
     if (!chartElement) {
-      console.error(`Chart element with id ${chartData.id} not found after waiting. Cannot create chart.`);
       return;
     }
 

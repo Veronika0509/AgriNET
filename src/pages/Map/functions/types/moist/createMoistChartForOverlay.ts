@@ -48,7 +48,6 @@ export const createMoistChartForOverlay = async (type: string, chartData: MoistC
     // Check if element exists and is valid
     const chartElement = document.getElementById(chartId);
     if (!chartElement) {
-      console.error(`Chart element with id ${chartId} not found after waiting. Cannot create chart.`);
       return;
     }
 

@@ -1,7 +1,7 @@
 interface ValveChartDataItem {
   id: string;
   mainId: string | number;
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   layerName: string;
   events: unknown[];
@@ -18,7 +18,7 @@ interface ValveBounds {
 interface ValveDataContainerProps {
   id: { value: string | number };
   mainId: string | number;
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   data: {
     events: unknown[];

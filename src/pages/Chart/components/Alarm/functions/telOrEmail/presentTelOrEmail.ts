@@ -3,7 +3,7 @@ import {onTelOrEmailSubmit} from "./onTelOrEmailSubmit";
 
 export const presentTelOrEmail = (
   sensorId: string,
-  name: number,
+  name: string | number,
   setEmailOrTel: (value: string) => void,
   presentErrorAlert: (options: unknown) => void,
   presentAlert: (options: unknown) => void,

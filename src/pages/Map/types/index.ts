@@ -10,7 +10,7 @@ export interface LayerListLayer {
 
 export interface LayerListMarker {
   chartData: {
-    sensorId: string | number
+    sensorId: string
     [key: string]: unknown
   }
   [key: string]: unknown
@@ -28,7 +28,7 @@ export type TempChartData = unknown
 
 // Extl data types
 export interface ExtlSensorData {
-  sensorId: string | number
+  sensorId: string
   name?: string
   lat: number
   lng: number
@@ -63,7 +63,7 @@ export type Marker = {
 }
 
 export interface ChartDataItem {
-  sensorId: string | number
+  sensorId: string
   markerType?: string
   [key: string]: unknown
 }
@@ -84,7 +84,7 @@ export interface BaseOverlay {
   draw: () => void
   setMap: (map: google.maps.Map | null) => Promise<void>
   update?: () => void
-  sensorId: string | number
+  sensorId: string
   layerName: string
   [key: string]: unknown
 }

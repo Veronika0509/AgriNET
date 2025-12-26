@@ -2,6 +2,12 @@ import { onSiteClick } from "./onSiteClick";
 import {logoFacebook, logoHackernews} from "ionicons/icons";
 import { getSiteList } from "../data/getSiteList";
 import axios from "axios";
+import type { Site } from "../../../types";
+
+// Extended marker type with custom infoWindow property
+interface MarkerWithInfoWindow extends google.maps.marker.AdvancedMarkerElement {
+  infoWindow?: google.maps.InfoWindow;
+}
 
 interface SensorsGroupData {
   lat: number;
@@ -13,10 +19,10 @@ interface SensorsGroupData {
 interface CreateSitesProps {
   setAreArraysUpdated: (updated: boolean) => void;
   markers: unknown[];
-  siteList: SensorsGroupData[];
+  siteList: Site[];
   map: google.maps.Map;
   setMarkers: (markers: unknown[]) => void;
-  userId: string | number;
+  userId: number;
   setPage: (page: number) => void;
   setSiteId: (id: string | number) => void;
   setSiteName: (name: string) => void;
@@ -51,20 +57,20 @@ interface CreateSitesProps {
 }
 
 export const createSites = async (props: CreateSitesProps) => {
-  const markers: google.maps.marker.AdvancedMarkerElement[] = [];
+  const markers: MarkerWithInfoWindow[] = [];
   props.setAreArraysUpdated(false);
   const template = document.createElement("div");
   template.className = "my-advanced-marker";
   template.innerHTML = `<img src="https://app.agrinet.us/Tier1Markr_20.svg" alt="m">`;
   if (props.markers.length === 0) {
-    props.siteList.forEach((sensorsGroupData: SensorsGroupData) => {
+    props.siteList.forEach((sensorsGroupData: Site) => {
       const el = template.cloneNode(true) as HTMLElement;
       const groupMarker = new google.maps.marker.AdvancedMarkerElement({
         map: props.map,
         position: { lat: sensorsGroupData.lat, lng: sensorsGroupData.lng },
         title: sensorsGroupData.name,
         content: el
-      });
+      }) as MarkerWithInfoWindow;
 
       const info: string = `<p class="infoWindowText">${sensorsGroupData.name}</p>`;
       const infoWindow = new google.maps.InfoWindow({
@@ -150,7 +156,7 @@ export const createSites = async (props: CreateSitesProps) => {
       const bounds = new google.maps.LatLngBounds();
 
       // Extend bounds with all marker positions
-      props.siteList.forEach((site: SensorsGroupData) => {
+      props.siteList.forEach((site: Site) => {
         bounds.extend({ lat: site.lat, lng: site.lng });
       });
 

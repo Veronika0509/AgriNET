@@ -15,7 +15,7 @@ import type { ValveSettings } from '../../../../../../types';
 
 // Интерфейсы для типизации
 interface SiteMarker {
-  sensorId: string | number;
+  sensorId: string;
   [key: string]: unknown;
 }
 

@@ -12,7 +12,8 @@ import {presentTelOrEmail} from "../functions/telOrEmail/presentTelOrEmail";
 
 interface AlarmItemSetpointsProps {
   name: string;
-  sensorId: string | number;
+  sensorId: string;
+  field: string;
   selectedSensor: string;
   setpoint: string | number;
   isSetpointEnabled: boolean;
@@ -34,6 +35,12 @@ export const AlarmItemSetpoints = (props: AlarmItemSetpointsProps) => {
   const [presentSelectToast] = useIonToast();
   const [presentSetpointToast] = useIonToast();
   const [presentErrorAlert] = useIonAlert();
+
+  // Helper to convert string | number to string
+  const toString = (value: string | number): string => {
+    return typeof value === 'string' ? value : String(value);
+  };
+
   const initialSensorActionSheetButtonsArray: string[] = Object.values(props.fieldsLabelsData)
   const sensorActionSheetButtons: Array<{text: string; handler?: () => void; role?: string; data?: {action: string}}> = []
 
@@ -69,7 +76,7 @@ export const AlarmItemSetpoints = (props: AlarmItemSetpointsProps) => {
             header="Select Sensor"
             buttons={sensorActionSheetButtons}
           ></IonActionSheet>
-          <IonButton fill='clear' color='light' onClick={() => presentSetpointChangeAlert(presentAlert, props.name, props.sensorId, props.setSetpoint, presentSetpointToast)}>{props.setpoint}</IonButton>
+          <IonButton fill='clear' color='light' onClick={() => presentSetpointChangeAlert(presentAlert, props.name, toString(props.sensorId), props.setSetpoint, presentSetpointToast)}>{props.setpoint}</IonButton>
           <IonButton fill={props.isSetpointEnabled ? 'clear' : 'solid'} onClick={
             () => onEnableCLick(props.sensorId, props.name, props.isSetpointEnabled, props.setIsSetpointEnabled, props.setIsEnabledToastOpen, props.setIsDisabledToastOpen, props.setIsEnableActionSheet)
           }>
@@ -82,7 +89,7 @@ export const AlarmItemSetpoints = (props: AlarmItemSetpointsProps) => {
               {
                 text: 'Email',
                 handler: () => presentTelOrEmail(
-                  props.sensorId,
+                  toString(props.sensorId),
                   1,
                   props.setEmailOrTel,
                   presentErrorAlert,
@@ -98,7 +105,7 @@ export const AlarmItemSetpoints = (props: AlarmItemSetpointsProps) => {
               },              {
                 text: 'SMS',
                 handler: () => presentTelOrEmail(
-                  props.sensorId,
+                  toString(props.sensorId),
                   1,
                   props.setEmailOrTel,
                   presentErrorAlert,

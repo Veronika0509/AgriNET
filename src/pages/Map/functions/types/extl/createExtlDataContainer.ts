@@ -1,5 +1,5 @@
 interface ExtlItem {
-  sensorId: string | number;
+  sensorId: string;
   layerName?: string;
   [key: string]: unknown;
 }

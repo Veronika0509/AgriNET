@@ -10,7 +10,7 @@ interface MoistChartData {
   id: string | number;
   layerName: string;
   name: string;
-  sensorId: string | number;
+  sensorId: string;
   mainId: string | number;
   battery?: string;
   freshness?: string;

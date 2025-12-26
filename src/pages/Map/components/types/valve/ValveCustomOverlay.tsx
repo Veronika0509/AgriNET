@@ -7,7 +7,7 @@ import skull from "../../../../../assets/images/skull.svg";
 
 interface ValveChartData {
   id: string | number;
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   bgColor?: string;
   enabled?: boolean;

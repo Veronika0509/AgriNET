@@ -16,7 +16,7 @@ import {postComment} from "../data/postComment";
 interface AddCommentModalProps {
   addCommentModal: Date
   type: 'main' | 'soilTemp' | 'sum' | 'temp' | 'battery'
-  sensorId: string | number
+  sensorId: string
   userId: string | number
   setAddCommentModal: (modal: boolean) => void
   setAddCommentItemShowed: (item: string) => void

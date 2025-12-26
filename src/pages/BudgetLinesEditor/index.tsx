@@ -11,28 +11,59 @@ import {onIncreaseDaysCountClick} from "./functions/onIncreaseDaysCountClick";
 import s from '../Map/style.module.css'
 import BudgetEditorLine from "./components/BudgetEditorLine";
 import {updateSite} from "./functions/updateSite";
+import * as am5 from "@amcharts/amcharts5";
 
+import type { Site } from '../../types';
+
+interface BudgetLine {
+  value: number;
+  label: string;
+}
+
+interface ChartDataItem {
+  DateTime: string;
+  SumAve: number;
+  [key: string]: unknown;
+}
+
+interface ChartDataState {
+  data?: ChartDataItem[];
+  budgetLines?: BudgetLine[];
+}
+
+interface MoistSensor {
+  sensorId: string;
+  lat: number;
+  lng: number;
+  [key: string]: unknown;
+}
+
+interface MoistOverlay {
+  setMap: (map: google.maps.Map | null) => void;
+  update: (sensorId: string) => void;
+  dispose?: () => void;
+}
 
 interface BudgetEditorProps {
   previousPage?: string;
-  siteList: unknown[];
-  userId: string | number;
+  siteList: Site[];
+  userId: number;
   isGoogleApiLoaded: boolean;
   [key: string]: unknown;
 }
 
 const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
-  const [sites, setSites] = useState<unknown[]>([])
+  const [sites, setSites] = useState<Site[]>([])
   const [currentSite, setCurrentSite] = useState<string | undefined>()
-  const [moistSensors, setMoistSensors] = useState<unknown[]>([])
-  const [currentSensorId, setCurrentSensorId] = useState<string | number | undefined>()
-  const [chartData, setChartData] = useState<{ data?: unknown[]; budgetLines?: unknown[] }>({})
-  const chartRoot = useRef<unknown>(null);
+  const [moistSensors, setMoistSensors] = useState<MoistSensor[]>([])
+  const [currentSensorId, setCurrentSensorId] = useState<string | undefined>()
+  const [chartData, setChartData] = useState<ChartDataState>({})
+  const chartRoot = useRef<am5.Root | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map | undefined>()
-  const [moistOverlays, setMoistOverlays] = useState<unknown[]>([])
+  const [moistOverlays, setMoistOverlays] = useState<MoistOverlay[]>([])
   const isMoistMarkerChartDrawn: boolean = false
-  const moistOverlaysRef = useRef<unknown[]>([])
+  const moistOverlaysRef = useRef<MoistOverlay[]>([])
   const [dataExists, setDataExists] = useState<boolean>(false)
   const [presentAlert] = useIonAlert();
   const [presentErrorAlert] = useIonAlert();
@@ -66,7 +97,7 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
   }, [map, moistSensors]);
   // create chart
   useEffect(() => {
-    if (chartData.length !== 0 && dataExists) {
+    if (chartData.data && chartData.data.length !== 0 && chartData.budgetLines && dataExists) {
       createBudgetChart({
         chartData: chartData.data,
         budgetLines: chartData.budgetLines,
@@ -77,10 +108,10 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
   useEffect(() => {
     if (currentSensorId) {
       getNewData(currentAmountOfDays, currentSensorId, setChartData, setDataExists)
-      moistSensors.map((moistSensor: { sensorId: string | number; lat: number; lng: number; [key: string]: unknown }) => {
+      moistSensors.map((moistSensor) => {
         if (moistSensor.sensorId === currentSensorId) {
-          map.setCenter({lat: moistSensor.lat, lng: moistSensor.lng})
-          map.setZoom(15)
+          map?.setCenter({lat: moistSensor.lat, lng: moistSensor.lng})
+          map?.setZoom(15)
         }
       })
       moistOverlaysRef.current.forEach((overlay) => {
@@ -92,7 +123,7 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
   useEffect(() => {
     if (moistOverlaysRef.current.length === 0 && map) {
       const currentSensors = [...moistSensors]
-      currentSensors.forEach(async (marker: { sensorId: string | number; lat: number; lng: number; [key: string]: unknown }) => {
+      currentSensors.forEach(async (marker) => {
         const overlayChartData = await getMoistMarkerChartData(marker.sensorId, props.userId);
         const bounds = new google.maps.LatLngBounds(
           new google.maps.LatLng(marker.lat, marker.lng),
@@ -133,10 +164,11 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
   // create chart for overlays
   useEffect(() => {
     if (moistOverlays.length !== 0) {
-      const roots: any[] = [];
-      moistOverlaysRef.current.forEach((moistOverlay: any) => {
-        if (moistOverlay.isValidChartData && moistOverlay.toUpdate) {
-          createMoistChartForOverlay('b', moistOverlay.chartData, roots, moistOverlaysRef.current)
+      const roots: am5.Root[] = [];
+      moistOverlaysRef.current.forEach((moistOverlay) => {
+        const overlayWithChart = moistOverlay as any; // MoistCustomOverlay has additional properties not in MoistOverlay interface
+        if (overlayWithChart.isValidChartData && overlayWithChart.toUpdate) {
+          createMoistChartForOverlay('b', overlayWithChart.chartData, roots, moistOverlaysRef.current)
         }
       });
       return () => {
@@ -208,16 +240,16 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
                          setCurrentSensorId,
                          setMoistSensors
                        })}>
-              {sites.map((site: { name: string; [key: string]: unknown }) => (
+              {sites.map((site) => (
                 <IonSelectOption key={site.name} value={site.name}>{site.name}</IonSelectOption>
               ))}
             </IonSelect>
           ) : null}
           <IonSelect label="Sensor ID" value={currentSensorId} className={s.budget_menuSensorID}
                      onIonChange={(e: CustomEvent) => setCurrentSensorId(e.detail.value)}>
-            {moistSensors.map((sensor: { sensorId: string | number; name: string; [key: string]: unknown }) => (
+            {moistSensors.map((sensor) => (
               <IonSelectOption key={sensor.sensorId}
-                               value={sensor.sensorId}>{`${sensor.sensorId} - ${sensor.name}`}</IonSelectOption>
+                               value={sensor.sensorId}>{`${sensor.sensorId} - ${(sensor as any).name}`}</IonSelectOption>
             ))}
           </IonSelect>
         </div>

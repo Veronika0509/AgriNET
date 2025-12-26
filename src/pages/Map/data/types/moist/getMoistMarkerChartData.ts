@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const getMoistMarkerChartData = async (sensorId: string | number, userId: string | number) => {
+export const getMoistMarkerChartData = async (sensorId: string, userId: string | number) => {
   return await axios.get('https://app.agrinet.us/api/map/moist-fuel?v=43', {
     params: {
       sensorId: sensorId,

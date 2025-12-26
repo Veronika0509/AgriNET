@@ -3,13 +3,13 @@ import {getSensorItems} from "@/pages/Map/data/getSensorItems";
 interface SensorItem {
   lat: number;
   lng: number;
-  sensorId: string | number;
+  sensorId: string;
   id: string | number;
   [key: string]: unknown;
 }
 
 interface Marker {
-  sensorId: string | number;
+  sensorId: string;
   [key: string]: unknown;
 }
 

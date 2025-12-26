@@ -4,7 +4,7 @@ import axios, { AxiosResponse } from "axios";
 // Интерфейсы для типизации
 interface SensorItem {
   id: string | number;
-  sensorId: string | number;
+  sensorId: string;
   mainId: string | number;
   markerType: string;
   lat: number;
@@ -16,7 +16,7 @@ interface SensorItem {
 interface WxetDataItem {
   mainId: string | number;
   id: string | number;
-  sensorId: string | number;
+  sensorId: string;
   name: string;
   data: {
     temp?: number | null;

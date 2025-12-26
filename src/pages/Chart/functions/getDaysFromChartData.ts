@@ -1,8 +1,6 @@
-interface ChartDataItem {
-  DateTime?: string;
-  time?: string;
-  [key: string]: unknown;
-}
+import { TimeSeriesDataItem } from "../../../types/api";
+
+type ChartDataItem = TimeSeriesDataItem;
 
 export const getDaysFromChartData = (data: ChartDataItem[]): number => {
   const timeLabel = data[0].DateTime ? 'DateTime' : 'time'
