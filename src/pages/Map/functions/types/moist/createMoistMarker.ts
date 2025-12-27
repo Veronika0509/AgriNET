@@ -53,9 +53,9 @@ export const createMoistMarker = async (
         setMoistChartDataContainer,
         moistChartsAmount,
         moistId,
-        moistChartData: moistChartData as unknown[],
-        boundsArray: boundsArray as unknown[],
-        invalidChartData: moistInvalidChartData as unknown[],
+        moistChartData: moistChartData as any,
+        boundsArray: boundsArray as any,
+        invalidChartData: moistInvalidChartData as any,
         response,
         countMoistFuel,
         layer

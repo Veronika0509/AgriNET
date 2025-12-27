@@ -116,32 +116,32 @@ const AddUnitPage: React.FC<AddUnitPageProps> = (props) => {
       </IonHeader>
       <IonContent style={{ "--background": "white" }}>
         <div style={{ height: "100%"}} >
-          <AddUnitContainer
-            userId={props.userId}
-            siteList={props.siteList}
-            setSiteList={props.setSiteList}
-            selectedSiteForAddUnit={props.selectedSiteForAddUnit}
-            setSelectedSiteForAddUnit={props.setSelectedSiteForAddUnit}
-            setSelectedMoistureSensor={props.setSelectedMoistureSensor}
-            setPage={props.setPage}
-            isGoogleApiLoaded={props.isGoogleApiLoaded}
-            activeTab="add"
-            setActiveTab={(tab) => {
+          {React.createElement(AddUnitContainer as any, {
+            userId: props.userId,
+            siteList: props.siteList,
+            setSiteList: props.setSiteList,
+            selectedSiteForAddUnit: props.selectedSiteForAddUnit,
+            setSelectedSiteForAddUnit: props.setSelectedSiteForAddUnit,
+            setSelectedMoistureSensor: props.setSelectedMoistureSensor,
+            setPage: props.setPage,
+            isGoogleApiLoaded: props.isGoogleApiLoaded,
+            activeTab: "add",
+            setActiveTab: (tab: string) => {
               if (tab === "map") {
                 handleNavigateToMap();
               }
-            }}
-            setNavigationHistory={() => {}}
-            markers={markers}
-            setMarkers={setMarkers}
-            layers={layers}
-            setLayers={setLayers}
-            layerMapping={layerMapping}
-            setLayerMapping={setLayerMapping}
-            isLoadingLayers={isLoadingLayers}
-            showCreateNewSiteAlert={showCreateNewSiteAlert}
-            showCreateNewLayerAlert={showCreateNewLayerAlert}
-          />
+            },
+            setNavigationHistory: () => {},
+            markers,
+            setMarkers,
+            layers: layers as any,
+            setLayers: setLayers as any,
+            layerMapping,
+            setLayerMapping,
+            isLoadingLayers,
+            showCreateNewSiteAlert,
+            showCreateNewLayerAlert
+          })}
         </div>
       </IonContent>
     </IonPage>

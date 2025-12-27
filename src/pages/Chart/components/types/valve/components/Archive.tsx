@@ -17,6 +17,9 @@ interface ArchiveItem {
   sensorId: string;
   localTime: string;
   duration: string;
+  valve1: string;
+  valve1Name: string;
+  validate: number;
   [key: string]: unknown;
 }
 

@@ -51,7 +51,7 @@ export const testCustomOverlays = (
         moistBounds,
         '', // invalidChartDataImage
         true, // isValidChartData
-        testMoistData,
+        testMoistData as any,
         setChartData,
         setPage,
         setSiteId,
@@ -59,7 +59,7 @@ export const testCustomOverlays = (
         history,
         false, // isMoistMarkerChartDrawn
         () => {}, // setAdditionalChartData
-        [], // siteList
+        [] as any, // siteList
         () => {}, // setMoistOverlays
         setChartPageType,
         { current: [] }, // moistOverlaysRef
@@ -82,7 +82,7 @@ export const testCustomOverlays = (
       const tempOverlay = new TempCustomOverlayExport(
         tempBounds,
         true, // isValidChartData
-        testTempData,
+        testTempData as any,
         setChartData,
         setPage,
         setSiteId,

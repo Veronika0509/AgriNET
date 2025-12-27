@@ -77,7 +77,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
     marker.infoWindow.close()
   })
   props.setSecondMap(props.sensorsGroupData.name)
-  const allSensorItems = getSensorItems(undefined, props.siteList, props.groupMarker.title)
+  const allSensorItems = getSensorItems(undefined, props.siteList as any, props.groupMarker.title)
   // moist props
   const moistId: IdCounter = { value: 0 }
   const moistChartData: unknown[] = []
@@ -185,16 +185,16 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
     const layer: string = getLayerName(marker.id)
     createMoistMarker(
-      props.moistChartsAmount,
-      marker,
-      props.page,
+      props.moistChartsAmount as any,
+      marker as any,
+      props.page as number,
       props.userId,
       props.setInvalidMoistChartDataContainer,
       props.setMoistChartDataContainer,
       moistId,
       moistInvalidChartData,
       moistChartData,
-      moistBoundsArray,
+      moistBoundsArray as any,
       countMoistFuel.length,
       layer
     )
@@ -212,16 +212,16 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
     const layer: string = getLayerName(marker.id)
     createWxetMarker(
-      props.wxetChartsAmount,
-      marker,
-      props.page,
+      props.wxetChartsAmount as any,
+      marker as any,
+      props.page as number,
       props.userId,
       props.setInvalidWxetDataContainer,
       props.setWxetDataContainer,
       wxetId,
-      wxetData,
-      wxetBoundsArray,
-      wxetInvalidChartData,
+      wxetData as any,
+      wxetBoundsArray as any,
+      wxetInvalidChartData as any,
       countWxet.length,
       layer
     )
@@ -239,13 +239,13 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
     const layer: string = getLayerName(marker.id)
     createExtlMarker(
-      props.extlChartsAmount,
-      marker,
-      props.page,
+      props.extlChartsAmount as any,
+      marker as any,
+      props.page as number,
       props.setExtlDataContainer,
       extlId,
-      extlData,
-      extlBoundsArray,
+      extlData as any,
+      extlBoundsArray as any,
       countExtl.length,
       layer
     )
@@ -263,16 +263,16 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
     const layer: string = getLayerName(marker.id)
     createTempMarker(
-      props.tempChartsAmount,
-      marker,
-      props.page,
+      props.tempChartsAmount as any,
+      marker as any,
+      props.page as number,
       props.userId,
       props.setInvalidTempChartDataContainer,
       props.setTempChartDataContainer,
       tempId,
-      tempChartData,
-      tempBoundsArray,
-      tempInvalidChartData,
+      tempChartData as any,
+      tempBoundsArray as any,
+      tempInvalidChartData as any,
       countTemp.length,
       layer
     )
@@ -290,16 +290,16 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
     const layer: string = getLayerName(marker.id)
     createValveMarker(
-      props.valveChartsAmount,
-      marker,
-      props.page,
+      props.valveChartsAmount as any,
+      marker as any,
+      props.page as number,
       props.userId,
       props.setInvalidValveChartDataContainer,
       props.setValveChartDataContainer,
       valveId,
-      valveChartData,
-      valveBoundsArray,
-      valveInvalidChartData,
+      valveChartData as any,
+      valveBoundsArray as any,
+      valveInvalidChartData as any,
       countValve.length,
       layer
     )

@@ -50,7 +50,13 @@ export const TempChartPage = (props: any) => {
   const [nwsForecast, setNwsForecast] = useState(false)
   const [nwsForecastDays, setNwsForecastDays] = useState(1)
   const [nwsForecastData, setNwsForecastData] = useState(undefined)
-  const [present] = useIonToast();
+  const [presentToast] = useIonToast();
+
+  // Wrapper to adapt async toast to sync signature
+  const present = (options: { message: string; duration?: number; position?: 'top' | 'bottom' | 'middle'; color?: string }) => {
+    void presentToast(options);
+  };
+
   const [tempTabularData, setTempTabularData] = useState<any>(null)
   const [isTempTabularDataLoading, setIsTempTabularDataLoading] = useState(false)
   const chartCode: string = 'tempRh'
@@ -146,7 +152,7 @@ export const TempChartPage = (props: any) => {
         isTempCommentsShowed,
       )
     } else {
-      const newData: any = await getTempMainChartData(present, props.sensorId, props.userId, currentDates[0], currentDates[1])
+      const newData: any = await getTempMainChartData(present, props.sensorId, props.userId, Number(currentDates[0]), String(currentDates[1]))
       setCurrentChartData(newData.data.data)
       createTempChart(
         newData.data.data,
@@ -272,10 +278,7 @@ export const TempChartPage = (props: any) => {
               sensorId={props.sensorId}
               addCommentModal={tempAddCommentModal}
               setAddCommentModal={setTempAddCommentModal}
-              setComments={setTempComments}
               setAddCommentItemShowed={setTempAddCommentItemShowed}
-              addCommentItemShowed={tempAddCommentItemShowed}
-              updateChart={updateChart}
           />}
           <TabularData
             type={'temp'}

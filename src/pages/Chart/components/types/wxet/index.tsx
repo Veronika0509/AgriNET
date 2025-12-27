@@ -100,7 +100,7 @@ export const WxetChartPage = (props: any) => {
       } else {
         if (nwsForecastData) {
           setNwsForecastData(undefined)
-          createWxetChart(currentChartData, root, props.isMobile, props.additionalChartData, nwsForecast)
+          createWxetChart(currentChartData, root, props.isMobile, props.additionalChartData, nwsForecast as any)
         }
       }
     }

@@ -1,5 +1,5 @@
 // Тип для комментариев
-type CommentItemType = 'main' | 'soilTemp' | 'sum' | 'battery';
+type CommentItemType = 'main' | 'soilTemp' | 'sum' | 'battery' | 'temp';
 type SetterFunction = (value: boolean) => void;
 
 export const getSetAddCommentItemShowed = (
@@ -8,15 +8,17 @@ export const getSetAddCommentItemShowed = (
   setMoistSoilTempAddCommentItemShowed: SetterFunction,
   setMoistSumAddCommentItemShowed: SetterFunction,
   setMoistBatteryAddCommentItemShowed: SetterFunction
-): SetterFunction | undefined => {
+): ((item: string) => void) | undefined => {
   if (type === 'main') {
-    return setMoistMainAddCommentItemShowed
+    return (item: string) => setMoistMainAddCommentItemShowed(true)
   } else if (type === 'soilTemp') {
-    return setMoistSoilTempAddCommentItemShowed
+    return (item: string) => setMoistSoilTempAddCommentItemShowed(true)
   } else if (type === 'sum') {
-    return setMoistSumAddCommentItemShowed
+    return (item: string) => setMoistSumAddCommentItemShowed(true)
   } else if (type === 'battery') {
-    return setMoistBatteryAddCommentItemShowed
+    return (item: string) => setMoistBatteryAddCommentItemShowed(true)
+  } else if (type === 'temp') {
+    return (item: string) => {} // temp is not used in moist charts, return noop
   }
   return undefined
 }

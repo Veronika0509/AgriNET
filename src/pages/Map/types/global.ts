@@ -2,20 +2,7 @@
 
 declare global {
   interface Window {
-    google: typeof google
-  }
-
-  const google: {
-    maps: {
-      Map: any
-      Marker: any
-      LatLng: any
-      LatLngBounds: any
-      SymbolPath: any
-      event: any
-      MapTypeId: any
-      [key: string]: any
-    }
+    google: any
   }
 
   namespace JSX {

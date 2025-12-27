@@ -6,7 +6,7 @@ export interface SiteGroup {
 }
 
 export interface Layer {
-  id: string
+  id: string | number
   name: string
   value: string
 }

@@ -20,11 +20,19 @@ import {addOutline, removeOutline} from "ionicons/icons"
 import {getDatetime} from "../../../DateTimePicker/functions/getDatetime"
 import {createScheduler} from "../../../../data/types/valve/createScheduler";
 
+interface ValveConfig {
+  id: string | number;
+  name: string;
+  names: string[];
+  [key: string]: unknown;
+}
+
 interface CreateProps {
   sensorId: string;
   userId: string | number;
   isCreateOpen: boolean;
   setIsCreateOpen: (open: boolean) => void;
+  config?: ValveConfig;
   [key: string]: unknown;
 }
 
@@ -125,7 +133,7 @@ export const Create = (props: CreateProps) => {
         duration: 3000,
         position: 'bottom',
       });
-      props.setValveCreate(false)
+      props.setIsCreateOpen(false)
       setDuration('06:00')
       setStartTime(new Date(new Date().getTime() + 2 * 60 * 1000))
       setStopTime(() => {
@@ -140,8 +148,8 @@ export const Create = (props: CreateProps) => {
   }
 
   return (
-    <IonModal isOpen={props.valveCreate} className={s.createModal}>
-      <Header type="valveCreateModal" sensorId={props.sensorId} setValveCreate={props.setValveCreate}/>
+    <IonModal isOpen={props.isCreateOpen} className={s.createModal}>
+      <Header type="valveCreateModal" sensorId={props.sensorId} setValveCreate={props.setIsCreateOpen}/>
       <IonContent>
         <div className={s.createModalContent}>
           <IonItem className={s.createModalItem}>{props.config?.names[0] ? props.config?.names[0] : "Valve"}</IonItem>

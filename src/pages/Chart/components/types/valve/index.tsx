@@ -15,21 +15,24 @@ import {Create} from "./components/Create";
 interface ValveChartPageProps {
   sensorId: string;
   userId: string | number;
-  chartData: unknown[];
-  [key: string]: unknown;
+  chartData: any[];
+  [key: string]: any;
 }
 
 interface ValveConfig {
   id: string | number;
   name: string;
-  [key: string]: unknown;
+  names: any[];
+  [key: string]: any;
 }
 
 interface ValveDataItem {
-  id: string | number;
+  id: number;
   localTime: string;
   duration: string;
-  [key: string]: unknown;
+  valve1: string;
+  validate: number;
+  [key: string]: any;
 }
 
 export const ValveChartPage = (props: ValveChartPageProps) => {
@@ -190,10 +193,10 @@ export const ValveChartPage = (props: ValveChartPageProps) => {
                 setAdditionalChartData={props.setAdditionalChartData} setChartData={props.setChartData}
                 setSiteId={props.setSiteId} setSiteName={props.setSiteName} setChartPageType={props.setChartPageType}
                 setAlarm={props.setAlarm} alarmOddBack={props.alarmOddBack} setAlarmOddBack={props.setAlarmOddBack}
-                settingsOddBack={props.settingsOddBack} setSettingsOddBack={props.setSettingsOddBack} userId={props.userId}
+                settingsOddBack={props.settingsOddBack} setSettingsOddBack={props.setSettingsOddBack} userId={props.userId as number}
                 setAutowater={props.setAutowater} />
-      <Create sensorId={props.sensorId} valveCreate={props.valveCreate} setValveCreate={props.setValveCreate}
-              config={config} userId={props.userId} />
+      <Create sensorId={props.sensorId} isCreateOpen={props.valveCreate} setIsCreateOpen={props.setValveCreate}
+              config={config} userId={props.userId as number} />
       
     </IonContent>
   )

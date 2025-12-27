@@ -32,6 +32,7 @@ interface ForecastData {
 
 interface NwsForecastData {
   data: ForecastData[];
+  now: string;
 }
 
 interface TempComment {
@@ -343,7 +344,7 @@ export const createTempChart = (
         const container = am5.Container.new(root.current, {
           centerX: am5.p50,
           draggable: true,
-          layout: root.verticalLayout,
+          layout: root.current.verticalLayout,
           dy: 4,
         })
         container.adapters.add("y", () => 0)
@@ -389,10 +390,10 @@ export const createTempChart = (
             new Date(xAxis.positionToValue(position)),
             "yyyy-MM-dd HH:mm",
           )
-          new Promise((resolve: any) => {
+          new Promise((resolve: any, reject: any) => {
             updateCommentDate(moistMainComment.id, newDate, userId, resolve)
           }).then(async () => {
-            await updateCommentsArray("T")
+            await updateCommentsArray("T", undefined as any)
             rotationAnimation?.stop()
             icon?.set("src", "https://img.icons8.com/?size=100&id=98070&format=png&color=000000")
             icon?.set("rotation", 0)
@@ -504,10 +505,10 @@ export const createTempChart = (
               icon.set("dx", 17)
               icon.set("dy", 7)
             })
-            new Promise((resolve: () => void) => {
+            new Promise((resolve: any, reject: any) => {
               removeComment(moistMainComment.id, userId, resolve)
             }).then(async () => {
-              await updateCommentsArray("T")
+              await updateCommentsArray("T", undefined as any)
               rotationAnimation?.stop()
               icon?.set("src", "https://img.icons8.com/?size=100&id=8112&format=png&color=000000")
               icon?.set("rotation", 0)

@@ -1,5 +1,5 @@
 // Тип для комментариев
-type CommentItemType = 'main' | 'soilTemp' | 'sum' | 'battery';
+type CommentItemType = 'main' | 'soilTemp' | 'sum' | 'battery' | 'temp';
 
 export const getAddCommentItemShowed = (
   type: CommentItemType,
@@ -16,6 +16,8 @@ export const getAddCommentItemShowed = (
     return moistSumAddCommentItemShowed
   } else if (type === 'battery') {
     return moistBatteryAddCommentItemShowed
+  } else if (type === 'temp') {
+    return false // temp is not used in moist charts
   }
   return undefined
 }

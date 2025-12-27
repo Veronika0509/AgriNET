@@ -42,11 +42,11 @@ const Header = (props: HeaderProps) => {
       if (previousPage === 'map') {
         props.setIsMarkerClicked(false);
       }
-      props.setActiveTab(previousPage);
+      (props as any).setActiveTab(previousPage);
     } else {
       // Reset marker clicked state when navigating to map
       props.setIsMarkerClicked(false);
-      props.setActiveTab('map');
+      (props as any).setActiveTab('map');
     }
   }
 

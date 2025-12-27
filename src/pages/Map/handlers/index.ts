@@ -29,8 +29,8 @@ export {
 export type { SensorModalHandlers, TimezoneModalHandlers, PurchaseAlertOptions } from "./modalHandlers"
 
 // Unit handlers
-export { createUnit, clearFormFields, reloadAndLogChanges, validateAndCreateUnit } from "./unitHandlers"
-export type { UnitData, CreateUnitOptions } from "./unitHandlers"
+export { createUnit, clearFormFields, reloadAndLogChanges, validateAndCreateUnit } from "../../../features/AddUnit/handlers/unitHandlers"
+export type { UnitData, CreateUnitOptions } from "../../../features/AddUnit/handlers/unitHandlers"
 
 // QR Scanner handlers
 export { handleJSONQRData, handleKeyValueQRData } from "./qrScannerHandlers"

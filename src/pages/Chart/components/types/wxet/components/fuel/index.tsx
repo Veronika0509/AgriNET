@@ -19,13 +19,21 @@ interface FuelChartPageProps {
   sensorId: string;
   userId: string | number;
   setPage?: (page: number) => void;
-  [key: string]: unknown;
+  chartData?: any;
+  siteList?: any;
+  setSiteName?: any;
+  setSiteId?: any;
+  setIsMobile?: any;
+  [key: string]: any;
 }
 
 interface FuelComment {
-  id: string | number;
-  comment: string;
-  date: number;
+  id: string;
+  key?: string;
+  text: string;
+  color_id?: number;
+  comment?: string;
+  date?: number;
   [key: string]: unknown;
 }
 
@@ -37,7 +45,7 @@ interface Location {
 
 export const FuelChartPage = (props: FuelChartPageProps) => {
   const root = useRef<HTMLDivElement>(null);
-  const [currentChartData, setCurrentChartData] = useState<Record<string, unknown>[]>([])
+  const [currentChartData, setCurrentChartData] = useState<any>([])
   const currentDate: string = getCurrentDatetime()
   const initialStartDate: string = getStartDate(getCurrentDatetime())
   const [startDate, setStartDate] = useState<string>(initialStartDate);
@@ -59,6 +67,15 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
   const [presentDataAlert] = useIonAlert();
   const [presentLocationAlert] = useIonAlert();
   const locationSelectRef = useRef<HTMLIonSelectElement>(null)
+
+  // Wrapper function to adapt setFuelAddCommentModal to the expected type for createFuelChart
+  const setFuelAddCommentModalWrapper = (params: { date: Date; type: string }) => {
+    setFuelAddCommentModal({
+      isOpen: true,
+      date: params.date.getTime(),
+      type: params.type
+    });
+  };
 
   const onLocationChange = async (value: string) => {
     if (value === 'All') {
@@ -82,11 +99,11 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
           setCurrentLocation(sensorItem)
           let newChartData: any
           if (currentDates) {
-            newChartData = await getFuelMainChartData(sensorItem.sensorId, currentDates[1], currentDates[0])
+            newChartData = await getFuelMainChartData(sensorItem.sensorId, currentDates[0], currentDates[1])
           } else {
             newChartData = await getFuelMainChartData(sensorItem.sensorId)
           }
-          createFuelChart(newChartData.data.data, root, fuelAddCommentItemShowed, setFuelAddCommentModal, fuelComments, isFuelCommentsShowed)
+          createFuelChart(newChartData.data.data, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper, fuelComments as any, isFuelCommentsShowed)
           setCurrentChartData(newChartData.data.data)
         }
       })
@@ -121,7 +138,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
   }, []);
   useEffect(() => {
     if (currentChartData && currentChartData.initialData) {
-      createFuelChart(currentChartData.data, root, fuelAddCommentItemShowed, setFuelAddCommentModal, fuelComments, isFuelCommentsShowed)
+      createFuelChart(currentChartData.data, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper, fuelComments as any, isFuelCommentsShowed)
       setCurrentChartData(currentChartData.data)
     }
   }, [currentChartData])
@@ -129,8 +146,8 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
     if (currentChartData && !currentChartData.initialData) {
       const updateCharts = async () => {
         try {
-          const newChartData = await getFuelMainChartData(props.sensorId, currentDates[1], currentDates[0])
-          createFuelChart(newChartData.data.data, root, fuelAddCommentItemShowed, setFuelAddCommentModal, fuelComments, isFuelCommentsShowed)
+          const newChartData = await getFuelMainChartData(props.sensorId, currentDates[0], currentDates[1])
+          createFuelChart(newChartData.data.data, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper, fuelComments as any, isFuelCommentsShowed)
           setCurrentChartData(newChartData.data.data)
         } catch (e) {
           presentDataAlert({
@@ -153,7 +170,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
   useEffect(() => {
     if (currentChartData && !currentChartData.initialData) {
       setDynamicChartHeight('fuelChartDiv')
-      createFuelChart(currentChartData, root, fuelAddCommentItemShowed, setFuelAddCommentModal, fuelComments, isFuelCommentsShowed)
+      createFuelChart(currentChartData, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper, fuelComments as any, isFuelCommentsShowed)
     }
   }, [fuelAddCommentItemShowed]);
   window.addEventListener("resize", () => setDynamicChartHeight('fuelChartDiv'))
@@ -195,21 +212,20 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
                               setIsCommentsShowed={setIsFuelCommentsShowed}/>
           </div>
           <AddCommentMessage type={'fuel'} addCommentItemShowed={fuelAddCommentItemShowed}
-                             setAddCommentModal={setFuelAddCommentModal}/>
-          {fuelAddCommentModal && <AddCommentModal
-              type={fuelAddCommentModal.type}
+                             setAddCommentModal={(params: { date: Date; type: string }) => setFuelAddCommentModalWrapper(params)}/>
+          {fuelAddCommentModal && fuelAddCommentModal.type && fuelAddCommentModal.date && <AddCommentModal
+              type={fuelAddCommentModal.type as 'main' | 'soilTemp' | 'sum' | 'temp' | 'battery'}
               userId={props.userId}
               sensorId={props.sensorId}
-              addCommentModal={fuelAddCommentModal.date}
-              setAddCommentItemShowed={setFuelAddCommentItemShowed}
-              addCommentItemShowed={fuelAddCommentItemShowed}
-              setAddCommentModal={setFuelAddCommentModal}
+              addCommentModal={new Date(fuelAddCommentModal.date)}
+              setAddCommentModal={() => setFuelAddCommentModal(undefined)}
+              setAddCommentItemShowed={(item: string) => setFuelAddCommentItemShowed(true)}
           />}
           <TabularData
             type={'fuel'}
             sensorId={props.sensorId}
-            data={fuelTabularData}
-            setData={setFuelTabularData}
+            data={fuelTabularData as any}
+            setData={(data: any) => setFuelTabularData(data)}
             isLoading={isFuelTabularDataLoading}
             setIsLoading={setIsFuelTabularDataLoading}
             chartCode={chartCode}

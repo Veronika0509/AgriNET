@@ -161,7 +161,8 @@ export const createValveChartForOverlay = async (
   if (chartData.events.length !== 0) {
     const options = await getOptions();
     chartData.events.forEach((event: any, index: number) => {
-      const color = options.data[`valve-marker.colors.${event.status}`] || 0x962e40
+      const colorValue = options.data[`valve-marker.colors.${event.status}`] || 0x962e40
+      const color = typeof colorValue === 'string' ? parseInt(colorValue.replace('#', ''), 16) : colorValue
       const eventMinuteHand = createClockHand(color, 'event');
       const eventMinuteDataItem = xAxis.makeDataItem({});
       eventMinuteDataItem.set("bullet", am5xy.AxisBullet.new(root, {

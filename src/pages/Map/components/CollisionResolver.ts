@@ -1,3 +1,5 @@
+import type { OverlayItem } from '../types/OverlayItem';
+
 interface Bounds {
   north: number;
   south: number;
@@ -20,15 +22,6 @@ interface CollisionData {
   overlapY: number;
   centerDiffX: number;
   centerDiffY: number;
-}
-
-interface OverlayItem {
-  getBounds: () => Bounds;
-  getPosition: () => Position;
-  setPosition: (lat: number, lng: number) => void;
-  getDiv: () => HTMLElement | null;
-  draw: () => void;
-  offset?: Offset;
 }
 
 export class CollisionResolver {
@@ -210,9 +203,9 @@ export class CollisionResolver {
     div.style.left = `${currentLeft + dx}px`;
     div.style.top = `${currentTop + dy}px`;
 
-    if (!overlay.offset) overlay.offset = {x: 0, y: 0};
-    overlay.offset.x += dx;
-    overlay.offset.y += dy;
+    if (!(overlay as any).offset) (overlay as any).offset = {x: 0, y: 0};
+    (overlay as any).offset.x += dx;
+    (overlay as any).offset.y += dy;
 
     overlay.draw();
   }

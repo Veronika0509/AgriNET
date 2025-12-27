@@ -43,7 +43,7 @@ export const createMoistChartForOverlay = async (type: string, chartData: MoistC
   const chartId = `${type}-${chartData.id}`
 
   try {
-    await checkOverlay(chartId, moistOverlays);
+    await checkOverlay(chartId, moistOverlays as any);
 
     // Check if element exists and is valid
     const chartElement = document.getElementById(chartId);

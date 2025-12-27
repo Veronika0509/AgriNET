@@ -33,29 +33,29 @@ interface UseMapInitializationProps {
   userId: number;
   setSiteList: (sites: Site[]) => void;
   markers: Marker[];
-  setMarkers: React.Dispatch<React.SetStateAction<Marker[]>>;
+  setMarkers: any;
   allCoordinatesOfMarkers: Array<{ lat: number; lng: number }>;
   setCoordinatesForFitting: (coords: Array<{ lat: number; lng: number }>) => void;
   setSecondMap: (map: google.maps.Map | null) => void;
-  moistChartsAmount: unknown[];
-  setInvalidMoistChartDataContainer: (data: unknown[]) => void;
-  setMoistChartDataContainer: (data: unknown[]) => void;
+  moistChartsAmount: any;
+  setInvalidMoistChartDataContainer: (data: any) => void;
+  setMoistChartDataContainer: (data: any) => void;
   moistId: { id: number };
-  tempChartsAmount: unknown[];
-  setInvalidTempChartDataContainer: (data: unknown[]) => void;
-  setTempChartDataContainer: (data: unknown[]) => void;
+  tempChartsAmount: any;
+  setInvalidTempChartDataContainer: (data: any) => void;
+  setTempChartDataContainer: (data: any) => void;
   tempId: { id: number };
-  wxetChartsAmount: unknown[];
-  setInvalidWxetChartDataContainer: (data: unknown[]) => void;
-  setWxetChartDataContainer: (data: unknown[]) => void;
+  wxetChartsAmount: any;
+  setInvalidWxetChartDataContainer: (data: any) => void;
+  setWxetChartDataContainer: (data: any) => void;
   wxetId: { id: number };
-  valveChartsAmount: unknown[];
-  setInvalidValveChartDataContainer: (data: unknown[]) => void;
-  setValveChartDataContainer: (data: unknown[]) => void;
+  valveChartsAmount: any;
+  setInvalidValveChartDataContainer: (data: any) => void;
+  setValveChartDataContainer: (data: any) => void;
   valveId: { id: number };
-  extlChartsAmount: unknown[];
-  setInvalidExtlChartDataContainer: (data: unknown[]) => void;
-  setExtlChartDataContainer: (data: unknown[]) => void;
+  extlChartsAmount: any;
+  setInvalidExtlChartDataContainer: (data: any) => void;
+  setExtlChartDataContainer: (data: any) => void;
   extlId: { id: number };
   presentToast: (message: string, color: string) => void;
 }
@@ -143,9 +143,8 @@ export const useMapInitialization = (props: UseMapInitializationProps) => {
         extlChartsAmount: props.extlChartsAmount,
         setInvalidExtlChartDataContainer: props.setInvalidExtlChartDataContainer,
         setExtlChartDataContainer: props.setExtlChartDataContainer,
-        extlId: props.extlId,
-        mapRefFunc
-      });
+        extlId: props.extlId
+      } as any);
     }
   }, [map, siteList]);
 

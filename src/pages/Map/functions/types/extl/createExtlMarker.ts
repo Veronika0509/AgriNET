@@ -41,7 +41,6 @@ export const createExtlMarker = async (
     };
     if (page === 1) {
       createExtlDataContainer({
-        mainId: extlId.value,
         bounds,
         setExtlChartDataContainer,
         extlChartsAmount,

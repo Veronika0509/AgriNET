@@ -1,6 +1,8 @@
 import type { Site, SensorData, ChartPageType, UserId, SiteId } from "../../../types"
 import type { OverlayItem } from "./OverlayItem"
 
+export type { OverlayItem }
+
 // LayerList interfaces
 export interface LayerListLayer {
   name: string
@@ -168,7 +170,7 @@ export type LayerMapping = { [key: string]: string }
 
 // Form errors type
 export interface FormErrors {
-  [key: string]: string | undefined
+  [key: string]: string | boolean | undefined
 }
 
 // New layer configuration

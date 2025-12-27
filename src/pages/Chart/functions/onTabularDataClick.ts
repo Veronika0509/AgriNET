@@ -16,7 +16,7 @@ interface TabularDataResponse {
 }
 
 export const onTabularDataClick = (
-  type: SensorType,
+  type: SensorType | undefined,
   data: TabularDataItem[] | TabularDataItem | null,
   setData: (value: TabularDataItem[] | TabularDataItem | { data: TabularDataItem[] } | null) => void,
   setLoading: (value: boolean) => void,

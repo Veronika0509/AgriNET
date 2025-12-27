@@ -22,6 +22,15 @@ interface ChartDataItem {
   [key: string]: unknown
 }
 
+interface ChartBounds {
+  lat: number
+  lng: number
+  [key: string]: unknown
+}
+
+// Tuple type for chart data containers
+type ChartDataTuple = [ChartDataItem, ChartBounds]
+
 interface ExtlSensorData {
   sensorId: string
   name?: string
@@ -69,25 +78,25 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
   const history = useHistory()
 
   // Moist Marker Chart state
-  const [moistChartDataContainer, setMoistChartDataContainer] = useState<ChartDataItem[]>([])
-  const [invalidMoistChartDataContainer, setInvalidMoistChartDataContainer] = useState<ChartDataItem[]>([])
+  const [moistChartDataContainer, setMoistChartDataContainer] = useState<ChartDataTuple[]>([])
+  const [invalidMoistChartDataContainer, setInvalidMoistChartDataContainer] = useState<ChartDataTuple[]>([])
   const [moistOverlays, setMoistOverlays] = useState<OverlayItem[]>([])
   const moistOverlaysRef = useRef<any[]>([])
   const [currentSensorId, setCurrentSensorId] = useState<string | number>(0)
 
   // Temp type state
-  const [tempChartDataContainer, setTempChartDataContainer] = useState<ChartDataItem[]>([])
-  const [invalidTempChartDataContainer, setInvalidTempChartDataContainer] = useState<ChartDataItem[]>([])
+  const [tempChartDataContainer, setTempChartDataContainer] = useState<ChartDataTuple[]>([])
+  const [invalidTempChartDataContainer, setInvalidTempChartDataContainer] = useState<ChartDataTuple[]>([])
   const [tempOverlays, setTempOverlays] = useState<OverlayItem[]>([])
 
   // Valve type state
-  const [valveChartDataContainer, setValveChartDataContainer] = useState<ChartDataItem[]>([])
-  const [invalidValveChartDataContainer, setInvalidValveChartDataContainer] = useState<ChartDataItem[]>([])
+  const [valveChartDataContainer, setValveChartDataContainer] = useState<ChartDataTuple[]>([])
+  const [invalidValveChartDataContainer, setInvalidValveChartDataContainer] = useState<ChartDataTuple[]>([])
   const [valveOverlays, setValveOverlays] = useState<OverlayItem[]>([])
 
   // Wxet/Fuel type state
-  const [wxetDataContainer, setWxetDataContainer] = useState<ChartDataItem[]>([])
-  const [invalidWxetDataContainer, setInvalidWxetDataContainer] = useState<ChartDataItem[]>([])
+  const [wxetDataContainer, setWxetDataContainer] = useState<ChartDataTuple[]>([])
+  const [invalidWxetDataContainer, setInvalidWxetDataContainer] = useState<ChartDataTuple[]>([])
   const [fuelOverlays, setFuelOverlays] = useState<OverlayItem[]>([])
 
   // Extl type state
@@ -102,23 +111,27 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
   // Moist Marker Chart - Valid data
   useEffect(() => {
     if (moistChartDataContainer.length !== 0) {
-      moistChartDataContainer.map((chartData: ChartDataItem) => {
+      moistChartDataContainer.map((chartData: ChartDataTuple) => {
         const MoistCustomOverlayExport = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
+        const bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
+          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
+        )
         const overlay = new MoistCustomOverlayExport(
           false,
-          chartData[1],
+          bounds,
           invalidChartDataImage,
           true,
-          chartData[0],
-          props.setChartData,
+          chartData[0] as any,
+          props.setChartData as any,
           props.setPage,
           props.setSiteId,
           props.setSiteName,
-          history,
+          history as any,
           isMoistMarkerChartDrawn,
-          props.setAdditionalChartData,
-          props.siteList,
-          setMoistOverlays,
+          props.setAdditionalChartData as any,
+          props.siteList as any,
+          setMoistOverlays as any,
           props.setChartPageType,
           moistOverlaysRef,
           currentSensorId,
@@ -127,7 +140,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
           })
         }
       })
@@ -137,23 +150,27 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
   // Moist Marker Chart - Invalid data
   useEffect(() => {
     if (invalidMoistChartDataContainer.length !== 0) {
-      invalidMoistChartDataContainer.map((chartData: ChartDataItem) => {
+      invalidMoistChartDataContainer.map((chartData: ChartDataTuple) => {
         const CustomOverlayExport = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
+        const bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
+          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
+        )
         const overlay = new CustomOverlayExport(
           false,
-          chartData[1],
+          bounds,
           invalidChartDataImage,
           false,
-          chartData[0],
-          props.setChartData,
+          chartData[0] as any,
+          props.setChartData as any,
           props.setPage,
           props.setSiteId,
           props.setSiteName,
-          history,
+          history as any,
           isMoistMarkerChartDrawn,
-          props.setAdditionalChartData,
-          props.siteList,
-          setMoistOverlays,
+          props.setAdditionalChartData as any,
+          props.siteList as any,
+          setMoistOverlays as any,
           props.setChartPageType,
           moistOverlaysRef,
           currentSensorId,
@@ -162,7 +179,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
           })
         }
       })
@@ -174,7 +191,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
     if (moistOverlays.length !== 0) {
       let roots: ChartRoot[] = []
       moistOverlays.map((moistOverlay: OverlayItem) => {
-        createMoistChartForOverlay("m", moistOverlay.chartData, roots, moistOverlays)
+        createMoistChartForOverlay("m", moistOverlay.chartData as any, roots as any, moistOverlays as any)
       })
       return () => {
         roots.forEach((root) => root.dispose())
@@ -187,7 +204,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
   // Wxet/Fuel Marker - Valid data
   useEffect(() => {
     if (wxetDataContainer.length !== 0) {
-      wxetDataContainer.map((data: ChartDataItem) => {
+      wxetDataContainer.map((data: ChartDataTuple) => {
         let overlay: OverlayItem | undefined
         if (data[0].markerType === "wxet") {
           const WxetCustomOverlayExport = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
@@ -197,29 +214,29 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
             props.setPage,
             props.setSiteId,
             props.setSiteName,
-            props.setAdditionalChartData,
-            history,
-            data[1],
+            props.setAdditionalChartData as any,
+            history as any,
+            data[1] as any,
             true,
-            data[0],
+            data[0] as any,
             props.setChartPageType,
-          )
+          ) as any
         } else if (data[0].markerType === "fuel") {
           const FuelCustomOverlayExport = initializeFuelCustomOverlay(props.isGoogleApiLoaded)
           if (!FuelCustomOverlayExport) return
           overlay = new FuelCustomOverlayExport(
-            props.setChartData,
+            props.setChartData as any,
             props.setPage,
             props.setSiteId,
             props.setSiteName,
-            history,
-            data[1],
+            history as any,
+            data[1] as any,
             true,
-            data[0],
+            data[0] as any,
             props.setChartPageType,
             isFuelMarkerChartDrawn,
-            setFuelOverlays,
-          )
+            setFuelOverlays as any,
+          ) as any
         }
         if (overlay) {
           React.startTransition(() => {
@@ -233,39 +250,39 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
   // Wxet/Fuel Marker - Invalid data
   useEffect(() => {
     if (invalidWxetDataContainer.length !== 0) {
-      invalidWxetDataContainer.map((data: ChartDataItem) => {
+      invalidWxetDataContainer.map((data: ChartDataTuple) => {
         let overlay: OverlayItem | undefined
         if (data[0].markerType === "wxet") {
           const WxetCustomOverlayExport = initializeWxetCustomOverlay(props.isGoogleApiLoaded)
           if (!WxetCustomOverlayExport) return
           overlay = new WxetCustomOverlayExport(
-            props.setChartData,
+            props.setChartData as any,
             props.setPage,
             props.setSiteId,
             props.setSiteName,
-            props.setAdditionalChartData,
-            history,
-            data[1],
+            props.setAdditionalChartData as any,
+            history as any,
+            data[1] as any,
             false,
-            data[0],
+            data[0] as any,
             props.setChartPageType,
-          )
+          ) as any
         } else if (data[0].markerType === "fuel") {
           const FuelCustomOverlayExport = initializeFuelCustomOverlay(props.isGoogleApiLoaded)
           if (!FuelCustomOverlayExport) return
           overlay = new FuelCustomOverlayExport(
-            props.setChartData,
+            props.setChartData as any,
             props.setPage,
             props.setSiteId,
             props.setSiteName,
-            history,
-            data[1],
+            history as any,
+            data[1] as any,
             true,
-            data[0],
+            data[0] as any,
             props.setChartPageType,
             isFuelMarkerChartDrawn,
-            setFuelOverlays,
-          )
+            setFuelOverlays as any,
+          ) as any
         }
 
         if (overlay) {
@@ -282,7 +299,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
     if (fuelOverlays.length !== 0) {
       const roots: ChartRoot[] = []
       fuelOverlays.map((fuelOverlay: OverlayItem) => {
-        createFuelChartForOverlay(fuelOverlay.chartData, roots, fuelOverlays)
+        createFuelChartForOverlay(fuelOverlay.chartData as any, roots as any, fuelOverlays as any)
       })
 
       return () => {
@@ -295,28 +312,32 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
   // Temp Marker - Valid data
   useEffect(() => {
     if (tempChartDataContainer.length !== 0) {
-      tempChartDataContainer.map((chartData: ChartDataItem) => {
+      tempChartDataContainer.map((chartData: ChartDataTuple) => {
         const TempCustomOverlayExport = initializeTempCustomOverlay(props.isGoogleApiLoaded)
         if (!TempCustomOverlayExport) return
+        const bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
+          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
+        )
         const overlay = new TempCustomOverlayExport(
-          chartData[1],
+          bounds,
           true,
-          chartData[0],
-          props.setChartData,
+          chartData[0] as any,
+          props.setChartData as any,
           props.setPage,
           props.setSiteId,
           props.setSiteName,
           history,
           isTempMarkerChartDrawn,
-          props.setAdditionalChartData,
-          setTempOverlays,
+          props.setAdditionalChartData as any,
+          setTempOverlays as any,
           props.setChartPageType,
           props.userId,
           props.present,
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
           })
         }
       })
@@ -326,28 +347,32 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
   // Temp Marker - Invalid data
   useEffect(() => {
     if (invalidTempChartDataContainer.length !== 0) {
-      invalidTempChartDataContainer.map((chartData: ChartDataItem) => {
+      invalidTempChartDataContainer.map((chartData: ChartDataTuple) => {
         const CustomOverlayExport = initializeTempCustomOverlay(props.isGoogleApiLoaded)
         if (!CustomOverlayExport) return
+        const bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
+          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
+        )
         const overlay = new CustomOverlayExport(
-          chartData[1],
+          bounds,
           false,
-          chartData[0],
-          props.setChartData,
+          chartData[0] as any,
+          props.setChartData as any,
           props.setPage,
           props.setSiteId,
           props.setSiteName,
           history,
           isTempMarkerChartDrawn,
-          props.setAdditionalChartData,
-          setTempOverlays,
+          props.setAdditionalChartData as any,
+          setTempOverlays as any,
           props.setChartPageType,
           props.userId,
           props.present,
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
           })
         }
       })
@@ -360,7 +385,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
     if (tempOverlays.length !== 0) {
       const roots: ChartRoot[] = []
       tempOverlays.map((tempOverlay: OverlayItem) => {
-        createTempChartForOverlay(tempOverlay.chartData, roots, tempOverlays)
+        createTempChartForOverlay(tempOverlay.chartData as any, roots as any, tempOverlays as any)
       })
 
       return () => {
@@ -373,13 +398,17 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
   // Valve Marker - Valid data
   useEffect(() => {
     if (valveChartDataContainer.length !== 0) {
-      valveChartDataContainer.map((chartData: ChartDataItem) => {
+      valveChartDataContainer.map((chartData: ChartDataTuple) => {
         const ValveCustomOverlayExport = initializeValveCustomOverlay(props.isGoogleApiLoaded)
         if (!ValveCustomOverlayExport) return
+        const bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
+          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
+        )
         const overlay = new ValveCustomOverlayExport(
-          chartData[1],
+          bounds,
           true,
-          chartData[0],
+          chartData[0] as any,
           props.setChartData,
           props.setPage,
           props.setSiteId,
@@ -387,12 +416,12 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           props.setChartPageType,
           history,
           isValveMarkerChartDrawn,
-          setValveOverlays,
+          setValveOverlays as any,
           props.userId,
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
           })
         }
       })
@@ -402,13 +431,17 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
   // Valve Marker - Invalid data
   useEffect(() => {
     if (invalidValveChartDataContainer.length !== 0) {
-      invalidValveChartDataContainer.map((chartData: ChartDataItem) => {
+      invalidValveChartDataContainer.map((chartData: ChartDataTuple) => {
         const ValveCustomOverlayExport = initializeValveCustomOverlay(props.isGoogleApiLoaded)
         if (!ValveCustomOverlayExport) return
+        const bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
+          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
+        )
         const overlay = new ValveCustomOverlayExport(
-          chartData[1],
+          bounds,
           false,
-          chartData[0],
+          chartData[0] as any,
           props.setChartData,
           props.setPage,
           props.setSiteId,
@@ -416,12 +449,12 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           props.setChartPageType,
           history,
           isValveMarkerChartDrawn,
-          setValveOverlays,
+          setValveOverlays as any,
           props.userId,
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
           })
         }
       })
@@ -434,7 +467,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
     if (valveOverlays.length !== 0) {
       const roots: ChartRoot[] = []
       valveOverlays.map((valveOverlay: OverlayItem) => {
-        createValveChartForOverlay(valveOverlay.chartData, roots, valveOverlays)
+        createValveChartForOverlay(valveOverlay.chartData as any, roots as any, valveOverlays as any)
       })
 
       return () => {
@@ -470,10 +503,10 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           mainId: extlItem.mainId,
         }
 
-        const overlay = new ExtlCustomOverlayExport(bounds, extlChartData)
+        const overlay = new ExtlCustomOverlayExport(bounds, extlChartData as any)
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as any, props.setActiveOverlays, props.map)
           })
         }
       })
@@ -509,11 +542,11 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
     setFuelOverlays,
     extlDataContainer,
     setExtlDataContainer,
-    // Constants
-    moistChartsAmount: [] as ChartDataItem[],
-    tempChartsAmount: [] as ChartDataItem[],
-    valveChartsAmount: [] as ChartDataItem[],
-    wxetChartsAmount: [] as ChartDataItem[],
-    extlChartsAmount: [] as ChartDataItem[],
+    // Constants - return empty arrays to be populated by marker creation functions
+    moistChartsAmount: [] as any[],
+    tempChartsAmount: [] as any[],
+    valveChartsAmount: [] as any[],
+    wxetChartsAmount: [] as any[],
+    extlChartsAmount: [] as any[],
   }
 }

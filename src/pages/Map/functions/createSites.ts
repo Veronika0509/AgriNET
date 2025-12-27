@@ -1,3 +1,4 @@
+import React from "react";
 import { onSiteClick } from "./onSiteClick";
 import {logoFacebook, logoHackernews} from "ionicons/icons";
 import { getSiteList } from "../data/getSiteList";
@@ -9,6 +10,17 @@ interface MarkerWithInfoWindow extends google.maps.marker.AdvancedMarkerElement 
   infoWindow?: google.maps.InfoWindow;
 }
 
+interface Marker {
+  sensorId: string;
+  visible: boolean;
+  setMap: (map: google.maps.Map | null) => void;
+  infoWindow: google.maps.InfoWindow;
+  lat: number;
+  lng: number;
+  id: string | number;
+  [key: string]: unknown;
+}
+
 interface SensorsGroupData {
   lat: number;
   lng: number;
@@ -16,49 +28,57 @@ interface SensorsGroupData {
   layers: unknown[];
 }
 
+interface CoordinateWithId {
+  lat: number;
+  lng: number;
+  id: string | number;
+  mainId: string | number;
+}
+
 interface CreateSitesProps {
-  setAreArraysUpdated: (updated: boolean) => void;
-  markers: unknown[];
+  setAreArraysUpdated?: React.Dispatch<React.SetStateAction<boolean>> | ((updated: boolean) => void);
+  markers: google.maps.Marker[] | Marker[];
   siteList: Site[];
   map: google.maps.Map;
-  setMarkers: (markers: unknown[]) => void;
+  setMarkers: React.Dispatch<React.SetStateAction<any[]>> | ((markers: any[]) => void);
   userId: number;
-  setPage: (page: number) => void;
-  setSiteId: (id: string | number) => void;
-  setSiteName: (name: string) => void;
-  setChartData: (data: unknown) => void;
-  setAdditionalChartData: (data: unknown) => void;
-  setChartPageType: (type: string) => void;
-  history: { push: (path: string) => void };
+  setPage?: React.Dispatch<React.SetStateAction<number>> | ((page: number) => void);
+  setSiteId?: React.Dispatch<React.SetStateAction<any>> | ((id: string | number) => void);
+  setSiteName?: React.Dispatch<React.SetStateAction<string>> | ((name: string) => void);
+  setChartData?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown) => void);
+  setAdditionalChartData?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown) => void);
+  setChartPageType?: React.Dispatch<React.SetStateAction<any>> | ((type: string) => void);
+  history?: { push: (path: string) => void };
   initialZoom?: number;
   setInitialZoom?: (zoom: number | undefined) => void;
-  setIsMarkerClicked?: (clicked: boolean | string) => void;
+  setIsMarkerClicked?: React.Dispatch<React.SetStateAction<boolean | string>> | ((clicked: boolean | string) => void);
   page?: number;
-  allCoordinatesOfMarkers?: unknown[];
-  setCoordinatesForFitting?: (coords: unknown[]) => void;
-  setAllCoordinatesOfMarkers?: (coords: unknown[]) => void;
-  setSecondMap?: (map: unknown) => void;
+  allCoordinatesOfMarkers?: CoordinateWithId[] | any[];
+  setCoordinatesForFitting?: React.Dispatch<React.SetStateAction<any[]>> | ((coords: CoordinateWithId[]) => void);
+  setAllCoordinatesOfMarkers?: React.Dispatch<React.SetStateAction<any[]>> | ((coords: CoordinateWithId[]) => void);
+  setSecondMap?: React.Dispatch<React.SetStateAction<any>> | ((map: string) => void);
   moistChartsAmount?: number;
-  setInvalidMoistChartDataContainer?: (data: unknown) => void;
-  setMoistChartDataContainer?: (data: unknown) => void;
+  setInvalidMoistChartDataContainer?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown[]) => void);
+  setMoistChartDataContainer?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown[]) => void);
   wxetChartsAmount?: number;
-  setInvalidWxetDataContainer?: (data: unknown) => void;
-  setWxetDataContainer?: (data: unknown) => void;
+  setInvalidWxetDataContainer?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown[]) => void);
+  setWxetDataContainer?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown[]) => void);
   tempChartsAmount?: number;
-  setInvalidTempChartDataContainer?: (data: unknown) => void;
-  setTempChartDataContainer?: (data: unknown) => void;
+  setInvalidTempChartDataContainer?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown[]) => void);
+  setTempChartDataContainer?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown[]) => void);
   valveChartsAmount?: number;
-  setInvalidValveChartDataContainer?: (data: unknown) => void;
-  setValveChartDataContainer?: (data: unknown) => void;
+  setInvalidValveChartDataContainer?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown[]) => void);
+  setValveChartDataContainer?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown[]) => void);
   amountOfSensors?: number;
   setAmountOfSensors?: (amount: number) => void;
   extlChartsAmount?: number;
-  setExtlDataContainer?: (data: unknown) => void;
+  setExtlDataContainer?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown[]) => void);
+  mapRefFunc?: React.RefObject<HTMLDivElement>;
 }
 
 export const createSites = async (props: CreateSitesProps) => {
   const markers: MarkerWithInfoWindow[] = [];
-  props.setAreArraysUpdated(false);
+  props.setAreArraysUpdated?.(false);
   const template = document.createElement("div");
   template.className = "my-advanced-marker";
   template.innerHTML = `<img src="https://app.agrinet.us/Tier1Markr_20.svg" alt="m">`;
@@ -90,7 +110,7 @@ export const createSites = async (props: CreateSitesProps) => {
             allCoordinatesOfMarkers: props.allCoordinatesOfMarkers,
             setCoordinatesForFitting: props.setCoordinatesForFitting,
             setAllCoordinatesOfMarkers: props.setAllCoordinatesOfMarkers,
-            siteList: props.siteList,
+            siteList: props.siteList as any,
             groupMarker,
             sensorsGroupData,
             setSecondMap: props.setSecondMap,
@@ -108,7 +128,7 @@ export const createSites = async (props: CreateSitesProps) => {
             setValveChartDataContainer: props.setValveChartDataContainer,
             amountOfSensors: props.amountOfSensors,
             setAmountOfSensors: props.setAmountOfSensors,
-            markers: props.markers.length > 0 ? props.markers : markers,
+            markers: (props.markers.length > 0 ? props.markers : markers) as any,
             extlChartsAmount: props.extlChartsAmount,
             setExtlDataContainer: props.setExtlDataContainer,
           });
@@ -123,7 +143,7 @@ export const createSites = async (props: CreateSitesProps) => {
           allCoordinatesOfMarkers: props.allCoordinatesOfMarkers,
           setCoordinatesForFitting: props.setCoordinatesForFitting,
           setAllCoordinatesOfMarkers: props.setAllCoordinatesOfMarkers,
-          siteList: props.siteList,
+          siteList: props.siteList as any,
           groupMarker,
           sensorsGroupData,
           setSecondMap: props.setSecondMap,
@@ -141,7 +161,7 @@ export const createSites = async (props: CreateSitesProps) => {
           setValveChartDataContainer: props.setValveChartDataContainer,
           amountOfSensors: props.amountOfSensors,
           setAmountOfSensors: props.setAmountOfSensors,
-          markers: props.markers.length > 0 ? props.markers : markers,
+          markers: (props.markers.length > 0 ? props.markers : markers) as any,
           extlChartsAmount: props.extlChartsAmount,
           setExtlDataContainer: props.setExtlDataContainer,
         });

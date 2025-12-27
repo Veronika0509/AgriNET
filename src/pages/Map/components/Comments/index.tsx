@@ -424,7 +424,7 @@ export const Comments = (props: any) => {
               <IonItem className={s.comments_modalItem}>
                 <IonSelect label="Chart" value={modalChart} onIonChange={(e: CustomEvent) => {
                   const value = (e.detail as { value: string }).value;
-                  setModalChart(value)
+                  setModalChart(value as any)
                   updateFormValue('chart', value)
                 }}>
                   {chartKinds && chartKinds.map((chartKind: any) => (

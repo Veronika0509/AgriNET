@@ -11,6 +11,11 @@ interface TableData {
   freshness?: string;
 }
 
+// Type guard to check if data is TableData
+function isTableData(data: TableData | { data: TableData[] }): data is TableData {
+  return 'data' in data && Array.isArray(data.data) && (data.data.length === 0 || 'DateTime' in data.data[0]);
+}
+
 export const onDataSet = (
   type: string,
   data: TableData | { data: TableData[] },
@@ -23,7 +28,7 @@ export const onDataSet = (
   setIsLoading: (loading: boolean) => void
 ): void => {
   if (type === 'wxet') {
-    if (!data.isFiltered && isWxetMobile) {
+    if (isTableData(data) && !data.isFiltered && isWxetMobile) {
       const dataArray = data.data
       dataArray.sort((a: any, b: any) => new Date(a.DateTime).getTime() - new Date(b.DateTime).getTime());
       const lastDate = new Date(dataArray[dataArray.length - 1].DateTime);
@@ -44,11 +49,11 @@ export const onDataSet = (
   } else if (type === 'fuel') {
     setIsFuelModalOpen(true)
   } else {
-    if (data.label) {
-      setFirstRowColor(freshnessColors[data.freshness] || undefined);
+    if (isTableData(data) && data.label) {
+      setFirstRowColor(freshnessColors[data.freshness || ''] || undefined);
     } else {
       const dataWithColors: any[] = []
-      if (data.data) {
+      if ('data' in data && Array.isArray(data.data)) {
         data.data.map((table: any) => {
           dataWithColors.push({
             data: table.data,

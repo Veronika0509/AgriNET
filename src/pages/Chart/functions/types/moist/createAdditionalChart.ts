@@ -16,10 +16,13 @@ interface BudgetLine {
 }
 
 interface MoistComment {
-  key: string;
+  key?: string;
   text: string;
   color_id?: number;
   id: string;
+  date?: string;
+  userId?: string | number;
+  [key: string]: unknown;
 }
 
 type RootRef = React.RefObject<am5.Root | null>;
@@ -75,7 +78,7 @@ export const createAdditionalChart = (
 ) => {
   if (root.current) {
     root.current.dispose();
-    root.current = null;
+    (root as any).current = null;
   }
   if (!root.current) {
     let divId: string
@@ -90,7 +93,7 @@ export const createAdditionalChart = (
       divId = 'batteryChart'
       chartCode = 'MBattery'
     }
-    root.current = am5.Root.new(divId);
+    (root as any).current = am5.Root.new(divId);
 
     const myTheme = am5.Theme.new(root.current);
 
@@ -280,7 +283,7 @@ export const createAdditionalChart = (
         chartData.map((chartDataItem: ChartDataItem) => {
           // Battery chart uses 'time' property instead of 'DateTime'
           const timeStr = chartDataItem.time || chartDataItem.DateTime;
-          const chartDate = new Date(timeStr).getTime();
+          const chartDate = new Date(timeStr as any).getTime();
           const value = chartDataItem.value !== undefined ? chartDataItem.value : chartDataItem.Battery;
           const chartData = createChartData(chartDate, typeof value === 'number' ? value : 0);
           data.push(chartData);

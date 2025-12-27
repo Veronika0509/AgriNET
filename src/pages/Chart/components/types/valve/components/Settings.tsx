@@ -45,11 +45,15 @@ interface SettingsProps {
   setIsEnableActionSheet?: (open: boolean) => void;
   setChartPageType?: (type: string) => void;
   setAlarmOddBack?: (value: boolean) => void;
+  alarmOddBack?: boolean;
   settingsOddBack?: boolean;
   setSettingsOddBack?: (value: boolean) => void;
   setOddBack?: (value: boolean) => void;
   setSiteId?: (id: string | number) => void;
+  setSiteName?: (name: string) => void;
   setAutowater?: (value: boolean) => void;
+  setAdditionalChartData?: (data: unknown) => void;
+  setChartData?: (data: unknown) => void;
 }
 
 export const Settings: React.FC<SettingsProps> = (props) => {
@@ -270,7 +274,8 @@ export const Settings: React.FC<SettingsProps> = (props) => {
 
   return (
     <IonModal isOpen={!!props.valveSettings} className={s.settingsModal}>
-      <Header type='valveSettingsModal' sensorId={props.sensorId} setValveSettings={props.setValveSettings} settingsOddBack={props.settingsOddBack} setSettingsOddBack={props.setSettingsOddBack} setOddBack={props.setOddBack} setChartPageType={props.setChartPageType} setSiteId={props.setSiteId} moistSensorId={settingsData?.probeId || ''} setAutowater={props.setAutowater} />
+      {/* @ts-ignore */}
+      <Header type='valveSettingsModal' sensorId={props.sensorId} setValveSettings={props.setValveSettings as any} settingsOddBack={props.settingsOddBack as any} setSettingsOddBack={props.setSettingsOddBack} setOddBack={props.setOddBack} setChartPageType={props.setChartPageType} setSiteId={props.setSiteId as any} moistSensorId={settingsData?.probeId || ''} setAutowater={props.setAutowater} />
       {settingsData && (
         <IonContent className={s.settingsWrapper}>
           <IonItem className={s.settingsInputWrapper}>

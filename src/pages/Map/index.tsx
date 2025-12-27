@@ -323,7 +323,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         }
 
         if (mapRef.current) {
-          createMap(map, setMap, mapRef, mapRefFunc)
+          createMap(map, setMap, mapRef)
           setMapInitialized(true)
 
           if (map && sitesData && sitesData.length > 0) {
@@ -332,7 +332,7 @@ const MapPage: React.FC<MapProps> = (props) => {
               lng: site.lng,
               name: site.name,
               layers: site.layers || [],
-            }))
+            })) as unknown as Site[]
             createSites({
               setAreArraysUpdated,
               page: props.page,
@@ -345,23 +345,23 @@ const MapPage: React.FC<MapProps> = (props) => {
               setCoordinatesForFitting,
               setAllCoordinatesOfMarkers,
               setSecondMap,
-              moistChartsAmount,
+              moistChartsAmount: moistChartsAmount as any,
               setInvalidMoistChartDataContainer,
               setMoistChartDataContainer,
-              wxetChartsAmount,
+              wxetChartsAmount: wxetChartsAmount as any,
               setInvalidWxetDataContainer,
               setWxetDataContainer,
-              tempChartsAmount,
+              tempChartsAmount: tempChartsAmount as any,
               setInvalidTempChartDataContainer,
               setTempChartDataContainer,
-              valveChartsAmount,
+              valveChartsAmount: valveChartsAmount as any,
               setInvalidValveChartDataContainer,
               setValveChartDataContainer,
               amountOfSensors,
               setAmountOfSensors,
               setIsMarkerClicked,
               setInitialZoom,
-              extlChartsAmount,
+              extlChartsAmount: extlChartsAmount as any,
               setExtlDataContainer,
               mapRefFunc
             })
@@ -386,7 +386,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         lng: site.lng,
         name: site.name,
         layers: site.layers || [], // Use layers from API data
-      }))
+      })) as unknown as Site[]
       createSites({
         page: props.page,
         map,
@@ -398,16 +398,16 @@ const MapPage: React.FC<MapProps> = (props) => {
         setCoordinatesForFitting,
         setAllCoordinatesOfMarkers,
         setSecondMap,
-        moistChartsAmount,
+        moistChartsAmount: moistChartsAmount as any,
         setInvalidMoistChartDataContainer,
         setMoistChartDataContainer,
-        wxetChartsAmount,
+        wxetChartsAmount: wxetChartsAmount as any,
         setInvalidWxetDataContainer,
         setWxetDataContainer,
-        tempChartsAmount,
+        tempChartsAmount: tempChartsAmount as any,
         setInvalidTempChartDataContainer,
         setTempChartDataContainer,
-        valveChartsAmount,
+        valveChartsAmount: valveChartsAmount as any,
         setInvalidValveChartDataContainer,
         setValveChartDataContainer,
         amountOfSensors,
@@ -415,7 +415,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         setIsMarkerClicked,
         setInitialZoom,
         initialZoom,
-        extlChartsAmount,
+        extlChartsAmount: extlChartsAmount as any,
         setExtlDataContainer,
         setAreArraysUpdated,
         history,

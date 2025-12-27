@@ -923,7 +923,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                           inputmode="numeric"
                           value={moistLevel}
                           onIonInput={(e) => {
-                            const inputValue = (e.target as HTMLIonInputElement).value
+                            const inputValue = (e.target as any).value
 
                             // If input is empty, don't show error
                             if (!inputValue || inputValue === "") {

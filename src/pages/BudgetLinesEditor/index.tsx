@@ -32,16 +32,23 @@ interface ChartDataState {
 }
 
 interface MoistSensor {
+  id: string | number;
+  layerName: string;
+  name: string;
   sensorId: string;
+  mainId: string | number;
   lat: number;
   lng: number;
   [key: string]: unknown;
 }
 
 interface MoistOverlay {
+  layerName: string;
+  chartData: MoistSensor;
   setMap: (map: google.maps.Map | null) => void;
   update: (sensorId: string) => void;
   dispose?: () => void;
+  [key: string]: unknown;
 }
 
 interface BudgetEditorProps {
@@ -150,11 +157,11 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
           isMoistMarkerChartDrawn,
           undefined,
           undefined,
-          setMoistOverlays,
+          setMoistOverlays as any,
           undefined,
-          moistOverlaysRef,
+          moistOverlaysRef as any,
           currentSensorId,
-          setCurrentSensorId,
+          setCurrentSensorId as any,
           true
         );
         await overlay.setMap(map);
@@ -168,7 +175,7 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
       moistOverlaysRef.current.forEach((moistOverlay) => {
         const overlayWithChart = moistOverlay as any; // MoistCustomOverlay has additional properties not in MoistOverlay interface
         if (overlayWithChart.isValidChartData && overlayWithChart.toUpdate) {
-          createMoistChartForOverlay('b', overlayWithChart.chartData, roots, moistOverlaysRef.current)
+          createMoistChartForOverlay('b', overlayWithChart.chartData, roots, moistOverlaysRef.current as any)
         }
       });
       return () => {

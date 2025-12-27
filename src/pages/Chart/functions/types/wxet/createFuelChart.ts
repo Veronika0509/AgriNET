@@ -135,7 +135,7 @@ export const createFuelChart = (
 
         const xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width());
 
-        const clickDate = xAxis.positionToDate(xPosition);
+        const clickDate = (xAxis as any).positionToDate(xPosition);
 
         setFuelAddCommentModal({date: clickDate, type: 'main'})
       });
@@ -170,7 +170,7 @@ export const createFuelChart = (
         const container = am5.Container.new(root.current, {
           centerX: am5.p50,
           draggable: true,
-          layout: root.verticalLayout,
+          layout: (root as any).verticalLayout,
           dy: 4,
         })
         container.adapters.add("y", function () {

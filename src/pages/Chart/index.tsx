@@ -85,7 +85,7 @@ const Chart = (props: ChartProps) => {
         return (
           <MoistChartPage
             chartData={props.chartData}
-            additionalChartData={props.additionalChartData}
+            additionalChartData={props.additionalChartData as any}
             userId={props.userId}
             sensorId={props.siteId}
             isMobile={isMobile}
@@ -93,8 +93,8 @@ const Chart = (props: ChartProps) => {
             alarm={alarm}
             setAlarm={setAlarm}
             setChartData={props.setChartData}
-            setSiteId={props.setSiteId}
-            setChartPageType={props.setChartPageType}
+            setSiteId={props.setSiteId as any}
+            setChartPageType={props.setChartPageType as any}
             setValveSettings={setValveSettings}
             alarmOddBack={alarmOddBack}
             setAlarmOddBack={setAlarmOddBack}
@@ -202,12 +202,12 @@ const Chart = (props: ChartProps) => {
       />
       {renderChartPage()}
       <IonModal isOpen={alarm} className={s.alarmPage}>
-        <Header type='alarmPage' setAlarm={setAlarm} alarmOddBack={alarmOddBack} setAlarmOddBack={setAlarmOddBack} settingsOddBack={settingsOddBack} setSettingsOddBack={setSettingsOddBack} setChartPageType={props.setChartPageType} />
+        <Header type='alarmPage' setAlarm={setAlarm} alarmOddBack={alarmOddBack} setAlarmOddBack={setAlarmOddBack} settingsOddBack={settingsOddBack} setSettingsOddBack={setSettingsOddBack} setChartPageType={props.setChartPageType as any} />
         <Alarm
           alarm={alarm}
           setAlarm={setAlarm}
           sensorId={props.siteId}
-          alarmData={alarmData}
+          alarmData={alarmData as any}
           emailOrTel1={alarmEmailOrTel1}
           setEmailOrTel1={setAlarmEmailOrTel1}
           emailOrTel2={alarmEmailOrTel2}
@@ -218,7 +218,7 @@ const Chart = (props: ChartProps) => {
           setLowSetpoint={setAlarmLowSetpoint}
           highSetpoint={alarmHighSetpoint}
           setHighSetpoint={setAlarmHighSetpoint}
-          fieldsLabelsData={alarmFieldLabelsData}
+          fieldsLabelsData={alarmFieldLabelsData as any}
           lowSelectedSensor={alarmLowSelectedSensor}
           setLowSelectedSensor={setAlarmLowSelectedSensor}
           highSelectedSensor={alarmHighSelectedSensor}

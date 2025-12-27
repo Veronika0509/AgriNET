@@ -26,7 +26,7 @@ interface SiteWithLayers extends Site {
   layers?: LayerListLayer[]
 }
 
-interface MapTabProps {
+export interface MapTabProps {
   mapRef: React.RefObject<HTMLDivElement>
   centerMapOnUserLocation: () => void
   isLocationEnabled: boolean

@@ -6,7 +6,17 @@ import {WxetModalTable} from "./components/types/wxet/WxetModalTable";
 import {MoistTable} from "./components/types/moist/MoistTable";
 import {FuelModalTable} from "./components/types/wxet/FuelModalTable";
 
+interface DataItem {
+  DateTime: string;
+  [key: string]: unknown;
+}
+
 interface TabularDataItem {
+  data: DataItem[];
+  sensorCount?: number;
+  label?: string;
+  isFiltered?: boolean;
+  freshness?: string;
   [key: string]: unknown;
 }
 
@@ -14,8 +24,8 @@ interface TabularDataProps {
   type: 'temp' | 'wxet' | 'fuel' | 'moist' | string;
   sensorId: string;
   colors?: string[];
-  data: TabularDataItem[] | TabularDataItem;
-  setData: (data: TabularDataItem[] | TabularDataItem) => void;
+  data: TabularDataItem | TabularDataItem[] | { data: TabularDataItem[] };
+  setData: (data: TabularDataItem | TabularDataItem[] | { data: TabularDataItem[] } | null) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
   chartCode: string;
@@ -65,7 +75,7 @@ export const TabularData: React.FC<TabularDataProps> = ({
     if (data) {
       onDataSet(
         type,
-        data,
+        data as any,
         isWxetMobile,
         setData,
         setIsWxetModalOpen,
@@ -83,7 +93,7 @@ export const TabularData: React.FC<TabularDataProps> = ({
         <div>
           {type === 'temp' ? (
             <div>
-              {data.length ? (
+              {Array.isArray(data) && data.length ? (
                 <div>
                   {(data as TabularDataItem[]).map((tabularData: TabularDataItem, index: number) => (
                     <TempTable key={index} tabularData={tabularData} isMobile={isMobile}

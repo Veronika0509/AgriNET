@@ -37,7 +37,7 @@ interface ChartDataPoint {
 
 export const createFuelChartForOverlay = async (chartData: FuelChartData, roots: am5.Root[], fuelOverlays: FuelOverlay[]) => {
   try {
-    await checkOverlay(chartData.id, fuelOverlays)
+    await checkOverlay(chartData.id as any, fuelOverlays as any)
 
     // Check if element exists and is valid
     const chartElement = document.getElementById(chartData.id.toString());
@@ -74,7 +74,7 @@ export const createFuelChartForOverlay = async (chartData: FuelChartData, roots:
 
   let root: am5.Root;
   try {
-    root = am5.Root.new(chartData.id);
+    root = am5.Root.new(chartData.id.toString());
   } catch (error) {
     console.error(`Error creating root for ${chartData.id}:`, error);
     return;

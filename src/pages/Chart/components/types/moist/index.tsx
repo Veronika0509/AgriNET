@@ -37,9 +37,14 @@ import { TimeSeriesDataItem } from "../../../../../types/api";
 // Define TypeScript interfaces
 type ChartDataItem = TimeSeriesDataItem;
 
+interface BudgetLine {
+  value: number;
+  label: string;
+}
+
 interface ChartData {
   data: ChartDataItem[]
-  budgetLines?: Record<string, unknown>[]
+  budgetLines?: BudgetLine[]
   metric?: string
 }
 
@@ -82,7 +87,7 @@ interface AdditionalChartData {
 }
 
 interface TabularDataState {
-  data: Record<string, unknown>[] | null
+  data: any | null
   isLoading: boolean
   colors: string[]
 }
@@ -483,11 +488,11 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setMoistAddCommentModalWrapper,
             updateCommentsArrayWrapper,
             props.sensorId,
-            updateComments,
+            () => updateComments("sum", undefined),
             addCommentItemShowed.sum,
             newComments,
             props.userId,
-            updateChart,
+            () => updateChart(CHART_TYPES.SUM, 'comments'),
             isMoistCommentsShowed,
             currentSumChartData.budgetLines,
             historicMode,
@@ -508,11 +513,11 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               setMoistAddCommentModalWrapper,
               updateCommentsArrayWrapper,
               props.sensorId,
-              updateComments,
+              () => updateComments("sum", undefined),
               addCommentItemShowed.sum,
               comments.sum,
               props.userId,
-              updateChart,
+              () => updateChart(CHART_TYPES.SUM, 'dates'),
               isMoistCommentsShowed,
               newSumChartData.data.budgetLines,
               historicMode,
@@ -528,11 +533,11 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setMoistAddCommentModalWrapper,
             updateCommentsArrayWrapper,
             props.sensorId,
-            updateComments,
+            () => updateComments("sum", undefined),
             addCommentItemShowed.sum,
             comments.sum,
             props.userId,
-            updateChart,
+            () => updateChart(CHART_TYPES.SUM, 'sameData'),
             isMoistCommentsShowed,
             currentSumChartData.budgetLines,
             historicMode,
@@ -554,11 +559,11 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setMoistAddCommentModalWrapper,
             updateCommentsArrayWrapper,
             props.sensorId,
-            updateComments,
+            () => updateComments("sum", undefined),
             addCommentItemShowed.sum,
             comments.sum,
             props.userId,
-            updateChart,
+            () => updateChart(CHART_TYPES.SUM),
             isMoistCommentsShowed,
             newData.data.budgetLines,
             historicMode,
@@ -583,7 +588,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             addCommentItemShowed.soilTemp,
             newComments,
             props.userId,
-            updateChart,
+            () => updateChart(CHART_TYPES.SOIL_TEMP, 'comments'),
             isMoistCommentsShowed,
             undefined,
             undefined,
@@ -607,11 +612,11 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               setMoistAddCommentModalWrapper,
               updateCommentsArrayWrapper,
               props.sensorId,
-              updateComments,
+              () => updateComments("soilTemp", undefined),
               addCommentItemShowed.soilTemp,
               comments.soilTemp,
               props.userId,
-              updateChart,
+              () => updateChart(CHART_TYPES.SOIL_TEMP, 'dates'),
               isMoistCommentsShowed,
               undefined,
               undefined,
@@ -630,11 +635,11 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setMoistAddCommentModalWrapper,
             updateCommentsArrayWrapper,
             props.sensorId,
-            updateComments,
+            () => updateComments("soilTemp", undefined),
             addCommentItemShowed.soilTemp,
             comments.soilTemp,
             props.userId,
-            updateChart,
+            () => updateChart(CHART_TYPES.SOIL_TEMP, 'sameData'),
             isMoistCommentsShowed,
             undefined,
             undefined,
@@ -659,11 +664,11 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setMoistAddCommentModalWrapper,
             updateCommentsArrayWrapper,
             props.sensorId,
-            updateComments,
+            () => updateComments("soilTemp", undefined),
             addCommentItemShowed.soilTemp,
             comments.soilTemp,
             props.userId,
-            updateChart,
+            () => updateChart(CHART_TYPES.SOIL_TEMP),
             isMoistCommentsShowed,
             undefined,
             undefined,
@@ -687,11 +692,11 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setMoistAddCommentModalWrapper,
             updateCommentsArrayWrapper,
             props.sensorId,
-            updateComments,
+            () => updateComments("battery", undefined),
             addCommentItemShowed.battery,
             newComments,
             props.userId,
-            updateChart,
+            () => updateChart(CHART_TYPES.BATTERY, 'comments'),
             isMoistCommentsShowed,
           )
         } else if (updateReason === "dates") {
@@ -708,11 +713,11 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               setMoistAddCommentModalWrapper,
               updateCommentsArrayWrapper,
               props.sensorId,
-              updateComments,
+              () => updateComments("battery", undefined),
               addCommentItemShowed.battery,
               comments.battery,
               props.userId,
-              updateChart,
+              () => updateChart(CHART_TYPES.BATTERY, 'dates'),
               isMoistCommentsShowed,
             )
           }
@@ -724,11 +729,11 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setMoistAddCommentModalWrapper,
             updateCommentsArrayWrapper,
             props.sensorId,
-            updateComments,
+            () => updateComments("battery", undefined),
             addCommentItemShowed.battery,
             comments.battery,
             props.userId,
-            updateChart,
+            () => updateChart(CHART_TYPES.BATTERY, 'sameData'),
             isMoistCommentsShowed,
           )
         } else {
@@ -746,11 +751,11 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setMoistAddCommentModalWrapper,
             updateCommentsArrayWrapper,
             props.sensorId,
-            updateComments,
+            () => updateComments("battery", undefined),
             addCommentItemShowed.battery,
             comments.battery,
             props.userId,
-            updateChart,
+            () => updateChart(CHART_TYPES.BATTERY),
             isMoistCommentsShowed,
           )
         }
@@ -921,7 +926,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             <div className={s.additionalButtons}>
               <ButtonAndSpinner
                 data={tabularData.soilTemp.data}
-                setData={(data: Record<string, unknown>) => updateTabularData("soilTemp", {data})}
+                setData={(data: Record<string, unknown>[]) => updateTabularData("soilTemp", {data})}
                 setIsLoading={(isLoading: boolean) => updateTabularData("soilTemp", {isLoading})}
                 sensorId={props.sensorId}
                 chartCode={CHART_CODES.SOIL_TEMP}
@@ -947,7 +952,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               sensorId={props.sensorId}
               colors={tabularData.soilTemp.colors}
               data={tabularData.soilTemp.data}
-              setData={(data: Record<string, unknown>[]) => updateTabularData("soilTemp", {data})}
+              setData={(data: any) => updateTabularData("soilTemp", {data})}
               chartCode={CHART_CODES.SOIL_TEMP}
               isLoading={tabularData.soilTemp.isLoading}
               setIsLoading={(isLoading: boolean) => updateTabularData("soilTemp", {isLoading})}
@@ -1020,7 +1025,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
                 sensorId={props.sensorId}
                 colors={tabularData.main.colors}
                 data={tabularData.main.data}
-                setData={(data: Record<string, unknown>) => updateTabularData("main", {data})}
+                setData={(data: any) => updateTabularData("main", {data})}
                 chartCode={CHART_CODES.MAIN}
                 isLoading={tabularData.main.isLoading}
                 setIsLoading={(isLoading: boolean) => updateTabularData("main", {isLoading})}
@@ -1046,24 +1051,16 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             isIrrigationButtons={isIrrigationButtons}
             currentChartData={currentChartData}
             irrigationDates={irrigationDates}
-            setDisableNextButton={setDisableNextButton}
-            setDisablePrevButton={setDisablePrevButton}
             disableNextButton={disableNextButton}
             disablePrevButton={disablePrevButton}
-            sensorId={props.sensorId}
-            setCurrentChartData={setCurrentChartData}
-            root={root}
-            fullDatesArray={fullDatesArray}
             setStartDate={setStartDate}
             setEndDate={setEndDate}
-            additionalChartData={props.additionalChartData}
-            batteryRoot={batteryRoot}
-            sumRoot={sumRoot}
             setDateDifferenceInDays={setDateDifferenceInDays}
-            setCurrentDates={setCurrentDates}
+            setCurrentDates={(dates: [number, string]) => setCurrentDates([String(dates[0]), dates[1]])}
             setShowForecast={setShowForecast}
-            updateChartsWithDates={setNewDaysData}
-            setHistoricMode={setHistoricMode}
+            updateChartsWithDates={(params: { days?: number; newEndDateFormatted?: string; endDatetime?: number }) =>
+              setNewDaysData({ ...params, endDatetime: params.endDatetime?.toString() })
+            }
           />
         </div>
 
@@ -1073,7 +1070,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           <div className={s.additionalButtons}>
             <ButtonAndSpinner
               data={tabularData.sum.data}
-              setData={(data: Record<string, unknown>) => updateTabularData("sum", {data})}
+              setData={(data: Record<string, unknown>[]) => updateTabularData("sum", {data})}
               setIsLoading={(isLoading: boolean) => updateTabularData("sum", {isLoading})}
               sensorId={props.sensorId}
               chartCode={CHART_CODES.SUM}
@@ -1099,7 +1096,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             sensorId={props.sensorId}
             colors={tabularData.sum.colors}
             data={tabularData.sum.data}
-            setData={(data: Record<string, unknown>) => updateTabularData("sum", {data})}
+            setData={(data: any) => updateTabularData("sum", {data})}
             chartCode={CHART_CODES.SUM}
             isLoading={tabularData.sum.isLoading}
             setIsLoading={(isLoading: boolean) => updateTabularData("sum", {isLoading})}
@@ -1110,28 +1107,18 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
         {/* Comment Modal */}
         {moistAddCommentModal && (
           <AddCommentModal
-            type={moistAddCommentModal.type}
+            type={moistAddCommentModal.type as 'main' | 'soilTemp' | 'sum' | 'temp' | 'battery'}
             userId={props.userId}
             sensorId={props.sensorId}
             addCommentModal={new Date(moistAddCommentModal.date)}
-            setMoistAddCommentModal={setMoistAddCommentModal}
-            setMoistMainComments={(data: Comment[]) => updateComments("main", data)}
+            setAddCommentModal={(modal: boolean) => setMoistAddCommentModal(undefined)}
             setAddCommentItemShowed={getSetAddCommentItemShowed(
-              moistAddCommentModal.type,
+              moistAddCommentModal.type as 'main' | 'soilTemp' | 'sum' | 'temp' | 'battery',
               (value: boolean) => updateAddCommentItemShowed("main", value),
               (value: boolean) => updateAddCommentItemShowed("soilTemp", value),
               (value: boolean) => updateAddCommentItemShowed("sum", value),
               (value: boolean) => updateAddCommentItemShowed("battery", value),
-            )}
-            addCommentItemShowed={getAddCommentItemShowed(
-              moistAddCommentModal.type,
-              addCommentItemShowed.main,
-              addCommentItemShowed.soilTemp,
-              addCommentItemShowed.sum,
-              addCommentItemShowed.battery,
-            )}
-            setAddCommentModal={setMoistAddCommentModal}
-            updateChart={updateChart}
+            ) || ((item: string) => {})}
           />
         )}
       </div>
