@@ -113,13 +113,9 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
     if (moistChartDataContainer.length !== 0) {
       moistChartDataContainer.map((chartData: ChartDataTuple) => {
         const MoistCustomOverlayExport = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
-        const bounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
-          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
-        )
         const overlay = new MoistCustomOverlayExport(
           false,
-          bounds,
+          chartData[1] as any,
           invalidChartDataImage,
           true,
           chartData[0] as any,
@@ -152,13 +148,9 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
     if (invalidMoistChartDataContainer.length !== 0) {
       invalidMoistChartDataContainer.map((chartData: ChartDataTuple) => {
         const CustomOverlayExport = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
-        const bounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
-          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
-        )
         const overlay = new CustomOverlayExport(
           false,
-          bounds,
+          chartData[1] as any,
           invalidChartDataImage,
           false,
           chartData[0] as any,
@@ -276,8 +268,8 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
             props.setSiteId,
             props.setSiteName,
             history as any,
-            data[1] as any,
-            true,
+            bounds,
+            false,
             data[0] as any,
             props.setChartPageType,
             isFuelMarkerChartDrawn,
@@ -315,12 +307,8 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
       tempChartDataContainer.map((chartData: ChartDataTuple) => {
         const TempCustomOverlayExport = initializeTempCustomOverlay(props.isGoogleApiLoaded)
         if (!TempCustomOverlayExport) return
-        const bounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
-          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
-        )
         const overlay = new TempCustomOverlayExport(
-          bounds,
+          chartData[1] as any,
           true,
           chartData[0] as any,
           props.setChartData as any,
@@ -350,12 +338,8 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
       invalidTempChartDataContainer.map((chartData: ChartDataTuple) => {
         const CustomOverlayExport = initializeTempCustomOverlay(props.isGoogleApiLoaded)
         if (!CustomOverlayExport) return
-        const bounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
-          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
-        )
         const overlay = new CustomOverlayExport(
-          bounds,
+          chartData[1] as any,
           false,
           chartData[0] as any,
           props.setChartData as any,
@@ -401,12 +385,8 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
       valveChartDataContainer.map((chartData: ChartDataTuple) => {
         const ValveCustomOverlayExport = initializeValveCustomOverlay(props.isGoogleApiLoaded)
         if (!ValveCustomOverlayExport) return
-        const bounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
-          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
-        )
         const overlay = new ValveCustomOverlayExport(
-          bounds,
+          chartData[1] as any,
           true,
           chartData[0] as any,
           props.setChartData,
@@ -434,12 +414,8 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
       invalidValveChartDataContainer.map((chartData: ChartDataTuple) => {
         const ValveCustomOverlayExport = initializeValveCustomOverlay(props.isGoogleApiLoaded)
         if (!ValveCustomOverlayExport) return
-        const bounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(chartData[1].lat, chartData[1].lng),
-          new google.maps.LatLng(chartData[1].lat + 0.0001, chartData[1].lng + 0.0001)
-        )
         const overlay = new ValveCustomOverlayExport(
-          bounds,
+          chartData[1] as any,
           false,
           chartData[0] as any,
           props.setChartData,
@@ -486,11 +462,6 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
 
         const extlItem: ExtlSensorData = data[0]
 
-        const bounds = new google.maps.LatLngBounds(
-          new google.maps.LatLng(extlItem.lat - 0.001, extlItem.lng - 0.001),
-          new google.maps.LatLng(extlItem.lat + 0.001, extlItem.lng + 0.001),
-        )
-
         const extlChartData = {
           id: extlItem.sensorId,
           layerName: "EXTL",
@@ -503,7 +474,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           mainId: extlItem.mainId,
         }
 
-        const overlay = new ExtlCustomOverlayExport(bounds, extlChartData as any)
+        const overlay = new ExtlCustomOverlayExport(data[1] as any, extlChartData as any)
         if (overlay) {
           React.startTransition(() => {
             addOverlayToOverlaysArray(overlay as any, props.setActiveOverlays, props.map)

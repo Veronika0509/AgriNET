@@ -1,4 +1,5 @@
 import type { OverlayItem } from '../types/OverlayItem';
+import {logoHackernews} from "ionicons/icons";
 
 interface Bounds {
   north: number;
