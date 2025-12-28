@@ -157,7 +157,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
   const history = useHistory();
 
   // Chart refs - amCharts Root refs
-  const root: { current: am5.Root | null } = { current: null }
+  const root = useRef<am5.Root | null>(null)
   const batteryRoot = useRef<am5.Root | null>(null)
   const soilTempRoot = useRef<am5.Root | null>(null)
   const sumRoot = useRef<am5.Root | null>(null)
@@ -708,7 +708,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           } else {
             createAdditionalChart(
               "battery",
-              newBatteryChartData.data.data,
+              newBatteryChartData.data,
               batteryRoot,
               setMoistAddCommentModalWrapper,
               updateCommentsArrayWrapper,
