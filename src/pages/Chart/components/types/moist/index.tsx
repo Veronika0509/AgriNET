@@ -87,7 +87,7 @@ interface AdditionalChartData {
 }
 
 interface TabularDataState {
-  data: any | null
+  data: Record<string, unknown>[] | null
   isLoading: boolean
   colors: string[]
 }
@@ -235,12 +235,19 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
   const [moistAddCommentModal, setMoistAddCommentModal] = useState<CommentModal | undefined>(undefined)
 
   // Wrapper function to adapt setMoistAddCommentModal to the expected type
-  const setMoistAddCommentModalWrapper = (params: SetCommentModalParams | ((prev: any) => any)) => {
-    setMoistAddCommentModal(params as any);
+  const setMoistAddCommentModalWrapper = (params: SetCommentModalParams | ((prev: CommentModal | undefined) => CommentModal | undefined)) => {
+    if (typeof params === 'function') {
+      setMoistAddCommentModal(prev => {
+        const result = params(prev);
+        return result ? { type: result.type, date: result.date } : undefined;
+      });
+    } else {
+      setMoistAddCommentModal({ type: params.type || '', date: params.date || 0 });
+    }
   };
 
   // Wrapper function to adapt updateCommentsArray to the expected type
-  const updateCommentsArrayWrapper = (type: string, data?: any) => {
+  const updateCommentsArrayWrapper = (_type: string, _data?: unknown) => {
     // This wrapper is intentionally empty as updateCommentsArray is called directly
     // in the updateChart function with proper parameters
   };
@@ -355,7 +362,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             isNewDates: false,
             historicMode,
             showForecast,
-            setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal(params as any),
+            setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal({ type: params.type || '', date: params.date || 0 }),
             moistMainAddCommentItemShowed: typeof addCommentItemShowed.main === 'boolean' ? addCommentItemShowed.main : false,
             moistMainComments: newCommentData.map(c => ({ ...c, comment: c.text })),
             updateCommentsArray,
@@ -413,7 +420,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               isNewDates: true,
               historicMode,
               showForecast: compareDates(Number(endDatetime || 0)),
-              setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal(params as any),
+              setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal({ type: params.type || '', date: params.date || 0 }),
               moistMainAddCommentItemShowed: typeof addCommentItemShowed.main === 'boolean' ? addCommentItemShowed.main : false,
               moistMainComments: comments.main ? comments.main.map(c => ({ ...c, comment: c.text })) : [],
               updateCommentsArray,
@@ -433,7 +440,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             isNewDates: false,
             historicMode,
             showForecast,
-            setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal(params as any),
+            setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal({ type: params.type || '', date: params.date || 0 }),
             moistMainAddCommentItemShowed: typeof addCommentItemShowed.main === 'boolean' ? addCommentItemShowed.main : false,
             moistMainComments: comments.main ? comments.main.map(c => ({ ...c, comment: c.text })) : [],
             updateCommentsArray,
@@ -464,7 +471,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             isNewDates: false,
             historicMode,
             showForecast,
-            setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal(params as any),
+            setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal({ type: params.type || '', date: params.date || 0 }),
             moistMainAddCommentItemShowed: typeof addCommentItemShowed.main === 'boolean' ? addCommentItemShowed.main : false,
             moistMainComments: comments.main ? comments.main.map(c => ({ ...c, comment: c.text })) : [],
             updateCommentsArray,
@@ -708,7 +715,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           } else {
             createAdditionalChart(
               "battery",
-              newBatteryChartData.data,
+              newBatteryChartData.data.data,
               batteryRoot,
               setMoistAddCommentModalWrapper,
               updateCommentsArrayWrapper,
@@ -952,7 +959,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               sensorId={props.sensorId}
               colors={tabularData.soilTemp.colors}
               data={tabularData.soilTemp.data}
-              setData={(data: any) => updateTabularData("soilTemp", {data})}
+              setData={(data: Record<string, unknown>[]) => updateTabularData("soilTemp", {data})}
               chartCode={CHART_CODES.SOIL_TEMP}
               isLoading={tabularData.soilTemp.isLoading}
               setIsLoading={(isLoading: boolean) => updateTabularData("soilTemp", {isLoading})}
@@ -1025,7 +1032,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
                 sensorId={props.sensorId}
                 colors={tabularData.main.colors}
                 data={tabularData.main.data}
-                setData={(data: any) => updateTabularData("main", {data})}
+                setData={(data: Record<string, unknown>[]) => updateTabularData("main", {data})}
                 chartCode={CHART_CODES.MAIN}
                 isLoading={tabularData.main.isLoading}
                 setIsLoading={(isLoading: boolean) => updateTabularData("main", {isLoading})}
