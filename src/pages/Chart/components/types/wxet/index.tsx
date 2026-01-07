@@ -1,7 +1,8 @@
 import s from './style.module.css'
-import React, {useEffect, useRef, useState} from "react";
+import React from "react"
+import {useEffect, useRef, useState} from "react";
 import {handleResize} from "../../../functions/handleResize";
-import {IonContent, useIonToast} from "@ionic/react";
+import {IonContent, useIonToast as _useIonToast} from "@ionic/react";
 import TopSection from "../../TopSection";
 import {getCurrentDatetime} from "../../DateTimePicker/functions/getCurrentDatetime";
 import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
@@ -12,19 +13,17 @@ import {getBatteryChartData} from "../../../data/types/wxet/getBatteryChartData"
 import {TabularData} from "../../TabularData";
 import {Export} from "../../Export";
 import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
-import {AddCommentButton} from "../../AddComment/components/AddCommentButton";
-import {AddCommentMessage} from "../../AddComment/components/AddCommentMessage";
-import {compareDates} from "../../../functions/types/moist/compareDates";
+import {compareDates as _compareDates} from "../../../functions/types/moist/compareDates";
 import {formatDate} from "../../../functions/formatDate";
 import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
 import {createAdditionalChart} from "../../../functions/types/moist/createAdditionalChart";
-import login from "../../../../Login";
+import _login from "../../../../Login";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
   const batteryRoot = useRef<any>(null);
   const [currentChartData, setCurrentChartData] = useState<any>()
-  const [currentBatteryChartData, setCurrentBatteryChartData] = useState<any>([])
+  const [_currentBatteryChartData, setCurrentBatteryChartData] = useState<any>([])
   const currentDate: any = getCurrentDatetime()
   const initialStartDate: any = getStartDate(getCurrentDatetime())
   const [startDate, setStartDate] = useState<string>(initialStartDate);

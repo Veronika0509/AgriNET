@@ -6,7 +6,6 @@ import {useHistory} from "react-router-dom";
 import {addOutline} from "ionicons/icons";
 import {timeOutline} from "ionicons/icons";
 import {settings} from "ionicons/icons";
-import {useAppContext} from "../../../context/AppContext";
 
 interface HeaderProps {
   type: 'chartPage' | 'alarmPage' | 'valveArchiveModal' | 'valveSettingsModal' | 'valveCreateModal' | 'addValveModal'

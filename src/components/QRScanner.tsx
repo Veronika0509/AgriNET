@@ -17,19 +17,19 @@ const QRScanner = () => {
   const scanNative = async () => {
     // Request camera permission
     const permission = await BarcodeScanner.checkPermission({ force: true });
-    
+
     if (!permission.granted) {
       alert('Camera permission denied');
       return;
     }
     setIsScanning(true);
-    
+
     // Make background transparent so camera is visible
     document.body.classList.add('scanner-active');
-    
+
     // Start scanning
-    const result = await BarcodeScanner.startScan();
-    
+    await BarcodeScanner.startScan();
+
     // Remove transparency
     document.body.classList.remove('scanner-active');
     setIsScanning(false);
@@ -53,8 +53,8 @@ const QRScanner = () => {
     // Start scanning
     scannerRef.current.render(
       // Success callback - called when QR code is detected
-      (decodedText) => {
-        
+      (_decodedText) => {
+
         // Stop scanner after successful scan
         if (scannerRef.current) {
           scannerRef.current.clear();
@@ -63,7 +63,7 @@ const QRScanner = () => {
         setIsScanning(false);
       },
       // Error callback - called continuously while scanning
-      (error) => {
+      (_error) => {
         // Don't log every frame error, too noisy
       }
     );

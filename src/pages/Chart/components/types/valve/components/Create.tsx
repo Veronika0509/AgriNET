@@ -15,7 +15,7 @@ import {
   IonSelectOption,
   useIonAlert, useIonToast,
 } from "@ionic/react"
-import React, {useEffect, useRef, useState} from "react"
+import {useEffect, useRef, useState} from "react"
 import {addOutline, removeOutline} from "ionicons/icons"
 import {getDatetime} from "../../../DateTimePicker/functions/getDatetime"
 import {createScheduler} from "../../../../data/types/valve/createScheduler";

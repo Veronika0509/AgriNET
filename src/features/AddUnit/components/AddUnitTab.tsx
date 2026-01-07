@@ -20,8 +20,7 @@ import s from "../../../pages/Map/style.module.css"
 import SensorModal from "../../../pages/Map/components/modals/SensorModal"
 
 // Type imports
-import type { Site, UserId, SiteId } from "../../../types"
-import type { AddUnitTabProps, HTMLIonInputElement } from "../types"
+import type { AddUnitTabProps } from "../types"
 
 // Import unit creation handlers
 import { validateAndCreateUnit } from "../handlers/unitHandlers"
@@ -50,11 +49,9 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
   const {
     addUnitMapRef,
     addUnitMap,
-    crosshairMarker,
     userId,
     siteList,
     setSiteList,
-    selectedSiteForAddUnit,
     setSelectedSiteForAddUnit,
     setSelectedMoistureSensor,
     setPage,
@@ -69,7 +66,6 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
     selectedSiteGroup,
     setSelectedSiteGroup,
     siteGroups,
-    siteGroupError,
     setSiteGroupError,
     sensorPrefix,
     setSensorPrefix,
@@ -99,14 +95,10 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
     qrDisplayMetric,
     newLayerConfigData,
     setNewLayerConfigData,
-    tempLayerName,
     setTempLayerName,
     markers,
     setMarkers,
-    setLayers,
-    setLayerMapping,
     availableSensors,
-    setAvailableSensors,
     isSensorModalOpen,
     setIsSensorModalOpen,
     setActiveTab,
@@ -425,11 +417,6 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                         const newCenter = { lat: selectedSiteObj.lat, lng: selectedSiteObj.lng }
                         addUnitMap.setCenter(newCenter)
                         addUnitMap.setZoom(16) // Good zoom for site view
-
-                        // Update crosshair marker position
-                        if (crosshairMarker) {
-                          crosshairMarker.setPosition(newCenter)
-                        }
                       }
                     } else {
                       setUnitLatitude("")
@@ -446,7 +433,7 @@ const AddUnitTab: React.FC<AddUnitTabProps> = (props) => {
                 <IonButton
                   fill="outline"
                   size="small"
-                  onClick={(e) => {
+                  onClick={() => {
                     showCreateNewSiteAlert()
                   }}
                   style={{

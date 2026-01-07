@@ -50,10 +50,10 @@ export interface AppState {
 // Interface for state modification functions
 export interface AppActions {
   // Page navigation
-  setPage: (page: number) => void
-  setMapPageKey: (key: number | ((prev: number) => number)) => void
-  setBudgetEditorReturnPage: (page: 'chart' | 'menu' | null) => void
-  setBudgetEditorNavigationStack: (stack: string[]) => void
+  setPage: React.Dispatch<React.SetStateAction<number>>
+  setMapPageKey: React.Dispatch<React.SetStateAction<number>>
+  setBudgetEditorReturnPage: React.Dispatch<React.SetStateAction<'chart' | 'menu' | null>>
+  setBudgetEditorNavigationStack: React.Dispatch<React.SetStateAction<string[]>>
   pushToBudgetEditorNavigationStack: (page: string) => void
   popFromBudgetEditorNavigationStack: () => string | undefined
   pushToNavigationHistory: (path: string, page: number) => void
@@ -61,25 +61,25 @@ export interface AppActions {
   clearNavigationHistory: () => void
 
   // User data
-  setUserId: (userId: UserId) => void
+  setUserId: React.Dispatch<React.SetStateAction<UserId>>
   logout: () => void
 
   // Site data
-  setSiteList: (siteList: Site[]) => void
-  setSiteId: (siteId: SiteId) => void
-  setSiteName: (siteName: string) => void
-  setSelectedSiteForAddUnit: (site: string) => void
+  setSiteList: React.Dispatch<React.SetStateAction<Site[]>>
+  setSiteId: React.Dispatch<React.SetStateAction<SiteId>>
+  setSiteName: React.Dispatch<React.SetStateAction<string>>
+  setSelectedSiteForAddUnit: React.Dispatch<React.SetStateAction<string>>
 
   // Chart data
-  setChartData: (chartData: SensorData[]) => void
-  setAdditionalChartData: (chartData: SensorData[]) => void
-  setChartPageType: (chartPageType: ChartPageType) => void
+  setChartData: React.Dispatch<React.SetStateAction<SensorData[]>>
+  setAdditionalChartData: React.Dispatch<React.SetStateAction<SensorData[]>>
+  setChartPageType: React.Dispatch<React.SetStateAction<ChartPageType>>
 
   // Google Maps API
-  setGoogleApiLoaded: (loaded: boolean) => void
+  setGoogleApiLoaded: React.Dispatch<React.SetStateAction<boolean>>
 
   // Sensor selection
-  setSelectedMoistureSensor: (sensor: any | null) => void
+  setSelectedMoistureSensor: React.Dispatch<React.SetStateAction<any>>
 
   // Utility functions
   reloadMapPage: () => Promise<void>

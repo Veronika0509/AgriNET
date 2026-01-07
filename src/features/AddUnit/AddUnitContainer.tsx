@@ -7,7 +7,6 @@ import { createSiteId } from "../../types"
 // Import our modularized components
 import AddUnitTab from "./components/AddUnitTab"
 import { useAddUnitForm } from "./hooks/useAddUnitForm"
-import { useAddUnitMap } from "./hooks/useAddUnitMap"
 import QRCodeScanner from "../../components/QRCodeScanner"
 import { handleJSONQRData, handleKeyValueQRData } from "./handlers/qrScannerHandlers"
 import type { QRScanHandlers } from "./handlers/qrScannerHandlers"
@@ -17,9 +16,9 @@ interface AddUnitContainerProps {
   siteList: Site[]
   setSiteList: React.Dispatch<React.SetStateAction<Site[]>>
   selectedSiteForAddUnit: string
-  setSelectedSiteForAddUnit: (site: string) => void
-  setSelectedMoistureSensor?: (sensor: any) => void
-  setPage: (page: number) => void
+  setSelectedSiteForAddUnit: React.Dispatch<React.SetStateAction<string>>
+  setSelectedMoistureSensor?: React.Dispatch<React.SetStateAction<any>>
+  setPage: React.Dispatch<React.SetStateAction<number>>
   isGoogleApiLoaded: boolean
   activeTab: string
   setActiveTab: (tab: string) => void
@@ -72,7 +71,6 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
   // Map refs and state
   const addUnitMapRef = useRef<HTMLDivElement>(null)
   const [addUnitMap, setAddUnitMap] = useState<google.maps.Map | null>(null)
-  const [crosshairMarker, setCrosshairMarker] = useState<google.maps.Marker | null>(null)
 
   // Form state - use our custom hook
   const formState = useAddUnitForm({
@@ -372,6 +370,7 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
             setSiteList([...siteList, newSite])
             setSelectedSite(siteName)
             setSelectedSiteForAddUnit(siteName)
+            return true
           },
         },
       ],
@@ -608,7 +607,6 @@ const AddUnitContainer: React.FC<AddUnitContainerProps> = (props) => {
         // Map refs and state
         addUnitMapRef={addUnitMapRef}
         addUnitMap={addUnitMap}
-        crosshairMarker={crosshairMarker}
 
       // User and site data
       userId={userId}

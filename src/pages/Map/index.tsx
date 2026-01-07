@@ -5,33 +5,15 @@ import {
   IonPage,
   IonContent,
   useIonToast,
-  useIonAlert,
-  IonIcon,
-  IonSegment,
-  IonSegmentButton,
-  IonLabel,
-  IonButton,
-  IonItem,
-  IonSelect,
-  IonSelectOption,
-  IonInput,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
-  IonCheckbox,
-  IonModal,
-  IonHeader,
 } from "@ionic/react"
 import SensorModal from "./components/modals/SensorModal"
 import { NewLayerModal } from "./components/modals/NewLayerModal"
 import { useHistory } from "react-router-dom"
-import { home, informationCircle, settings, cameraOutline } from "ionicons/icons"
 import type { Site, SensorData, ChartPageType, UserId, SiteId } from "../../types"
 import type { LayerListLayer, SiteWithLayers, Coordinate } from "./types"
 import type { OverlayItem } from "./types/OverlayItem"
 import Header from "./components/Header"
 import { getSiteList } from "./data/getSiteList"
-import { getLayers } from "./data/getLayers"
 import { createMap } from "./functions/createMap"
 import { createSites } from "./functions/createSites"
 import { CollisionResolver } from "./components/CollisionResolver"
@@ -44,12 +26,9 @@ import { useUserLocation } from "./hooks/useUserLocation"
 import { useMarkerClickCleanup } from "./hooks/useMarkerClickCleanup"
 import { useLayers } from "./hooks/useLayers"
 import { useChartOverlays } from "./hooks/useChartOverlays"
-import { useSiteManagement } from "./hooks/useSiteManagement"
 import { useLayerCreation } from "./hooks/useLayerCreation"
-import { useMapBounds } from "./hooks/useMapBounds"
 import { useCollisionResolution } from "./hooks/useCollisionResolution"
 import { useMapVisibility } from "./hooks/useMapVisibility"
-import { useAppContext } from "../../context/AppContext"
 
 interface MapProps {
   page: number
@@ -74,20 +53,13 @@ interface MapProps {
 const MapPage: React.FC<MapProps> = (props) => {
   if (!props.reloadMapPage) {
   }
-  const location = useHistory().location
   const present = useIonToast()
-  const [presentAlert] = useIonAlert()
-  const userRole = localStorage.getItem("userRole")
-  const [presentEmptyNameAlert] = useIonAlert()
   const [activeTab, setActiveTab] = useState("map")
   const [navigationHistory, setNavigationHistory] = useState<string[]>(["map"])
-  const [centerMarker, setCenterMarker] = useState<google.maps.Marker | null>(null)
   const [isMarkerClicked, setIsMarkerClicked] = useState(false)
-  const [areArraysUpdated, setAreArraysUpdated] = useState(false)
   const mapRefFunc = useRef(null);
   const previousTabRef = useRef("map")
   const previousPageRef = useRef(props.page)
-  const isHandlingBackNavRef = useRef(false)
 
   // Layer list state for mobile menu icon
   const [layerListState, setLayerListState] = useState({
@@ -98,14 +70,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   })
 
   // Keep layers state - it's shared with Map tab (using custom hook)
-  const { layers, setLayers, layerMapping, setLayerMapping, isLoadingLayers } = useLayers()
-
-  // Site management (using custom hook)
-  const { isSiteNameValid, handleCreateNewSite, showCreateNewSiteAlert } = useSiteManagement({
-    siteList: props.siteList,
-    setSiteList: props.setSiteList,
-    setSelectedSiteForAddUnit: props.setSelectedSiteForAddUnit,
-  })
+  const { layers, setLayers, setLayerMapping } = useLayers()
 
   // Layer creation (using custom hook)
   const {
@@ -119,9 +84,6 @@ const MapPage: React.FC<MapProps> = (props) => {
     setNewLayerTable,
     newLayerColumn,
     setNewLayerColumn,
-    isLayerNameValid,
-    handleCreateNewLayer,
-    showCreateNewLayerAlert,
     handleFinishNewLayer,
   } = useLayerCreation({
     layers,
@@ -132,7 +94,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Sensor modal state (shared)
   const [isSensorModalOpen, setIsSensorModalOpen] = useState(false)
   const [selectedSensor, setSelectedSensor] = useState<any>(null)
-  const [availableSensors, setAvailableSensors] = useState<any[]>([])
+  const [availableSensors, _setAvailableSensors] = useState<any[]>([])
 
   const handleCloseSensorModal = useCallback(() => {
     setIsSensorModalOpen(false)
@@ -167,42 +129,26 @@ const MapPage: React.FC<MapProps> = (props) => {
 
   // User location tracking (using custom hook)
   const {
-    userLocation,
-    userLocationMarker,
     isLocationEnabled,
     locationError,
-    getCurrentLocation: getUserLocation,
     centerOnUserLocation,
   } = useUserLocation(map)
 
   // Chart overlays (using custom hook)
   const {
-    moistChartDataContainer,
     setMoistChartDataContainer,
-    invalidMoistChartDataContainer,
     setInvalidMoistChartDataContainer,
-    moistOverlays,
     setMoistOverlays,
     moistOverlaysRef,
-    tempChartDataContainer,
     setTempChartDataContainer,
-    invalidTempChartDataContainer,
     setInvalidTempChartDataContainer,
-    tempOverlays,
     setTempOverlays,
-    valveChartDataContainer,
     setValveChartDataContainer,
-    invalidValveChartDataContainer,
     setInvalidValveChartDataContainer,
-    valveOverlays,
     setValveOverlays,
-    wxetDataContainer,
     setWxetDataContainer,
-    invalidWxetDataContainer,
     setInvalidWxetDataContainer,
-    fuelOverlays,
     setFuelOverlays,
-    extlDataContainer,
     setExtlDataContainer,
     moistChartsAmount,
     tempChartsAmount,
@@ -334,7 +280,6 @@ const MapPage: React.FC<MapProps> = (props) => {
               layers: site.layers || [],
             })) as unknown as Site[]
             createSites({
-              setAreArraysUpdated,
               page: props.page,
               map,
               siteList: sitesAsSensorsGroupData,
@@ -417,7 +362,6 @@ const MapPage: React.FC<MapProps> = (props) => {
         initialZoom,
         extlChartsAmount: extlChartsAmount as any,
         setExtlDataContainer,
-        setAreArraysUpdated,
         history,
         setChartData: props.setChartData,
         setPage: props.setPage,

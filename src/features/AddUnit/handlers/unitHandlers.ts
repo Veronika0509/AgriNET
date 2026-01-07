@@ -1,4 +1,4 @@
-import type { Site, UserId, SiteId } from "../../../types"
+import type { Site, UserId } from "../../../types"
 import type { FormErrors, NewLayerConfigData } from "../types"
 import { getSiteList } from "../../../pages/Map/data/getSiteList"
 
@@ -216,10 +216,7 @@ export const reloadAndLogChanges = async (options: {
           const newMarkers = newLayer.markers || []
 
           if (oldMarkers.length !== newMarkers.length) {
-            const addedMarkers = newMarkers.filter(
-              (newMarker: any) =>
-                !oldMarkers.some((oldMarker: any) => oldMarker.chartData?.sensorId === newMarker.chartData?.sensorId),
-            )
+            // Markers have changed
           }
         }
       })

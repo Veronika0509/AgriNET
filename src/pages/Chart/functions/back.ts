@@ -5,7 +5,7 @@ interface History {
 export const back = (
   setPage: (page: number) => void,
   history: History,
-  returnToMapTab?: string | null,
+  _returnToMapTab?: string | null,
   clearReturnToMapTab?: () => void
 ): void => {
   setPage(1);

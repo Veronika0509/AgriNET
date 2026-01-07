@@ -55,7 +55,7 @@ interface TempDataContainerProps {
 }
 
 export const createTempDataContainers = async (props: TempDataContainerProps) => {
-  let value: number = props.response.data.lines.length > 0 ? props.response.data.data[props.response.data.data.length - 1][props.response.data.lines[0]] : props.response.data.temp
+  let value: number = props.response.data.lines.length > 0 ? (props.response.data.data[props.response.data.data.length - 1] as Record<string, unknown>)[props.response.data.lines[0]] as number : props.response.data.temp
   const label: string = props.response.data.lines.length > 0 ? props.response.data.linesLabels[0] : `${props.response.data!.metric == "AMERICA" ? "F" : "C"}°`
   value = Math.round(value*10) / 10
   const valueAndValue: string = value.toString() + label

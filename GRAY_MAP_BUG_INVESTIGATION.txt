@@ -1,0 +1,207 @@
+================================================================================
+GRAY MAP BUG - INVESTIGATION COMPLETE
+================================================================================
+
+ISSUE: Map turns gray/unresponsive after clicking back arrow from site fields
+
+AFFECTED FILES:
+- /Users/veronika/IdeaProjects/AgriNET/src/pages/Map/index.tsx (PRIMARY)
+- /Users/veronika/IdeaProjects/AgriNET/src/pages/Map/functions/onSiteClick.ts
+- /Users/veronika/IdeaProjects/AgriNET/src/App.tsx
+
+================================================================================
+ROOT CAUSE ANALYSIS
+================================================================================
+
+The gray map occurs due to CASCADING CLEANUP FAILURES when the component 
+remounts (triggered by mapPageKey increment in reloadMapPage()).
+
+FAILURE CASCADE:
+1. User clicks back in Header.tsx → calls reloadMapPage()
+2. reloadMapPage() increments mapPageKey → Map component receives new key
+3. React unmounts the Map component (due to key change)
+4. FAILURE #1: No cleanup function disposes the Google Maps instance
+5. FAILURE #2: Event listeners remain attached to the old map
+6. FAILURE #3: DOM containers still have CSS visibility set to hidden
+7. Map component remounts with same mapRef
+8. FAILURE #4: New map initialization races with setState, sites aren't created
+9. FAILURE #5: Map initialization targets DOM elements corrupted by old listeners
+10. RESULT: Map renders gray/broken
+
+================================================================================
+CRITICAL ISSUES FOUND (5 TOTAL)
+================================================================================
+
+ISSUE #1: MISSING MAP CLEANUP ON UNMOUNT [CRITICAL]
+Location: /Users/veronika/IdeaProjects/AgriNET/src/pages/Map/index.tsx
+          (lines 1200-1312 - no cleanup effect exists)
+
+Impact: When component unmounts, Google Maps instance is not disposed
+        - Listeners remain attached
+        - Overlays not cleared
+        - DOM references persist
+        - Causes conflicts when component remounts
+
+Fix Required: Add cleanup useEffect with empty dependency array
+              that disposes map and clears all listeners/overlays
+
+
+ISSUE #2: EVENT LISTENER MEMORY LEAK [CRITICAL]
+Location: /Users/veronika/IdeaProjects/AgriNET/src/pages/Map/index.tsx
+          (lines 1960-1980)
+
+Problem: window.addEventListener called with arrow function:
+         window.addEventListener('resize', () => handleResize())
+         But cleanup tries to remove handleResize directly:
+         window.removeEventListener('resize', handleResize)
+         
+         Different object references = removal FAILS = listener leaks
+
+Impact: Orphaned listeners accumulate, interfering with map rendering
+        Each remount adds more zombie listeners
+
+Fix Required: Use useCallback for handleResize, pass same reference
+              to both addEventListener and removeEventListener
+
+
+ISSUE #3: TYPE INCONSISTENCY - secondMap STATE [HIGH]
+Location: Multiple files:
+          - onSiteClick.ts line 77: setSecondMap(name) - stores STRING
+          - index.tsx line 1207: useState<google.maps.Map | null>(null) - expects Map
+          - index.tsx line 2002: typeof secondMap === 'string' - workaround
+
+Impact: Type mismatch could cause runtime errors or unexpected behavior
+        Code has to check typeof secondMap because of this mismatch
+
+Fix Required: Rename variable or change to proper union type
+              Consider: useState<string | null>(null) or separate state for name
+
+
+ISSUE #4: MAP INITIALIZATION RACE CONDITION [CRITICAL]
+Location: /Users/veronika/IdeaProjects/AgriNET/src/pages/Map/index.tsx
+          (lines 1237-1312)
+
+Problem: 
+  createMap(map, setMap, mapRef);  // map is null
+  setMapInitialized(true);
+  if (map && sites.data...) {      // map is STILL null! (setState not processed)
+    // This block NEVER executes on first load
+    createSites(...)               // Sites never created!
+  }
+
+Timeline:
+  1. createMap() calls setMap() (ASYNC setState)
+  2. Code continues immediately without waiting
+  3. if (map &&) check runs while map is still null
+  4. createSites() is skipped
+  5. Eventually map state updates, but createSites() code already passed
+
+Impact: Sites not created on initial map load after remount
+        Results in empty or stale map
+
+Fix Required: Move site creation to separate useEffect that depends on map state
+              Ensure map exists before calling createSites
+
+
+ISSUE #5: MAP VISIBILITY SELECTOR TARGETS WRONG ELEMENTS [HIGH]
+Location: /Users/veronika/IdeaProjects/AgriNET/src/pages/Map/index.tsx
+          (lines 1981-1996)
+
+Problem: 
+  const mapDivs = document.querySelectorAll('.gm-style');  // Gets ALL maps!
+  mapDivs.forEach(div => {
+    (div as HTMLElement).style.visibility = 'hidden';     // Hides ALL maps
+  });
+
+Issues:
+  - After remount, both old and new map divs might exist in DOM
+  - Querying ALL .gm-style elements could affect wrong map
+  - Old map's CSS persists affecting new map rendering
+  - When back arrow clicked, wrong visibility state applied
+
+Impact: Map visibility toggle affects multiple/wrong map instances
+        Contributes to gray screen on back navigation
+
+Fix Required: Use mapRef.current to hide/show ONLY this map's container
+              Don't query by generic Google Maps CSS class
+
+
+================================================================================
+WHY THIS HAPPENS ON BACK ARROW
+================================================================================
+
+Back Arrow Flow:
+1. Header.tsx back button clicked (line 19-22)
+2. setIsMarkerClicked(false) called
+3. reloadMapPage() called
+4. In App.tsx, reloadMapPage() increments mapPageKey (line 81)
+5. Map component receives new key → React unmounts and remounts
+6. All the cleanup failures listed above occur
+7. Map renders gray because of corrupted initialization state
+
+The back arrow flow is a forced remount, exposing all cleanup issues
+that were previously hidden because:
+- First load: map works (cleanup not needed yet)
+- Transitions between tabs: might work (partial cleanup from visibility toggle)
+- Back arrow: FORCES complete remount = cleanup REQUIRED = failures exposed
+
+================================================================================
+AFFECTED BEHAVIOR PATHS
+================================================================================
+
+1. User views site list on main map
+2. User clicks site marker (onSiteClick.ts)
+3. setSecondMap() called with site name
+4. User sees field view (different component/state)
+5. User clicks back arrow in Header.tsx
+6. reloadMapPage() increments mapPageKey
+7. Map component unmounts ← NO CLEANUP HAPPENS
+8. Map component remounts ← BROKEN INITIALIZATION HAPPENS
+9. User sees gray map ← RESULT
+
+OR occasionally:
+
+1. Map visible and working
+2. User navigates to another tab
+3. activeTab changes ← visibility toggle affects wrong divs
+4. User navigates back to map
+5. Gray map or broken rendering
+
+================================================================================
+VERIFICATION CHECKLIST
+================================================================================
+
+To confirm these issues, check for:
+
+[ ] Search for "useEffect" in index.tsx - verify cleanup effect exists
+[ ] Search for ".setMap(null)" - should see in cleanup, not found
+[ ] Search for "google.maps.event.clearListeners" - should be in cleanup
+[ ] Check if handleResize uses useCallback - it doesn't (BUG)
+[ ] Check if removeEventListener passes same function reference - it doesn't (BUG)
+[ ] Check type of secondMap state vs actual runtime values - mismatch found
+[ ] Check if map state is checked before createSites - it's not (BUG)
+[ ] Check if mapRef is used in visibility toggle - it's not (BUG)
+[ ] Count occurrences of "querySelectorAll('.gm-style')" - should be 0
+
+================================================================================
+FILES TO MODIFY
+================================================================================
+
+Primary File (requires most changes):
+  /Users/veronika/IdeaProjects/AgriNET/src/pages/Map/index.tsx
+
+Secondary Files (type/naming cleanup):
+  /Users/veronika/IdeaProjects/AgriNET/src/pages/Map/functions/onSiteClick.ts
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Add cleanup useEffect with proper map disposal
+2. Fix event listener reference matching using useCallback
+3. Fix map initialization race condition with separate useEffect
+4. Fix map visibility toggle to use mapRef instead of global selector
+5. Fix secondMap type inconsistency
+6. Test remount cycle: marker click → back arrow → verify map renders
+
+================================================================================

@@ -18,7 +18,7 @@ interface ExtlChartData {
 
 
 
-export const initializeExtlCustomOverlay = (isGoogleApiLoaded: boolean) => {
+export const initializeExtlCustomOverlay = (isGoogleApiLoaded: boolean): any => {
   if (isGoogleApiLoaded) {
     return class CustomOverlayExport extends google.maps.OverlayView {
       private bounds: google.maps.LatLngBounds;

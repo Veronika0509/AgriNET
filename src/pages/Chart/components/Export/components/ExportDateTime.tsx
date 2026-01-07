@@ -1,5 +1,5 @@
 import React from "react";
-import {IonDatetime, IonDatetimeButton, IonItem, IonModal, IonText} from "@ionic/react";
+import {IonDatetime, IonDatetimeButton, IonModal, IonText} from "@ionic/react";
 import s from '../../../style.module.css'
 
 interface ExportDateTimeProps {

@@ -1,12 +1,7 @@
 import s from '../../../style.module.css'
 import {IonActionSheet, IonButton, IonItem, IonText, useIonAlert} from "@ionic/react";
-import React, {useEffect, useRef, useState} from "react";
-import {removeTelOrEmail} from "../data/telOrEmail/removeTelOrEmail";
-import {getAlarmData} from "../data/getAlarmData";
-import {enableSetpoint} from "../data/setpoints/enableSetpoint";
+import {useEffect, useRef, useState} from "react";
 import {presentTelOrEmail} from "../functions/telOrEmail/presentTelOrEmail";
-import {onRemoveTelOrEmailSubmit} from "../functions/telOrEmail/onRemoveTelOrEmailSubmit";
-import {updateButtons} from "../functions/telOrEmail/updateButtons";
 import {onEmailOrTelChange} from "../functions/telOrEmail/onEmailOrTelChange";
 
 interface AlarmItemTelOrEmailProps {

@@ -1,11 +1,6 @@
 import {IonActionSheet, IonButton, IonItem, IonText, IonToast, useIonAlert, useIonToast} from "@ionic/react";
 import s from '../../../style.module.css'
-import React, {useEffect, useState} from "react";
-import {enableSetpoint} from "../data/setpoints/enableSetpoint";
-import {onSensorChange} from "../data/setpoints/onSensorChange";
-import {onSetpointChange} from "../data/setpoints/onSetpointChange";
 import {onSensorSelect} from "../functions/setpoints/onSensorSelect";
-import {onSetpointSubmit} from "../functions/setpoints/onSetpointSubmit";
 import {presentSetpointChangeAlert} from "../functions/setpoints/presentSetpointChangeAlert";
 import {onEnableCLick} from "../functions/setpoints/onEnableClick";
 import {presentTelOrEmail} from "../functions/telOrEmail/presentTelOrEmail";

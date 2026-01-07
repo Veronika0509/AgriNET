@@ -100,7 +100,6 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   const extlId: IdCounter = { value: 0 };
   const extlData: unknown[] = []
   const extlBoundsArray: unknown[] = []
-  const extlInvalidChartData: unknown[] = []
   const countExtl: Marker[] = []
   // valve props
   const valveId: IdCounter = { value: 0 };

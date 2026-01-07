@@ -1,7 +1,7 @@
-import {IonButton, IonButtons, IonContent, IonIcon, IonModal, IonSpinner, useIonAlert, useIonToast} from "@ionic/react";
+import {IonButton, IonButtons, IonContent, IonIcon, useIonAlert, useIonToast} from "@ionic/react";
 import s from './style.module.css'
 import {trash} from "ionicons/icons";
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {Archive} from "./components/Archive";
 import {refreshOutline} from "ionicons/icons";
 import '../../../../../App.css'

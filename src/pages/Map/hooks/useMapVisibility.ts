@@ -12,7 +12,7 @@ interface UseMapVisibilityProps {
  * Custom hook for managing map visibility based on active tab
  * Hides/shows map DOM elements and triggers resize events
  */
-export const useMapVisibility = ({ map, mapRef, activeTab, coordinatesForFitting }: UseMapVisibilityProps) => {
+export const useMapVisibility = ({ map, mapRef, activeTab }: UseMapVisibilityProps) => {
   // Toggle map visibility based on active tab
   useEffect(() => {
     if (!map) return
@@ -34,7 +34,7 @@ export const useMapVisibility = ({ map, mapRef, activeTab, coordinatesForFitting
   }, [activeTab, map])
 
   // Fix map display after returning to map tab
-  useEffect(() => {
+  useEffect((): void | (() => void) => {
     if (activeTab !== "map" || !map || !mapRef.current) return
 
     // Force Google Maps to resize and redraw
@@ -48,7 +48,9 @@ export const useMapVisibility = ({ map, mapRef, activeTab, coordinatesForFitting
       }
     }, 100) // Small delay to ensure DOM is ready
 
-    return () => clearTimeout(timeout)
+    return (): void => {
+      clearTimeout(timeout)
+    }
   }, [activeTab, map, mapRef])
 
   return {

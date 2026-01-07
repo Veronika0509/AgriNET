@@ -21,7 +21,7 @@ export const useCollisionResolution = ({ map, activeOverlays, areBoundsFitted }:
   }, [activeOverlays])
 
   // Handle collisions on resize and zoom events after bounds are fitted
-  useEffect(() => {
+  useEffect((): void | (() => void) => {
     if (!map || activeOverlays.length === 0 || !areBoundsFitted) {
       return
     }
@@ -43,7 +43,7 @@ export const useCollisionResolution = ({ map, activeOverlays, areBoundsFitted }:
     const zoomListener = map.addListener("zoom_changed", handleResize)
 
     // Cleanup
-    return () => {
+    return (): void => {
       window.removeEventListener("resize", handleResize)
       if (zoomListener) {
         google.maps.event.removeListener(zoomListener)

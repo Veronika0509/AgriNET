@@ -1,6 +1,5 @@
-import React from 'react'
 import s from "../style.module.css";
-import {IonButton, IonText} from "@ionic/react";
+import {IonButton} from "@ionic/react";
 import {onIrrigationButtonClick} from "../../../../functions/types/moist/onIrrigationButtonClick";
 import { TimeSeriesDataItem } from "../../../../../../types/api";
 

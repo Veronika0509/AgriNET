@@ -8,15 +8,18 @@
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     
-    // Строгая типизация (Senior level) - временно отключена для деплоя
+    // Строгая типизация (Senior level) - включается постепенно
+    // Этап 1: Очистка неиспользуемых переменных ✓ ЗАВЕРШЕН
+    // Этап 2: Явные типы ✓ ЗАВЕРШЕН
+    // Этап 3: Строгие функции (в процессе)
     "strict": false,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "strictNullChecks": false,
-    "strictFunctionTypes": false,
-    "noImplicitReturns": false,
-    "noImplicitThis": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "exactOptionalPropertyTypes": false,
     
     "forceConsistentCasingInFileNames": true,

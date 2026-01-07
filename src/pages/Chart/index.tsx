@@ -1,14 +1,12 @@
 import s from './components/types/moist/style.module.css';
-import {IonContent, IonModal, IonPage} from "@ionic/react";
+import {IonModal, IonPage} from "@ionic/react";
 import Header from "./components/Header";
 import {MoistChartPage} from "./components/types/moist";
 import {WxetChartPage} from "./components/types/wxet";
 import {handleResize} from "./functions/handleResize";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useCallback} from "react";
 import {TempChartPage} from "./components/types/temp";
 import {Alarm} from "./components/Alarm";
-import {getAlarmData} from "./components/Alarm/data/getAlarmData";
-import {getFieldLabels} from "./components/Alarm/data/getFieldLabels";
 import {alarmDataProcessing} from "./functions/alarmDataProcessing";
 import {ValveChartPage} from "./components/types/valve";
 import {FuelChartPage} from "./components/types/wxet/components/fuel";
@@ -57,6 +55,15 @@ const Chart = (props: ChartProps) => {
   const [valveArchive, setValveArchive] = useState(false)
   const [valveSettings, setValveSettings] = useState(false)
   const [valveCreate, setValveCreate] = useState(false)
+
+  // Wrapper functions for setpoint handlers to accept string | number
+  const handleSetLowSetpoint = useCallback((value: string | number) => {
+    setAlarmLowSetpoint(typeof value === 'string' ? parseFloat(value) : value)
+  }, [])
+
+  const handleSetHighSetpoint = useCallback((value: string | number) => {
+    setAlarmHighSetpoint(typeof value === 'string' ? parseFloat(value) : value)
+  }, [])
 
   useEffect(() => {
     alarmDataProcessing(
@@ -215,9 +222,9 @@ const Chart = (props: ChartProps) => {
           emailOrTel3={alarmEmailOrTel3}
           setEmailOrTel3={setAlarmEmailOrTel3}
           lowSetpoint={alarmLowSetpoint}
-          setLowSetpoint={setAlarmLowSetpoint}
+          setLowSetpoint={handleSetLowSetpoint}
           highSetpoint={alarmHighSetpoint}
-          setHighSetpoint={setAlarmHighSetpoint}
+          setHighSetpoint={handleSetHighSetpoint}
           fieldsLabelsData={alarmFieldLabelsData as any}
           lowSelectedSensor={alarmLowSelectedSensor}
           setLowSelectedSensor={setAlarmLowSelectedSensor}

@@ -8,7 +8,7 @@ const TestOverlays: React.FC = () => {
   const [isGoogleApiLoaded, setIsGoogleApiLoaded] = useState(false);
 
   // Проверяем, загружен ли Google Maps API
-  useEffect(() => {
+  useEffect((): void | (() => void) => {
     const checkGoogleApi = () => {
       if (window.google && window.google.maps) {
         setIsGoogleApiLoaded(true);
@@ -28,7 +28,9 @@ const TestOverlays: React.FC = () => {
       }
     }, 100);
 
-    return () => clearInterval(interval);
+    return (): void => {
+      clearInterval(interval);
+    };
   }, []);
 
   // Инициализируем карту

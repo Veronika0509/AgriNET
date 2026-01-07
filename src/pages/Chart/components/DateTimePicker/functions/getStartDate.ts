@@ -1,4 +1,3 @@
-import {getCurrentDatetime} from "./getCurrentDatetime";
 import {getDatetime} from "./getDatetime";
 
 export const getStartDate = (props: any) => {

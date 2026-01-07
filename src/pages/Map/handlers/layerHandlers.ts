@@ -267,9 +267,7 @@ export const handleFinishNewLayer = async (options: HandleFinishNewLayerOptions)
 /**
  * Toggles layer visibility on the map
  */
-export const handleToggleLayer = (options: ToggleLayerOptions) => {
-  const { layerId, isChecked, secondMap, siteList } = options
-
+export const handleToggleLayer = (_options: ToggleLayerOptions) => {
   // This function would handle showing/hiding markers for a specific layer
   // The implementation depends on how markers are stored and managed
   // For now, we'll just log the toggle action

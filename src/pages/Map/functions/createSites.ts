@@ -1,8 +1,4 @@
-import React from "react";
 import { onSiteClick } from "./onSiteClick";
-import {logoFacebook, logoHackernews} from "ionicons/icons";
-import { getSiteList } from "../data/getSiteList";
-import axios from "axios";
 import type { Site } from "../../../types";
 
 // Extended marker type with custom infoWindow property
@@ -21,12 +17,6 @@ interface Marker {
   [key: string]: unknown;
 }
 
-interface SensorsGroupData {
-  lat: number;
-  lng: number;
-  name: string;
-  layers: unknown[];
-}
 
 interface CoordinateWithId {
   lat: number;
@@ -181,7 +171,7 @@ export const createSites = async (props: CreateSitesProps) => {
       });
 
       // Listen for when tiles finish loading, then trigger final resize
-      const tilesLoadedListener = google.maps.event.addListenerOnce(props.map, 'tilesloaded', () => {
+      google.maps.event.addListenerOnce(props.map, 'tilesloaded', () => {
         google.maps.event.trigger(props.map, 'resize');
       });
 

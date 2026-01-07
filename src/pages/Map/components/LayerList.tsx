@@ -1,5 +1,4 @@
 import s from '../style.module.css'
-import {IonCheckbox, IonItem} from "@ionic/react";
 import {useEffect, useState} from "react";
 import { OverlayItem } from '../types/OverlayItem';
 

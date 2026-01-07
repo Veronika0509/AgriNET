@@ -4,7 +4,6 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import {updateCommentDate} from "../../../components/AddComment/data/updateCommentDate";
 import {removeComment} from "../../../components/AddComment/data/removeComment";
-import login from "../../../../Login";
 import { TimeSeriesDataItem } from "../../../../../types/api";
 
 // Интерфейсы для данных графика
@@ -59,12 +58,12 @@ export const createAdditionalChart = (
   root: RootRef,
   setMoistAddCommentModal: (params: {isOpen: boolean; date?: number; type?: string} | ((prev: any) => any)) => void,
   updateCommentsArray: UpdateCommentsArrayFunction,
-  sensorId: string,
-  updateComments: () => void,
+  _sensorId: string,
+  _updateComments: () => void,
   moistAddCommentItemShowed: boolean,
   moistComments: MoistComment[],
   userId: string | number,
-  updateChart: UpdateChartFunction,
+  _updateChart: UpdateChartFunction,
   isMoistCommentsShowed: boolean,
 // sum
   budgetLines?: BudgetLine[],
@@ -569,7 +568,7 @@ export const createAdditionalChart = (
           })
 
           // Add a listener to ensure position doesn't change during animation
-          icon?.on("rotation", (rotation) => {
+          icon?.on("rotation", (_rotation) => {
             // Force the position to stay fixed during rotation
             icon.set("x", originalX)
             icon.set("y", originalY)
@@ -679,7 +678,7 @@ export const createAdditionalChart = (
               loops: Number.POSITIVE_INFINITY,
               easing: am5.ease.linear,
             })
-            icon?.on("rotation", (rotation) => {
+            icon?.on("rotation", (_rotation) => {
               icon.set("x", originalX)
               icon.set("y", originalY)
               icon.set("dx", 17)

@@ -1,7 +1,7 @@
 import {createMoistDataContainers} from "./createMoistDataContainers";
-import axios from "axios";
+;
 import {getMoistMarkerChartData} from "../../../data/types/moist/getMoistMarkerChartData";
-import {logoFacebook} from "ionicons/icons";
+;
 
 interface SensorItem {
   id: string | number;

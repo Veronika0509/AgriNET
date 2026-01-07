@@ -58,7 +58,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
   // Add Comment
   const [fuelAddCommentModal, setFuelAddCommentModal] = useState<{ isOpen: boolean; date?: number; type?: string } | undefined>(undefined)
   const [isFuelCommentsShowed, setIsFuelCommentsShowed] = useState(false)
-  const [fuelComments, setFuelComments] = useState<FuelComment[]>();
+  const [fuelComments, _setFuelComments] = useState<FuelComment[]>();
   const [fuelAddCommentItemShowed, setFuelAddCommentItemShowed] = useState<boolean>(false)
   // Tabular Data
   const [fuelTabularData, setFuelTabularData] = useState<Record<string, unknown>[] | null>(null)
@@ -219,7 +219,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
               sensorId={props.sensorId}
               addCommentModal={new Date(fuelAddCommentModal.date)}
               setAddCommentModal={() => setFuelAddCommentModal(undefined)}
-              setAddCommentItemShowed={(item: string) => setFuelAddCommentItemShowed(true)}
+              setAddCommentItemShowed={(_item: string) => setFuelAddCommentItemShowed(true)}
           />}
           <TabularData
             type={'fuel'}

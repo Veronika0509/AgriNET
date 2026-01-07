@@ -1,6 +1,6 @@
 import s from "../style.module.css";
 import {IonButton, IonContent, IonModal, IonSpinner, IonText, IonTitle, useIonViewDidEnter} from "@ionic/react";
-import React, {useEffect, useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {getAutowaterData} from "../../../../data/types/moist/getAutowaterData";
 
 interface ValveData {

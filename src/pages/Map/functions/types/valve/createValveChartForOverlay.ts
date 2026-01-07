@@ -3,7 +3,6 @@ import * as am5xy from "@amcharts/amcharts5/xy";
 import * as am5radar from "@amcharts/amcharts5/radar";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import {getOptions} from "../../../data/getOptions";
-import login from "../../../../Login";
 import {checkOverlay} from "../../checkOverlay";
 
 export const createValveChartForOverlay = async (
@@ -160,7 +159,7 @@ export const createValveChartForOverlay = async (
   // Create and animate event hands
   if (chartData.events.length !== 0) {
     const options = await getOptions();
-    chartData.events.forEach((event: any, index: number) => {
+    chartData.events.forEach((event: any, _index: number) => {
       const colorValue = options.data[`valve-marker.colors.${event.status}`] || 0x962e40
       const color = typeof colorValue === 'string' ? parseInt(colorValue.replace('#', ''), 16) : colorValue
       const eventMinuteHand = createClockHand(color, 'event');

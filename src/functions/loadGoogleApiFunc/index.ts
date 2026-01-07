@@ -27,7 +27,7 @@ export const loadGoogleApi = (setLoaded: React.Dispatch<React.SetStateAction<boo
     script.onload = () => {
       setLoaded(true);
     };
-    script.onerror = (error) => {
+    script.onerror = (_error) => {
       // Silent error handling
     };
     

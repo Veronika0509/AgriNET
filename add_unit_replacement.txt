@@ -1,0 +1,23 @@
+      case "add":
+        return (
+          <AddUnitContainer
+            userId={props.userId}
+            siteList={props.siteList}
+            setSiteList={props.setSiteList}
+            selectedSiteForAddUnit={props.selectedSiteForAddUnit}
+            setSelectedSiteForAddUnit={props.setSelectedSiteForAddUnit}
+            setSelectedMoistureSensor={props.setSelectedMoistureSensor}
+            setPage={props.setPage}
+            isGoogleApiLoaded={props.isGoogleApiLoaded}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            setNavigationHistory={setNavigationHistory}
+            markers={markers}
+            setMarkers={setMarkers}
+            layers={layers}
+            setLayers={setLayers}
+            layerMapping={layerMapping}
+            setLayerMapping={setLayerMapping}
+            isLoadingLayers={isLoadingLayers}
+          />
+        )

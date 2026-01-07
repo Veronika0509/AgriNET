@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  IonAlert,
-  IonButton
+  IonAlert
 } from '@ionic/react';
 
 interface Sensor {

@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import s from "../../style.module.css";
 import {IonButton, IonIcon, IonInput, IonSegment, IonSegmentButton, useIonToast} from "@ionic/react";
-import {logoPwa, refreshOutline} from "ionicons/icons";
+import {refreshOutline} from "ionicons/icons";
 import DatetimeCalendar from "./components/DatetimeCalendar";
 import {getDatetime} from "./functions/getDatetime";
 import {updateChartsWithNewDatetime} from "./functions/updateChartsWithNewDatetime";

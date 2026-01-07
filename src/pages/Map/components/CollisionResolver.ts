@@ -1,22 +1,8 @@
 import type { OverlayItem } from '../types/OverlayItem';
-import {logoHackernews} from "ionicons/icons";
+;
 
-interface Bounds {
-  north: number;
-  south: number;
-  east: number;
-  west: number;
-}
 
-interface Position {
-  lat: () => number;
-  lng: () => number;
-}
 
-interface Offset {
-  x: number;
-  y: number;
-}
 
 interface CollisionData {
   overlapX: number;

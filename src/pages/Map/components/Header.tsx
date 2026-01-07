@@ -1,9 +1,7 @@
-import React, {useEffect} from 'react'
 import s from "../style.module.css";
 import {IonHeader, IonIcon, IonTitle, IonToolbar, IonButtons} from "@ionic/react";
 import {arrowBackOutline, menuOutline} from "ionicons/icons";
 import { useHistory } from 'react-router-dom';
-import { useAppContext } from '../../../context/AppContext';
 
 interface HeaderProps {
   isMarkerClicked: boolean;

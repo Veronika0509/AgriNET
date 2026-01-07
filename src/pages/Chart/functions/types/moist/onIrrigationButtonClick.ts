@@ -1,6 +1,5 @@
 import {getDatetime} from "../../../components/DateTimePicker/functions/getDatetime";
 import {updateMoistChartWithNewDates} from "./updateMoistChartWithNewDates";
-import {loadGoogleApi} from "../../../../../functions/loadGoogleApiFunc";
 import {getCurrentDatetime} from "../../../components/DateTimePicker/functions/getCurrentDatetime";
 import { TimeSeriesDataItem } from "../../../../../types/api";
 

@@ -1,0 +1,268 @@
+================================================================================
+GRAY MAP BUG - SEQUENCE DIAGRAM & EXECUTION FLOW
+================================================================================
+
+SCENARIO 1: User clicks site marker then back arrow (REPRODUCES BUG)
+================================================================================
+
+Timeline of Events:
+
+USER INTERACTION:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  [User on Map]  →  [Clicks Site Marker]  →  [Views Field Overlays]        │
+│                                                                             │
+│  State:                                                                     │
+│  - map: initialized google.maps.Map                                         │
+│  - secondMap: null                                                          │
+│  - activeTab: 'map'                                                         │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+EVENT: onSiteClick() triggered (onSiteClick.ts line 77)
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  setSecondMap(sensorsGroupData.name)  // Sets to STRING!                    │
+│                                                                             │
+│  State After:                                                               │
+│  - secondMap: "Site Name" (STRING, not Map)                                │
+│  - isMarkerClicked: true (from parent)                                      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+USER INTERACTION:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  [User in Field View]  →  [Clicks Back Arrow]                             │
+│                                                                             │
+│  Header.tsx back() function executes (line 19-22)                           │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CRITICAL SEQUENCE: Back button flow
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Step 1: Header.tsx back() called                                            │
+│         ├─ props.setIsMarkerClicked(false)    ✓ Works                       │
+│         └─ props.reloadMapPage()              ✓ Called                      │
+│                                                                             │
+│ Step 2: App.tsx reloadMapPage() executed                                    │
+│         ├─ const sites = await getSiteList()  ✓ API call                    │
+│         ├─ setSiteList(sites.data)            ✓ Updates list                │
+│         └─ setMapPageKey(prev => prev + 1)   ✓ Increment by 1              │
+│                                                                             │
+│ Step 3: React detects key change on Map component                           │
+│         ├─ Old key value: 0                                                 │
+│         └─ New key value: 1                   ← Different!                  │
+│                                                                             │
+│ Step 4: UNMOUNT OLD MAP COMPONENT  [CLEANUP SHOULD HAPPEN HERE]            │
+│         ├─ ❌ NO CLEANUP useEffect FOUND                                    │
+│         ├─ ❌ map state not disposed                                        │
+│         ├─ ❌ event listeners not removed                                   │
+│         │   ├─ window 'resize' listener REMAINS                             │
+│         │   ├─ map 'zoom_changed' listener REMAINS                          │
+│         │   └─ OLD DOM nodes still in memory                                │
+│         ├─ ❌ overlays not cleared                                          │
+│         │   ├─ moistOverlays not disposed                                   │
+│         │   ├─ fuelOverlays not disposed                                    │
+│         │   ├─ tempOverlays not disposed                                    │
+│         │   ├─ valveOverlays not disposed                                   │
+│         │   └─ extlOverlays not disposed                                    │
+│         ├─ ❌ mapRef.current still references old DOM                       │
+│         └─ ❌ old .gm-style divs still in DOM                               │
+│                                                                             │
+│ Step 5: MOUNT NEW MAP COMPONENT                                             │
+│         ├─ New state created:                                               │
+│         │   ├─ map: null                                                    │
+│         │   ├─ secondMap: null                                              │
+│         │   ├─ activeTab: 'map'                                             │
+│         │   └─ mapInitialized: false                                        │
+│         └─ useEffect for initialization triggers                            │
+│                                                                             │
+│ Step 6: MAP INITIALIZATION [RACE CONDITION]                                │
+│         │                                                                  │
+│         ├─ Synchronous execution:                                          │
+│         │  1. createMap(map=null, setMap, mapRef)  ← map is STILL null     │
+│         │     └─ Inside createMap: setMap(initMap) is called (ASYNC)       │
+│         │     └─ Returns immediately (doesn't wait)                        │
+│         │                                                                  │
+│         │  2. setMapInitialized(true)              ← NOW map=null          │
+│         │                                                                  │
+│         │  3. if (map && sites.data...) {  ← Check IMMEDIATELY             │
+│         │     ❌ map is STILL null (setState queued, not executed)         │
+│         │     ❌ CONDITION FAILS                                            │
+│         │     ❌ createSites() NEVER CALLED                                 │
+│         │     }                                                            │
+│         │                                                                  │
+│         └─ Asynchronous completion (later):                                 │
+│            └─ setMap() state update completes                              │
+│               └─ map now has value, but createSites() already passed       │
+│                                                                             │
+│ Step 7: MAP VISIBILITY TOGGLE [WRONG TARGETS]                              │
+│         │                                                                  │
+│         ├─ useEffect activeTab change detected                              │
+│         ├─ document.querySelectorAll('.gm-style')  ← Selects ALL maps      │
+│         │   └─ OLD map's .gm-style divs STILL IN DOM                       │
+│         │   └─ NEW map's .gm-style divs also selected                      │
+│         ├─ Sets visibility on BOTH old and new                              │
+│         │   ├─ Old map divs: visibility = 'visible'  (wrong!)              │
+│         │   └─ New map divs: visibility = 'visible'  (needed but too late) │
+│         └─ Both maps now have conflicting CSS states                        │
+│                                                                             │
+│ Step 8: USER SEES GRAY MAP                                                  │
+│         │                                                                  │
+│         └─ Causes:                                                         │
+│             ├─ New map initialized with corrupted DOM                       │
+│             ├─ Old listeners interfering with rendering                     │
+│             ├─ Old map divs obscuring new map                               │
+│             ├─ CSS visibility states conflicting                            │
+│             ├─ Sites never rendered (createSites was skipped)               │
+│             └─ Result: GRAY SCREEN                                          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+SCENARIO 2: Normal map navigation (USUALLY WORKS)
+================================================================================
+
+User stays on map, clicks different site markers (no back):
+
+[Map Init] → [Marker 1 Clicked] → [Marker 2 Clicked] → [Still on Map]
+
+Result: Usually works because:
+- Component doesn't unmount (key doesn't change)
+- secondMap state changes but no remount
+- No cleanup needed yet
+- Existing map instance reused
+- Issue hidden until back arrow forces remount
+
+
+DETAILED: Event Listener Bug Execution
+================================================================================
+
+useEffect at lines 1960-1980:
+
+Step 1: Define listener
+  const handleResize = () => { ... }  // FUNCTION OBJECT A
+
+Step 2: Add listener
+  window.addEventListener('resize', () => handleResize())
+  // NEW ARROW FUNCTION created here - let's call it FUNCTION OBJECT B
+  // B captures A, but B != A
+
+Step 3: Cleanup attempt
+  return () => {
+    window.removeEventListener('resize', handleResize)  // Using FUNCTION OBJECT A
+    // ❌ But the listener is registered for FUNCTION OBJECT B
+    // ❌ A and B are different object references
+    // ❌ removeEventListener looks for exact same reference
+    // ❌ Not found - FAILS silently
+    // ❌ Listener remains attached
+  }
+
+Each remount adds another orphaned listener:
+  First remount:  1 orphaned listener
+  Second remount: 2 orphaned listeners
+  Nth remount:    N orphaned listeners
+
+All firing on window resize events, interfering with map rendering!
+
+
+SCENARIO 3: Map Visibility State Conflict
+================================================================================
+
+Initial state:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ .gm-style divs: visibility = 'visible'                                      │
+│ User can see map normally                                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Back button triggers remount with concurrent state changes:
+
+Timeline:
+  t=0ms    Component unmounts (no cleanup)
+  t=1ms    Old .gm-style divs still in DOM, visibility = 'visible'
+  t=2ms    Component remounts
+  t=3ms    New map initialization begins
+  t=5ms    Visibility toggle effect runs
+  t=6ms    document.querySelectorAll('.gm-style') selects:
+           - OLD map divs (still in DOM from t=1ms)
+           - NEW map divs (partially initialized)
+  t=7ms    visibility = 'visible' set on both
+  t=8ms    Old map divs render on top of new map
+  t=10ms   Result: Gray/obscured map
+
+The fix would use:
+  mapRef.current?.style.visibility = 'visible'
+  // Only affects THIS map's container, not all .gm-style divs
+
+
+ISSUE DEPENDENCY GRAPH
+================================================================================
+
+                    ┌─────────────────────────┐
+                    │   Back Arrow Clicked    │
+                    │ (Header.tsx line 19-22) │
+                    └────────────┬────────────┘
+                                 │
+                                 v
+                    ┌─────────────────────────┐
+                    │  mapPageKey Incremented │
+                    │   (App.tsx line 81)     │
+                    └────────────┬────────────┘
+                                 │
+                                 v
+                    ┌─────────────────────────┐
+                    │  Map Component Unmounts │
+                    │   (React key change)    │
+                    └────────────┬────────────┘
+                                 │
+         ┌───────────────────────┼───────────────────────┐
+         │                       │                       │
+         v                       v                       v
+    ╔═════════════╗         ╔═════════════╗        ╔═════════════╗
+    ║ ISSUE #1    ║         ║ ISSUE #2    ║        ║ ISSUE #5    ║
+    ║ No Cleanup  ║         ║ Listeners   ║        ║ Visibility  ║
+    ║             ║         ║ Not Removed ║        ║ Selector    ║
+    ╚═════════════╝         ╚═════════════╝        ╚═════════════╝
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                                 v
+                    ┌─────────────────────────┐
+                    │ Map Component Remounts  │
+                    └────────────┬────────────┘
+                                 │
+         ┌───────────────────────┴───────────────────────┐
+         │                                               │
+         v                                               v
+    ╔═════════════╗                                  ╔═════════════╗
+    ║ ISSUE #4    ║                                  ║ ISSUE #3    ║
+    ║ Race Cond   ║                                  ║ Type Error  ║
+    ║ createSites ║                                  ║ secondMap   ║
+    ║ not called  ║                                  ║             ║
+    ╚═════════════╝                                  ╚═════════════╝
+         │                                               │
+         └───────────────────────┬───────────────────────┘
+                                 │
+                                 v
+                    ┌─────────────────────────┐
+                    │    MAP RENDERS GRAY     │
+                    │     NO CONSOLE ERRORS   │
+                    │    (Silent failure)     │
+                    └─────────────────────────┘
+
+
+STATUS MATRIX
+================================================================================
+
+Phase               | Component State | Map Instance | Event Listeners | DOM
+────────────────────┼─────────────────┼──────────────┼─────────────────┼──────
+Initial Load        | MOUNTED         | ✓ Created    | ✓ Clean         | ✓ OK
+Click Marker        | MOUNTED         | ✓ Exists     | ✓ Clean         | ✓ OK
+Back Arrow Click    | UNMOUNTING      | ❌ Not disposed | ❌ Leaked       | ❌ Dirty
+Back Arrow Effect   | UNMOUNTED       | ❌ Lost ref   | ❌ Orphaned      | ❌ Stale
+Remount Start       | REMOUNTING      | null         | ❌ Interfering  | ❌ Conflict
+Remount Complete    | MOUNTED         | null (race)  | ❌ Multiple     | ❌ Gray
+After Cleanup Fix   | MOUNTED         | ✓ New        | ✓ Clean         | ✓ Fresh
+
+================================================================================

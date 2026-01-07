@@ -1,6 +1,5 @@
-import {IonButton, IonButtons, IonContent, IonHeader, IonModal, IonText, IonToolbar} from "@ionic/react";
+import {IonButton, IonButtons, IonContent, IonHeader, IonModal, IonToolbar} from "@ionic/react";
 import s from "../../../../types/moist/style.module.css";
-import React, {useEffect} from "react";
 
 export const FuelModalTable = (props: any) => {
   const onFuelModalCancelClick = () => {

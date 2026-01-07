@@ -7,18 +7,18 @@ export const getSetAddCommentItemShowed = (
   setMoistMainAddCommentItemShowed: SetterFunction,
   setMoistSoilTempAddCommentItemShowed: SetterFunction,
   setMoistSumAddCommentItemShowed: SetterFunction,
-  setMoistBatteryAddCommentItemShowed: SetterFunction
+  _setMoistBatteryAddCommentItemShowed: SetterFunction
 ): ((item: string) => void) | undefined => {
   if (type === 'main') {
-    return (item: string) => setMoistMainAddCommentItemShowed(true)
+    return (_item: string) => setMoistMainAddCommentItemShowed(true)
   } else if (type === 'soilTemp') {
-    return (item: string) => setMoistSoilTempAddCommentItemShowed(true)
+    return (_item: string) => setMoistSoilTempAddCommentItemShowed(true)
   } else if (type === 'sum') {
-    return (item: string) => setMoistSumAddCommentItemShowed(true)
+    return (_item: string) => setMoistSumAddCommentItemShowed(true)
   } else if (type === 'battery') {
-    return (item: string) => setMoistBatteryAddCommentItemShowed(true)
+    return (_item: string) => undefined
   } else if (type === 'temp') {
-    return (item: string) => {} // temp is not used in moist charts, return noop
+    return (_item: string) => {} // temp is not used in moist charts, return noop
   }
   return undefined
 }

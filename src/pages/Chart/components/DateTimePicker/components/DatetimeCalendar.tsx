@@ -1,6 +1,5 @@
-import React, {useEffect} from 'react'
 import s from "../../../style.module.css";
-import {IonDatetime, IonDatetimeButton, IonLabel, IonModal, useIonAlert} from "@ionic/react";
+import {IonDatetime, IonDatetimeButton, IonLabel, IonModal} from "@ionic/react";
 import {getDatetime} from "../functions/getDatetime";
 
 interface DatetimeCalendarProps {
@@ -14,21 +13,6 @@ interface DatetimeCalendarProps {
 }
 
 const DatetimeCalendar = (props: DatetimeCalendarProps) => {
-  const [presentPurchaseAlert] = useIonAlert();
-
-  const showPurchaseRequest = () => {
-    presentPurchaseAlert({
-      header: 'Purchase Request',
-      message: 'This selection will place an order for equipment. Your dealer will contact you shortly. Thanks.',
-      buttons: [
-        {
-          text: 'THANKS',
-          role: 'confirm'
-        }
-      ]
-    });
-  };
-
   const handleDateChange = (event: CustomEvent) => {
     if (props.title === 'From') {
       props.setStartDate(event.detail.value);

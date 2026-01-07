@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { isPlatform, IonButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { isPlatform, IonButton } from '@ionic/react';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { Html5Qrcode } from 'html5-qrcode';
 import './QRCodeScanner.css';
@@ -18,11 +18,9 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   autoStart = false
 }) => {
   const [isScanning, setIsScanning] = useState(false);
-  const [isPermissionGranted, setIsPermissionGranted] = useState(false);
   const [shouldStartScan, setShouldStartScan] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
-  const scannerContainerRef = useRef<HTMLDivElement | null>(null);
   const scannerContainerId = 'html5-qrcode-scanner';
 
   const isMobile = isPlatform('ios') || isPlatform('android');
@@ -83,19 +81,16 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
       try {
         const status = await BarcodeScanner.checkPermission({ force: false });
         if (status.granted) {
-          setIsPermissionGranted(true);
           return true;
         }
 
         // If not granted, request permission
         const requestResult = await BarcodeScanner.checkPermission({ force: true });
         if (requestResult.granted) {
-          setIsPermissionGranted(true);
           return true;
         }
 
         // Permission denied
-        setIsPermissionGranted(false);
         onScanError('Camera permission is required to scan QR codes. Please enable camera permission in your device settings.');
         return false;
       } catch (error) {
@@ -186,7 +181,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
             onScanSuccess(decodedText);
           });
         },
-        (errorMessage) => {
+        (_errorMessage) => {
           // This is just a failure to decode, not a critical error
           // Silent - no need to log decode attempts
         }

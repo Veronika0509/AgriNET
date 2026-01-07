@@ -26,7 +26,7 @@ export const onRemoveTelOrEmailSubmit = async (
   }
 
   const disableSetpointFunc = () => {
-    new Promise<void>((resolve) => {
+    new Promise<void>((_resolve) => {
       const labelsToDisable: string[] = ['low', 'high'].filter(label => alarmData.data[`${label}Enabled`])
       labelsToDisable.map((labelToDisable: string) => {
         new Promise<boolean>((resolve) => {

@@ -1,5 +1,4 @@
 import axios from "axios";
-import type { LayersApiResponse } from "../../../types/api";
 
 export interface Layer {
   id: string;

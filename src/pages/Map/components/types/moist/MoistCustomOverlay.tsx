@@ -64,7 +64,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private currentSensorId: string | number
       private setCurrentSensorId: (id: string | number) => void
       private borderColor: string
-      private toUpdate: boolean
+      public toUpdate: boolean
 
       private div?: HTMLElement | null;
       private root: ReturnType<typeof createRoot> | null;

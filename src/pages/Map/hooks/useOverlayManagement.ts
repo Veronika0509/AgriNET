@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import type { OverlayItem } from '../types/OverlayItem';
 
-interface ChartDataContainer<T = unknown> {
-  [key: number]: T;
-}
 
 export const useOverlayManagement = () => {
   // Moist overlays

@@ -42,12 +42,6 @@ interface TempComment {
   id: string;
 }
 
-interface DataLabel {
-  label: string;
-  name: string;
-  tooltip: string;
-  metric: string;
-}
 
 interface ChartDataPoint {
   date: number;
@@ -74,7 +68,7 @@ export const createTempChart = (
   tempComments: TempComment[],
   updateCommentsArray: (type: string, data: TempComment) => void,
   userId: UserId,
-  sensorId: SensorId,
+  _sensorId: SensorId,
   isTempCommentsShowed: boolean,
 ) => {
   if (root.current) {
@@ -375,7 +369,7 @@ export const createTempChart = (
           })
 
           // Add a listener to ensure position doesn't change during animation
-          icon?.on("rotation", (rotation) => {
+          icon?.on("rotation", (_rotation) => {
             // Force the position to stay fixed during rotation
             icon.set("x", originalX)
             icon.set("y", originalY)
@@ -390,7 +384,7 @@ export const createTempChart = (
             new Date(xAxis.positionToValue(position)),
             "yyyy-MM-dd HH:mm",
           )
-          new Promise((resolve: any, reject: any) => {
+          new Promise((resolve: any, _reject: any) => {
             updateCommentDate(moistMainComment.id, newDate, userId, resolve)
           }).then(async () => {
             await updateCommentsArray("T", undefined as any)
@@ -499,13 +493,13 @@ export const createTempChart = (
               loops: Number.POSITIVE_INFINITY,
               easing: am5.ease.linear,
             })
-            icon?.on("rotation", (rotation) => {
+            icon?.on("rotation", (_rotation) => {
               icon.set("x", originalX)
               icon.set("y", originalY)
               icon.set("dx", 17)
               icon.set("dy", 7)
             })
-            new Promise((resolve: any, reject: any) => {
+            new Promise((resolve: any, _reject: any) => {
               removeComment(moistMainComment.id, userId, resolve)
             }).then(async () => {
               await updateCommentsArray("T", undefined as any)

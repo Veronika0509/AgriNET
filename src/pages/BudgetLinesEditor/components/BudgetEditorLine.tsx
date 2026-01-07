@@ -4,22 +4,7 @@ import {IonButton, useIonAlert} from "@ionic/react";
 import {getNewData} from "../functions/getNewData";
 import {updateChart} from "../functions/updateChart";
 import {updateBudgetLine} from "../functions/updateBudgetLine";
-
-interface BudgetLine {
-  value: number;
-  label: string;
-}
-
-interface ChartDataState {
-  data?: unknown[];
-  budgetLines?: BudgetLine[];
-}
-
-interface MoistOverlay {
-  setMap: (map: google.maps.Map | null) => void;
-  update: (sensorId: string) => void;
-  dispose?: () => void;
-}
+import type { ChartDataState, MoistOverlay } from '../types';
 
 interface BudgetEditorLineProps {
   chartData: ChartDataState;

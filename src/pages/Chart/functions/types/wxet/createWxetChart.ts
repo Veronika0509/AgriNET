@@ -1,7 +1,6 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
-import {logoHackernews} from "ionicons/icons";
 
 interface ChartDataItem {
   DateTime: string;
@@ -117,12 +116,12 @@ export const createWxetChart = (
 
     function createChartDataArray(lineLabel: string) {
       const data: Array<{ date: number; value: number }> = [];
-      const dataArray = lineLabel === 'forecastTemp' ? (nwsForecastData?.data || []) : chartData;
-      
+      const dataArray: any[] = lineLabel === 'forecastTemp' ? (nwsForecastData?.data || []) : chartData;
+
       dataArray.forEach((chartDataItem) => {
         let chartDate: number;
         let chartValue: number;
-        
+
         if (lineLabel === 'forecastTemp' && 'time' in chartDataItem) {
           chartDate = new Date(chartDataItem.time).getTime();
           chartValue = Number(chartDataItem.forecastTemp || 0);
@@ -132,7 +131,7 @@ export const createWxetChart = (
         } else {
           return; // Skip invalid items
         }
-        
+
         const chartData = createChartData(chartDate, chartValue);
         data.push(chartData);
       });

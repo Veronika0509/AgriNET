@@ -176,7 +176,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
     listOfSeries.map((seriesItem: SeriesItem, index: number) => {
       let count = 1
       for (let i = 0; i < props.additionalChartData.linesCount; i++) {
-        const name = props.additionalChartData.legend[`s${count}`]
+        const name = (props.additionalChartData.legend as Record<string, string>)[`s${count}`]
         let tooltip: am5.Tooltip | undefined
         if (seriesItem.name === "ordinarySeries") {
           tooltip = am5.Tooltip.new(props.root.current, {
@@ -404,7 +404,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           })
 
           // Add a listener to ensure position doesn't change during animation
-          icon?.on("rotation", (rotation) => {
+          icon?.on("rotation", (_rotation) => {
             // Force the position to stay fixed during rotation
             icon.set("x", originalX)
             icon.set("y", originalY)
@@ -528,7 +528,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
               loops: Number.POSITIVE_INFINITY,
               easing: am5.ease.linear,
             })
-            icon?.on("rotation", (rotation) => {
+            icon?.on("rotation", (_rotation) => {
               icon.set("x", originalX)
               icon.set("y", originalY)
               icon.set("dx", 17)

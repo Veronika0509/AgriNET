@@ -14,7 +14,7 @@ interface BudgetEditorTabProps {
 
 export const BudgetEditorTab: React.FC<BudgetEditorTabProps> = ({ siteList, userId, isGoogleApiLoaded }) => {
   const history = useHistory()
-  const { budgetEditorReturnPage, setBudgetEditorReturnPage, setPage, navigationHistory, popFromNavigationHistory, clearNavigationHistory } = useAppContext()
+  const { budgetEditorReturnPage, setBudgetEditorReturnPage, setPage, popFromNavigationHistory } = useAppContext()
 
   const handleBack = () => {
     const previousPage = popFromNavigationHistory()

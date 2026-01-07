@@ -13,7 +13,7 @@ import {
   IonTitle,
   IonToolbar
 } from "@ionic/react";
-import {download, logoFacebook} from "ionicons/icons";
+import {download} from "ionicons/icons";
 import React, {useEffect, useRef, useState} from "react";
 import {ExportDateTime} from "./components/ExportDateTime";
 import s from '../../style.module.css'

@@ -268,7 +268,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
             props.setSiteId,
             props.setSiteName,
             history as any,
-            bounds,
+            data[1] as any,
             false,
             data[0] as any,
             props.setChartPageType,

@@ -24,7 +24,6 @@ interface SetCommentModalParams {
   type: string;
 }
 
-type SetterFunction<T> = (value: T) => void;
 
 export const createFuelChart = (
   chartData: FuelChartDataItem[],
@@ -189,8 +188,8 @@ export const createFuelChart = (
         container.events.on("dragstop", function () {
           isContainerDragging = false
           cursor.set('behavior', 'zoomX')
-          const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
-          const newDate = root.current.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
+          // const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
+          // const newDate = root.current.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
           // new Promise((resolve: any) => {
           //   updateCommentDate(moistMainComment.id, newDate, props.userId, resolve)
           // }).then(() => {

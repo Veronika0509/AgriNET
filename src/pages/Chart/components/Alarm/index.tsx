@@ -3,7 +3,6 @@ import {
   IonContent,
   IonText
 } from "@ionic/react";
-import React from "react";
 import {AlarmItemTelOrEmail} from "./components/AlarmItemTelOrEmail";
 import {AlarmItemSetpoints} from "./components/AlarmItemSetpoints";
 
@@ -22,9 +21,9 @@ interface AlarmProps {
   emailOrTel3: string;
   setEmailOrTel3: (value: string) => void;
   lowSetpoint: number;
-  setLowSetpoint: (value: number) => void;
+  setLowSetpoint: (value: string | number) => void;
   highSetpoint: number;
-  setHighSetpoint: (value: number) => void;
+  setHighSetpoint: (value: string | number) => void;
   lowSelectedSensor: string;
   setLowSelectedSensor: (value: string) => void;
   highSelectedSensor: string;

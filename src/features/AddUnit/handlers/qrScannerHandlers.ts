@@ -1,4 +1,4 @@
-import type { Site, SiteId } from "../../../types"
+import type { Site } from "../../../types"
 
 export interface QRData {
   sensorId?: string

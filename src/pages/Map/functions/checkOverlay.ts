@@ -1,4 +1,4 @@
-import {logoFacebook} from "ionicons/icons";
+;
 
 interface Overlay {
   prefix: string;
@@ -9,7 +9,7 @@ interface Overlay {
 }
 
 export const checkOverlay = async (id: string, overlays: Overlay[]): Promise<void> => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     let attempts = 0
     const maxAttempts = 20 // Maximum number of attempts
     const checkInterval = 100 // milliseconds between checks

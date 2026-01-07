@@ -1,7 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import {TempTable} from "./components/types/temp/TempTable";
 import {onDataSet} from "./functions/onDataSet";
-import {ButtonAndSpinner} from "./components/ButtonAndSpinner";
 import {WxetModalTable} from "./components/types/wxet/WxetModalTable";
 import {MoistTable} from "./components/types/moist/MoistTable";
 import {FuelModalTable} from "./components/types/wxet/FuelModalTable";
@@ -11,7 +10,7 @@ interface DataItem {
   [key: string]: unknown;
 }
 
-interface TabularDataItem {
+export interface TabularDataItem {
   data: DataItem[];
   sensorCount?: number;
   label?: string;
@@ -34,12 +33,12 @@ interface TabularDataProps {
 export const TabularData: React.FC<TabularDataProps> = ({
                                                      type,
                                                      colors,
-                                                     sensorId,
+                                                     sensorId: _sensorId,
                                                      data,
                                                      setData,
-                                                     isLoading,
+                                                     isLoading: _isLoading,
                                                      setIsLoading,
-                                                     chartCode
+                                                     chartCode: _chartCode
                                                    }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 750);
   const [firstRowColor, setFirstRowColor] = useState<string | undefined>(undefined);

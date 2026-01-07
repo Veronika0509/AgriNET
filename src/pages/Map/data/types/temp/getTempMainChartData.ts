@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const getTempMainChartData = async (present: (options: { message: string; duration?: number; position?: string; color?: string }) => void, sensorId: string, userId: string | number, daysProp?: number, endDateProp?: string) => {
+export const getTempMainChartData = async (present: (options: { message: string; duration?: number; position?: string; color?: string }) => void, sensorId: string, userId: string | number, daysProp?: number, endDateProp?: string): Promise<any> => {
   const showErrorMessage = () => {
     present({
       message: 'Standby: Data is being re routed',

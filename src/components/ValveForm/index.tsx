@@ -9,11 +9,8 @@ import {
   IonItem,
   IonLabel,
   IonModal,
-  IonSelect,
-  IonSelectOption,
 } from "@ionic/react"
 import { addOutline, removeOutline } from "ionicons/icons"
-import { getDatetime } from "../../pages/Chart/components/DateTimePicker/functions/getDatetime"
 import './ValveForm.css'
 
 interface ValveFormProps {
@@ -64,7 +61,7 @@ const ValveForm: React.FC<ValveFormProps> = ({
     const [hours, minutes] = (initialValues.duration || '06:00').split(':').map(Number);
     return new Date(new Date().getTime() + (hours * 60 + minutes + 2) * 60 * 1000);
   });
-  const [timezone, setTimezone] = useState(initialValues.timezone || 'America/Los_Angeles');
+  const [timezone] = useState(initialValues.timezone || 'America/Los_Angeles');
   
   const stopDatetimeRef = useRef<HTMLIonDatetimeElement>(null);
 

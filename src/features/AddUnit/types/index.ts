@@ -35,28 +35,27 @@ export interface AddUnitTabProps {
 
   // Map state
   addUnitMap: google.maps.Map | null
-  crosshairMarker: google.maps.Marker | null
 
   // Props from parent
   userId: UserId
   siteList: Site[]
   setSiteList: React.Dispatch<React.SetStateAction<Site[]>>
   selectedSiteForAddUnit: string
-  setSelectedSiteForAddUnit: (site: string) => void
-  setSelectedMoistureSensor?: (sensor: any) => void
-  setPage: (page: number) => void
+  setSelectedSiteForAddUnit: React.Dispatch<React.SetStateAction<string>>
+  setSelectedMoistureSensor?: React.Dispatch<React.SetStateAction<any>>
+  setPage: React.Dispatch<React.SetStateAction<number>>
 
   // Form state from useAddUnitForm hook
   unitName: string
-  setUnitName: (value: string) => void
+  setUnitName: React.Dispatch<React.SetStateAction<string>>
   unitLatitude: string
-  setUnitLatitude: (value: string) => void
+  setUnitLatitude: React.Dispatch<React.SetStateAction<string>>
   unitLongitude: string
-  setUnitLongitude: (value: string) => void
+  setUnitLongitude: React.Dispatch<React.SetStateAction<string>>
   selectedSite: string
-  setSelectedSite: (value: string) => void
+  setSelectedSite: React.Dispatch<React.SetStateAction<string>>
   selectedSiteGroup: string
-  setSelectedSiteGroup: (value: string) => void
+  setSelectedSiteGroup: React.Dispatch<React.SetStateAction<string>>
   siteGroups: SiteGroup[]
   setSiteGroups: React.Dispatch<React.SetStateAction<SiteGroup[]>>
   siteGroupError: { invalidGroup: string; correctGroups: string[] } | null
@@ -64,64 +63,64 @@ export interface AddUnitTabProps {
     React.SetStateAction<{ invalidGroup: string; correctGroups: string[] } | null>
   >
   sensorPrefix: string
-  setSensorPrefix: (value: string) => void
+  setSensorPrefix: React.Dispatch<React.SetStateAction<string>>
   sensorId: string
-  setSensorId: (value: string) => void
+  setSensorId: React.Dispatch<React.SetStateAction<string>>
   selectedLayer: string
-  setSelectedLayer: (value: string) => void
+  setSelectedLayer: React.Dispatch<React.SetStateAction<string>>
   requestHardware: boolean
-  setRequestHardware: (value: boolean) => void
+  setRequestHardware: React.Dispatch<React.SetStateAction<boolean>>
   moistLevel: number | undefined
-  setMoistLevel: (value: number | undefined) => void
+  setMoistLevel: React.Dispatch<React.SetStateAction<number | undefined>>
   moistLevelError: boolean
-  setMoistLevelError: (value: boolean) => void
+  setMoistLevelError: React.Dispatch<React.SetStateAction<boolean>>
   formErrors: FormErrors
   setFormErrors: React.Dispatch<React.SetStateAction<FormErrors>>
   validateSensorId: (sensorId: string) => { isValid: boolean; message?: string }
   getAllSensorIds: () => Promise<string[]>
 
   // Layer state
-  layers: Array<Layer>
-  setLayers: React.Dispatch<React.SetStateAction<Array<Layer>>>
+  layers: Array<{ id: string; name: string; value: string }>
+  setLayers: React.Dispatch<React.SetStateAction<Array<{ id: string; name: string; value: string }>>>
   layerMapping: { [key: string]: string }
   setLayerMapping: React.Dispatch<React.SetStateAction<{ [key: string]: string }>>
   isLoadingLayers: boolean
 
   // QR Scanner state
   showQRScanner: boolean
-  setShowQRScanner: (value: boolean) => void
+  setShowQRScanner: React.Dispatch<React.SetStateAction<boolean>>
   isQRScanned: boolean
-  setIsQRScanned: (value: boolean) => void
+  setIsQRScanned: React.Dispatch<React.SetStateAction<boolean>>
   scannedSensorId: string
-  setScannedSensorId: (value: string) => void
+  setScannedSensorId: React.Dispatch<React.SetStateAction<string>>
   qrTimezone: string
-  setQrTimezone: (value: string) => void
+  setQrTimezone: React.Dispatch<React.SetStateAction<string>>
   qrCustomFields: { [key: string]: any }
-  setQrCustomFields: (value: { [key: string]: any }) => void
+  setQrCustomFields: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>
   qrBudgetLines: { [key: string]: any }
-  setQrBudgetLines: (value: { [key: string]: any }) => void
+  setQrBudgetLines: React.Dispatch<React.SetStateAction<{ [key: string]: any }>>
   qrRawMetric: number
-  setQrRawMetric: (value: number) => void
+  setQrRawMetric: React.Dispatch<React.SetStateAction<number>>
   qrDisplayMetric: number
-  setQrDisplayMetric: (value: number) => void
+  setQrDisplayMetric: React.Dispatch<React.SetStateAction<number>>
 
   // New layer config state
   newLayerConfigData: NewLayerConfigData | undefined
   setNewLayerConfigData: React.Dispatch<React.SetStateAction<NewLayerConfigData | undefined>>
   tempLayerName: string | undefined
-  setTempLayerName: (value: string | undefined) => void
+  setTempLayerName: React.Dispatch<React.SetStateAction<string | undefined>>
 
   // New layer modal state
   isNewLayerModalOpen: boolean
-  setIsNewLayerModalOpen: (value: boolean) => void
+  setIsNewLayerModalOpen: React.Dispatch<React.SetStateAction<boolean>>
   newLayerName: string
-  setNewLayerName: (value: string) => void
+  setNewLayerName: React.Dispatch<React.SetStateAction<string>>
   newLayerMarkerType: string
-  setNewLayerMarkerType: (value: string) => void
+  setNewLayerMarkerType: React.Dispatch<React.SetStateAction<string>>
   newLayerTable: string
-  setNewLayerTable: (value: string) => void
+  setNewLayerTable: React.Dispatch<React.SetStateAction<string>>
   newLayerColumn: string
-  setNewLayerColumn: (value: string) => void
+  setNewLayerColumn: React.Dispatch<React.SetStateAction<string>>
   handleFinishNewLayer: () => void
 
   // Markers state

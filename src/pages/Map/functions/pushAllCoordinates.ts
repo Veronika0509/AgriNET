@@ -1,4 +1,3 @@
-import {getSensorItems} from "@/pages/Map/data/getSensorItems";
 
 interface SensorItem {
   lat: number;
@@ -33,10 +32,10 @@ interface Coordinate {
 export const pushAllCoordinates = (
   sensorItem: SensorItem,
   allCoordinatesOfMarkers: Coordinate[],
-  siteList: Site[],
+  _siteList: Site[],
   setCoordinatesForFitting: (coords: Coordinate[]) => void,
   allSensorItems: Marker[],
-  siteName: string,
+  _siteName: string,
   type: string
 ): void => {
   const lat = sensorItem.lat

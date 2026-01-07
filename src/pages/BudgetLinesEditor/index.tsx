@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {IonButton, IonSelect, IonSelectOption, useIonAlert} from "@ionic/react";
 import {getFreshSiteList} from "./functions/getFreshSiteList";
 import {createBudgetChart} from "./functions/createBudgetChart";
@@ -14,42 +14,7 @@ import {updateSite} from "./functions/updateSite";
 import * as am5 from "@amcharts/amcharts5";
 
 import type { Site } from '../../types';
-
-interface BudgetLine {
-  value: number;
-  label: string;
-}
-
-interface ChartDataItem {
-  DateTime: string;
-  SumAve: number;
-  [key: string]: unknown;
-}
-
-interface ChartDataState {
-  data?: ChartDataItem[];
-  budgetLines?: BudgetLine[];
-}
-
-interface MoistSensor {
-  id: string | number;
-  layerName: string;
-  name: string;
-  sensorId: string;
-  mainId: string | number;
-  lat: number;
-  lng: number;
-  [key: string]: unknown;
-}
-
-interface MoistOverlay {
-  layerName: string;
-  chartData: MoistSensor;
-  setMap: (map: google.maps.Map | null) => void;
-  update: (sensorId: string) => void;
-  dispose?: () => void;
-  [key: string]: unknown;
-}
+import type { ChartDataState, MoistSensor, MoistOverlay } from './types';
 
 interface BudgetEditorProps {
   previousPage?: string;
@@ -169,7 +134,7 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
     }
   }, [moistSensors, map]);
   // create chart for overlays
-  useEffect(() => {
+  useEffect((): void | (() => void) => {
     if (moistOverlays.length !== 0) {
       const roots: am5.Root[] = [];
       moistOverlaysRef.current.forEach((moistOverlay) => {
@@ -178,7 +143,7 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
           createMoistChartForOverlay('b', overlayWithChart.chartData, roots, moistOverlaysRef.current as any)
         }
       });
-      return () => {
+      return (): void => {
         roots.forEach(root => root.dispose());
       };
     }
