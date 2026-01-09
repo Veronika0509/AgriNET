@@ -61,9 +61,6 @@ export const initializeExtlCustomOverlay = (isGoogleApiLoaded: boolean): any => 
           }
         }
 
-        console.log('[EXTL DEBUG ExtlCustomOverlay] chartType:', this.chartData.chartType);
-        console.log('[EXTL DEBUG ExtlCustomOverlay] extractedUrl:', extractedUrl);
-        console.log(extractedUrl)
         return (
           <a target='_blank' href={extractedUrl} className={s.overlay_extlOverlayWrapper} rel="noreferrer">
             <div className={s.overlay_extlOverlay}>

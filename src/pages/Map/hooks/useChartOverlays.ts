@@ -456,15 +456,11 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
   // EXTL Marker
   useEffect(() => {
     if (extlDataContainer.length !== 0) {
-      console.log('[EXTL DEBUG useChartOverlays] extlDataContainer:', extlDataContainer);
       extlDataContainer.map((data: ExtlDataContainerItem) => {
         const ExtlCustomOverlayExport = initializeExtlCustomOverlay(props.isGoogleApiLoaded)
         if (!ExtlCustomOverlayExport) return
 
         const extlItem: ExtlSensorData = data[0]
-        console.log('[EXTL DEBUG useChartOverlays] extlItem:', extlItem);
-        console.log('[EXTL DEBUG useChartOverlays] extlItem ALL KEYS:', Object.keys(extlItem));
-        console.log('[EXTL DEBUG useChartOverlays] extlItem FULL:', JSON.stringify(extlItem, null, 2));
 
         // Create proper google.maps.LatLngBounds from plain object
         const boundsObj = data[1] as any
@@ -484,7 +480,6 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           sensorId: extlItem.sensorId,
           mainId: extlItem.mainId,
         }
-        console.log('[EXTL DEBUG useChartOverlays] extlChartData:', extlChartData);
 
         const overlay = new ExtlCustomOverlayExport(bounds, extlChartData as any)
         if (overlay) {

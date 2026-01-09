@@ -250,7 +250,6 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
           overlay.setMap(map);
         }
       } else if (sensorItem.markerType === 'extl' || sensorItem.markerType === 'graphic') {
-        console.log('[EXTL DEBUG] sensorItem data:', sensorItem);
         const ExtlCustomOverlayExport = initializeExtlCustomOverlay(isGoogleApiLoaded);
         if (ExtlCustomOverlayExport) {
           // Create LatLngBounds for overlay position
@@ -269,7 +268,6 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
             height: sensorItem.height,
             sensorId: sensorItem.sensorId
           };
-          console.log('[EXTL DEBUG] extlChartData:', extlChartData);
           
           overlay = new ExtlCustomOverlayExport(
             bounds,
