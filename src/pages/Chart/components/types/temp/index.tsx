@@ -49,12 +49,12 @@ export const TempChartPage = (props: any) => {
   })
   const [nwsForecast, setNwsForecast] = useState(false)
   const [nwsForecastDays, setNwsForecastDays] = useState(1)
-  const [nwsForecastData, setNwsForecastData] = useState(undefined)
+  const [nwsForecastData, setNwsForecastData] = useState<any>(null)
   const [presentToast] = useIonToast();
 
   // Wrapper to adapt async toast to sync signature
-  const present = (options: { message: string; duration?: number; position?: 'top' | 'bottom' | 'middle'; color?: string }) => {
-    void presentToast(options);
+  const present = (options: { message: string; duration?: number; position?: string; color?: string }) => {
+    void (presentToast as any)(options);
   };
 
   const [tempTabularData, setTempTabularData] = useState<any>(null)
@@ -87,7 +87,7 @@ export const TempChartPage = (props: any) => {
         setTempAddCommentModal,
         tempAddCommentItemShowed === 'comments' ? false : tempAddCommentItemShowed,
         comments.data,
-        updateCommentsArray,
+        updateCommentsArray as any,
         props.userId,
         props.sensorId,
         isTempCommentsShowed
@@ -98,17 +98,17 @@ export const TempChartPage = (props: any) => {
         newChartData = await getNwsForecastData(props.sensorId, props.userId, nwsForecastDays)
         setNwsForecastData(newChartData.data[0])
       } else {
-        setNwsForecastData(undefined)
+        setNwsForecastData(null)
       }
       createTempChart(
         currentChartData,
         root,
         props.isMobile,
         props.additionalChartData,
-        nwsForecast ? newChartData.data[0] : undefined,
+        nwsForecast ? newChartData.data[0] : null,
         setTempAddCommentModal,
         tempAddCommentItemShowed,
-        tempComments,
+        tempComments ?? [],
         updateCommentsArray,
         props.userId,
         props.sensorId,
@@ -245,7 +245,7 @@ export const TempChartPage = (props: any) => {
             setCurrentDates={setCurrentDates}
             setNwsForecast={setNwsForecast}
             nwsForecastDays={nwsForecastDays}
-            setNwsForecastDays={setNwsForecastDays}
+            setNwsForecastDays={setNwsForecastDays as any}
             setAlarm={props.setAlarm}
             isCommentsShowed={isTempCommentsShowed}
             setIsCommentsShowed={setIsTempCommentsShowed}

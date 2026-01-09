@@ -1,10 +1,12 @@
 import {formatDate} from "../../Chart/functions/formatDate";
 import {getSumChartData} from "../../Chart/data/types/moist/getSumChartData";
+import type { Dispatch, SetStateAction } from "react";
+import type { ChartDataState } from "../types";
 
 export const getNewData = async (
   currentAmountOfDays: number,
   currentSensorId: string | undefined,
-  setChartData: (data: unknown) => void,
+  setChartData: Dispatch<SetStateAction<ChartDataState>>,
   setDataExists: (exists: boolean) => void,
   sensorId?: string
 ) => {

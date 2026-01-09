@@ -87,19 +87,21 @@ export const handleJSONQRData = (data: QRData, siteList: Site[], handlers: QRSca
   if (data.siteName || data.site) {
     const qrSiteName = data.siteName || data.site
 
-    const siteExists = siteList.some((site) => site.name.toLowerCase() === qrSiteName.toLowerCase())
+    if (qrSiteName) {
+      const siteExists = siteList.some((site) => site.name.toLowerCase() === qrSiteName.toLowerCase())
 
-    if (siteExists) {
-      handlers.setSelectedSite(qrSiteName)
-      handlers.setSelectedSiteForAddUnit(qrSiteName)
+      if (siteExists) {
+        handlers.setSelectedSite(qrSiteName)
+        handlers.setSelectedSiteForAddUnit(qrSiteName)
 
-      const site = siteList.find((s) => s.name.toLowerCase() === qrSiteName.toLowerCase())
-      if (site && site.lat && site.lng) {
-        handlers.setUnitLatitude(String(site.lat))
-        handlers.setUnitLongitude(String(site.lng))
+        const site = siteList.find((s) => s.name.toLowerCase() === qrSiteName.toLowerCase())
+        if (site && site.lat && site.lng) {
+          handlers.setUnitLatitude(String(site.lat))
+          handlers.setUnitLongitude(String(site.lng))
+        }
+      } else {
+        handlers.handleCreateNewSite(qrSiteName)
       }
-    } else {
-      handlers.handleCreateNewSite(qrSiteName)
     }
   }
 
@@ -123,8 +125,10 @@ export const handleJSONQRData = (data: QRData, siteList: Site[], handlers: QRSca
   // Set layer from JSON data
   if (data.locall || data.local) {
     const layerValue = data.locall || data.local
-    const capitalizedLayer = layerValue.charAt(0).toUpperCase() + layerValue.slice(1).toLowerCase()
-    handlers.setSelectedLayer(capitalizedLayer)
+    if (layerValue) {
+      const capitalizedLayer = layerValue.charAt(0).toUpperCase() + layerValue.slice(1).toLowerCase()
+      handlers.setSelectedLayer(capitalizedLayer)
+    }
   }
 }
 

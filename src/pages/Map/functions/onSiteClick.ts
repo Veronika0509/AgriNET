@@ -108,9 +108,11 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   const valveInvalidChartData: unknown[] = []
   const countValve: Marker[] = []
 
+  console.log('[EXTL DEBUG onSiteClick] All sensor items:', allSensorItems);
   props.siteList.map((site: SiteWithLayers) => {
     if (site.name === props.groupMarker.title) {
       allSensorItems.map((sensItem: any) => {
+        console.log('[EXTL DEBUG onSiteClick] Sensor item:', sensItem, 'markerType:', sensItem.markerType);
         if (sensItem.markerType === 'moist-fuel') {
           if (!countMoistFuel.some((item: Marker) => item.id === sensItem.id)) {
             countMoistFuel.push(sensItem)
@@ -127,7 +129,8 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
           if (!countValve.some((item: Marker) => item.id === sensItem.id)) {
             countValve.push(sensItem)
           }
-        } else if (sensItem.markerType === 'extl') {
+        } else if (sensItem.markerType === 'graphic' || sensItem.markerType === 'extl') {
+          console.log('[EXTL DEBUG onSiteClick] Found EXTL marker!', sensItem);
           if (!countExtl.some((item: Marker) => item.id === sensItem.id)) {
             countExtl.push(sensItem)
           }
@@ -182,14 +185,14 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   }
   countMoistFuel.length !== 0 && countMoistFuel.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
-    const layer: string = getLayerName(marker.id)
+    const layer: string = getLayerName(marker.id) as any
     createMoistMarker(
       props.moistChartsAmount as any,
       marker as any,
       props.page as number,
       props.userId,
-      props.setInvalidMoistChartDataContainer,
-      props.setMoistChartDataContainer,
+      props.setInvalidMoistChartDataContainer as any,
+      props.setMoistChartDataContainer as any,
       moistId,
       moistInvalidChartData,
       moistChartData,
@@ -234,7 +237,9 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       'WXET'
     )
   })
+  console.log('[EXTL DEBUG onSiteClick] countExtl:', countExtl);
   countExtl.length !== 0 && countExtl.map((marker: Marker) => {
+    console.log('[EXTL DEBUG onSiteClick] Creating EXTL marker:', marker);
     props.setAmountOfSensors(props.amountOfSensors += 1)
     const layer: string = getLayerName(marker.id)
     createExtlMarker(

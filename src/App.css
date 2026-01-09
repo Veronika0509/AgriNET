@@ -68,3 +68,17 @@ p, h1, h2, h3, h4, h5, h6, div, img, a, button {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
+
+/* Fix header visibility issue */
+ion-page {
+  display: flex;
+  flex-direction: column;
+}
+
+ion-header {
+  flex-shrink: 0;
+}
+
+ion-content {
+  flex: 1;
+}

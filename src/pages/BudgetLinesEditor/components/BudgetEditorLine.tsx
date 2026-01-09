@@ -12,7 +12,7 @@ interface BudgetEditorLineProps {
   currentSensorId: string | undefined;
   userId: number;
   currentAmountOfDays: number;
-  setChartData: (data: unknown) => void;
+  setChartData: Dispatch<SetStateAction<ChartDataState>>;
   setDataExists: (exists: boolean) => void;
   moistOverlays: MoistOverlay[];
   setMoistOverlays: Dispatch<SetStateAction<MoistOverlay[]>>;
@@ -109,7 +109,7 @@ function BudgetEditorLine(props: BudgetEditorLineProps) {
             props.setChartData,
             props.setDataExists
           )
-          updateChart(props.currentSensorId, props.userId, props.moistOverlays, props.setMoistOverlays, props.moistOverlaysRef)
+          updateChart(props.currentSensorId, props.userId, props.moistOverlays, props.setMoistOverlays as any, props.moistOverlaysRef)
         })
         .catch(error => {
           presentErrorAlert({

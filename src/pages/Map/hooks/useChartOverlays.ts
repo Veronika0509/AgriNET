@@ -389,11 +389,11 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           chartData[1] as any,
           true,
           chartData[0] as any,
-          props.setChartData,
-          props.setPage,
-          props.setSiteId,
-          props.setSiteName,
-          props.setChartPageType,
+          props.setChartData as any,
+          props.setPage as any,
+          props.setSiteId as any,
+          props.setSiteName as any,
+          props.setChartPageType as any,
           history,
           isValveMarkerChartDrawn,
           setValveOverlays as any,
@@ -418,11 +418,11 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           chartData[1] as any,
           false,
           chartData[0] as any,
-          props.setChartData,
-          props.setPage,
-          props.setSiteId,
-          props.setSiteName,
-          props.setChartPageType,
+          props.setChartData as any,
+          props.setPage as any,
+          props.setSiteId as any,
+          props.setSiteName as any,
+          props.setChartPageType as any,
           history,
           isValveMarkerChartDrawn,
           setValveOverlays as any,
@@ -456,25 +456,37 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
   // EXTL Marker
   useEffect(() => {
     if (extlDataContainer.length !== 0) {
+      console.log('[EXTL DEBUG useChartOverlays] extlDataContainer:', extlDataContainer);
       extlDataContainer.map((data: ExtlDataContainerItem) => {
         const ExtlCustomOverlayExport = initializeExtlCustomOverlay(props.isGoogleApiLoaded)
         if (!ExtlCustomOverlayExport) return
 
         const extlItem: ExtlSensorData = data[0]
+        console.log('[EXTL DEBUG useChartOverlays] extlItem:', extlItem);
+        console.log('[EXTL DEBUG useChartOverlays] extlItem ALL KEYS:', Object.keys(extlItem));
+        console.log('[EXTL DEBUG useChartOverlays] extlItem FULL:', JSON.stringify(extlItem, null, 2));
+
+        // Create proper google.maps.LatLngBounds from plain object
+        const boundsObj = data[1] as any
+        const bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(boundsObj.south, boundsObj.west),
+          new google.maps.LatLng(boundsObj.north, boundsObj.east)
+        )
 
         const extlChartData = {
           id: extlItem.sensorId,
           layerName: "EXTL",
           name: extlItem.name || `Sensor ${extlItem.sensorId}`,
           graphic: extlItem.graphic,
-          chartType: "default",
+          chartType: extlItem.chartType || "default",
           width: extlItem.width,
           height: extlItem.height,
           sensorId: extlItem.sensorId,
           mainId: extlItem.mainId,
         }
+        console.log('[EXTL DEBUG useChartOverlays] extlChartData:', extlChartData);
 
-        const overlay = new ExtlCustomOverlayExport(data[1] as any, extlChartData as any)
+        const overlay = new ExtlCustomOverlayExport(bounds, extlChartData as any)
         if (overlay) {
           React.startTransition(() => {
             addOverlayToOverlaysArray(overlay as any, props.setActiveOverlays, props.map)

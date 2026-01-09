@@ -94,7 +94,10 @@ export const createAdditionalChart = (
     }
     (root as any).current = am5.Root.new(divId);
 
-    const myTheme = am5.Theme.new(root.current);
+    // After creating the root, it will never be null
+    const rootInstance = root.current!;
+
+    const myTheme = am5.Theme.new(rootInstance);
 
     myTheme.rule("AxisLabel", ["minor"]).setAll({
       dy: 1
@@ -109,37 +112,37 @@ export const createAdditionalChart = (
     });
 
 // Set themes
-    root.current.setThemes([
-      am5themes_Animated.new(root.current),
+    rootInstance.setThemes([
+      am5themes_Animated.new(rootInstance),
       myTheme
     ]);
 
     // Create chart
-    const chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
+    const chart = rootInstance.container.children.push(am5xy.XYChart.new(rootInstance, {
       wheelY: "zoomX",
       maxTooltipDistance: undefined,
       paddingLeft: 0
     }));
 
 // Create axes
-    const xAxis = chart.xAxes.push(am5xy.DateAxis.new(root.current, {
+    const xAxis = chart.xAxes.push(am5xy.DateAxis.new(rootInstance, {
       maxDeviation: 0.2,
       baseInterval: {
         timeUnit: "minute",
         count: 20
       },
-      renderer: am5xy.AxisRendererX.new(root.current, {
+      renderer: am5xy.AxisRendererX.new(rootInstance, {
         opposite: true,
         minorGridEnabled: true
       })
     }));
 
-    const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
-      renderer: am5xy.AxisRendererY.new(root.current, {})
+    const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(rootInstance, {
+      renderer: am5xy.AxisRendererY.new(rootInstance, {})
     }));
 
 // Add series
-    let series: am5xy.SmoothedXLineSeries
+    let series: am5xy.SmoothedXLineSeries | undefined
     if (chartType === 'sum') {
       function createSumChartData(chartDate: number, chartCount: number): ChartDataPoint {
         return {
@@ -174,13 +177,13 @@ export const createAdditionalChart = (
       }
 
       listOfSeries.map((seriesItem: SeriesItem, index: number) => {
-        series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
+        series = chart.series.push(am5xy.SmoothedXLineSeries.new(rootInstance, {
           xAxis: xAxis,
           yAxis: yAxis,
           valueYField: "value",
           valueXField: "date",
           tension: 0.5,
-          tooltip: seriesItem.name === 'ordinarySeries' ? am5.Tooltip.new(root.current, {
+          tooltip: seriesItem.name === 'ordinarySeries' ? am5.Tooltip.new(rootInstance, {
             pointerOrientation: "horizontal",
             labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + "Sum Average = {value}%"
           }) : undefined,
@@ -236,7 +239,7 @@ export const createAdditionalChart = (
         for (let i = 0; i < linesCount; i++) {
           const name = count + ' inch';
           const metricSign: '°F' | '°C' = metric === 'AMERICA' ? '°F' : '°C'
-          series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
+          series = chart.series.push(am5xy.SmoothedXLineSeries.new(rootInstance, {
             name: name,
             xAxis: xAxis,
             yAxis: yAxis,
@@ -244,7 +247,7 @@ export const createAdditionalChart = (
             valueXField: "date",
             legendValueText: "{valueY}",
             tension: 0.5,
-            tooltip: am5.Tooltip.new(root.current, {
+            tooltip: am5.Tooltip.new(rootInstance, {
               pointerOrientation: "horizontal",
               labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + " - {value} " + metricSign
             }),
@@ -290,7 +293,7 @@ export const createAdditionalChart = (
         return data;
       }
 
-      series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
+      series = chart.series.push(am5xy.SmoothedXLineSeries.new(rootInstance, {
         name: 'Battery',
         xAxis: xAxis,
         yAxis: yAxis,
@@ -298,7 +301,7 @@ export const createAdditionalChart = (
         valueXField: "date",
         legendValueText: "{valueY}",
         tension: 0.5,
-        tooltip: am5.Tooltip.new(root.current, {
+        tooltip: am5.Tooltip.new(rootInstance, {
           pointerOrientation: "horizontal",
           labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + 'Battery = ' + '{value}' + ' VDC'
         }),
@@ -316,7 +319,7 @@ export const createAdditionalChart = (
       series.appear();
     }
 
-    if (chartType === 'sum') {
+    if (chartType === 'sum' && series) {
 // Inside
       // Lines
       if (historicMode) {
@@ -324,14 +327,14 @@ export const createAdditionalChart = (
           value: new Date().getTime()
         });
         series.createAxisRange(seriesRangeDataItem);
-        seriesRangeDataItem.get("grid").setAll({
+        seriesRangeDataItem.get("grid")?.setAll({
           visible: true,
           stroke: am5.color(0xd445d2),
           strokeWidth: 5,
           strokeOpacity: 1,
           strokeDasharray: [2, 2],
         });
-        seriesRangeDataItem.get('label').setAll({
+        seriesRangeDataItem.get('label')?.setAll({
           text: "NOW",
           inside: true,
           visible: true,
@@ -346,7 +349,7 @@ export const createAdditionalChart = (
           value: budgetLine2.value
         });
         series.createAxisRange(seriesRangeDataItem);
-        seriesRangeDataItem.get("grid").setAll({
+        seriesRangeDataItem.get("grid")?.setAll({
           strokeOpacity: 1,
           visible: true,
           stroke: am5.color(0xCC0000),
@@ -355,7 +358,7 @@ export const createAdditionalChart = (
         seriesRangeDataItem.get("label")?.setAll({
           text: budgetLine2.label || '',
           fill: am5.color(0x000000),
-          background: am5.RoundedRectangle.new(root.current, {
+          background: am5.RoundedRectangle.new(rootInstance, {
             fill: am5.color(0xffffff)
           }),
           inside: true,
@@ -372,7 +375,7 @@ export const createAdditionalChart = (
           value: budgetLine3.value
         });
         series.createAxisRange(seriesRangeDataItem);
-        seriesRangeDataItem.get("grid").setAll({
+        seriesRangeDataItem.get("grid")?.setAll({
           strokeOpacity: 1,
           visible: true,
           stroke: am5.color(0xCCCC00),
@@ -381,7 +384,7 @@ export const createAdditionalChart = (
         seriesRangeDataItem.get("label")?.setAll({
           text: budgetLine3.label || '',
           fill: am5.color(0x000000),
-          background: am5.RoundedRectangle.new(root.current, {
+          background: am5.RoundedRectangle.new(rootInstance, {
             fill: am5.color(0xffffff)
           }),
           inside: true,
@@ -400,13 +403,13 @@ export const createAdditionalChart = (
     endValue: 100
   });
   series.createAxisRange(topBudgetRegion);
-  topBudgetRegion.get("grid").setAll({
+  topBudgetRegion.get("grid")?.setAll({
     strokeOpacity: 1,
     visible: true,
     stroke: am5.color(0xCCCC00),
     strokeDasharray: [4, 4]
   });
-  topBudgetRegion.get("axisFill").setAll({
+  topBudgetRegion.get("axisFill")?.setAll({
     fill: am5.color(0x02c5fd),
     fillOpacity: 0.2,
     visible: true
@@ -414,7 +417,7 @@ export const createAdditionalChart = (
       topBudgetRegion.get("label")?.setAll({
         text: budgetLine1 ? budgetLine1.label || '' : '',
         fill: am5.color(0x000000),
-        background: am5.RoundedRectangle.new(root.current, {
+        background: am5.RoundedRectangle.new(rootInstance, {
           fill: am5.color(0xffffff)
         }),
         location: 0,
@@ -431,13 +434,13 @@ export const createAdditionalChart = (
         endValue: budgetLine4 && typeof budgetLine4.value === 'number' ? budgetLine4.value : 0
       });
       series.createAxisRange(middleBudgetRegion);
-      middleBudgetRegion.get("grid").setAll({
+      middleBudgetRegion.get("grid")?.setAll({
         strokeOpacity: 1,
         visible: true,
         stroke: am5.color(0xCC0000),
         strokeDasharray: [4, 4]
       });
-      middleBudgetRegion.get("axisFill").setAll({
+      middleBudgetRegion.get("axisFill")?.setAll({
         fill: am5.color(0x08f908),
         fillOpacity: 0.2,
         visible: true
@@ -448,13 +451,13 @@ export const createAdditionalChart = (
         endValue: 0
       });
       series.createAxisRange(bottomBudgetRegion);
-      bottomBudgetRegion.get("grid").setAll({
+      bottomBudgetRegion.get("grid")?.setAll({
         strokeOpacity: 1,
         visible: true,
         stroke: am5.color(0xCCCC00),
         strokeDasharray: [4, 4]
       });
-      bottomBudgetRegion.get("axisFill").setAll({
+      bottomBudgetRegion.get("axisFill")?.setAll({
         fill: am5.color(0xf6363b),
         fillOpacity: 0.2,
         visible: true
@@ -462,7 +465,7 @@ export const createAdditionalChart = (
       bottomBudgetRegion.get("label")?.setAll({
         text: budgetLine4 ? budgetLine4.label || '' : '',
         fill: am5.color(0x000000),
-        background: am5.RoundedRectangle.new(root.current, {
+        background: am5.RoundedRectangle.new(rootInstance, {
           fill: am5.color(0xffffff)
         }),
         location: 0,
@@ -475,7 +478,7 @@ export const createAdditionalChart = (
     }
 
     // Add cursor
-    const cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
+    const cursor = chart.set("cursor", am5xy.XYCursor.new(rootInstance, {
       behavior: "zoomX",
       xAxis: xAxis,
     }));
@@ -530,18 +533,18 @@ export const createAdditionalChart = (
         const rangeDataItem = xAxis.makeDataItem({})
         xAxis.createAxisRange(rangeDataItem)
         let isContainerDragging: boolean = false
-        const container = am5.Container.new(root.current, {
+        const container = am5.Container.new(rootInstance, {
           centerX: am5.p50,
           draggable: true,
-          layout: root.current!.verticalLayout,
+          layout: rootInstance.verticalLayout,
           dy: 4,
         })
         container.adapters.add("y", function () {
           return 0
-        })
+        } as any)
         container.adapters.add("x", function (x: number | null | undefined) {
           return Math.max(0, Math.min(chart.plotContainer.width(), x || 0))
-        })
+        } as any)
         container.events.on("pointerdown", function () {
           container.set('draggable', isContainerDragging)
         })
@@ -578,7 +581,7 @@ export const createAdditionalChart = (
           isContainerDragging = false
           cursor.set('behavior', 'zoomX')
           const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
-          const newDate = root.current!.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
+          const newDate = rootInstance.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
           new Promise<void>((resolve: () => void) => {
             updateCommentDate(moistMainComment.id, newDate, userId.toString(), resolve)
           }).then(async () => {
@@ -591,20 +594,20 @@ export const createAdditionalChart = (
         xAxis.topGridContainer.children.push(container)
         rangeDataItem.set(
           "bullet",
-          am5xy.AxisBullet.new(root.current, {
+          am5xy.AxisBullet.new(rootInstance, {
             sprite: container,
           })
         )
-        rangeDataItem.get("grid").setAll({
+        rangeDataItem.get("grid")?.setAll({
           strokeOpacity: 1,
           visible: true,
           stroke: am5.color(commentColor),
           strokeWidth: 6,
           location: 0,
         })
-        container.set("background", am5.RoundedRectangle.new(root.current, {fill: am5.color(commentColor)}))
+        container.set("background", am5.RoundedRectangle.new(rootInstance, {fill: am5.color(commentColor)}))
         const label = container.children.push(
-          am5.Label.new(root.current, {
+          am5.Label.new(rootInstance, {
             text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[(moistMainComment.color_id as number) - 1]}\n` : ''}${moistMainComment.text}`,
             fill: am5.color(0x000000),
             maxWidth: 150,
@@ -619,25 +622,25 @@ export const createAdditionalChart = (
         );
 
         labelsArray.push(label);
-        const buttonsContainer = label.children.push(am5.Container.new(root.current, {
-          layout: root.current.horizontalLayout,
+        const buttonsContainer = label.children.push(am5.Container.new(rootInstance, {
+          layout: rootInstance.horizontalLayout,
           x: am5.p100,
           y: 0,
           centerX: am5.p100,
           paddingTop: 3,
           paddingRight: 3,
         }));
-        const dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        const dragButton = buttonsContainer.children.push(am5.Button.new(rootInstance, {
           width: 20,
           height: 20,
           cursorOverStyle: "ew-resize",
-          background: am5.Rectangle.new(root.current, {
+          background: am5.Rectangle.new(rootInstance, {
             fill: am5.color(0xffffff),
             fillOpacity: 0,
           }),
           dx: -20
         }));
-        dragButton.children.push(am5.Picture.new(root.current, {
+        dragButton.children.push(am5.Picture.new(rootInstance, {
           src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
           width: 12,
           height: 12,
@@ -648,16 +651,16 @@ export const createAdditionalChart = (
         dragButton.events.on('pointerdown', () => {
           isContainerDragging = true
         })
-        const closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        const closeButton = buttonsContainer.children.push(am5.Button.new(rootInstance, {
           width: 20,
           height: 20,
           cursorOverStyle: "pointer",
-          background: am5.Rectangle.new(root.current, {
+          background: am5.Rectangle.new(rootInstance, {
             fill: am5.color(0xffffff),
             fillOpacity: 0,
           }),
         }));
-        closeButton.children.push(am5.Picture.new(root.current, {
+        closeButton.children.push(am5.Picture.new(rootInstance, {
           src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
           width: 12,
           height: 12,
@@ -704,7 +707,7 @@ export const createAdditionalChart = (
             value = xAxis.positionToValue(position)
           }
 
-          label.set("text", `${root.current!.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[(moistMainComment.color_id as number) - 1]}\n` : ''}${moistMainComment.text}`)
+          label.set("text", `${rootInstance.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[(moistMainComment.color_id as number) - 1]}\n` : ''}${moistMainComment.text}`)
 
           rangeDataItem.set("value", value)
         }
@@ -767,8 +770,8 @@ export const createAdditionalChart = (
             y1 + h1 < y2 || y2 + h2 < y1);
         }
 
-        root.current.events.on("frameended", positionLabels)
-        series.events.on("datavalidated", () => {
+        rootInstance.events.on("frameended", positionLabels)
+        series?.events.on("datavalidated", () => {
           const commentDate = new Date(moistMainComment.key as string).getTime()
           rangeDataItem.set("value", commentDate)
           updateLabel(commentDate)

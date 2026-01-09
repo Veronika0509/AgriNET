@@ -32,7 +32,7 @@ export const MoistTable: React.FC<moistTableProps> = ({type, data, colors, first
       </tr>
       </thead>
       <tbody className={s.mainTabularDataTableTbody}>
-      {data.data.map((row: any, index: number) => (
+      {data.data?.map((row: any, index: number) => (
         <tr key={index} className={`${s.mainTabularDataTableTr} ${type === 'moistSoilTemp' && s.mainMoistSoilTempTabularDataTableTr}`}>
           <td className={`${s.mainTabularDataTableTd} ${type === 'moistSoilTemp' && s.mainMoistSoilTempTabularDataTableTd} ${
             (index === 0 &&

@@ -1,11 +1,19 @@
 import {setDays} from "./setDays";
 import s from '../../Map/style.module.css'
+import type { AlertButton, AlertOptions } from '@ionic/react';
+import type { HookOverlayOptions } from '@ionic/react/dist/types/hooks/HookOverlayOptions';
 
 interface OnIncreaseDaysCountClickProps {
-  presentAlert: (options: unknown) => void;
+  presentAlert: {
+    (message: string, buttons?: AlertButton[] | undefined): Promise<void>;
+    (options: AlertOptions & HookOverlayOptions): Promise<void>;
+  };
   currentAmountOfDays: number;
   setCurrentAmountOfDays: (days: number) => void;
-  presentErrorAlert: (options: unknown) => void;
+  presentErrorAlert: {
+    (message: string, buttons?: AlertButton[] | undefined): Promise<void>;
+    (options: AlertOptions & HookOverlayOptions): Promise<void>;
+  };
 }
 
 export const onIncreaseDaysCountClick = (props: OnIncreaseDaysCountClickProps) => {

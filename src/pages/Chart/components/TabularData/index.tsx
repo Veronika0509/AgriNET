@@ -76,19 +76,29 @@ export const TabularData: React.FC<TabularDataProps> = ({
         type,
         data as any,
         isWxetMobile,
-        setData,
+        setData as any,
         setIsWxetModalOpen,
         setIsFuelModalOpen,
         setFirstRowColor,
         freshnessColors,
-        setIsLoading
+        setIsLoading as any,
       )
     }
   }, [data]);
 
+  const hasData = () => {
+    if (!data) return false;
+    if (Array.isArray(data)) return data.length > 0;
+    if (typeof data === 'object' && 'data' in data) {
+      const dataArray = (data as any).data;
+      return Array.isArray(dataArray) && dataArray.length > 0;
+    }
+    return false;
+  };
+
   return (
     <div>
-      {data && (
+      {hasData() && (
         <div>
           {type === 'temp' ? (
             <div>

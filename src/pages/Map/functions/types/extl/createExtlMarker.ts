@@ -29,6 +29,8 @@ export const createExtlMarker = async (
   countExtl: number,
   layer: string
 ) => {
+  console.log('[EXTL DEBUG createExtlMarker] Called with sensorItem:', sensorItem);
+  console.log('[EXTL DEBUG createExtlMarker] page:', page, 'countExtl:', countExtl);
   const exists = extlChartsAmount.some((secondItemTemp: ExtlSensorItem) => secondItemTemp.id === sensorItem.id);
   if (!exists) {
     extlId.value++;
@@ -39,7 +41,9 @@ export const createExtlMarker = async (
       east: sensorItem.lng + 0.0001,
       west: sensorItem.lng
     };
+    console.log('[EXTL DEBUG createExtlMarker] bounds:', bounds);
     if (page === 1) {
+      console.log('[EXTL DEBUG createExtlMarker] Calling createExtlDataContainer');
       createExtlDataContainer({
         bounds,
         setExtlChartDataContainer,
@@ -50,6 +54,10 @@ export const createExtlMarker = async (
         item: sensorItem,
         layer
       });
+    } else {
+      console.log('[EXTL DEBUG createExtlMarker] Skipping - page is not 1');
     }
+  } else {
+    console.log('[EXTL DEBUG createExtlMarker] Skipping - already exists');
   }
 }

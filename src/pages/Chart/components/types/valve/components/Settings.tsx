@@ -260,16 +260,22 @@ export const Settings: React.FC<SettingsProps> = (props) => {
 
   const setLowSetpoint = async () => {
     if (!settingsData) return;
-    
-    props.setAlarm(true)
+
+    props.setAlarm?.(true)
     const fieldsLabelsData = await getFieldLabels(settingsData.probeId)
     const depthSetpointSensor = `Depth ${settingsData.setPointSensor}`
-    onSensorSelect(fieldsLabelsData.data, 'Low', settingsData.probeId, props.setLowSelectedSensor,  presentSensorSelectToast, depthSetpointSensor)
-    onSetpointSubmit('Low', settingsData.probeId, props.setLowSetpoint, presentSetpointSubmitToast, settingsData.msetPoint)
-    onEnableCLick(settingsData.probeId, 'Low', props.isSetpointEnabled ?? false, props.setIsSetpointEnabled, props.setIsEnabledToastOpen, props.setIsDisabledToastOpen, props.setIsEnableActionSheet)
+    if (props.setLowSelectedSensor) {
+      onSensorSelect(fieldsLabelsData.data, 'Low', settingsData.probeId, props.setLowSelectedSensor,  presentSensorSelectToast, depthSetpointSensor)
+    }
+    if (props.setLowSetpoint) {
+      onSetpointSubmit('Low', settingsData.probeId, props.setLowSetpoint, presentSetpointSubmitToast, settingsData.msetPoint)
+    }
+    if (props.setIsSetpointEnabled) {
+      onEnableCLick(settingsData.probeId, 'Low', props.isSetpointEnabled ?? false, props.setIsSetpointEnabled, props.setIsEnabledToastOpen, props.setIsDisabledToastOpen, props.setIsEnableActionSheet)
+    }
 
-    props.setChartPageType('moist')
-    props.setAlarmOddBack(true)
+    props.setChartPageType?.('moist')
+    props.setAlarmOddBack?.(true)
   }
 
   return (

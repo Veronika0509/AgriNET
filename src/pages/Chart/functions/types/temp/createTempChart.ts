@@ -341,8 +341,8 @@ export const createTempChart = (
           layout: root.current.verticalLayout,
           dy: 4,
         })
-        container.adapters.add("y", () => 0)
-        container.adapters.add("x", (x: number) => Math.max(0, Math.min(chart.plotContainer.width(), x)))
+        container.adapters.add("y", (() => 0) as any)
+        container.adapters.add("x", ((x: number) => Math.max(0, Math.min(chart.plotContainer.width(), x))) as any)
         container.events.on("pointerdown", () => {
           container.set("draggable", isContainerDragging)
         })

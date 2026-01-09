@@ -240,10 +240,16 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
   };
 
   // Wrapper function to adapt updateCommentsArray to the expected type
-  const updateCommentsArrayWrapper = (_type: string, _data?: unknown) => {
-    // This wrapper is intentionally empty as updateCommentsArray is called directly
-    // in the updateChart function with proper parameters
-  };
+  const updateCommentsArrayWrapper = ((type: string, _data?: unknown) => {
+    // Call updateCommentsArray with the appropriate parameters
+    if (type === 'main') {
+      updateCommentsArray('M', props.sensorId as any, () => updateComments("main", undefined), currentChartData);
+    } else if (type === 'sum') {
+      updateCommentsArray('MSum', props.sensorId as any, () => updateComments("sum", undefined), currentSumChartData.data);
+    } else if (type === 'soilTemp') {
+      updateCommentsArray('MST', props.sensorId as any, () => updateComments("soilTemp", undefined), currentSoilTempChartData.data);
+    }
+  }) as any;
 
   // Responsive design state
   const [screenSize, setScreenSize] = useState<ScreenSizeState>({
@@ -358,7 +364,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal({ type: params.type || '', date: params.date || 0 }),
             moistMainAddCommentItemShowed: typeof addCommentItemShowed.main === 'boolean' ? addCommentItemShowed.main : false,
             moistMainComments: newCommentData.map(c => ({ ...c, comment: c.text })),
-            updateCommentsArray,
+            updateCommentsArray: updateCommentsArray as any,
             isMoistCommentsShowed,
             setMoistMainTabularDataColors: (colors: string[]) => updateTabularData("main", { colors }),
             smallScreen: screenSize.small,
@@ -416,7 +422,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal({ type: params.type || '', date: params.date || 0 }),
               moistMainAddCommentItemShowed: typeof addCommentItemShowed.main === 'boolean' ? addCommentItemShowed.main : false,
               moistMainComments: comments.main ? comments.main.map(c => ({ ...c, comment: c.text })) : [],
-              updateCommentsArray,
+              updateCommentsArray: updateCommentsArray as any,
               isMoistCommentsShowed,
             })
           }
@@ -436,7 +442,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal({ type: params.type || '', date: params.date || 0 }),
             moistMainAddCommentItemShowed: typeof addCommentItemShowed.main === 'boolean' ? addCommentItemShowed.main : false,
             moistMainComments: comments.main ? comments.main.map(c => ({ ...c, comment: c.text })) : [],
-            updateCommentsArray,
+            updateCommentsArray: updateCommentsArray as any,
             isMoistCommentsShowed,
             setMoistMainTabularDataColors: (colors: string[]) => updateTabularData("main", { colors }),
             smallScreen: screenSize.small,
@@ -467,7 +473,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal({ type: params.type || '', date: params.date || 0 }),
             moistMainAddCommentItemShowed: typeof addCommentItemShowed.main === 'boolean' ? addCommentItemShowed.main : false,
             moistMainComments: comments.main ? comments.main.map(c => ({ ...c, comment: c.text })) : [],
-            updateCommentsArray,
+            updateCommentsArray: updateCommentsArray as any,
             isMoistCommentsShowed,
             setMoistMainTabularDataColors: (colors: string[]) => updateTabularData("main", { colors }),
             smallScreen: screenSize.small,

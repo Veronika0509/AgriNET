@@ -42,7 +42,7 @@ export const AlarmItemTelOrEmail = (props: AlarmItemTelOrEmailProps) => {
   useEffect(() => {
     onEmailOrTelChange(
       props.emailOrTel,
-      setActionSheetButtons,
+      setActionSheetButtons as any,
       setTextRef,
       presentAlert,
       toString(props.sensorId),

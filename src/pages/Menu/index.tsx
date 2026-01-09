@@ -110,7 +110,7 @@ const Menu: React.FC<MenuProps> = (props) => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle slot="start">{username}</IonTitle>
+          <IonTitle>{username}</IonTitle>
           <IonButtons slot="end">
             <IonButton fill="clear" onClick={handleLogout}>
               Logout

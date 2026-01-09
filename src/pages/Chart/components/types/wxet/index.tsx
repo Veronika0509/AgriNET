@@ -31,7 +31,7 @@ export const WxetChartPage = (props: any) => {
   const [currentDates, setCurrentDates] = useState<any>()
   const [nwsForecast, setNwsForecast] = useState(false)
   const [nwsForecastDays, setNwsForecastDays] = useState(1)
-  const [nwsForecastData, setNwsForecastData] = useState(undefined)
+  const [nwsForecastData, setNwsForecastData] = useState<any>(null)
   const [wxetTabularData, setWxetTabularData] = useState<any>(null)
   const [isWxetTabularDataLoading, setIsWxetTabularDataLoading] = useState(false)
   const [batteryChartShowed, setBatteryChartShowed] = useState<boolean>(false)
@@ -48,12 +48,12 @@ export const WxetChartPage = (props: any) => {
         "battery",
         newBatteryChartData.data,
         batteryRoot,
-        undefined,
-        undefined,
+        undefined as any,
+        undefined as any,
         props.sensorId,
         undefined,
         false,
-        undefined,
+        undefined as any,
         props.userId,
         undefined,
         false,
@@ -98,8 +98,8 @@ export const WxetChartPage = (props: any) => {
         updateChart()
       } else {
         if (nwsForecastData) {
-          setNwsForecastData(undefined)
-          createWxetChart(currentChartData, root, props.isMobile, props.additionalChartData, nwsForecast as any)
+          setNwsForecastData(null)
+          createWxetChart(currentChartData, root, props.isMobile, props.additionalChartData, null)
         }
       }
     }
@@ -129,7 +129,7 @@ export const WxetChartPage = (props: any) => {
             setCurrentDates={setCurrentDates}
             setNwsForecast={setNwsForecast}
             nwsForecastDays={nwsForecastDays}
-            setNwsForecastDays={setNwsForecastDays}
+            setNwsForecastDays={setNwsForecastDays as any}
             setAlarm={props.setAlarm}
             dateDifferenceInDays={dateDifferenceInDays}
             setDateDifferenceInDays={setDateDifferenceInDays}

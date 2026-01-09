@@ -11,10 +11,11 @@
     // Строгая типизация (Senior level) - включается постепенно
     // Этап 1: Очистка неиспользуемых переменных ✓ ЗАВЕРШЕН
     // Этап 2: Явные типы ✓ ЗАВЕРШЕН
-    // Этап 3: Строгие функции (в процессе)
+    // Этап 3: Строгие функции ✓ ЗАВЕРШЕН
+    // Этап 4: Null checks (в процессе)
     "strict": false,
     "noImplicitAny": true,
-    "strictNullChecks": false,
+    "strictNullChecks": true,
     "strictFunctionTypes": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,

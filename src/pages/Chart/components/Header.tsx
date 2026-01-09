@@ -37,7 +37,7 @@ const Header = (props: HeaderProps) => {
         back(props.setPage, history, null)
       }
     } else if (props.type === 'alarmPage') {
-      props.setAlarm(false)
+      props.setAlarm?.(false)
       if (props.alarmOddBack) {
         props.setAlarmOddBack?.(false)
         props.setChartPageType?.('valve')

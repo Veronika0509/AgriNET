@@ -301,7 +301,7 @@ export const createUnit = async (
     timezone: timezone,
     warnIfSensorIdExist:
       overrideFlags?.warnIfSensorIdExist !== undefined
-        ? overrideFlags.warnIfSensorIdExist
+        ? Boolean(overrideFlags.warnIfSensorIdExist)
         : !isQRScanned || sensorIdModified,
     askOverrideInstallDate:
       overrideFlags?.askOverrideInstallDate !== undefined ? overrideFlags.askOverrideInstallDate : true,

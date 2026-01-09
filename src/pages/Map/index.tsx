@@ -56,7 +56,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   const present = useIonToast()
   const [activeTab, setActiveTab] = useState("map")
   const [navigationHistory, setNavigationHistory] = useState<string[]>(["map"])
-  const [isMarkerClicked, setIsMarkerClicked] = useState(false)
+  const [isMarkerClicked, setIsMarkerClicked] = useState<string | boolean>(false)
   const mapRefFunc = useRef(null);
   const previousTabRef = useRef("map")
   const previousPageRef = useRef(props.page)
@@ -436,7 +436,9 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Chart overlay creation is now handled by useChartOverlays hook
 
   useEffect(() => {
+    console.log('[DEBUG Collision] activeOverlays.length:', activeOverlays.length, 'amountOfSensors:', amountOfSensors, 'areBoundsFitted:', areBoundsFitted);
     if (activeOverlays.length !== 0 && activeOverlays.length === amountOfSensors && !areBoundsFitted) {
+      console.log('[DEBUG Collision] Calling CollisionResolver.resolve');
       CollisionResolver.resolve(activeOverlays)
       setAllOverlays(activeOverlays)
       const bounds = new google.maps.LatLngBounds()

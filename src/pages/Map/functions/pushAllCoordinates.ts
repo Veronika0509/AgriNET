@@ -44,7 +44,7 @@ export const pushAllCoordinates = (
   const mainId = sensorItem.id
   const neededSensorItemsArray: Marker[] = []
   allSensorItems.map((sensItem: Marker) => {
-    if (sensItem.markerType === 'moist-fuel' || sensItem.markerType === 'wxet' || sensItem.markerType === 'fuel' || sensItem.markerType === 'temp-rh-v2' || sensItem.markerType === 'soiltemp' || sensItem.markerType === 'temp-rh' || sensItem.markerType === 'valve' || sensItem.markerType === 'extl') {
+    if (sensItem.markerType === 'moist-fuel' || sensItem.markerType === 'wxet' || sensItem.markerType === 'fuel' || sensItem.markerType === 'temp-rh-v2' || sensItem.markerType === 'soiltemp' || sensItem.markerType === 'temp-rh' || sensItem.markerType === 'valve' || sensItem.markerType === 'extl' || sensItem.markerType === 'graphic') {
       if (!neededSensorItemsArray.some((item: Marker) => item.id === sensItem.id)) {
         neededSensorItemsArray.push(sensItem);
       }

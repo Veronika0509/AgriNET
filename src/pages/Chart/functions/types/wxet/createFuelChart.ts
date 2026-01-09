@@ -174,10 +174,10 @@ export const createFuelChart = (
         })
         container.adapters.add("y", function () {
           return 0
-        })
+        } as any)
         container.adapters.add("x", function (x: number) {
           return Math.max(0, Math.min(chart.plotContainer.width(), x))
-        })
+        } as any)
         container.events.on("pointerdown", function () {
           container.set('draggable', isContainerDragging)
         })

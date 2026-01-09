@@ -51,8 +51,21 @@ export const initializeExtlCustomOverlay = (isGoogleApiLoaded: boolean): any => 
 
       renderContent() {
         const img = 'https://app.agrinet.us/' + this.chartData.graphic
+        // Extract URL from chartType. Format: "external:https://..."
+        let extractedUrl = '#'
+        if (this.chartData.chartType && typeof this.chartData.chartType === 'string') {
+          if (this.chartData.chartType.startsWith('external:')) {
+            extractedUrl = this.chartData.chartType.substring('external:'.length)
+          } else if (this.chartData.chartType.startsWith('http')) {
+            extractedUrl = this.chartData.chartType
+          }
+        }
+
+        console.log('[EXTL DEBUG ExtlCustomOverlay] chartType:', this.chartData.chartType);
+        console.log('[EXTL DEBUG ExtlCustomOverlay] extractedUrl:', extractedUrl);
+        console.log(extractedUrl)
         return (
-          <a target='_blank' href={this.chartData.chartType.substring(this.chartData.chartType.indexOf("https"))} className={s.overlay_extlOverlayWrapper} rel="noreferrer">
+          <a target='_blank' href={extractedUrl} className={s.overlay_extlOverlayWrapper} rel="noreferrer">
             <div className={s.overlay_extlOverlay}>
               <img src={img} alt="EXTL Image"
                    style={{width: `${this.chartData.width}px`, height: `${this.chartData.height}px`}}/>

@@ -23,7 +23,7 @@ export const onTelOrEmailSubmit = (
         setTelOrEmail(sensorId, nameNum, event[0], resolve)
       }).then((response: string) => {
         setEmailOrTel(response)
-        if (toEnable) {
+        if (toEnable && setIsSetpointEnabled) {
           onEnableCLick(sensorId, toEnable, false, setIsSetpointEnabled, setIsEnabledToastOpen, setIsDisabledToastOpen, setIsEnableActionSheet)
         }
       })

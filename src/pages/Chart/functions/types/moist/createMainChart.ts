@@ -376,8 +376,8 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           layout: props.root.current!.verticalLayout,
           dy: 4,
         })
-        container.adapters.add("y", () => 0)
-        container.adapters.add("x", (x: number | null | undefined) => Math.max(0, Math.min(chart.plotContainer.width(), x || 0)))
+        container.adapters.add("y", (() => 0) as any)
+        container.adapters.add("x", ((x: number | null | undefined) => Math.max(0, Math.min(chart.plotContainer.width(), x || 0))) as any)
         container.events.on("pointerdown", () => {
           container.set("draggable", isContainerDragging)
         })
@@ -720,9 +720,9 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           const downPosX = getPrivateValue(selection, "downPositionX") ?? 0
           const posX = getPrivateValue(selection, "positionX") ?? 0
 
-          const x1 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(downPosX)).getTime()
-          const x2 = xAxisValue.positionToDate(xAxisValue.toAxisPosition(posX)).getTime()
-          chart.series.each((series: am5xy.SmoothedXLineSeries) => {
+          const x1 = (xAxisValue as any).positionToDate((xAxisValue as any).toAxisPosition(downPosX)).getTime()
+          const x2 = (xAxisValue as any).positionToDate((xAxisValue as any).toAxisPosition(posX)).getTime()
+          ((chart.series.each) as any)((series: am5xy.SmoothedXLineSeries) => {
             const dataItemStart = series.dataItems.find((dataItem: am5.DataItem<am5xy.IXYSeriesDataItem>) => {
               if (x1 < x2) {
                 return dataItem.get("valueX") >= x1

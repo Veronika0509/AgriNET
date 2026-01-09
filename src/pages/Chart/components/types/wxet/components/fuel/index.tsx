@@ -86,7 +86,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
           {
             text: 'Close',
             role: 'cancel',
-            handler: async () => locationSelectRef.current.open()
+            handler: async () => locationSelectRef.current?.open()
           }
         ]
       })
@@ -103,7 +103,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
           } else {
             newChartData = await getFuelMainChartData(sensorItem.sensorId)
           }
-          createFuelChart(newChartData.data.data, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper, fuelComments as any, isFuelCommentsShowed)
+          createFuelChart(newChartData.data.data, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper as any, fuelComments as any, isFuelCommentsShowed)
           setCurrentChartData(newChartData.data.data)
         }
       })
@@ -138,7 +138,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
   }, []);
   useEffect(() => {
     if (currentChartData && currentChartData.initialData) {
-      createFuelChart(currentChartData.data, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper, fuelComments as any, isFuelCommentsShowed)
+      createFuelChart(currentChartData.data, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper as any, fuelComments as any, isFuelCommentsShowed)
       setCurrentChartData(currentChartData.data)
     }
   }, [currentChartData])
@@ -147,7 +147,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
       const updateCharts = async () => {
         try {
           const newChartData = await getFuelMainChartData(props.sensorId, currentDates[0], currentDates[1])
-          createFuelChart(newChartData.data.data, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper, fuelComments as any, isFuelCommentsShowed)
+          createFuelChart(newChartData.data.data, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper as any, fuelComments as any, isFuelCommentsShowed)
           setCurrentChartData(newChartData.data.data)
         } catch (e) {
           presentDataAlert({
@@ -170,7 +170,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
   useEffect(() => {
     if (currentChartData && !currentChartData.initialData) {
       setDynamicChartHeight('fuelChartDiv')
-      createFuelChart(currentChartData, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper, fuelComments as any, isFuelCommentsShowed)
+      createFuelChart(currentChartData, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper as any, fuelComments as any, isFuelCommentsShowed)
     }
   }, [fuelAddCommentItemShowed]);
   window.addEventListener("resize", () => setDynamicChartHeight('fuelChartDiv'))
@@ -193,9 +193,9 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
             dateDifferenceInDays={dateDifferenceInDays}
             setDateDifferenceInDays={setDateDifferenceInDays}
             locations={locations}
-            onLocationChange={onLocationChange}
+            onLocationChange={onLocationChange as any}
             currentLocation={currentLocation}
-            setCurrentLocation={setCurrentLocation}
+            setCurrentLocation={setCurrentLocation as any}
             locationSelectRef={locationSelectRef}
             isCommentsShowed={isFuelCommentsShowed}
             setIsCommentsShowed={setIsFuelCommentsShowed}
@@ -203,8 +203,8 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
         </div>
         <div data-chart-section="main-header">
           <div className={s.additionalButtons}>
-            <ButtonAndSpinner data={fuelTabularData} setData={setFuelTabularData}
-                              setIsLoading={setIsFuelTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode}
+            <ButtonAndSpinner data={fuelTabularData} setData={setFuelTabularData as any}
+                              setIsLoading={setIsFuelTabularDataLoading as any} sensorId={props.sensorId} chartCode={chartCode}
                               isLoading={isFuelTabularDataLoading} type={'fuel'}/>
             <AddCommentButton addCommentItemShowed={fuelAddCommentItemShowed}
                               setAddCommentItemShowed={setFuelAddCommentItemShowed}
