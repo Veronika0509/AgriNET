@@ -528,6 +528,66 @@ export const createAdditionalChart = (
       }
 
       const labelsArray: am5.Label[] = []
+
+      // Function to position labels to avoid overlap
+      function positionLabels() {
+        const labels = labelsArray
+
+        // Cache all positions and sizes ONCE to avoid expensive repeated calls
+        const labelData = labels.map(label => ({
+          label,
+          parent: label.parent as am5.Container,
+          x: label.parent?.x() || 0,
+          width: label.width() || 0,
+          height: label.height() || 0,
+          dy: 4
+        })).filter(data => data.parent)
+
+        // Sort by X
+        labelData.sort((a, b) => a.x - b.x)
+
+        // Reset all Y positions (dy)
+        labelData.forEach(data => {
+          data.parent.set("dy", 4)
+          data.dy = 4
+        })
+
+        // Position each label
+        for (let i = 0; i < labelData.length; i++) {
+          const current = labelData[i]
+          let yOffset = 4
+          let overlap = true
+
+          while (overlap) {
+            overlap = false
+
+            for (let j = 0; j < i; j++) {
+              const other = labelData[j]
+
+              // Check overlap using cached values
+              const x1 = current.x
+              const x2 = other.x
+              const y1 = current.dy - 4
+              const y2 = other.dy - 4
+              const w1 = current.width
+              const w2 = other.width
+              const h1 = current.height
+              const h2 = other.height
+
+              if (!(x1 + w1 < x2 || x2 + w2 < x1 || y1 + h1 < y2 || y2 + h2 < y1)) {
+                overlap = true
+                yOffset = Math.max(yOffset, other.dy + other.height + 5)
+              }
+            }
+
+            if (overlap) {
+              current.parent.set("dy", yOffset)
+              current.dy = yOffset
+            }
+          }
+        }
+      }
+
       moistComments.forEach((moistMainComment: MoistComment) => {
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[(moistMainComment.color_id as number) - 1]]}` : `#FBFFA6`;
         const rangeDataItem = xAxis.makeDataItem({})
@@ -536,23 +596,29 @@ export const createAdditionalChart = (
         const container = am5.Container.new(rootInstance, {
           centerX: am5.p50,
           draggable: true,
-          layout: rootInstance.verticalLayout,
+          layout: rootInstance.horizontalLayout,
           dy: 4,
         })
-        container.adapters.add("y", function () {
+
+        container.adapters.add("x", ((x: number | null | undefined) => Math.max(0, Math.min(chart.plotContainer.width(), x || 0))) as any)
+
+        // Lock Y position - only allow X dragging
+        container.adapters.add("y", (() => {
           return 0
-        } as any)
-        container.adapters.add("x", function (x: number | null | undefined) {
-          return Math.max(0, Math.min(chart.plotContainer.width(), x || 0))
-        } as any)
-        container.events.on("pointerdown", function () {
+        }) as any)
+
+        container.events.on("pointerdown", () => {
           container.set('draggable', isContainerDragging)
         })
-        container.events.on("dragged", function () {
+        container.events.on("dragged", () => {
           updateLabel()
           cursor.set('behavior', 'none')
+          // Update positions in real-time during drag
+          positionLabels()
         })
         container.events.on("dragstop", function () {
+          // Final reposition after drag ends
+          positionLabels()
           const icon = dragButton.children.getIndex(0) as am5.Picture
           icon?.set("src", "https://img.icons8.com/ios/50/000000/loading.png")
 
@@ -617,18 +683,15 @@ export const createAdditionalChart = (
             paddingTop: 4,
             paddingLeft: 5,
             paddingRight: 5,
-            centerX: am5.p50
+            paddingBottom: 4,
           })
         );
 
-        labelsArray.push(label);
-        const buttonsContainer = label.children.push(am5.Container.new(rootInstance, {
+        labelsArray.push(label)
+
+        const buttonsContainer = container.children.push(am5.Container.new(rootInstance, {
           layout: rootInstance.horizontalLayout,
-          x: am5.p100,
-          y: 0,
-          centerX: am5.p100,
-          paddingTop: 3,
-          paddingRight: 3,
+          marginLeft: 8,
         }));
         const dragButton = buttonsContainer.children.push(am5.Button.new(rootInstance, {
           width: 20,
@@ -711,72 +774,22 @@ export const createAdditionalChart = (
 
           rangeDataItem.set("value", value)
         }
-        function positionLabels() {
-          const labels = labelsArray;
 
-          labels.sort((a: am5.Label, b: am5.Label) => {
-            const aParent = a.parent;
-            const bParent = b.parent;
-            if (!aParent || !bParent) return 0;
-            return aParent.x() - bParent.x();
-          });
-
-          labels.forEach((label: am5.Label) => {
-            label.set("y", 0);
-          });
-
-          for (let i = 0; i < labels.length; i++) {
-            const currentLabel = labels[i];
-            let yOffset = 0;
-            let overlap = true;
-
-            while (overlap) {
-              overlap = false;
-
-              for (let j = 0; j < i; j++) {
-                const otherLabel = labels[j];
-
-                if (doLabelsOverlap(currentLabel, otherLabel)) {
-                  overlap = true;
-                  yOffset = Math.max(
-                    yOffset,
-                    otherLabel.y() + otherLabel.height() + 5
-                  );
-                }
-              }
-
-              if (overlap) {
-                currentLabel.set("y", yOffset);
-              }
-            }
-          }
-        }
-
-        function doLabelsOverlap(label1: am5.Label, label2: am5.Label) {
-          const parent1 = label1.parent;
-          const parent2 = label2.parent;
-          if (!parent1 || !parent2) return false;
-
-          const x1 = parent1.x();
-          const x2 = parent2.x();
-          const y1 = label1.y();
-          const y2 = label2.y();
-          const w1 = label1.width();
-          const w2 = label2.width();
-          const h1 = label1.height();
-          const h2 = label2.height();
-
-          return !(x1 + w1 < x2 || x2 + w2 < x1 ||
-            y1 + h1 < y2 || y2 + h2 < y1);
-        }
-
-        rootInstance.events.on("frameended", positionLabels)
         series?.events.on("datavalidated", () => {
           const commentDate = new Date(moistMainComment.key as string).getTime()
           rangeDataItem.set("value", commentDate)
           updateLabel(commentDate)
         })
       });
+
+      // Position all labels after they are all loaded
+      if (labelsArray.length > 0 && series) {
+        series.events.once("datavalidated", () => {
+          setTimeout(() => {
+            positionLabels()
+          }, 300)
+        })
+      }
     }
 
     chart.appear(1000, 100);

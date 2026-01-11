@@ -52,17 +52,22 @@ export const onDataSet = (
     if (isTableData(data) && data.label) {
       setFirstRowColor(freshnessColors[data.freshness || ''] || undefined);
     } else {
-      const dataWithColors: any[] = []
+      // Check if data is already processed to prevent infinite loop
       if ('data' in data && Array.isArray(data.data)) {
-        data.data.map((table: any) => {
-          dataWithColors.push({
-            data: table.data,
-            freshnessColor: freshnessColors[table.freshness],
-            label: table.label,
-            isReady: true
+        // If the data has already been processed (has isReady flag), skip processing
+        const isAlreadyProcessed = data.data.length > 0 && data.data[0]?.isReady;
+        if (!isAlreadyProcessed) {
+          const dataWithColors: any[] = []
+          data.data.map((table: any) => {
+            dataWithColors.push({
+              data: table.data,
+              freshnessColor: freshnessColors[table.freshness],
+              label: table.label,
+              isReady: true
+            })
           })
-        })
-        setData(dataWithColors, true)
+          setData(dataWithColors, true)
+        }
       }
     }
   }

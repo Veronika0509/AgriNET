@@ -436,9 +436,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Chart overlay creation is now handled by useChartOverlays hook
 
   useEffect(() => {
-    console.log('[DEBUG Collision] activeOverlays.length:', activeOverlays.length, 'amountOfSensors:', amountOfSensors, 'areBoundsFitted:', areBoundsFitted);
     if (activeOverlays.length !== 0 && activeOverlays.length === amountOfSensors && !areBoundsFitted) {
-      console.log('[DEBUG Collision] Calling CollisionResolver.resolve');
       CollisionResolver.resolve(activeOverlays)
       setAllOverlays(activeOverlays)
       const bounds = new google.maps.LatLngBounds()

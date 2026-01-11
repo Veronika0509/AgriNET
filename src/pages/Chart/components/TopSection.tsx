@@ -5,6 +5,7 @@ import s from "../style.module.css"
 import DateTimePicker from "./DateTimePicker"
 import {IonButton, IonIcon, IonInput, IonSelect, IonSelectOption, IonToggle} from "@ionic/react"
 import {alarmOutline} from "ionicons/icons"
+import { debugLog } from "../../../utils/debugConfig"
 
 interface TopSectionProps {
   type: string;
@@ -247,7 +248,10 @@ const TopSection = (props: TopSectionProps) => {
               <IonToggle
                 className={`${s.topSection_compactToggle} ${s.topSection_moistCompactToggle}`}
                 checked={props.isCommentsShowed}
-                onIonChange={(event: CustomEvent) => props.setIsCommentsShowed?.(event.detail.checked)}
+                onIonChange={(event: CustomEvent) => {
+                  debugLog.comments(`[TopSection] Comments toggle changed to: ${event.detail.checked}`);
+                  props.setIsCommentsShowed?.(event.detail.checked);
+                }}
               >
                 Comments
               </IonToggle>

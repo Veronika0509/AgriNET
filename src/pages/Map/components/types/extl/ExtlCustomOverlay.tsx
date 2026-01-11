@@ -60,7 +60,6 @@ export const initializeExtlCustomOverlay = (isGoogleApiLoaded: boolean): any => 
             extractedUrl = this.chartData.chartType
           }
         }
-
         return (
           <a target='_blank' href={extractedUrl} className={s.overlay_extlOverlayWrapper} rel="noreferrer">
             <div className={s.overlay_extlOverlay}>

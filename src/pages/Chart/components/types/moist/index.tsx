@@ -1,5 +1,5 @@
 import s from "./style.module.css"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState, startTransition } from "react"
 import * as am5 from "@amcharts/amcharts5"
 import { getCurrentDatetime } from "../../DateTimePicker/functions/getCurrentDatetime"
 import { getDatetime } from "../../DateTimePicker/functions/getDatetime"
@@ -32,6 +32,7 @@ import { useAppContext } from "../../../../../context/AppContext";
 import { useHistory } from 'react-router-dom';
 import { loadChartPreferences } from "../../../../../utils/chartPreferences";
 import { TimeSeriesDataItem } from "../../../../../types/api";
+import { debugLog } from "../../../../../utils/debugConfig";
 
 // Define TypeScript interfaces
 type ChartDataItem = TimeSeriesDataItem;
@@ -131,6 +132,9 @@ const CHART_CODES = {
   SUM: "mSum",
 }
 
+// Stable empty array reference to prevent unnecessary re-renders
+const EMPTY_ARRAY: any[] = [];
+
 interface MoistChartPageProps {
   sensorId: string;
   userId: string | number;
@@ -196,6 +200,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
   const [historicMode, setHistoricMode] = useState<boolean>(false)
   const [showForecast, setShowForecast] = useState<boolean>(true)
   const [isMoistCommentsShowed, setIsMoistCommentsShowed] = useState<boolean>(false)
+  const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false)
 
   // Chart visibility state
   const [batteryChartShowed, setBatteryChartShowed] = useState<boolean>(false)
@@ -348,7 +353,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
       if (typeOfChart === CHART_TYPES.MAIN) {
         if (updateReason === "comments") {
           const newCommentData: Comment[] = await fetchComments(CHART_TYPES.MAIN, currentChartData)
-
+          console.log(newCommentData)
           createMainChart({
             data: currentChartData,
             sensorId: props.sensorId,
@@ -486,7 +491,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
       else if (typeOfChart === CHART_TYPES.SUM) {
         if (updateReason === "comments") {
           const newComments: Comment[] = await fetchComments(CHART_TYPES.SUM, currentSumChartData.data)
-
           createAdditionalChart(
             "sum",
             currentSumChartData.data,
@@ -804,25 +808,81 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
   }, [fullDatesArray])
 
   useEffect(() => {
-    if (fullDatesArray !== undefined) {
+    debugLog.comments(`[MoistChartPage useEffect] isMoistCommentsShowed changed to: ${isMoistCommentsShowed}`);
+    debugLog.comments(`[MoistChartPage useEffect] fullDatesArray defined: ${fullDatesArray !== undefined}, isLoadingComments: ${isLoadingComments}`);
+
+    if (fullDatesArray !== undefined && !isLoadingComments) {
       if (isMoistCommentsShowed) {
-        updateChart(CHART_TYPES.MAIN, 'comments')
-        updateChart(CHART_TYPES.SUM, 'comments')
-        if (soilTempChartShowed) {
-          updateChart(CHART_TYPES.SOIL_TEMP, 'comments')
-        }
-        if (batteryChartShowed) {
-          updateChart(CHART_TYPES.BATTERY, 'comments')
-        }
+        debugLog.comments('[MoistChartPage useEffect] Comments ENABLED - Starting to load comments for all charts');
+        debugLog.comments(`[MoistChartPage useEffect] Battery chart showed: ${batteryChartShowed}, Soil temp showed: ${soilTempChartShowed}`);
+
+        // Prevent multiple simultaneous calls
+        setIsLoadingComments(true)
+
+        // Use startTransition to defer heavy chart updates and keep UI responsive
+        startTransition(() => {
+          // Execute chart updates with delays between each to yield to the browser
+          const updateChartsWithDelay = async () => {
+            try {
+              debugLog.comments('[MoistChartPage] Updating MAIN chart with comments...');
+              await updateChart(CHART_TYPES.MAIN, 'comments')
+              debugLog.comments('[MoistChartPage] MAIN chart updated with comments');
+              // Yield to browser to process UI updates
+              await new Promise(resolve => setTimeout(resolve, 100))
+
+              debugLog.comments('[MoistChartPage] Updating SUM chart with comments...');
+              await updateChart(CHART_TYPES.SUM, 'comments')
+              debugLog.comments('[MoistChartPage] SUM chart updated with comments');
+              // Yield to browser to process UI updates
+              await new Promise(resolve => setTimeout(resolve, 100))
+
+              if (soilTempChartShowed) {
+                debugLog.comments('[MoistChartPage] Updating SOIL TEMP chart with comments...');
+                await updateChart(CHART_TYPES.SOIL_TEMP, 'comments')
+                debugLog.comments('[MoistChartPage] SOIL TEMP chart updated with comments');
+                await new Promise(resolve => setTimeout(resolve, 100))
+              }
+              if (batteryChartShowed) {
+                debugLog.comments('[MoistChartPage] Updating BATTERY chart with comments...');
+                await updateChart(CHART_TYPES.BATTERY, 'comments')
+                debugLog.comments('[MoistChartPage] BATTERY chart updated with comments');
+              }
+              debugLog.comments('[MoistChartPage] All charts updated with comments successfully');
+            } catch (error) {
+              debugLog.commentsError('[MoistChartPage] Error updating charts with comments:', error);
+            } finally {
+              setIsLoadingComments(false)
+              debugLog.comments('[MoistChartPage] Finished loading comments, isLoadingComments set to false');
+            }
+          }
+
+          updateChartsWithDelay()
+        })
       } else {
-        updateChart(CHART_TYPES.MAIN, 'sameData')
-        updateChart(CHART_TYPES.SUM, 'sameData')
-        if (soilTempChartShowed) {
-          updateChart(CHART_TYPES.SOIL_TEMP, 'sameData')
-        }
-        if (batteryChartShowed) {
-          updateChart(CHART_TYPES.BATTERY, 'sameData')
-        }
+        debugLog.comments('[MoistChartPage useEffect] Comments DISABLED - Updating charts without comments');
+        // When disabling comments, use startTransition as well
+        startTransition(() => {
+          debugLog.comments('[MoistChartPage] Updating MAIN chart (sameData)...');
+          updateChart(CHART_TYPES.MAIN, 'sameData')
+          debugLog.comments('[MoistChartPage] Updating SUM chart (sameData)...');
+          updateChart(CHART_TYPES.SUM, 'sameData')
+          if (soilTempChartShowed) {
+            debugLog.comments('[MoistChartPage] Updating SOIL TEMP chart (sameData)...');
+            updateChart(CHART_TYPES.SOIL_TEMP, 'sameData')
+          }
+          if (batteryChartShowed) {
+            debugLog.comments('[MoistChartPage] Updating BATTERY chart (sameData)...');
+            updateChart(CHART_TYPES.BATTERY, 'sameData')
+          }
+          debugLog.comments('[MoistChartPage] All charts updated without comments');
+        })
+      }
+    } else {
+      if (fullDatesArray === undefined) {
+        debugLog.comments('[MoistChartPage useEffect] Skipping - fullDatesArray is undefined');
+      }
+      if (isLoadingComments) {
+        debugLog.comments('[MoistChartPage useEffect] Skipping - already loading comments');
       }
     }
   }, [isMoistCommentsShowed])
@@ -957,7 +1017,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               type="moistSoilTemp"
               sensorId={props.sensorId}
               colors={tabularData.soilTemp.colors}
-              data={(tabularData.soilTemp.data as any) || []}
+              data={(tabularData.soilTemp.data as any) || EMPTY_ARRAY}
               setData={(data: any) => updateTabularData("soilTemp", {data})}
               chartCode={CHART_CODES.SOIL_TEMP}
               isLoading={tabularData.soilTemp.isLoading}
@@ -1030,7 +1090,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
                 type="moistMain"
                 sensorId={props.sensorId}
                 colors={tabularData.main.colors}
-                data={(tabularData.main.data as any) || []}
+                data={(tabularData.main.data as any) || EMPTY_ARRAY}
                 setData={(data: any) => updateTabularData("main", {data})}
                 chartCode={CHART_CODES.MAIN}
                 isLoading={tabularData.main.isLoading}
@@ -1101,7 +1161,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             type="moistSum"
             sensorId={props.sensorId}
             colors={tabularData.sum.colors}
-            data={(tabularData.sum.data as any) || []}
+            data={(tabularData.sum.data as any) || EMPTY_ARRAY}
             setData={(data: any) => updateTabularData("sum", {data})}
             chartCode={CHART_CODES.SUM}
             isLoading={tabularData.sum.isLoading}
@@ -1125,6 +1185,22 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               (value: boolean) => updateAddCommentItemShowed("sum", value),
               (value: boolean) => updateAddCommentItemShowed("battery", value),
             ) || ((_item: string) => {})}
+            onCommentAdded={async () => {
+              const type = moistAddCommentModal.type as 'main' | 'soilTemp' | 'sum' | 'temp' | 'battery'
+              if (type === 'main') {
+                await updateCommentsArray('M', props.sensorId as any, () => updateComments("main", undefined), currentChartData)
+                await updateChart(CHART_TYPES.MAIN, 'comments')
+              } else if (type === 'soilTemp') {
+                await updateCommentsArray('MST', props.sensorId as any, () => updateComments("soilTemp", undefined), currentSoilTempChartData.data)
+                await updateChart(CHART_TYPES.SOIL_TEMP, 'comments')
+              } else if (type === 'sum') {
+                await updateCommentsArray('MSum', props.sensorId as any, () => updateComments("sum", undefined), currentSumChartData.data)
+                await updateChart(CHART_TYPES.SUM, 'comments')
+              } else if (type === 'battery') {
+                await updateCommentsArray('MBattery', props.sensorId as any, () => updateComments("battery", undefined), currentBatteryChartData)
+                await updateChart(CHART_TYPES.BATTERY, 'comments')
+              }
+            }}
           />
         )}
       </div>

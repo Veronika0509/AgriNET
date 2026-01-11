@@ -1,12 +1,17 @@
 import axios from "axios";
+import { debugLog } from "../../../../../utils/debugConfig";
 
 export const updateCommentDate = async (commentId: string | number, newDate: string, userId: string | number, resolve: () => void) => {
+  debugLog.comments(`Updating comment ${commentId} date to ${newDate} for user ${userId}`);
   axios.post(`https://app.agrinet.us/api/chart/comments/update-date?v=43&userId=${userId}`, {
     id: commentId,
     date: newDate
   }).then(() => {
-    resolve()
-  })
+    debugLog.comments(`Comment ${commentId} date updated successfully`);
+    resolve();
+  }).catch((error: unknown) => {
+    debugLog.commentsError('Error updating comment date:', error);
+  });
 }
 
 //fetch("https://app.agrinet.us/api/chart/comments/update-date", {

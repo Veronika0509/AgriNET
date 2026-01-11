@@ -20,6 +20,7 @@ interface AddCommentModalProps {
   userId: string | number
   setAddCommentModal: (modal: boolean) => void
   setAddCommentItemShowed: (item: string) => void
+  onCommentAdded?: () => void
 }
 
 const AddCommentModal = (props: AddCommentModalProps) => {
@@ -68,6 +69,10 @@ const AddCommentModal = (props: AddCommentModalProps) => {
       const res = response as { status: number }
       if (res.status === 200) {
         props.setAddCommentItemShowed('comments')
+        // Call onCommentAdded to refresh the comments
+        if (props.onCommentAdded) {
+          props.onCommentAdded()
+        }
         onCancel()
       }
     })
