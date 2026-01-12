@@ -33,6 +33,7 @@ import { useHistory } from 'react-router-dom';
 import { loadChartPreferences } from "../../../../../utils/chartPreferences";
 import { TimeSeriesDataItem } from "../../../../../types/api";
 import { debugLog } from "../../../../../utils/debugConfig";
+import {loadGoogleApi} from "@/functions/loadGoogleApiFunc";
 
 // Define TypeScript interfaces
 type ChartDataItem = TimeSeriesDataItem;
@@ -411,7 +412,26 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           setCurrentChartData(newMoistChartData.data.data)
 
           if (isMoistCommentsShowed) {
-            updateChart(CHART_TYPES.MAIN, 'comments')
+            // Load comments with the new data directly
+            const newCommentData: Comment[] = await fetchComments(CHART_TYPES.MAIN, newMoistChartData.data.data)
+            createMainChart({
+              data: newMoistChartData.data.data,
+              sensorId: props.sensorId,
+              updateComments: () => updateComments("main", undefined),
+              userId: String(props.userId),
+              root,
+              fullDatesArray: fullDatesArray ? fullDatesArray.map(d => new Date(d)) : false,
+              additionalChartData: props.additionalChartData,
+              comparingMode,
+              isNewDates: true,
+              historicMode,
+              showForecast: compareDates(Number(endDatetime || 0)),
+              setMoistAddCommentModal: (params: SetCommentModalParams) => setMoistAddCommentModal({ type: params.type || '', date: params.date || 0 }),
+              moistMainAddCommentItemShowed: typeof addCommentItemShowed.main === 'boolean' ? addCommentItemShowed.main : false,
+              moistMainComments: newCommentData.map(c => ({ ...c, comment: c.text })),
+              updateCommentsArray: updateCommentsArray as any,
+              isMoistCommentsShowed,
+            })
           } else {
             createMainChart({
               data: newMoistChartData.data.data,
@@ -515,7 +535,26 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           setCurrentSumChartData(newSumChartData.data)
 
           if (isMoistCommentsShowed) {
-            updateChart(CHART_TYPES.SUM, 'comments')
+            // Load comments with the new data directly
+            const newComments: Comment[] = await fetchComments(CHART_TYPES.SUM, newSumChartData.data.data)
+            createAdditionalChart(
+              "sum",
+              newSumChartData.data.data,
+              sumRoot,
+              setMoistAddCommentModalWrapper,
+              updateCommentsArrayWrapper,
+              props.sensorId,
+              () => updateComments("sum", undefined),
+              addCommentItemShowed.sum,
+              newComments,
+              props.userId,
+              () => updateChart(CHART_TYPES.SUM, 'dates'),
+              isMoistCommentsShowed,
+              newSumChartData.data.budgetLines,
+              historicMode,
+              showForecast,
+              (colors: string[]) => updateTabularData("sum", { colors }),
+            )
           } else {
             createAdditionalChart(
               "sum",
@@ -585,6 +624,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
       }
 
       else if (typeOfChart === CHART_TYPES.SOIL_TEMP) {
+        console.log(321)
         if (updateReason === "comments") {
           const newComments: Comment[] = await fetchComments(CHART_TYPES.SOIL_TEMP, currentSoilTempChartData.data)
 
@@ -614,7 +654,29 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           setCurrentSoilTempChartData(newSoilTempChartData.data)
 
           if (isMoistCommentsShowed) {
-            updateChart(CHART_TYPES.SOIL_TEMP, 'comments')
+            // Load comments with the new data directly
+            const newComments: Comment[] = await fetchComments(CHART_TYPES.SOIL_TEMP, newSoilTempChartData.data.data)
+            createAdditionalChart(
+              "soilTemp",
+              newSoilTempChartData.data.data,
+              soilTempRoot,
+              setMoistAddCommentModalWrapper,
+              updateCommentsArrayWrapper,
+              props.sensorId,
+              () => updateComments("soilTemp", undefined),
+              addCommentItemShowed.soilTemp,
+              newComments,
+              props.userId,
+              () => updateChart(CHART_TYPES.SOIL_TEMP, 'dates'),
+              isMoistCommentsShowed,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              props.additionalChartData.linesCount,
+              newSoilTempChartData.data.metric,
+              (colors: string[]) => updateTabularData("soilTemp", { colors }),
+            )
           } else {
             createAdditionalChart(
               "soilTemp",
@@ -719,6 +781,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
       }
 
       else if (typeOfChart === CHART_TYPES.BATTERY) {
+        console.log(123)
         if (updateReason === "comments") {
           const newComments: Comment[] = await fetchComments(CHART_TYPES.BATTERY, currentBatteryChartData.data)
           createAdditionalChart(
@@ -740,7 +803,22 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           setCurrentBatteryChartData(newBatteryChartData.data)
 
           if (isMoistCommentsShowed) {
-            updateChart(CHART_TYPES.BATTERY, 'comments')
+            // Load comments with the new data directly
+            const newComments: Comment[] = await fetchComments(CHART_TYPES.BATTERY, newBatteryChartData.data.data)
+            createAdditionalChart(
+              "battery",
+              newBatteryChartData.data.data,
+              batteryRoot,
+              setMoistAddCommentModalWrapper,
+              updateCommentsArrayWrapper,
+              props.sensorId,
+              () => updateComments("battery", undefined),
+              addCommentItemShowed.battery,
+              newComments,
+              props.userId,
+              () => updateChart(CHART_TYPES.BATTERY),
+              isMoistCommentsShowed,
+            )
           } else {
             createAdditionalChart(
               "battery",
@@ -753,7 +831,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               addCommentItemShowed.battery,
               comments.battery,
               props.userId,
-              () => updateChart(CHART_TYPES.BATTERY, 'dates'),
+              () => updateChart(CHART_TYPES.BATTERY),
               isMoistCommentsShowed,
             )
           }
@@ -778,7 +856,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             Number(currentDates[0]),
             currentDates[1],
           )
-          console.log(newBatteryChartData)
           setCurrentBatteryChartData(newBatteryChartData.data)
 
           if (isMoistCommentsShowed) {
@@ -972,8 +1049,12 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
     if (newDaysData.days) {
       updateChart('main', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
       updateChart('sum', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
-      updateChart('soilTemp', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
-      updateChart('battery', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
+      if (soilTempChartShowed) {
+        updateChart('soilTemp', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
+      }
+      if (batteryChartShowed) {
+        updateChart('battery', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
+      }
     }
   }, [showForecast, newDaysData]);
 
