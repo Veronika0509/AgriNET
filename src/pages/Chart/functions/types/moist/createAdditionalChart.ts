@@ -81,16 +81,12 @@ export const createAdditionalChart = (
   }
   if (!root.current) {
     let divId: string
-    let chartCode: string
     if (chartType === 'sum') {
       divId = 'sumChart'
-      chartCode = 'MSum'
     } else if (chartType === 'soilTemp') {
       divId = 'soilTempChart'
-      chartCode = 'MST'
     } else {
       divId = 'batteryChart'
-      chartCode = 'MBattery'
     }
     (root as any).current = am5.Root.new(divId);
 
@@ -649,11 +645,16 @@ export const createAdditionalChart = (
           const newDate = rootInstance.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
           new Promise<void>((resolve: () => void) => {
             updateCommentDate(moistMainComment.id, newDate, userId.toString(), resolve)
-          }).then(async () => {
-            await updateCommentsArray(chartCode)
+          }).then(() => {
             rotationAnimation?.stop()
             icon?.set("src", "https://img.icons8.com/?size=100&id=98070&format=png&color=000000")
             icon?.set("rotation", 0)
+
+            // Update the local comment key to reflect the new date
+            moistMainComment.key = newDate
+
+            // Also update comments array from server to sync state
+            updateCommentsArray(chartType)
           })
         })
         xAxis.topGridContainer.children.push(container)
@@ -690,6 +691,7 @@ export const createAdditionalChart = (
         const buttonsContainer = container.children.push(am5.Container.new(rootInstance, {
           layout: rootInstance.horizontalLayout,
           marginLeft: 8,
+          marginRight: 7,
         }));
         const dragButton = buttonsContainer.children.push(am5.Button.new(rootInstance, {
           width: 20,
@@ -750,11 +752,7 @@ export const createAdditionalChart = (
             })
             new Promise<void>((resolve: () => void) => {
               removeComment(moistMainComment.id, userId.toString(), resolve)
-            }).then(async () => {
-              rotationAnimation?.stop()
-              icon?.set("src", "https://img.icons8.com/?size=100&id=8112&format=png&color=000000")
-              icon?.set("rotation", 0)
-
+            }).then(() => {
               // Remove label from array before disposing
               const labelIndex = labelsArray.indexOf(label)
               if (labelIndex > -1) {
@@ -764,12 +762,19 @@ export const createAdditionalChart = (
               label.dispose()
               rangeDataItem.dispose()
 
+              rotationAnimation?.stop()
+              icon?.set("src", "https://img.icons8.com/?size=100&id=8112&format=png&color=000000")
+              icon?.set("rotation", 0)
+
               // Reposition remaining labels after deletion
               if (labelsArray.length > 0) {
                 setTimeout(() => {
                   positionLabels()
                 }, 100)
               }
+
+              // Update comments state after visual removal
+              updateCommentsArray(chartType)
             })
           }
         })

@@ -3,7 +3,7 @@ import {getDaysFromChartData} from "../../getDaysFromChartData";
 import { SensorId } from '../../../../../types';
 
 // Типы для комментариев
-type CommentType = 'M' | 'MSum' | 'MST' | 'battery';
+type CommentType = 'M' | 'MSum' | 'MST' | 'MBattery';
 type UpdateCommentsFunction = (type: string, data: unknown) => void;
 
 export const updateCommentsArray = async (
@@ -19,7 +19,7 @@ export const updateCommentsArray = async (
     updateComments('sum', newComments.data)
   } else if (type === 'MST') {
     updateComments('soilTemp', newComments.data)
-  } else {
+  } else if (type === 'MBattery') {
     updateComments('battery', newComments.data)
   }
 }
