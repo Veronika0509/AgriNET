@@ -39,6 +39,12 @@ const LayerList = (props: any) => {
     return <div style={{ display: 'none' }} />;
   }
 
+  // Only show layer list when there are overlays (not sites view)
+  const hasOverlays = props.allOverlays && Array.isArray(props.allOverlays) && props.allOverlays.length > 0;
+  if (!hasOverlays) {
+    return <div style={{ display: 'none' }} />;
+  }
+
   // Extract layer names from site data
   const layers: string[] = [];
   if (props.siteList && Array.isArray(props.siteList)) {

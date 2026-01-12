@@ -536,6 +536,7 @@ const MapPage: React.FC<MapProps> = (props) => {
             activeOverlays={activeOverlays}
             allOverlays={allOverlays}
             secondMap={secondMap}
+            isMarkerClicked={isMarkerClicked}
             checkedLayers={checkedLayers}
             setCheckedLayers={setCheckedLayers}
             setActiveOverlays={setActiveOverlays}
@@ -581,6 +582,7 @@ const MapPage: React.FC<MapProps> = (props) => {
                 activeOverlays={activeOverlays}
                 allOverlays={allOverlays}
                 secondMap={secondMap}
+                isMarkerClicked={isMarkerClicked}
                 checkedLayers={checkedLayers}
                 setCheckedLayers={setCheckedLayers}
                 setActiveOverlays={setActiveOverlays}

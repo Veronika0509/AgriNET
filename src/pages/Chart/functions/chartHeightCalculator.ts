@@ -1,5 +1,6 @@
 export const calculateDynamicChartHeight = (chartId?: string): number => {
   const viewportHeight = window.innerHeight
+  const viewportWidth = window.innerWidth
 
   const getElementHeight = (selector: string): number => {
     const element = document.querySelector(selector)
@@ -31,6 +32,12 @@ export const calculateDynamicChartHeight = (chartId?: string): number => {
   if (chartId === 'wxetChartDiv' || chartId === 'tempChartDiv') {
     minHeight = 365
   }
+
+  // Увеличиваем высоту графика на мобильных устройствах для mainChart
+  if (chartId === 'mainChart' && viewportWidth <= 800) {
+    minHeight = 500 // Увеличенная высота для мобильных устройств
+  }
+
   return Math.max(availableHeight, minHeight)
 }
 

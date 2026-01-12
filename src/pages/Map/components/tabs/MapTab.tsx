@@ -35,6 +35,7 @@ export interface MapTabProps {
   activeOverlays: OverlayItem[]
   allOverlays: OverlayItem[]
   secondMap: google.maps.Map | string | null
+  isMarkerClicked: boolean | string
   checkedLayers: { [key: string]: boolean }
   setCheckedLayers: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>
   setActiveOverlays: React.Dispatch<React.SetStateAction<OverlayItem[]>>
@@ -50,6 +51,7 @@ export const MapTab: React.FC<MapTabProps> = ({
                                                 activeOverlays,
                                                 allOverlays,
                                                 secondMap,
+                                                isMarkerClicked,
                                                 checkedLayers,
                                                 setCheckedLayers,
                                                 setActiveOverlays,
@@ -73,13 +75,36 @@ export const MapTab: React.FC<MapTabProps> = ({
 
   // Check if there are layers to show
   useEffect(() => {
+    console.log('LayerList check:', {
+      isMarkerClicked,
+      secondMap: typeof secondMap === "string" ? secondMap : 'google.maps.Map',
+      allOverlaysLength: allOverlays?.length || 0
+    })
+
+    // Hide layer list immediately when returning to sites view
+    if (isMarkerClicked === false) {
+      console.log('Hiding layer list - isMarkerClicked is false')
+      setHasLayersToShow(false)
+      return
+    }
+
+    // Only show layer list when on tier 2 map (site is selected) AND there are overlays (not sites view)
+    const isTier2Map = typeof secondMap === "string" && secondMap !== ""
+    const hasOverlays = allOverlays && allOverlays.length > 0
+
+    if (!isTier2Map || !hasOverlays) {
+      console.log('Hiding layer list - no tier2 map or no overlays', { isTier2Map, hasOverlays })
+      setHasLayersToShow(false)
+      return
+    }
+
     const hasSites = siteList && Array.isArray(siteList) && siteList.length > 0
     if (!hasSites) {
       setHasLayersToShow(false)
       return
     }
 
-    const secondMapName = typeof secondMap === "string" ? secondMap : secondMap?.getDiv()?.id || ""
+    const secondMapName = secondMap
     let layerCount = 0
 
     if (siteList && Array.isArray(siteList)) {
@@ -90,8 +115,9 @@ export const MapTab: React.FC<MapTabProps> = ({
       })
     }
 
+    console.log('Setting hasLayersToShow to:', layerCount > 0, 'layerCount:', layerCount)
     setHasLayersToShow(layerCount > 0)
-  }, [siteList, secondMap])
+  }, [siteList, secondMap, allOverlays, isMarkerClicked])
 
   // Hide layer list after 4 seconds on mobile devices (screen width < 500px)
   // Timer starts AFTER layer list is shown
@@ -209,6 +235,12 @@ export const MapTab: React.FC<MapTabProps> = ({
 
   // Extract layer names from site data
   const renderLayerList = () => {
+    // Don't render if we're on sites view
+    if (isMarkerClicked === false) {
+      console.log('renderLayerList: Not rendering - isMarkerClicked is false')
+      return null
+    }
+
     const hasSites = siteList && Array.isArray(siteList) && siteList.length > 0
 
     if (!hasSites) {
@@ -234,8 +266,10 @@ export const MapTab: React.FC<MapTabProps> = ({
       return null
     }
 
+    console.log('renderLayerList: Rendering layer list with layers:', layers)
+
     return (
-      <div className={s.layersListWrapper}>
+      <div className={s.layersListWrapper} data-from="MapTab">
         <div className={s.layers_checkbox}>
           {layers.map((layer: string) => (
             <IonItem key={layer} className={s.layers_item}>

@@ -624,7 +624,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
       }
 
       else if (typeOfChart === CHART_TYPES.SOIL_TEMP) {
-        console.log(321)
         if (updateReason === "comments") {
           const newComments: Comment[] = await fetchComments(CHART_TYPES.SOIL_TEMP, currentSoilTempChartData.data)
 
@@ -781,7 +780,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
       }
 
       else if (typeOfChart === CHART_TYPES.BATTERY) {
-        console.log(123)
         if (updateReason === "comments") {
           const newComments: Comment[] = await fetchComments(CHART_TYPES.BATTERY, currentBatteryChartData.data)
           createAdditionalChart(

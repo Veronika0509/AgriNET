@@ -871,20 +871,30 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         marginTop: 15,
       }),
     )
+
+    // Track if we're on mobile with vertical legend
+    let isMobileVerticalLegend = false
+
     if (props.additionalChartData.linesCount > 3 && props.additionalChartData.linesCount <= 6) {
       if (props.smallScreen) {
         legend.set("layout", props.root.current.verticalLayout)
         legend.set("x", am5.percent(5))
+        legend.set("width", 100) // Фиксированная ширина легенды
+        isMobileVerticalLegend = true
       }
     } else if (props.additionalChartData.linesCount > 6 && props.additionalChartData.linesCount <= 9) {
       if (props.middleScreen) {
         legend.set("layout", props.root.current.verticalLayout)
         legend.set("x", am5.percent(5))
+        legend.set("width", 85) // Уменьшенная ширина легенды для большего пространства графика
+        isMobileVerticalLegend = true
       }
     } else if (props.additionalChartData.linesCount > 9) {
       if (props.largeScreen) {
         legend.set("layout", props.root.current.verticalLayout)
         legend.set("x", am5.percent(5))
+        legend.set("width", 85) // Уменьшенная ширина легенды для большего пространства графика
+        isMobileVerticalLegend = true
       }
     }
 
