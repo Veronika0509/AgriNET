@@ -161,6 +161,66 @@ export const createFuelChart = (
 
       const labelsArray: am5.Container[] = []
 
+      // Function to position labels to avoid overlap
+      function positionLabels() {
+        const labels = labelsArray;
+
+        // Cache all positions and sizes ONCE to avoid expensive repeated calls
+        const labelData = labels.map(label => ({
+          label,
+          parent: label.parent as am5.Container,
+          x: label.parent?.x() || 0,
+          width: label.parent?.width() || 0,
+          height: label.parent?.height() || 0,
+          dy: 4
+        })).filter(data => data.parent)
+
+        // Sort by X
+        labelData.sort((a, b) => a.x - b.x)
+
+        // Reset all Y positions (dy)
+        labelData.forEach(data => {
+          data.parent.set("dy", 4)
+          data.dy = 4
+        })
+
+        // Position each label
+        for (let i = 0; i < labelData.length; i++) {
+          const current = labelData[i]
+          let yOffset = 4
+          let overlap = true
+
+          while (overlap) {
+            overlap = false
+
+            for (let j = 0; j < i; j++) {
+              const other = labelData[j]
+
+              // Check overlap using cached values
+              const x1 = current.x
+              const x2 = other.x
+              const y1 = current.dy - 4
+              const y2 = other.dy - 4
+              const w1 = current.width
+              const w2 = other.width
+              const h1 = current.height
+              const h2 = other.height
+
+              if (!(x1 + w1 < x2 || x2 + w2 < x1 || y1 + h1 < y2 || y2 + h2 < y1)) {
+                overlap = true
+                yOffset = Math.max(yOffset, other.dy + other.height + 5)
+              }
+            }
+
+            if (overlap) {
+              current.parent.set("dy", yOffset)
+              current.dy = yOffset
+            }
+
+          }
+        }
+      }
+
       fuelComments.forEach((moistMainComment: FuelComment) => {
         const commentColor: string = moistMainComment.color_id ? `#${colors[Object.keys(colors)[moistMainComment.color_id - 1]]}` : `#FBFFA6`;
         const rangeDataItem = xAxis.makeDataItem({})
@@ -216,8 +276,7 @@ export const createFuelChart = (
           am5.Label.new(root.current, {
             text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
             fill: am5.color(0x000000),
-            maxWidth: 150,
-            // minHeight: moistMainComment.color_id ? 60 : 45,
+            maxWidth: 130,
             oversizedBehavior: "wrap",
             fontSize: 12,
             paddingTop: 4,
@@ -279,8 +338,22 @@ export const createFuelChart = (
             // }).then(() => {
             //   props.updateCommentsArray('M')
             //   props.updateChart('comments')
+            //
+            //   // Remove label from array before disposing
+            //   const labelIndex = labelsArray.indexOf(label)
+            //   if (labelIndex > -1) {
+            //     labelsArray.splice(labelIndex, 1)
+            //   }
+            //
             //   label.dispose()
             //   rangeDataItem.dispose()
+            //
+            //   // Reposition remaining labels after deletion
+            //   if (labelsArray.length > 0) {
+            //     setTimeout(() => {
+            //       positionLabels()
+            //     }, 100)
+            //   }
             // })
           }
         })
@@ -298,73 +371,24 @@ export const createFuelChart = (
           rangeDataItem.set("value", value)
         }
 
-        function positionLabels() {
-          const labels = labelsArray;
-
-          labels.sort((a: am5.Container, b: am5.Container) => {
-            const aParent = a.parent;
-            const bParent = b.parent;
-            if (!aParent || !bParent) return 0;
-            return aParent.x() - bParent.x();
-          });
-
-          labels.forEach((label: am5.Container) => {
-            label.set("y", 0);
-          });
-
-          for (let i = 0; i < labels.length; i++) {
-            const currentLabel = labels[i];
-            let yOffset = 0;
-            let overlap = true;
-
-            while (overlap) {
-              overlap = false;
-
-              for (let j = 0; j < i; j++) {
-                const otherLabel = labels[j];
-
-                if (doLabelsOverlap(currentLabel, otherLabel)) {
-                  overlap = true;
-                  yOffset = Math.max(
-                    yOffset,
-                    otherLabel.y() + otherLabel.height() + 5
-                  );
-                }
-              }
-
-              if (overlap) {
-                currentLabel.set("y", yOffset);
-              }
-            }
-          }
-        }
-
-        function doLabelsOverlap(label1: am5.Container, label2: am5.Container) {
-          const parent1 = label1.parent;
-          const parent2 = label2.parent;
-          if (!parent1 || !parent2) return false;
-
-          const x1 = parent1.x();
-          const x2 = parent2.x();
-          const y1 = label1.y();
-          const y2 = label2.y();
-          const w1 = label1.width();
-          const w2 = label2.width();
-          const h1 = label1.height();
-          const h2 = label2.height();
-
-          return !(x1 + w1 < x2 || x2 + w2 < x1 ||
-            y1 + h1 < y2 || y2 + h2 < y1);
-        }
-
-        root.current.events.on("frameended", positionLabels)
-
         series.events.on("datavalidated", () => {
           const commentDate = new Date(moistMainComment.key).getTime()
           rangeDataItem.set("value", commentDate)
           updateLabel(commentDate)
         })
       });
+
+      // Add zoom event listeners to position labels after zoom
+      xAxis.onPrivate("selectionMax", () => {
+        if (labelsArray.length > 0) {
+          setTimeout(() => {
+            positionLabels()
+          }, 100)
+        }
+      })
+
+      // Position labels on frame updates (for smooth repositioning during interactions)
+      root.current.events.on("frameended", positionLabels)
     }
 
 // Add cursor

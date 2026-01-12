@@ -65,12 +65,12 @@ export const createAdditionalChart = (
   userId: string | number,
   _updateChart: UpdateChartFunction,
   isMoistCommentsShowed: boolean,
-// sum
+  // sum
   budgetLines?: BudgetLine[],
   historicMode?: boolean,
   showForecast?: boolean,
   setSumColor?: SetterFunction<string[]>,
-// soilTemp
+  // soilTemp
   linesCount?: number,
   metric?: string,
   setSoilTempColor?: SetterFunction<string[]>,
@@ -396,24 +396,24 @@ export const createAdditionalChart = (
         });
       }
 
-  // Regions
-  const budgetLine1 = getBudgetLine(budgetLines, 1);
-  const topBudgetRegion = yAxis.makeDataItem({
-    value: budgetLine1 && typeof budgetLine1.value === 'number' ? budgetLine1.value : 0,
-    endValue: 100
-  });
-  series.createAxisRange(topBudgetRegion);
-  topBudgetRegion.get("grid")?.setAll({
-    strokeOpacity: 1,
-    visible: true,
-    stroke: am5.color(0xCCCC00),
-    strokeDasharray: [4, 4]
-  });
-  topBudgetRegion.get("axisFill")?.setAll({
-    fill: am5.color(0x02c5fd),
-    fillOpacity: 0.2,
-    visible: true
-  });
+      // Regions
+      const budgetLine1 = getBudgetLine(budgetLines, 1);
+      const topBudgetRegion = yAxis.makeDataItem({
+        value: budgetLine1 && typeof budgetLine1.value === 'number' ? budgetLine1.value : 0,
+        endValue: 100
+      });
+      series.createAxisRange(topBudgetRegion);
+      topBudgetRegion.get("grid")?.setAll({
+        strokeOpacity: 1,
+        visible: true,
+        stroke: am5.color(0xCCCC00),
+        strokeDasharray: [4, 4]
+      });
+      topBudgetRegion.get("axisFill")?.setAll({
+        fill: am5.color(0x02c5fd),
+        fillOpacity: 0.2,
+        visible: true
+      });
       topBudgetRegion.get("label")?.setAll({
         text: budgetLine1 ? budgetLine1.label || '' : '',
         fill: am5.color(0x000000),
@@ -538,8 +538,8 @@ export const createAdditionalChart = (
           label,
           parent: label.parent as am5.Container,
           x: label.parent?.x() || 0,
-          width: label.width() || 0,
-          height: label.height() || 0,
+          width: label.parent?.width() || 0,
+          height: label.parent?.height() || 0,
           dy: 4
         })).filter(data => data.parent)
 
@@ -573,7 +573,6 @@ export const createAdditionalChart = (
               const w2 = other.width
               const h1 = current.height
               const h2 = other.height
-
               if (!(x1 + w1 < x2 || x2 + w2 < x1 || y1 + h1 < y2 || y2 + h2 < y1)) {
                 overlap = true
                 yOffset = Math.max(yOffset, other.dy + other.height + 5)
@@ -676,8 +675,7 @@ export const createAdditionalChart = (
           am5.Label.new(rootInstance, {
             text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[(moistMainComment.color_id as number) - 1]}\n` : ''}${moistMainComment.text}`,
             fill: am5.color(0x000000),
-            maxWidth: 150,
-            // minHeight: moistMainComment.color_id ? 60 : 45,
+            maxWidth: 130,
             oversizedBehavior: "wrap",
             fontSize: 12,
             paddingTop: 4,
@@ -756,8 +754,22 @@ export const createAdditionalChart = (
               rotationAnimation?.stop()
               icon?.set("src", "https://img.icons8.com/?size=100&id=8112&format=png&color=000000")
               icon?.set("rotation", 0)
+
+              // Remove label from array before disposing
+              const labelIndex = labelsArray.indexOf(label)
+              if (labelIndex > -1) {
+                labelsArray.splice(labelIndex, 1)
+              }
+
               label.dispose()
               rangeDataItem.dispose()
+
+              // Reposition remaining labels after deletion
+              if (labelsArray.length > 0) {
+                setTimeout(() => {
+                  positionLabels()
+                }, 100)
+              }
             })
           }
         })
@@ -790,6 +802,15 @@ export const createAdditionalChart = (
           }, 300)
         })
       }
+
+      // Add zoom event listeners to position labels after zoom
+      xAxis.onPrivate("selectionMax", () => {
+        if (labelsArray.length > 0) {
+          setTimeout(() => {
+            positionLabels()
+          }, 100)
+        }
+      })
     }
 
     chart.appear(1000, 100);

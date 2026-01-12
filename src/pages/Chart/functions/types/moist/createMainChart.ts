@@ -328,19 +328,6 @@ export const createMainChart = (props: CreateMainChartProps): void => {
     })
 
     cursor.lineY.set("visible", false)
-
-    // Add Comments
-    if (props.moistMainAddCommentItemShowed) {
-      chart.events.on("click", (ev: any) => {
-        const xAxis = chart.xAxes.getIndex(0) as am5xy.DateAxis<am5xy.AxisRendererX>
-
-        const xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width())
-
-        const clickDate = xAxis.positionToDate(xPosition)
-
-        props.setMoistAddCommentModal({ isOpen: true, date: clickDate.getTime(), type: "main" })
-      })
-    }
     if (props.moistMainComments && props.isMoistCommentsShowed) {
       const colors: Record<string, string> = {
         Advisory: "F08080",
@@ -372,8 +359,8 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           label,
           parent: label.parent as am5.Container,
           x: label.parent?.x() || 0,
-          width: label.width() || 0,
-          height: label.height() || 0,
+          width: label.parent?.width() || 0,
+          height: label.parent?.height() || 0,
           dy: 4
         })).filter(data => data.parent)
 
@@ -582,7 +569,10 @@ export const createMainChart = (props: CreateMainChartProps): void => {
             centerY: am5.p50,
           }),
         )
-        closeButton.events.on("click", () => {
+        closeButton.events.on("click", (ev: any) => {
+          // Stop event from bubbling to chart
+          ev.originalEvent?.stopPropagation()
+
           if (window.confirm("Are you sure want to delete this message?")) {
             const icon = closeButton.children.getIndex(0) as am5.Picture
             icon?.set("src", " https://img.icons8.com/ios/50/000000/loading.png")
@@ -609,8 +599,22 @@ export const createMainChart = (props: CreateMainChartProps): void => {
               rotationAnimation?.stop()
               icon?.set("src", "https://img.icons8.com/?size=100&id=8112&format=png&color=000000")
               icon?.set("rotation", 0)
+
+              // Remove label from array before disposing
+              const labelIndex = labelsArray.indexOf(label)
+              if (labelIndex > -1) {
+                labelsArray.splice(labelIndex, 1)
+              }
+
               label.dispose()
               rangeDataItem.dispose()
+
+              // Reposition remaining labels after deletion
+              if (labelsArray.length > 0) {
+                setTimeout(() => {
+                  positionLabels()
+                }, 100)
+              }
             })
           }
         })
@@ -646,7 +650,29 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           }, 300)
         })
       }
+
+      // Add zoom event listeners to position labels after zoom
+      if (!props.comparingMode) {
+        xAxis.onPrivate("selectionMax", (value: number | undefined) => {
+          if (labelsArray.length > 0) {
+            setTimeout(() => {
+              positionLabels()
+            }, 100)
+          }
+        })
+      }
     }
+
+    // Add Comments - handler should be after all comments are created so it's on top
+    if (props.moistMainAddCommentItemShowed) {
+      chart.plotContainer.events.on("click", (ev: any) => {
+        const xAxis = chart.xAxes.getIndex(0) as am5xy.DateAxis<am5xy.AxisRendererX>
+        const xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width())
+        const clickDate = xAxis.positionToDate(xPosition)
+        props.setMoistAddCommentModal({ isOpen: true, date: clickDate.getTime(), type: "main" })
+      })
+    }
+
     // Comparing Mode
     if (!props.comparingMode) {
       xAxis.onPrivate("selectionMin", (value: number) => {

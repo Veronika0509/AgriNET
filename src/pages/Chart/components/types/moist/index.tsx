@@ -353,7 +353,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
       if (typeOfChart === CHART_TYPES.MAIN) {
         if (updateReason === "comments") {
           const newCommentData: Comment[] = await fetchComments(CHART_TYPES.MAIN, currentChartData)
-          console.log(newCommentData)
           createMainChart({
             data: currentChartData,
             sensorId: props.sensorId,
@@ -694,7 +693,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
       else if (typeOfChart === CHART_TYPES.BATTERY) {
         if (updateReason === "comments") {
           const newComments: Comment[] = await fetchComments(CHART_TYPES.BATTERY, currentBatteryChartData)
-
           createAdditionalChart(
             "battery",
             currentBatteryChartData,
@@ -778,10 +776,10 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
       historicMode,
       showForecast,
       currentDates,
-      addCommentItemShowed,
       comments,
       isMoistCommentsShowed,
       screenSize,
+      addCommentItemShowed,
     ],
   )
 
@@ -887,25 +885,26 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
     }
   }, [isMoistCommentsShowed])
 
+  // Update charts when add comment mode changes
   useEffect(() => {
-    if (fullDatesArray !== undefined) {
+    if (currentChartData.length > 0) {
       setDynamicChartHeight('mainChart')
       updateChart(CHART_TYPES.MAIN, 'sameData')
     }
   }, [addCommentItemShowed.main])
   useEffect(() => {
-    if (fullDatesArray !== undefined) {
+    if (currentChartData.length > 0) {
       setDynamicChartHeight('sumChart')
       updateChart(CHART_TYPES.SUM, 'sameData')
     }
   }, [addCommentItemShowed.sum])
   useEffect(() => {
-    if (fullDatesArray !== undefined) {
+    if (currentChartData.length > 0) {
       updateChart(CHART_TYPES.SOIL_TEMP, 'sameData')
     }
   }, [addCommentItemShowed.soilTemp])
   useEffect(() => {
-    if (fullDatesArray !== undefined) {
+    if (currentChartData.length > 0) {
       updateChart(CHART_TYPES.BATTERY, 'sameData')
     }
   }, [addCommentItemShowed.battery])
@@ -1187,6 +1186,8 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             ) || ((_item: string) => {})}
             onCommentAdded={async () => {
               const type = moistAddCommentModal.type as 'main' | 'soilTemp' | 'sum' | 'temp' | 'battery'
+
+              // First update comments array and refresh chart
               if (type === 'main') {
                 await updateCommentsArray('M', props.sensorId as any, () => updateComments("main", undefined), currentChartData)
                 await updateChart(CHART_TYPES.MAIN, 'comments')
@@ -1200,6 +1201,19 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
                 await updateCommentsArray('MBattery', props.sensorId as any, () => updateComments("battery", undefined), currentBatteryChartData)
                 await updateChart(CHART_TYPES.BATTERY, 'comments')
               }
+
+              // Then turn off add comment mode after chart is updated
+              setTimeout(() => {
+                if (type === 'main') {
+                  updateAddCommentItemShowed("main", false)
+                } else if (type === 'soilTemp') {
+                  updateAddCommentItemShowed("soilTemp", false)
+                } else if (type === 'sum') {
+                  updateAddCommentItemShowed("sum", false)
+                } else if (type === 'battery') {
+                  updateAddCommentItemShowed("battery", false)
+                }
+              }, 100)
             }}
           />
         )}

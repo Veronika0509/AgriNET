@@ -2,5 +2,6 @@ import {getDatetime} from "./getDatetime";
 
 export const getCurrentDatetime = () => {
   const now = new Date();
-  return getDatetime(now)
+  now.setDate(now.getDate() + 1)
+  return getDatetime(now);
 }
