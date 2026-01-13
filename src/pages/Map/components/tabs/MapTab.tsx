@@ -75,15 +75,7 @@ export const MapTab: React.FC<MapTabProps> = ({
 
   // Check if there are layers to show
   useEffect(() => {
-    console.log('LayerList check:', {
-      isMarkerClicked,
-      secondMap: typeof secondMap === "string" ? secondMap : 'google.maps.Map',
-      allOverlaysLength: allOverlays?.length || 0
-    })
-
-    // Hide layer list immediately when returning to sites view
     if (isMarkerClicked === false) {
-      console.log('Hiding layer list - isMarkerClicked is false')
       setHasLayersToShow(false)
       return
     }
@@ -93,7 +85,6 @@ export const MapTab: React.FC<MapTabProps> = ({
     const hasOverlays = allOverlays && allOverlays.length > 0
 
     if (!isTier2Map || !hasOverlays) {
-      console.log('Hiding layer list - no tier2 map or no overlays', { isTier2Map, hasOverlays })
       setHasLayersToShow(false)
       return
     }
@@ -115,7 +106,6 @@ export const MapTab: React.FC<MapTabProps> = ({
       })
     }
 
-    console.log('Setting hasLayersToShow to:', layerCount > 0, 'layerCount:', layerCount)
     setHasLayersToShow(layerCount > 0)
   }, [siteList, secondMap, allOverlays, isMarkerClicked])
 
@@ -237,7 +227,6 @@ export const MapTab: React.FC<MapTabProps> = ({
   const renderLayerList = () => {
     // Don't render if we're on sites view
     if (isMarkerClicked === false) {
-      console.log('renderLayerList: Not rendering - isMarkerClicked is false')
       return null
     }
 
@@ -265,8 +254,6 @@ export const MapTab: React.FC<MapTabProps> = ({
     if (!layers || layers.length === 0) {
       return null
     }
-
-    console.log('renderLayerList: Rendering layer list with layers:', layers)
 
     return (
       <div className={s.layersListWrapper} data-from="MapTab">

@@ -328,6 +328,73 @@ export const createMainChart = (props: CreateMainChartProps): void => {
     })
 
     cursor.lineY.set("visible", false)
+
+    // Автоматическое увеличение высоты контейнера для всех тултипов
+    if (ordinarySeriesArray.length > 0) {
+      ordinarySeriesArray[0].events.once("datavalidated", () => {
+        // Небольшая задержка чтобы контейнер успел отрендериться
+        setTimeout(() => {
+          const chartContainer = document.getElementById("mainChart")
+          if (!chartContainer) return
+
+          const fullChartHeight = chartContainer.getBoundingClientRect().height
+          const sensorCount = props.additionalChartData.linesCount
+
+          // Получаем реальную высоту тултипа, показав его временно
+          const firstSeries = ordinarySeriesArray[0]
+          const firstDataItem = firstSeries.dataItems[0]
+          const tooltip = firstSeries.get("tooltip")
+
+          if (tooltip && firstDataItem) {
+            // Показываем тултип
+            firstSeries.showDataItemTooltip(firstDataItem)
+
+            // Даем время на рендеринг и измеряем
+            setTimeout(() => {
+              const tooltipElement = tooltip.getPrivate("htmlElement")
+              let tooltipHeight = 62 // значение по умолчанию
+
+              if (tooltipElement) {
+                const rect = tooltipElement.getBoundingClientRect()
+                tooltipHeight = rect.height
+                console.log(`Реальная высота тултипа через DOM: ${tooltipHeight.toFixed(1)}px`)
+              } else {
+                console.log(`Не удалось получить DOM элемент тултипа, используем ${tooltipHeight}px`)
+              }
+
+              // Скрываем тултип
+              tooltip.hide()
+
+              // Общая высота всех тултипов
+              const totalTooltipsHeight = tooltipHeight * sensorCount
+
+              // Сколько не хватает пикселей
+              const missingPixels = Math.max(0, totalTooltipsHeight - fullChartHeight)
+
+              // Количество тултипов которые влезают
+              const tooltipsThatFit = Math.floor(fullChartHeight / tooltipHeight)
+
+              // Количество тултипов вне границ
+              const tooltipsOutOfBounds = Math.max(0, sensorCount - tooltipsThatFit)
+
+              console.log(`Полная высота контейнера чарта (с легендой): ${fullChartHeight.toFixed(0)}px`)
+              console.log(`Количество сенсоров: ${sensorCount}`)
+              console.log(`Высота одного тултипа: ${tooltipHeight.toFixed(1)}px`)
+              console.log(`Тултипов не влезает: ${tooltipsOutOfBounds}`)
+              console.log(`Пикселей не хватает: ${missingPixels.toFixed(0)}px`)
+
+              // Увеличиваем высоту контейнера на недостающие пиксели
+              if (missingPixels > 0) {
+                const newHeight = fullChartHeight + missingPixels
+                chartContainer.style.height = `${newHeight}px`
+                console.log(`Новая высота контейнера: ${newHeight}px`)
+              }
+            }, 150)
+          }
+        }, 100)
+      })
+    }
+
     if (props.moistMainComments && props.isMoistCommentsShowed) {
       const colors: Record<string, string> = {
         Advisory: "F08080",
@@ -889,21 +956,31 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         legend.set("width", 85) // Уменьшенная ширина легенды для большего пространства графика
         isMobileVerticalLegend = true
       }
-    } else if (props.additionalChartData.linesCount > 9) {
-      if (props.largeScreen) {
-        legend.set("layout", props.root.current.verticalLayout)
-        legend.set("x", am5.percent(5))
-        legend.set("width", 85) // Уменьшенная ширина легенды для большего пространства графика
-        isMobileVerticalLegend = true
+    } else if (props.additionalChartData.linesCount >= 12) {
+      if (props.smallScreen || props.middleScreen) {
+        // Легенда в 2 ряда для экранов <= 1200px при 12+ сенсорах
+        legend.set("width", am5.percent(100))
+        legend.itemContainers.template.setAll({
+          paddingTop: 1,
+          paddingBottom: 1,
+          paddingLeft: 5,
+          paddingRight: 5,
+          width: am5.percent(16.66), // 100 / 6 = 16.66% для 6 колонок
+          maxWidth: 200
+        })
       }
+      // Для largeScreen (>1200px) остается горизонтальная легенда в одну строку по умолчанию
     }
 
-    legend.itemContainers.template.setAll({
-      paddingTop: 1,
-      paddingBottom: 1,
-      paddingLeft: 5,
-      paddingRight: 5,
-    })
+    // Настройки для других случаев
+    if (props.additionalChartData.linesCount < 12 || props.largeScreen) {
+      legend.itemContainers.template.setAll({
+        paddingTop: 1,
+        paddingBottom: 1,
+        paddingLeft: 5,
+        paddingRight: 5,
+      })
+    }
 
     legend.labels.template.setAll({
       fontSize: 13,
