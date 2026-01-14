@@ -929,58 +929,57 @@ export const createMainChart = (props: CreateMainChartProps): void => {
       destroyTooltipsAndLabels()
     })
 
-    // Legend
+    // Legend - определяем layout заранее в зависимости от условий
+    let legendLayout = props.root.current.horizontalLayout
+
+    // Для 12+ сенсоров на маленьких экранах используем GridLayout
+    if (props.additionalChartData.linesCount >= 12 && (props.smallScreen || props.middleScreen)) {
+      legendLayout = am5.GridLayout.new(props.root.current, {
+        maxColumns: 6,
+        fixedWidthGrid: false
+      })
+    }
+
     const legend = chart.children.push(
       am5.Legend.new(props.root.current, {
         centerX: am5.percent(50),
         x: am5.percent(50),
-        layout: props.root.current.horizontalLayout,
+        layout: legendLayout,
         marginTop: 15,
       }),
     )
 
     // Track if we're on mobile with vertical legend
-    let isMobileVerticalLegend = false
+    const isMobileVerticalLegend = false
 
-    if (props.additionalChartData.linesCount > 3 && props.additionalChartData.linesCount <= 6) {
-      if (props.smallScreen) {
-        legend.set("layout", props.root.current.verticalLayout)
-        legend.set("x", am5.percent(5))
-        legend.set("width", 100) // Фиксированная ширина легенды
-        isMobileVerticalLegend = true
-      }
-    } else if (props.additionalChartData.linesCount > 6 && props.additionalChartData.linesCount <= 9) {
-      if (props.middleScreen) {
-        legend.set("layout", props.root.current.verticalLayout)
-        legend.set("x", am5.percent(5))
-        legend.set("width", 85) // Уменьшенная ширина легенды для большего пространства графика
-        isMobileVerticalLegend = true
-      }
-    } else if (props.additionalChartData.linesCount >= 12) {
-      if (props.smallScreen || props.middleScreen) {
-        // Легенда в 2 ряда для экранов <= 1200px при 12+ сенсорах
-        legend.set("width", am5.percent(100))
-        legend.itemContainers.template.setAll({
-          paddingTop: 1,
-          paddingBottom: 1,
-          paddingLeft: 5,
-          paddingRight: 5,
-          width: am5.percent(16.66), // 100 / 6 = 16.66% для 6 колонок
-          maxWidth: 200
-        })
-      }
-      // Для largeScreen (>1200px) остается горизонтальная легенда в одну строку по умолчанию
-    }
+    // if (props.additionalChartData.linesCount > 3 && props.additionalChartData.linesCount <= 6) {
+    //   if (props.smallScreen) {
+    //     legend.set("layout", props.root.current.verticalLayout)
+    //     legend.set("x", am5.percent(5))
+    //     legend.set("width", 100) // Фиксированная ширина легенды
+    //     isMobileVerticalLegend = true
+    //   }
+    // } else if (props.additionalChartData.linesCount > 6 && props.additionalChartData.linesCount <= 9) {
+    //   if (props.middleScreen) {
+    //     legend.set("layout", props.root.current.verticalLayout)
+    //     legend.set("x", am5.percent(5))
+    //     legend.set("width", 85) // Уменьшенная ширина легенды для большего пространства графика
+    //     isMobileVerticalLegend = true
+    //   }
+    // } else if (props.additionalChartData.linesCount >= 12) {
+    //   if (props.smallScreen || props.middleScreen) {
+    //     // Легенда в 2 ряда для экранов <= 1200px при 12+ сенсорах
+    //     legend.set("width", am5.percent(100))
+    //   }
+    //   // Для largeScreen (>1200px) остается горизонтальная легенда в одну строку по умолчанию
+    // }
 
-    // Настройки для других случаев
-    if (props.additionalChartData.linesCount < 12 || props.largeScreen) {
-      legend.itemContainers.template.setAll({
-        paddingTop: 1,
-        paddingBottom: 1,
-        paddingLeft: 5,
-        paddingRight: 5,
-      })
-    }
+    legend.itemContainers.template.setAll({
+      paddingTop: 1,
+      paddingBottom: 1,
+      paddingLeft: 5,
+      paddingRight: 5,
+    })
 
     legend.labels.template.setAll({
       fontSize: 13,
@@ -993,5 +992,51 @@ export const createMainChart = (props: CreateMainChartProps): void => {
     legend.data.setAll(ordinarySeriesArray)
 
     chart.appear(1000, 100)
+
+    // Проверяем вмещается ли легенда и переносим на 2 строки если нет
+    setTimeout(() => {
+      const chartWidth = chart.width()
+      const legendWidth = legend.width()
+      const difference = chartWidth - legendWidth
+
+      console.log(`Ширина чарта: ${chartWidth}px`)
+      console.log(`Ширина легенды: ${legendWidth}px`)
+      console.log(`Разница (чарт - легенда): ${difference}px`)
+      console.log(`Легенда вмещается: ${difference >= 0 ? 'ДА' : 'НЕТ'}`)
+
+      // Если легенда не вмещается - переносим половину на вторую строку
+      if (difference < 0) {
+        const itemsCount = props.additionalChartData.linesCount
+        const maxColumns = Math.ceil(itemsCount / 2)
+
+        console.log(`Переносим легенду на 2 строки, maxColumns: ${maxColumns}`)
+
+        legend.set("layout", am5.GridLayout.new(props.root.current!, {
+          maxColumns: maxColumns,
+          fixedWidthGrid: true
+        }))
+
+        // Проверяем ещё раз после переноса на 2 строки
+        setTimeout(() => {
+          const chartWidth2 = chart.width()
+          const legendWidth2 = legend.width()
+          const difference2 = chartWidth2 - legendWidth2
+
+          console.log(`[После 2 строк] Ширина чарта: ${chartWidth2}px`)
+          console.log(`[После 2 строк] Ширина легенды: ${legendWidth2}px`)
+          console.log(`[После 2 строк] Разница: ${difference2}px`)
+          console.log(`[После 2 строк] Легенда вмещается: ${difference2 >= 0 ? 'ДА' : 'НЕТ'}`)
+
+          // Если всё ещё не вмещается - делаем полностью вертикальной
+          if (difference2 < 0) {
+            console.log(`Делаем легенду вертикальной`)
+
+            legend.set("layout", props.root.current!.verticalLayout)
+            legend.set("centerX", am5.percent(0))
+            legend.set("x", am5.percent(0))
+          }
+        }, 300)
+      }
+    }, 1200)
   }
 }
