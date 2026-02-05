@@ -22,7 +22,6 @@ export interface TabularDataItem {
 interface TabularDataProps {
   type: 'temp' | 'wxet' | 'fuel' | 'moist' | string;
   sensorId: string;
-  colors?: string[];
   data: TabularDataItem | TabularDataItem[] | { data: TabularDataItem[] };
   setData: (data: TabularDataItem | TabularDataItem[] | { data: TabularDataItem[] } | null) => void;
   isLoading: boolean;
@@ -32,7 +31,6 @@ interface TabularDataProps {
 
 export const TabularData: React.FC<TabularDataProps> = ({
                                                      type,
-                                                     colors,
                                                      sensorId: _sensorId,
                                                      data,
                                                      setData,
@@ -122,7 +120,7 @@ export const TabularData: React.FC<TabularDataProps> = ({
             <FuelModalTable setData={setData} setIsFuelModalOpen={setIsFuelModalOpen} modal={fuelModal}
                             isFuelModalOpen={isFuelModalOpen} data={data} isWxetMobile={isWxetMobile}/>
           ) : (
-            <MoistTable type={type} data={data} colors={colors} firstRowColor={firstRowColor}
+            <MoistTable type={type} data={data} firstRowColor={firstRowColor}
                         isWxetMobile={isWxetMobile}/>
           )
           }

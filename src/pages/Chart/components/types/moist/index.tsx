@@ -373,7 +373,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             moistMainComments: newCommentData.map(c => ({ ...c, comment: c.text })),
             updateCommentsArray: updateCommentsArray as any,
             isMoistCommentsShowed,
-            setMoistMainTabularDataColors: (colors: string[]) => updateTabularData("main", { colors }),
             smallScreen: screenSize.small,
             middleScreen: screenSize.middle,
             largeScreen: screenSize.large,
@@ -470,7 +469,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             moistMainComments: comments.main ? comments.main.map(c => ({ ...c, comment: c.text })) : [],
             updateCommentsArray: updateCommentsArray as any,
             isMoistCommentsShowed,
-            setMoistMainTabularDataColors: (colors: string[]) => updateTabularData("main", { colors }),
             smallScreen: screenSize.small,
             middleScreen: screenSize.middle,
             largeScreen: screenSize.large,
@@ -501,7 +499,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             moistMainComments: comments.main ? comments.main.map(c => ({ ...c, comment: c.text })) : [],
             updateCommentsArray: updateCommentsArray as any,
             isMoistCommentsShowed,
-            setMoistMainTabularDataColors: (colors: string[]) => updateTabularData("main", { colors }),
             smallScreen: screenSize.small,
             middleScreen: screenSize.middle,
             largeScreen: screenSize.large,
@@ -1142,7 +1139,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             <TabularData
               type="moistSoilTemp"
               sensorId={props.sensorId}
-              colors={tabularData.soilTemp.colors}
               data={(tabularData.soilTemp.data as any) || EMPTY_ARRAY}
               setData={(data: any) => updateTabularData("soilTemp", {data})}
               chartCode={CHART_CODES.SOIL_TEMP}
@@ -1215,7 +1211,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               <TabularData
                 type="moistMain"
                 sensorId={props.sensorId}
-                colors={tabularData.main.colors}
                 data={(tabularData.main.data as any) || EMPTY_ARRAY}
                 setData={(data: any) => updateTabularData("main", {data})}
                 chartCode={CHART_CODES.MAIN}
@@ -1286,7 +1281,6 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           <TabularData
             type="moistSum"
             sensorId={props.sensorId}
-            colors={tabularData.sum.colors}
             data={(tabularData.sum.data as any) || EMPTY_ARRAY}
             setData={(data: any) => updateTabularData("sum", {data})}
             chartCode={CHART_CODES.SUM}

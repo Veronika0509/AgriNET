@@ -39,6 +39,7 @@ export interface MapTabProps {
   checkedLayers: { [key: string]: boolean }
   setCheckedLayers: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>
   setActiveOverlays: React.Dispatch<React.SetStateAction<OverlayItem[]>>
+  amountOfSensors: number
   onLayerStateChange?: (state: { isMobileScreen: boolean; isLayerListVisible: boolean; hasLayersToShow: boolean; toggleLayerList: () => void }) => void
 }
 
@@ -55,6 +56,7 @@ export const MapTab: React.FC<MapTabProps> = ({
                                                 checkedLayers,
                                                 setCheckedLayers,
                                                 setActiveOverlays,
+                                                amountOfSensors,
                                                 onLayerStateChange,
                                               }) => {
   // State to control layer list visibility on mobile devices
@@ -80,11 +82,11 @@ export const MapTab: React.FC<MapTabProps> = ({
       return
     }
 
-    // Only show layer list when on tier 2 map (site is selected) AND there are overlays (not sites view)
+    // Only show layer list when on tier 2 map (site is selected) AND all overlays are fully loaded
     const isTier2Map = typeof secondMap === "string" && secondMap !== ""
-    const hasOverlays = allOverlays && allOverlays.length > 0
+    const allOverlaysLoaded = allOverlays && allOverlays.length > 0 && amountOfSensors > 0 && allOverlays.length >= amountOfSensors
 
-    if (!isTier2Map || !hasOverlays) {
+    if (!isTier2Map || !allOverlaysLoaded) {
       setHasLayersToShow(false)
       return
     }
@@ -107,7 +109,7 @@ export const MapTab: React.FC<MapTabProps> = ({
     }
 
     setHasLayersToShow(layerCount > 0)
-  }, [siteList, secondMap, allOverlays, isMarkerClicked])
+  }, [siteList, secondMap, allOverlays, isMarkerClicked, amountOfSensors])
 
   // Hide layer list after 4 seconds on mobile devices (screen width < 500px)
   // Timer starts AFTER layer list is shown

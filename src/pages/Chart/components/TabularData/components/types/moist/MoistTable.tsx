@@ -1,17 +1,21 @@
 import s from "../../../../types/moist/style.module.css";
 import React from "react";
 
+const colors =
+  "#FF6600 #FCD202 #B0DE09 #0D8ECF #2A0CD0 #CD0D74 #CC0000 #00CC00 #0000CC #DDDDDD #999999 #333333".split(" ");
+
 interface moistTableProps {
   type: string,
   data: any,
-  colors: any,
   firstRowColor: any,
-  isWxetMobile: boolean
+  isWxetMobile: boolean,
+  scrollable?: boolean
 }
 
-export const MoistTable: React.FC<moistTableProps> = ({type, data, colors, firstRowColor, isWxetMobile}) => {
+export const MoistTable: React.FC<moistTableProps> = ({type, data, firstRowColor, isWxetMobile, scrollable}) => {
   return (
-    <table className={`${s.mainTabularDataTable} ${type === 'moistSoilTemp' && s.mainMoistSoilTempTabularDataTable}`}>
+    <div style={scrollable ? { overflowX: 'auto' } : undefined}>
+    <table className={`${s.mainTabularDataTable} ${type === 'moistSoilTemp' && s.mainMoistSoilTempTabularDataTable}`} style={scrollable ? { tableLayout: 'auto', whiteSpace: 'nowrap' } : undefined}>
       <thead className={s.mainTabularDataTableThead}>
       <tr>
         <th className={`${s.mainTabularDataTableTh} ${s.mainTabularDataTableThLarge}`}>{data.label}</th>
@@ -53,5 +57,6 @@ export const MoistTable: React.FC<moistTableProps> = ({type, data, colors, first
       ))}
       </tbody>
     </table>
+    </div>
   )
 }

@@ -51,6 +51,10 @@ const Menu: React.FC<MenuProps> = (props) => {
     history.push('/info');
   };
 
+  const navigateToDataList = () => {
+    props.setPage(7);
+  };
+
   const handleLogout = () => {
     logout();
     history.push('/login');
@@ -145,8 +149,9 @@ const Menu: React.FC<MenuProps> = (props) => {
               </IonButton>
               <IonButton
                 className={s.menuBlock}
+                onClick={navigateToDataList}
               >
-                Block 4
+                Data List
               </IonButton>
             </div>
             <IonButton

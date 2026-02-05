@@ -4,10 +4,11 @@ import React, {useEffect, useState} from "react";
 interface TempTableProps {
   tabularData: any,
   isMobile: boolean,
-  freshnessColors: any
+  freshnessColors: any,
+  scrollable?: boolean
 }
 
-export const TempTable: React.FC<TempTableProps> = ({tabularData, isMobile, freshnessColors}) => {
+export const TempTable: React.FC<TempTableProps> = ({tabularData, isMobile, freshnessColors, scrollable}) => {
   const [data, setData] = useState<any>(undefined)
 
   // Define colors array matching the table headers
@@ -35,10 +36,12 @@ export const TempTable: React.FC<TempTableProps> = ({tabularData, isMobile, fres
     }
   }, []);
 
+  const tdClass = scrollable ? s.mainTabularDataTableTd : `${s.mainTabularDataTableTd} ${s.mainTempWxetTabularDataTableTd}`;
+
   return (
-    <div>
+    <div style={scrollable ? { overflowX: 'auto' } : undefined}>
       {data && (
-        <table className={`${s.mainTabularDataTable} ${s.mainTempWxetTabularDataTable}`}>
+        <table className={`${s.mainTabularDataTable} ${scrollable ? '' : s.mainTempWxetTabularDataTable}`} style={scrollable ? { tableLayout: 'auto', whiteSpace: 'nowrap' } : undefined}>
           <thead className={s.mainTabularDataTableThead}>
           <tr>
             <th
@@ -53,8 +56,7 @@ export const TempTable: React.FC<TempTableProps> = ({tabularData, isMobile, fres
                 style={{backgroundColor: `#28B2F7`}}>RH
             </th>
             <th className={s.mainTabularDataTableTh}
-                style={{backgroundColor: `#5ff627`}}>Leaf
-              Wetness
+                style={{backgroundColor: `#5ff627`}}>Leaf Wetness
             </th>
             <th className={s.mainTabularDataTableTh}
                 style={{backgroundColor: `#d2ba00`}}>Analog 1
@@ -74,44 +76,36 @@ export const TempTable: React.FC<TempTableProps> = ({tabularData, isMobile, fres
           {data.data.map((row: any, index: any) => (
             <tr key={index} className={s.mainTabularDataTableTr}>
               <td
-                className={`${s.TTabularDataTableTd} ${s.mainTempWxetTabularDataTableTd} ${
+                className={`${scrollable ? s.mainTabularDataTableTd : s.TTabularDataTableTd} ${scrollable ? '' : s.mainTempWxetTabularDataTableTd} ${
                   (index === 0 &&
                     (data.freshnessColor === '#000' ||
                       data.freshnessColor === '#808080FF' ||
                       data.freshnessColor === '#000000FF'))
                     ? s.mainTabularDataTableThead
                     : ''
-                } ${index !== 0 && s.mainTempWxetTabularDataTableTdBlack} `}
+                } ${index !== 0 && !scrollable && s.mainTempWxetTabularDataTableTdBlack} `}
                 style={index === 0 ? {backgroundColor: data.freshnessColor} : {}}
                 data-label={data.label}
               >{row.DateTime}</td>
-              <td className={`${s.mainTabularDataTableTd} ${s.mainTempWxetTabularDataTableTd}`}
-                  style={isMobile ? {backgroundColor: `rgb(${colors[0].r}, ${colors[0].g}, ${colors[0].b})`} : {}}
+              <td className={tdClass}
                   data-label="Temp">{row['MS 1'] === null ? 'null' : row['MS 1']}°F
               </td>
-              <td className={`${s.mainTabularDataTableTd} ${s.mainTempWxetTabularDataTableTd}`}
-                  style={isMobile ? {backgroundColor: `rgb(${colors[1].r}, ${colors[1].g}, ${colors[1].b})`} : {}}
+              <td className={tdClass}
                   data-label="Dew Point">{row['MS DU'] === null ? 'null' : row['MS DU']}°F
               </td>
-              <td className={`${s.mainTabularDataTableTd} ${s.mainTempWxetTabularDataTableTd}`}
-                  style={isMobile ? {backgroundColor: `rgb(${colors[2].r}, ${colors[2].g}, ${colors[2].b})`} : {}}
+              <td className={tdClass}
                   data-label="RH">{row['MS 3'] === null ? 'null' : row['MS 3']}%
               </td>
-              <td className={`${s.mainTabularDataTableTd} ${s.mainTempWxetTabularDataTableTd}`}
-                  style={isMobile ? {backgroundColor: `rgb(${colors[3].r}, ${colors[3].g}, ${colors[3].b})`} : {}}
+              <td className={tdClass}
                   data-label="Leaf Wetness">{row['leafWetness'] === null ? 'null' : row['leafWetness']}%
               </td>
-              <td className={`${s.mainTabularDataTableTd} ${s.mainTempWxetTabularDataTableTd}`}
-                  style={isMobile ? {backgroundColor: `rgb(${colors[4].r}, ${colors[4].g}, ${colors[4].b})`} : {}}
+              <td className={tdClass}
                   data-label="Analog 1">{row['analog1'] === null ? 'null' : row['analog1']}</td>
-              <td className={`${s.mainTabularDataTableTd} ${s.mainTempWxetTabularDataTableTd}`}
-                  style={isMobile ? {backgroundColor: `rgb(${colors[5].r}, ${colors[5].g}, ${colors[5].b})`} : {}}
+              <td className={tdClass}
                   data-label="Analog 2">{row['analog2'] === null ? 'null' : row['analog2']}</td>
-              <td className={`${s.mainTabularDataTableTd} ${s.mainTempWxetTabularDataTableTd}`}
-                  style={isMobile ? {backgroundColor: `rgb(${colors[6].r}, ${colors[6].g}, ${colors[6].b})`} : {}}
+              <td className={tdClass}
                   data-label="PSI">{row['psi'] === null ? 'null' : row['psi']}</td>
-              <td className={`${s.mainTabularDataTableTd} ${s.mainTempWxetTabularDataTableTd}`}
-                  style={isMobile ? {backgroundColor: `rgb(${colors[7].r}, ${colors[7].g}, ${colors[7].b})`} : {}}
+              <td className={tdClass}
                   data-label="Water Temp">{row['waterTemp'] === null ? 'null' : row['waterTemp']}°F
               </td>
             </tr>

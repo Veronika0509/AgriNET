@@ -33,7 +33,6 @@ interface SeriesItem {
   [key: string]: unknown
 }
 
-type SetterFunction<T> = (value: T) => void;
 type UpdateCommentsFunction = (type: string, sensorId: string, updateComments: () => void, data: ChartDataItem[]) => Promise<void>;
 
 // amCharts cursor event type
@@ -58,7 +57,6 @@ interface CreateMainChartProps {
   historicMode?: boolean;
   showForecast?: boolean;
   additionalChartData: AdditionalChartData;
-  setMoistMainTabularDataColors?: SetterFunction<string[]>;
   fullDatesArray?: Date[] | boolean;
   isNewDates?: boolean;
   moistMainAddCommentItemShowed?: boolean;
@@ -244,14 +242,6 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         seriesArray.push(series)
       }
     })
-
-    if (props.setMoistMainTabularDataColors) {
-      const colors: string[] = []
-      seriesColors.map((seriesColor: string) => {
-        colors.push(seriesColor)
-      })
-      props.setMoistMainTabularDataColors(colors)
-    }
 
     if (props.historicMode) {
       const seriesRangeDataItem = xAxis.makeDataItem({

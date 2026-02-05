@@ -82,3 +82,12 @@ ion-header {
 ion-content {
   flex: 1;
 }
+
+/* Hide tab bar on datalist page */
+.hide-tab-bar ion-tab-bar {
+  display: none !important;
+}
+
+ion-tab-bar[style*="display: none"] {
+  display: none !important;
+}

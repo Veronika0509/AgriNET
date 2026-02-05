@@ -540,6 +540,7 @@ const MapPage: React.FC<MapProps> = (props) => {
             checkedLayers={checkedLayers}
             setCheckedLayers={setCheckedLayers}
             setActiveOverlays={setActiveOverlays}
+            amountOfSensors={amountOfSensors}
           />
         )
       case "info":
@@ -586,6 +587,7 @@ const MapPage: React.FC<MapProps> = (props) => {
                 checkedLayers={checkedLayers}
                 setCheckedLayers={setCheckedLayers}
                 setActiveOverlays={setActiveOverlays}
+                amountOfSensors={amountOfSensors}
                 onLayerStateChange={setLayerListState}
               />
             </div>

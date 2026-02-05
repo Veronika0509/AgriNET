@@ -1,4 +1,4 @@
-import {Route, Redirect} from 'react-router-dom';
+import {Route, Redirect, useLocation} from 'react-router-dom';
 import {
   IonApp,
   IonIcon,
@@ -44,6 +44,7 @@ import VirtualValve from "./pages/VirtualValve";
 import AddValvePage from "./pages/AddValvePage";
 import CommentsPage from "./pages/Comments";
 import AddUnitPage from "./pages/AddUnit";
+import DataListPage from "./pages/DataList";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import { createUserId } from "./types";
 import './App.css'
@@ -83,6 +84,14 @@ const AppContent: React.FC = () => {
 
   const history = useHistory();
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
+  const [currentPath, setCurrentPath] = React.useState(window.location.pathname);
+
+  useEffect(() => {
+    const unlisten = history.listen((location) => {
+      setCurrentPath(location.pathname);
+    });
+    return () => unlisten();
+  }, [history]);
 
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);
@@ -167,26 +176,30 @@ const AppContent: React.FC = () => {
                         <Redirect to="/menu" />
                       </Route>
                     </IonRouterOutlet>
-                    <IonTabBar slot="bottom">
-                      <IonTabButton tab="menu" layout="icon-start" href="/menu" onClick={() => {
-                        const currentPath = window.location.pathname.replace('/AgriNET', '');
-                        pushToNavigationHistory(currentPath, page);
-                      }}>
-                        <IonIcon icon={home}/>
-                      </IonTabButton>
-                      <IonTabButton tab="budget" href="/budget" onClick={() => {
-                        const currentPath = window.location.pathname.replace('/AgriNET', '');
-                        pushToNavigationHistory(currentPath, page);
-                      }}>
-                        <IonIcon icon={settings}/>
-                      </IonTabButton>
-                      <IonTabButton tab="info" href="/info" onClick={() => {
-                        const currentPath = window.location.pathname.replace('/AgriNET', '');
-                        pushToNavigationHistory(currentPath, page);
-                      }}>
-                        <IonIcon icon={informationCircle}/>
-                      </IonTabButton>
-                    </IonTabBar>
+                    {currentPath.includes('/datalist') ? (
+                      <IonTabBar slot="bottom" style={{ display: 'none' }} />
+                    ) : (
+                      <IonTabBar slot="bottom">
+                        <IonTabButton tab="menu" layout="icon-start" href="/menu" onClick={() => {
+                          const currentPath = window.location.pathname.replace('/AgriNET', '');
+                          pushToNavigationHistory(currentPath, page);
+                        }}>
+                          <IonIcon icon={home}/>
+                        </IonTabButton>
+                        <IonTabButton tab="budget" href="/budget" onClick={() => {
+                          const currentPath = window.location.pathname.replace('/AgriNET', '');
+                          pushToNavigationHistory(currentPath, page);
+                        }}>
+                          <IonIcon icon={settings}/>
+                        </IonTabButton>
+                        <IonTabButton tab="info" href="/info" onClick={() => {
+                          const currentPath = window.location.pathname.replace('/AgriNET', '');
+                          pushToNavigationHistory(currentPath, page);
+                        }}>
+                          <IonIcon icon={informationCircle}/>
+                        </IonTabButton>
+                      </IonTabBar>
+                    )}
                   </IonTabs>
                 </IonReactRouter>
               </div>
@@ -248,7 +261,11 @@ const AppContent: React.FC = () => {
                               </Route>
                             </IonReactRouter>
                           </div>
-                        : null
+                        : page === 7
+                          ? <div>
+                              <DataListPage setPage={setPage} siteList={siteList} />
+                            </div>
+                          : null
             }
           </div>
           <div style={{display: page === 1 ? 'block' : 'none'}}>
