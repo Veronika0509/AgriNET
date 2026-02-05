@@ -57,6 +57,8 @@ const freshnessColors: Record<string, string> = {
   'outdated': '#000000FF'
 };
 
+const STORAGE_KEY = 'dataList_selectedTypes';
+
 const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
   const { userId } = useAppContext();
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -65,6 +67,7 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
   const [error, setError] = useState<string | null>(null);
   const [isMobile] = useState(window.innerWidth < 750);
   const [isWxetMobile] = useState(window.innerWidth < 425);
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
 
   const sensorTypes = useMemo(() => {
     const typesMap = new Map<string, string>();
@@ -127,10 +130,33 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
   };
 
   useEffect(() => {
-    if (sensorTypes.length > 0 && userId) {
+    if (sensorTypes.length > 0 && userId && !initialLoadDone) {
+      const savedTypes = localStorage.getItem(STORAGE_KEY);
+      if (savedTypes) {
+        try {
+          const parsed = JSON.parse(savedTypes);
+          const validTypes = parsed.filter((t: string) =>
+            sensorTypes.some(st => st.toLowerCase() === t.toLowerCase())
+          );
+          if (validTypes.length > 0) {
+            fetchAllTypes(validTypes);
+            setInitialLoadDone(true);
+            return;
+          }
+        } catch (e) {
+          console.error('Error parsing saved types:', e);
+        }
+      }
       fetchAllTypes(sensorTypes);
+      setInitialLoadDone(true);
     }
-  }, [sensorTypes, userId]);
+  }, [sensorTypes, userId, initialLoadDone]);
+
+  useEffect(() => {
+    if (selectedTypes.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(selectedTypes));
+    }
+  }, [selectedTypes]);
 
   const handleBack = () => {
     setPage(0);
