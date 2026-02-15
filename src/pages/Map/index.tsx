@@ -29,6 +29,7 @@ import { useChartOverlays } from "./hooks/useChartOverlays"
 import { useLayerCreation } from "./hooks/useLayerCreation"
 import { useCollisionResolution } from "./hooks/useCollisionResolution"
 import { useMapVisibility } from "./hooks/useMapVisibility"
+import { loadLayerPreferences, saveLayerPreferences } from "../../utils/chartPreferences"
 
 interface MapProps {
   page: number
@@ -181,6 +182,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   useMarkerClickCleanup({
     isMarkerClicked,
     activeOverlays,
+    allOverlays,
     markers,
     moistOverlaysRef,
     setMoistOverlays,
@@ -506,22 +508,72 @@ const MapPage: React.FC<MapProps> = (props) => {
   })
 
   // LayerList useEffect - initialize checked layers based on current site
+  // Load saved preferences from localStorage or default to all checked
   useEffect(() => {
+    console.log('[Map] Initializing layers, isMarkerClicked:', isMarkerClicked, 'userId:', props.userId);
     const initialCheckedState: { [key: string]: boolean } = {}
-    if (props.siteList && Array.isArray(props.siteList) && secondMap) {
-      const secondMapName = typeof secondMap === "string" ? secondMap : secondMap?.getDiv()?.id || ""
+
+    // Get site name from isMarkerClicked (it's set to the site name string when a site is clicked)
+    const siteName = typeof isMarkerClicked === "string" ? isMarkerClicked : ""
+
+    if (props.siteList && Array.isArray(props.siteList) && siteName) {
+      console.log('[Map] Site name for layer preferences:', siteName);
+
+      // Try to load saved preferences
+      const savedPreferences = loadLayerPreferences(props.userId, siteName)
+      console.log('[Map] Loaded saved preferences:', savedPreferences);
+
       props.siteList.forEach((site: SiteWithLayers) => {
-        if (site && site.name === secondMapName && site.layers && Array.isArray(site.layers)) {
+        if (site && site.name === siteName && site.layers && Array.isArray(site.layers)) {
           site.layers.forEach((layer: LayerListLayer) => {
             if (layer && layer.name) {
-              initialCheckedState[layer.name] = true
+              // Use saved preference if available, otherwise default to true (checked)
+              const layerChecked = savedPreferences?.[layer.name] ?? true
+              initialCheckedState[layer.name] = layerChecked
+              console.log('[Map] Layer', layer.name, 'checked:', layerChecked, '(saved:', savedPreferences?.[layer.name], ')');
             }
           })
         }
       })
     }
+    console.log('[Map] Final initial checked state:', initialCheckedState);
     setCheckedLayers(initialCheckedState)
-  }, [secondMap, props.siteList])
+  }, [isMarkerClicked, props.siteList, props.userId])
+
+  // Apply saved layer preferences to overlays - hide unchecked layers
+  // This runs AFTER all overlays are created and shown
+  useEffect(() => {
+    if (allOverlays && allOverlays.length > 0 && Object.keys(checkedLayers).length > 0) {
+      console.log('[Map] Applying layer preferences to overlays:', checkedLayers);
+
+      // Wait a bit to ensure all overlays are fully rendered
+      const timeoutId = setTimeout(() => {
+        allOverlays.forEach((overlay: OverlayItem) => {
+          const layerName = overlay?.chartData?.layerName
+          if (layerName && typeof checkedLayers[layerName] !== 'undefined') {
+            const shouldShow = checkedLayers[layerName]
+            console.log('[Map] Overlay', layerName, 'should show:', shouldShow);
+
+            if (!shouldShow) {
+              // Hide the overlay using hide() only - keep it on the map
+              console.log('[Map] Hiding overlay:', layerName, overlay?.chartData?.sensorId);
+              if (overlay.hide && typeof overlay.hide === 'function') {
+                overlay.hide()
+              }
+              // Remove from activeOverlays if it's there
+              setActiveOverlays((prev: OverlayItem[]) =>
+                prev.filter((active: OverlayItem) =>
+                  active?.chartData?.sensorId !== overlay?.chartData?.sensorId
+                )
+              )
+            }
+          }
+        })
+      }, 100) // Small delay to let overlays render
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [allOverlays, checkedLayers])
 
   const renderContent = () => {
     switch (activeTab) {
@@ -541,6 +593,8 @@ const MapPage: React.FC<MapProps> = (props) => {
             setCheckedLayers={setCheckedLayers}
             setActiveOverlays={setActiveOverlays}
             amountOfSensors={amountOfSensors}
+            userId={props.userId}
+            map={map}
           />
         )
       case "info":
@@ -588,6 +642,8 @@ const MapPage: React.FC<MapProps> = (props) => {
                 setCheckedLayers={setCheckedLayers}
                 setActiveOverlays={setActiveOverlays}
                 amountOfSensors={amountOfSensors}
+                userId={props.userId}
+                map={map}
                 onLayerStateChange={setLayerListState}
               />
             </div>

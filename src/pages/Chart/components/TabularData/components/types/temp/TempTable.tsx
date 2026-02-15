@@ -84,28 +84,31 @@ export const TempTable: React.FC<TempTableProps> = ({tabularData, isMobile, fres
                     ? s.mainTabularDataTableThead
                     : ''
                 } ${index !== 0 && !scrollable && s.mainTempWxetTabularDataTableTdBlack} `}
-                style={index === 0 ? {backgroundColor: data.freshnessColor} : {}}
+                style={index === 0 ? {
+                  backgroundColor: data.freshnessColor,
+                  color: (data.freshnessColor === '#808080FF' || data.freshnessColor === '#000000FF' || data.freshnessColor === '#000') ? '#fff' : '#000'
+                } : {color: '#000'}}
                 data-label={data.label}
               >{row.DateTime}</td>
-              <td className={tdClass}
+              <td className={tdClass} style={{color: '#000'}}
                   data-label="Temp">{row['MS 1'] === null ? 'null' : row['MS 1']}°F
               </td>
-              <td className={tdClass}
+              <td className={tdClass} style={{color: '#000'}}
                   data-label="Dew Point">{row['MS DU'] === null ? 'null' : row['MS DU']}°F
               </td>
-              <td className={tdClass}
+              <td className={tdClass} style={{color: '#000'}}
                   data-label="RH">{row['MS 3'] === null ? 'null' : row['MS 3']}%
               </td>
-              <td className={tdClass}
+              <td className={tdClass} style={{color: '#000'}}
                   data-label="Leaf Wetness">{row['leafWetness'] === null ? 'null' : row['leafWetness']}%
               </td>
-              <td className={tdClass}
+              <td className={tdClass} style={{color: '#000'}}
                   data-label="Analog 1">{row['analog1'] === null ? 'null' : row['analog1']}</td>
-              <td className={tdClass}
+              <td className={tdClass} style={{color: '#000'}}
                   data-label="Analog 2">{row['analog2'] === null ? 'null' : row['analog2']}</td>
-              <td className={tdClass}
+              <td className={tdClass} style={{color: '#000'}}
                   data-label="PSI">{row['psi'] === null ? 'null' : row['psi']}</td>
-              <td className={tdClass}
+              <td className={tdClass} style={{color: '#000'}}
                   data-label="Water Temp">{row['waterTemp'] === null ? 'null' : row['waterTemp']}°F
               </td>
             </tr>

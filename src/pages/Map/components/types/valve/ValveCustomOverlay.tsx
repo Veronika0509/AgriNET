@@ -4,6 +4,8 @@ import {onValveSensorClick} from "../../../functions/types/valve/onValveSensorCl
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {simpleColors} from "../../../../../assets/getColors";
 import skull from "../../../../../assets/images/skull.svg";
+import {IonAlert} from '@ionic/react';
+import React from 'react';
 
 interface ValveChartData {
   id: string | number;
@@ -43,6 +45,9 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private offset: { x: number; y: number };
       private div: HTMLElement | null;
       private isTextTruncated: boolean
+      private longPressTimer: NodeJS.Timeout | null = null;
+      private showInfoDialog: boolean = false;
+      private wasLongPress: boolean = false;
 
       constructor(
         bounds: google.maps.LatLngBounds,
@@ -88,19 +93,74 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: boolean) => {
         });
       }
 
+      private handleTouchStart = (e: React.TouchEvent) => {
+        this.wasLongPress = false;
+        this.longPressTimer = setTimeout(() => {
+          this.wasLongPress = true;
+          this.showInfoDialog = true;
+          if (this.root) {
+            this.root.render(this.renderContent());
+          }
+        }, 600);
+      };
+
+      private handleTouchEnd = () => {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+        setTimeout(() => {
+          this.wasLongPress = false;
+        }, 100);
+      };
+
+      private handleTouchMove = () => {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+      };
+
+      private closeInfoDialog = () => {
+        this.showInfoDialog = false;
+        if (this.root) {
+          this.root.render(this.renderContent());
+        }
+      };
+
       renderContent() {
+        const infoMessage = this.isValidChartData
+          ? [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n')
+          : [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n');
+
         return (
-          <div className={`${s.overlay_container}`} onClick={() => onValveSensorClick(
-            this.history,
-            this.userId,
-            String(this.chartData.sensorId),
-            this.chartData.name,
-            this.setChartData,
-            this.setPage,
-            this.setSiteId,
-            this.setSiteName,
-            this.setChartPageType
-          )}>
+          <React.Fragment>
+          <div
+            className={`${s.overlay_container}`}
+            onClick={() => {
+              if (this.wasLongPress) return;
+              onValveSensorClick(
+                this.history,
+                this.userId,
+                String(this.chartData.sensorId),
+                this.chartData.name,
+                this.setChartData,
+                this.setPage,
+                this.setSiteId,
+                this.setSiteName,
+                this.setChartPageType
+              );
+            }}
+            onTouchStart={this.handleTouchStart}
+            onTouchEnd={this.handleTouchEnd}
+            onTouchMove={this.handleTouchMove}
+          >
             {this.isValidChartData ? (
               <div>
                 <div className={`${s.overlay_chartContainer} ${s.overlay_valveChartContainer}`} style={{background: '#96fd66'}}>
@@ -117,7 +177,10 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: boolean) => {
                   {this.isValveMarkerChartDrawn ? null : (
                     <div className={s.overlay_loader}></div>
                   )}
-                  <p style={{marginTop: this.isValveMarkerChartDrawn ? '0' : '15px'}}
+                  <p style={{
+                    marginTop: this.isValveMarkerChartDrawn ? '0' : '15px',
+                    color: (this.chartData.freshness === '3d' || this.chartData.freshness === 'outdated') ? '#fff' : '#000'
+                  }}
                      className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlay_info}>
@@ -138,6 +201,14 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: boolean) => {
               </div>
             )}
           </div>
+          <IonAlert
+            isOpen={this.showInfoDialog}
+            onDidDismiss={this.closeInfoDialog}
+            header="Sensor Information"
+            message={infoMessage}
+            buttons={['OK']}
+          />
+          </React.Fragment>
         );
       }
 

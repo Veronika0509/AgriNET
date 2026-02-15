@@ -4,6 +4,8 @@ import {truncateText} from "../../../functions/truncateTextFunc";
 import {onTempSensorClick} from "../../../functions/types/temp/onTempSensorClick";
 import skull from "../../../../../assets/images/skull.svg";
 import alarm from "../../../../../assets/images/icons/wxetAlarm.png";
+import {IonAlert} from '@ionic/react';
+import React from 'react';
 
 interface TempChartData {
   id: string | number;
@@ -52,6 +54,9 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private div: HTMLElement | null;
       private isTextTruncated: boolean
       private borderColor: string
+      private longPressTimer: NodeJS.Timeout | null = null;
+      private showInfoDialog: boolean = false;
+      private wasLongPress: boolean = false;
 
       constructor(
         bounds: google.maps.LatLngBounds,
@@ -102,25 +107,80 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
         });
       }
 
+      private handleTouchStart = (e: React.TouchEvent) => {
+        this.wasLongPress = false;
+        this.longPressTimer = setTimeout(() => {
+          this.wasLongPress = true;
+          this.showInfoDialog = true;
+          if (this.root) {
+            this.root.render(this.renderContent());
+          }
+        }, 600);
+      };
+
+      private handleTouchEnd = () => {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+        setTimeout(() => {
+          this.wasLongPress = false;
+        }, 100);
+      };
+
+      private handleTouchMove = () => {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+      };
+
+      private closeInfoDialog = () => {
+        this.showInfoDialog = false;
+        if (this.root) {
+          this.root.render(this.renderContent());
+        }
+      };
+
       renderContent() {
         if (this.isValidChartData && !this.chartData.freshness) {
         }
+        const infoMessage = this.isValidChartData
+          ? [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
+              this.chartData.batteryPercentage ? `Battery: ${this.chartData.batteryPercentage}%` : null,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n')
+          : [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n');
+
         return (
-          <div className={s.overlay_container}>
+          <React.Fragment>
+            <div
+              className={s.overlay_container}
+              onTouchStart={this.handleTouchStart}
+              onTouchEnd={this.handleTouchEnd}
+              onTouchMove={this.handleTouchMove}
+            >
             {this.isValidChartData ? (
-              <div className={s.mainContainer} onClick={() => onTempSensorClick(
-                this.history,
-                this.chartData.sensorId,
-                this.chartData.name,
-                this.setChartData,
-                this.setPage,
-                this.setSiteId,
-                this.setSiteName,
-                this.setAdditionalChartData,
-                this.setChartPageType,
-                this.userId,
-                this.present
-              )}>
+              <div className={s.mainContainer} onClick={() => {
+                if (this.wasLongPress) return;
+                onTempSensorClick(
+                  this.history,
+                  this.chartData.sensorId,
+                  this.chartData.name,
+                  this.setChartData,
+                  this.setPage,
+                  this.setSiteId,
+                  this.setSiteName,
+                  this.setAdditionalChartData,
+                  this.setChartPageType,
+                  this.userId,
+                  this.present
+                );
+              }}>
                 <div className={s.overlay_chartContainer} style={{background: this.borderColor}}>
                   <div id={String(this.chartData.id)} className={s.overlay_chart} style={{ display: this.isTempMarkerChartDrawn ? 'block' : 'none' }}>
                     {this.chartData.alarmEnabled && (
@@ -132,7 +192,9 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
                   {this.isTempMarkerChartDrawn ? null : (
                     <div className={s.overlay_loader}></div>
                   )}
-                  <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
+                  <p className={s.overlay_underInformationOverlayText} style={{
+                    color: (this.chartData.freshness === '3d' || this.chartData.freshness === 'outdated') ? '#fff' : '#000'
+                  }}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlay_info}>
                   {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
@@ -153,6 +215,14 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
               </div>
             )}
           </div>
+          <IonAlert
+            isOpen={this.showInfoDialog}
+            onDidDismiss={this.closeInfoDialog}
+            header="Sensor Information"
+            message={infoMessage}
+            buttons={['OK']}
+          />
+          </React.Fragment>
         );
       }
 

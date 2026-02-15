@@ -53,3 +53,43 @@ export function loadChartPreferences(): ChartPreferences {
     selectedTab,
   };
 }
+
+/**
+ * Save layer selection preferences to localStorage
+ * Stores per user and per site
+ */
+export function saveLayerPreferences(userId: string | number, siteName: string, checkedLayers: { [key: string]: boolean }): void {
+  try {
+    // Convert userId to number if it's a branded type
+    const userIdValue = typeof userId === 'object' ? String(userId) : userId;
+    const key = `layerPreferences_${userIdValue}_${siteName}`;
+    const value = JSON.stringify(checkedLayers);
+    localStorage.setItem(key, value);
+    console.log('[Layer Preferences] Saved:', { key, userId: userIdValue, siteName, checkedLayers });
+  } catch (error) {
+    console.error('Failed to save layer preferences:', error);
+  }
+}
+
+/**
+ * Load layer selection preferences from localStorage
+ * Returns saved preferences or null if not found
+ */
+export function loadLayerPreferences(userId: string | number, siteName: string): { [key: string]: boolean } | null {
+  try {
+    // Convert userId to number if it's a branded type
+    const userIdValue = typeof userId === 'object' ? String(userId) : userId;
+    const key = `layerPreferences_${userIdValue}_${siteName}`;
+    const saved = localStorage.getItem(key);
+    console.log('[Layer Preferences] Loading:', { key, userId: userIdValue, siteName, saved });
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      console.log('[Layer Preferences] Loaded:', parsed);
+      return parsed;
+    }
+  } catch (error) {
+    console.error('Failed to load layer preferences:', error);
+  }
+  console.log('[Layer Preferences] No saved preferences found');
+  return null;
+}

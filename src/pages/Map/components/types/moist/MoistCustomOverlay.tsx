@@ -4,6 +4,9 @@ import {truncateText} from "../../../functions/truncateTextFunc";
 import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
 import {getOptions} from "../../../data/getOptions";
 import skull from '../../../../../assets/images/skull.svg'
+import {loadGoogleApi} from "@/functions/loadGoogleApiFunc";
+import {IonAlert} from '@ionic/react';
+import React from 'react';
 
 // Интерфейсы для типизации
 interface MoistChartData {
@@ -72,6 +75,9 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private prefix: string;
       private isCurrentOverlay: boolean;
       private isTextTruncated: boolean
+      private longPressTimer: NodeJS.Timeout | null = null;
+      private showInfoDialog: boolean = false;
+      private wasLongPress: boolean = false;
 
       constructor(
         isBudgetEditorMap: boolean,
@@ -163,8 +169,49 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private _onMouseLeave: () => void = () => {
       };
 
+      private handleTouchStart = (e: React.TouchEvent) => {
+        this.wasLongPress = false;
+        this.longPressTimer = setTimeout(() => {
+          this.wasLongPress = true;
+          this.showInfoDialog = true;
+          if (this.root) {
+            this.root.render(this.renderContent());
+          }
+        }, 600); // 600ms long press
+      };
+
+      private handleTouchEnd = () => {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+        // Reset wasLongPress after a short delay to allow onClick to check it
+        setTimeout(() => {
+          this.wasLongPress = false;
+        }, 100);
+      };
+
+      private handleTouchMove = () => {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+      };
+
+      private closeInfoDialog = () => {
+        this.showInfoDialog = false;
+        if (this.root) {
+          this.root.render(this.renderContent());
+        }
+      };
+
       renderContent() {
         const onMarkerClick = () => {
+          // Don't navigate if this was a long press
+          if (this.wasLongPress) {
+            return;
+          }
+
           if (this.isBudgetEditorMap) {
             if (!this.isCurrentOverlay) {
               this.setCurrentSensorId(this.chartData.sensorId)
@@ -187,9 +234,27 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
         }
         if (this.isValidChartData && !this.chartData.freshness) {
         }
+        const infoMessage = this.isValidChartData
+          ? [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
+              this.chartData.battery ? `Battery: ${this.chartData.battery}` : null,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n')
+          : [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n');
+
         return (
-          <div className={s.overlay_container} onClick={onMarkerClick}
-               style={{width: this.isCurrentOverlay ? '62px' : '58px'}}>
+          <>
+            <div
+              className={s.overlay_container}
+              onClick={onMarkerClick}
+              onTouchStart={this.handleTouchStart}
+              onTouchEnd={this.handleTouchEnd}
+              onTouchMove={this.handleTouchMove}
+              style={{width: this.isCurrentOverlay ? '62px' : '58px'}}
+            >
             {this.isValidChartData ? (
               <div className={s.mainContainer}>
                 <div className={s.overlay_chartContainer} style={{
@@ -212,7 +277,9 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
                       zIndex: 10
                     }}></div>
                   )}
-                  <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
+                  <p className={s.overlay_underInformationOverlayText} style={{
+                    color: (this.chartData.freshness === '3d' || this.chartData.freshness === 'outdated') ? '#fff' : '#000'
+                  }}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={s.overlay_info}>
                   {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
@@ -238,6 +305,14 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
               </div>
             )}
           </div>
+          <IonAlert
+            isOpen={this.showInfoDialog}
+            onDidDismiss={this.closeInfoDialog}
+            header="Sensor Information"
+            message={infoMessage}
+            buttons={['OK']}
+          />
+          </>
         );
       }
 

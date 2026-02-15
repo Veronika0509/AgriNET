@@ -4,6 +4,8 @@ import {truncateText} from "../../../functions/truncateTextFunc";
 import {getOptions} from "../../../data/getOptions";
 import skull from "../../../../../assets/images/skull.svg";
 import {onFuelSensorClick} from "../../../functions/types/wxet/onFuelSensorClick";
+import {IonAlert} from '@ionic/react';
+import React from 'react';
 
 // Интерфейсы для типизации
 interface FuelChartData {
@@ -47,6 +49,9 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private offset: { x: number; y: number };
       private div?: HTMLElement | null;
       private isTextTruncated: boolean
+      private longPressTimer: NodeJS.Timeout | null = null;
+      private showInfoDialog: boolean = false;
+      private wasLongPress: boolean = false;
 
       constructor(
         setChartData: (data: unknown) => void,
@@ -90,11 +95,64 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
         });
       }
 
+      private handleTouchStart = (e: React.TouchEvent) => {
+        this.wasLongPress = false;
+        this.longPressTimer = setTimeout(() => {
+          this.wasLongPress = true;
+          this.showInfoDialog = true;
+          if (this.root) {
+            this.root.render(this.renderContent());
+          }
+        }, 600);
+      };
+
+      private handleTouchEnd = () => {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+        setTimeout(() => {
+          this.wasLongPress = false;
+        }, 100);
+      };
+
+      private handleTouchMove = () => {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+      };
+
+      private closeInfoDialog = () => {
+        this.showInfoDialog = false;
+        if (this.root) {
+          this.root.render(this.renderContent());
+        }
+      };
+
       renderContent() {
+        const infoMessage = this.isValidData
+          ? [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
+              this.chartData.batteryPercentage ? `Battery: ${this.chartData.batteryPercentage}%` : null,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n')
+          : [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n');
+
         return (
-          <div className={s.overlay_fuelContainer}>
+          <React.Fragment>
+          <div
+            className={s.overlay_fuelContainer}
+            onTouchStart={this.handleTouchStart}
+            onTouchEnd={this.handleTouchEnd}
+            onTouchMove={this.handleTouchMove}
+          >
             {this.isValidData ? (
               <div className={s.mainContainer} onClick={() => {
+                if (this.wasLongPress) return;
                 onFuelSensorClick(
                   this.history,
                   String(this.chartData.sensorId),
@@ -104,7 +162,7 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
                   this.setSiteId,
                   this.setSiteName,
                   this.setChartPageType
-                )
+                );
               }}>
                 <div className={s.overlay_chartContainer} style={{background: this.borderColor}}>
                   <div id={String(this.chartData.id)} className={s.overlay_chart}
@@ -112,7 +170,9 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
                   {this.isFuelMarkerChartDrawn ? null : (
                     <div className={s.overlay_loader}></div>
                   )}
-                  <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name)}</p>
+                  <p className={s.overlay_underInformationOverlayText} style={{
+                    color: (this.chartData.freshness === '3d' || this.chartData.freshness === 'outdated') ? '#fff' : '#000'
+                  }}>{truncateText(this.chartData.name)}</p>
                 </div>
                 <div className={`${s.overlay_info} ${s.overlay_fuelInfo}`}>
                   {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
@@ -134,6 +194,14 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
               </div>
             )}
           </div>
+          <IonAlert
+            isOpen={this.showInfoDialog}
+            onDidDismiss={this.closeInfoDialog}
+            header="Sensor Information"
+            message={infoMessage}
+            buttons={['OK']}
+          />
+          </React.Fragment>
         );
       }
 

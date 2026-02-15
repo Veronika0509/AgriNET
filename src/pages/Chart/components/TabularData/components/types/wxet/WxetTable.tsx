@@ -53,34 +53,35 @@ export const WxetTable: React.FC<WxetTableProps> = ({ tabularData, freshnessColo
                 <td
                   className={`${scrollable ? s.mainTabularDataTableTd : s.TTabularDataTableTd} ${scrollable ? '' : `${s.mainTempWxetTabularDataTableTd} ${s.mainTempWxetTabularDataTableTdBlack}`}`}
                   data-label={data.label}
+                  style={{color: '#000'}}
                 >
                   {row.DateTime}
                 </td>
-                <td className={tdClass} data-label="Solar Rad">
+                <td className={tdClass} data-label="Solar Rad" style={{color: '#000'}}>
                   {row.solar_display === 0 ? '0' : row.solar_display ?? '-'}
                 </td>
-                <td className={tdClass} data-label="RH">
+                <td className={tdClass} data-label="RH" style={{color: '#000'}}>
                   {row.RH === 0 ? '0' : row.RH ?? '-'}%
                 </td>
-                <td className={tdClass} data-label="Air Temp">
+                <td className={tdClass} data-label="Air Temp" style={{color: '#000'}}>
                   {row.Temp === 0 ? '0' : row.Temp ?? '-'}°F
                 </td>
-                <td className={tdClass} data-label="Rain">
+                <td className={tdClass} data-label="Rain" style={{color: '#000'}}>
                   {row.rain_display === 0 ? '0' : row.rain_display ?? '-'}
                 </td>
-                <td className={tdClass} data-label="Wind">
+                <td className={tdClass} data-label="Wind" style={{color: '#000'}}>
                   {row.wind_display === 0 ? '0' : row.wind_display ?? '-'}
                 </td>
-                <td className={tdClass} data-label="Gust">
+                <td className={tdClass} data-label="Gust" style={{color: '#000'}}>
                   {row.gust_display === 0 ? '0' : row.gust_display ?? '-'}
                 </td>
-                <td className={tdClass} data-label="Leaf Wet">
+                <td className={tdClass} data-label="Leaf Wet" style={{color: '#000'}}>
                   {row.LW === 0 ? '0' : row.LW ?? '-'}
                 </td>
-                <td className={tdClass} data-label="GDD">
+                <td className={tdClass} data-label="GDD" style={{color: '#000'}}>
                   {row.gdd === 0 ? '0' : row.gdd ?? '-'}
                 </td>
-                <td className={tdClass} data-label="AGDD">
+                <td className={tdClass} data-label="AGDD" style={{color: '#000'}}>
                   {row.agdd === 0 ? '0' : row.agdd ?? '-'}
                 </td>
               </tr>

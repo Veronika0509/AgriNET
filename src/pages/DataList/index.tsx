@@ -12,7 +12,7 @@ import {
   IonSelectOption,
   IonSpinner,
 } from '@ionic/react';
-import {arrowBackOutline} from 'ionicons/icons';
+import {arrowBackOutline, refreshOutline} from 'ionicons/icons';
 import { useAppContext } from '../../context/AppContext';
 import axios from 'axios';
 import { MoistTable } from '../Chart/components/TabularData/components/types/moist/MoistTable';
@@ -304,59 +304,77 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
           <IonTitle>Data List</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent style={{ "--background": "white" }}>
-        <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: "12px" }}>
-          <IonSelect
-            multiple={true}
-            value={selectedTypes}
-            placeholder="Select sensor types"
-            onIonChange={(e) => setSelectedTypes(e.detail.value)}
-            interface="popover"
-            label="Sensor Types"
-            labelPlacement="start"
-            style={{ flex: 1 }}
-          >
-            {sensorTypes.map((type) => (
-              <IonSelectOption key={type} value={type}>
-                {getDisplayName(type)}
-              </IonSelectOption>
-            ))}
-          </IonSelect>
-          <IonButton size="default" onClick={fetchTabularData}>
-            Update
-          </IonButton>
-        </div>
-        <div style={{ padding: "0 16px 16px" }}>
-          {loading ? (
-            <div style={{ textAlign: "center", padding: "32px" }}>
-              <IonSpinner name="crescent" />
-            </div>
-          ) : error ? (
-            <div style={{ textAlign: "center", color: "#dc3545", padding: "32px" }}>
-              {error}
-            </div>
-          ) : tabularData.length === 0 ? (
-            <div style={{ textAlign: "center", color: "#666", padding: "32px" }}>
-              No data available
-            </div>
-          ) : (
-            groupedData.map(group => (
-              <div key={group.type} style={{ marginBottom: "24px" }}>
-                <h2 style={{
-                  fontSize: "18px",
-                  fontWeight: "600",
-                  color: "#333",
-                  margin: "16px 0 12px 0",
-                  textAlign: "center"
-                }}>
-                  {group.displayName}
-                </h2>
-                {group.items.map(renderDataTable)}
+      <div style={{ position: "relative", height: "100%" }}>
+        <IonContent style={{ "--background": "white" }}>
+          <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+            <IonSelect
+              multiple={true}
+              value={selectedTypes}
+              placeholder="Select sensor types"
+              onIonChange={(e) => setSelectedTypes(e.detail.value)}
+              interface="popover"
+              label="Sensor Types"
+              labelPlacement="start"
+              style={{ flex: 1, minWidth: "200px" }}
+            >
+              {sensorTypes.map((type) => (
+                <IonSelectOption key={type} value={type}>
+                  {getDisplayName(type)}
+                </IonSelectOption>
+              ))}
+            </IonSelect>
+            <IonButton size="default" onClick={fetchTabularData}>
+              Update
+            </IonButton>
+          </div>
+          <div style={{ padding: "0 16px 16px" }}>
+            {loading ? (
+              <div style={{ textAlign: "center", padding: "32px" }}>
+                <IonSpinner name="crescent" />
               </div>
-            ))
-          )}
-        </div>
-      </IonContent>
+            ) : error ? (
+              <div style={{ textAlign: "center", color: "#dc3545", padding: "32px" }}>
+                {error}
+              </div>
+            ) : tabularData.length === 0 ? (
+              <div style={{ textAlign: "center", color: "#666", padding: "32px" }}>
+                No data available
+              </div>
+            ) : (
+              groupedData.map(group => (
+                <div key={group.type} style={{ marginBottom: "24px" }}>
+                  <h2 style={{
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    color: "#333",
+                    margin: "16px 0 12px 0",
+                    textAlign: "center"
+                  }}>
+                    {group.displayName}
+                  </h2>
+                  {group.items.map(renderDataTable)}
+                </div>
+              ))
+            )}
+          </div>
+        </IonContent>
+        <IonButton
+          shape='round'
+          onClick={fetchTabularData}
+          style={{
+            cursor: "pointer",
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            '--padding-start': '5px',
+            '--padding-end': '5px',
+            width: '35px',
+            height: '36px',
+          }}
+        >
+          <IonIcon slot="icon-only" icon={refreshOutline}></IonIcon>
+        </IonButton>
+      </div>
     </IonPage>
   );
 };

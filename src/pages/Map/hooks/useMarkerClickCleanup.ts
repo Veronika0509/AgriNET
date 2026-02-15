@@ -5,6 +5,7 @@ import type { ExtlDataContainerItem } from "../types"
 interface UseMarkerClickCleanupProps {
   isMarkerClicked: boolean | string
   activeOverlays: OverlayItem[]
+  allOverlays: OverlayItem[]
   markers: google.maps.Marker[]
   moistOverlaysRef: React.MutableRefObject<any[]>
   setMoistOverlays: React.Dispatch<React.SetStateAction<OverlayItem[]>>
@@ -49,13 +50,23 @@ export const useMarkerClickCleanup = (props: UseMarkerClickCleanupProps) => {
     const isNowInSiteView = props.isMarkerClicked === false
 
     if (wasInSensorView && isNowInSiteView) {
-      // Remove all overlays from the map using activeOverlays which contains all the overlay instances
-      props.activeOverlays.forEach((overlay: OverlayItem) => {
+      // Remove all overlays from the map using allOverlays which contains ALL overlay instances
+      // (including hidden ones that are not in activeOverlays)
+      console.log('[Cleanup] Removing all overlays, count:', props.allOverlays.length);
+      props.allOverlays.forEach((overlay: OverlayItem) => {
         if (overlay && overlay.setMap && typeof overlay.setMap === "function") {
           try {
             overlay.setMap(null)
           } catch (error) {
             console.warn("Error removing overlay from map:", error)
+          }
+        }
+        // Also try calling hide() if available
+        if (overlay && overlay.hide && typeof overlay.hide === "function") {
+          try {
+            overlay.hide()
+          } catch (error) {
+            console.warn("Error hiding overlay:", error)
           }
         }
       })
@@ -107,5 +118,5 @@ export const useMarkerClickCleanup = (props: UseMarkerClickCleanupProps) => {
 
     // Update the ref to track the current state for the next render
     prevIsMarkerClickedRef.current = props.isMarkerClicked
-  }, [props.isMarkerClicked, props.activeOverlays, props.markers])
+  }, [props.isMarkerClicked, props.allOverlays, props.markers])
 }

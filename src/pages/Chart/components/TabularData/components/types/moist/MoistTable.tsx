@@ -45,9 +45,12 @@ export const MoistTable: React.FC<moistTableProps> = ({type, data, firstRowColor
                 row.freshness === 'outdated'))
               ? s.mainTabularDataTableThead
               : ''
-          }`}  data-label='Time' style={index === 0 ? {backgroundColor: firstRowColor} : {color: '#000'}}>{row.DateTime}</td>
+          }`}  data-label='Time' style={index === 0 ? {
+            backgroundColor: firstRowColor,
+            color: (row.freshness === '3d' || row.freshness === 'outdated') ? '#fff' : '#000'
+          } : {color: '#000'}}>{row.DateTime}</td>
           {Array.from({length: data.sensorCount}, (_, index) =>
-            <td key={index} data-label={`${4 * (index + 1)}inch`} style={isWxetMobile && type === 'moistSoilTemp' ? {backgroundColor: `rgb(${colors[index].r}, ${colors[index].g}, ${colors[index].b})`} : {}} className={`${s.mainTabularDataTableTd} ${type === 'moistSoilTemp' && s.mainMoistSoilTempTabularDataTableTd}`}>
+            <td key={index} data-label={`${4 * (index + 1)}inch`} style={isWxetMobile && type === 'moistSoilTemp' ? {backgroundColor: `rgb(${colors[index].r}, ${colors[index].g}, ${colors[index].b})`, color: '#000'} : {color: '#000'}} className={`${s.mainTabularDataTableTd} ${type === 'moistSoilTemp' && s.mainMoistSoilTempTabularDataTableTd}`}>
               {type === 'moistMain' && row[`MABS${index}`]}
               {type === 'moistSum' && `${row[`SumAve`]} inches`}
               {type === 'moistSoilTemp' && `${row[`MABS${index}`]}°F`}

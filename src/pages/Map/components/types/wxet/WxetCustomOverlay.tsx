@@ -7,6 +7,8 @@ import {onWxetSensorClick} from "../../../functions/types/wxet/onWxetSensorClick
 import {getOptions} from "../../../data/getOptions";
 import skull from "../../../../../assets/images/skull.svg";
 import alarm from '../../../../../assets/images/icons/wxetAlarm.png'
+import {IonAlert} from '@ionic/react';
+import React from 'react';
 
 interface WxetChartData {
   sensorId: string;
@@ -47,6 +49,9 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private offset: { x: number; y: number };
       private div: HTMLElement | null;
       private isTextTruncated: boolean
+      private longPressTimer: NodeJS.Timeout | null = null;
+      private showInfoDialog: boolean = false;
+      private wasLongPress: boolean = false;
 
       constructor(
         setChartData: (data: unknown) => void,
@@ -87,6 +92,41 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
         this.draw()
       }
 
+      private handleTouchStart = (e: React.TouchEvent) => {
+        this.wasLongPress = false;
+        this.longPressTimer = setTimeout(() => {
+          this.wasLongPress = true;
+          this.showInfoDialog = true;
+          if (this.root) {
+            this.root.render(this.renderContent());
+          }
+        }, 600);
+      };
+
+      private handleTouchEnd = () => {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+        setTimeout(() => {
+          this.wasLongPress = false;
+        }, 100);
+      };
+
+      private handleTouchMove = () => {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+      };
+
+      private closeInfoDialog = () => {
+        this.showInfoDialog = false;
+        if (this.root) {
+          this.root.render(this.renderContent());
+        }
+      };
+
       renderContent() {
         const tempMetric: string = this.chartData.data.metric === 'AMERICA' ? "°F" : "°C"
         const rainMetric: string = this.chartData.data.metric === 'AMERICA' ? "inch" : "mm"
@@ -104,21 +144,42 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
         const isBatteryPercentage: boolean = this.chartData.data.batteryPercentage !== undefined && this.chartData.data.batteryPercentage !== null
         if (this.isValidData && !this.chartData.freshness) {
         }
+        const infoMessage = this.isValidData
+          ? [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
+              isBatteryPercentage ? `Battery: ${this.chartData.data.batteryPercentage}%` : null,
+              isBattery && !isBatteryPercentage ? `Battery: ${this.chartData.data.battery} VDC` : null,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n')
+          : [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n');
+
         return (
-          <div className={s.overlay_wxetOverlay}>
+          <React.Fragment>
+            <div
+              className={s.overlay_wxetOverlay}
+              onTouchStart={this.handleTouchStart}
+              onTouchEnd={this.handleTouchEnd}
+              onTouchMove={this.handleTouchMove}
+            >
             {
               this.isValidData ? (
-                <div onClick={() => onWxetSensorClick(
-                  this.history,
-                  String(this.chartData.sensorId),
-                  this.chartData.name,
-                  this.setChartData,
-                  this.setPage,
-                  this.setSiteId,
-                  this.setSiteName,
-                  this.setAdditionalChartData,
-                  this.setChartPageType
-                )}>
+                <div onClick={() => {
+                  if (this.wasLongPress) return;
+                  onWxetSensorClick(
+                    this.history,
+                    String(this.chartData.sensorId),
+                    this.chartData.name,
+                    this.setChartData,
+                    this.setPage,
+                    this.setSiteId,
+                    this.setSiteName,
+                    this.setAdditionalChartData,
+                    this.setChartPageType
+                  );
+                }}>
                   <div className={s.overlay_wxetOverlayContainer} style={{ background: this.borderColor }}>
                     <div className={s.overlay_wxetOverlayInnerContainer} style={{backgroundColor: String(this.chartData.data.bgColor || '')}}>
                       <img src={this.chartData.data.solar ? wxetOverlaySun : wxetOverlayMoon} className={s.overlay_wxetOverlayImage}
@@ -136,7 +197,9 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
                         </div>}
                       </div>
                     </div>
-                    <p className={s.overlay_underInformationOverlayText}>{truncateText(this.chartData.name, 'wxet')}</p>
+                    <p className={s.overlay_underInformationOverlayText} style={{
+                      color: (this.chartData.freshness === '3d' || this.chartData.freshness === 'outdated') ? '#fff' : '#000'
+                    }}>{truncateText(this.chartData.name, 'wxet')}</p>
                   </div>
                   <div className={`${s.overlay_info} ${s.overlay_validWxetOverlayInfo}`}>
                     {this.isTextTruncated ? <p className={s.chartName}>{this.chartData.name}</p> : null}
@@ -165,6 +228,14 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
               )
             }
           </div>
+          <IonAlert
+            isOpen={this.showInfoDialog}
+            onDidDismiss={this.closeInfoDialog}
+            header="Sensor Information"
+            message={infoMessage}
+            buttons={['OK']}
+          />
+          </React.Fragment>
         );
       }
 

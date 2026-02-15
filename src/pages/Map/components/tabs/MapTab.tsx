@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react"
 import { IonItem, IonCheckbox } from "@ionic/react"
 import LocationButton from "../LocationButton"
-import type { Site } from "@/types"
+import type { Site, UserId } from "@/types"
 import type { OverlayItem } from "../../types/OverlayItem"
 import s from "../../style.module.css"
 import layerListIcon from "../../../../assets/images/icons/layerListIcon.png"
+import { saveLayerPreferences } from "../../../../utils/chartPreferences"
 
 // LayerList interfaces
 interface LayerListLayer {
@@ -40,6 +41,8 @@ export interface MapTabProps {
   setCheckedLayers: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>
   setActiveOverlays: React.Dispatch<React.SetStateAction<OverlayItem[]>>
   amountOfSensors: number
+  userId: UserId
+  map: google.maps.Map | null
   onLayerStateChange?: (state: { isMobileScreen: boolean; isLayerListVisible: boolean; hasLayersToShow: boolean; toggleLayerList: () => void }) => void
 }
 
@@ -57,6 +60,8 @@ export const MapTab: React.FC<MapTabProps> = ({
                                                 setCheckedLayers,
                                                 setActiveOverlays,
                                                 amountOfSensors,
+                                                userId,
+                                                map,
                                                 onLayerStateChange,
                                               }) => {
   // State to control layer list visibility on mobile devices
@@ -112,7 +117,7 @@ export const MapTab: React.FC<MapTabProps> = ({
   }, [siteList, secondMap, allOverlays, isMarkerClicked, amountOfSensors])
 
   // Hide layer list after 4 seconds on mobile devices (screen width < 500px)
-  // Timer starts AFTER layer list is shown
+  // Timer starts AFTER layer list is shown and restarts when user changes layer selection
   useEffect((): void | (() => void) => {
     const screenWidth = window.innerWidth
     const isMobile = screenWidth < 500
@@ -129,7 +134,7 @@ export const MapTab: React.FC<MapTabProps> = ({
       // On desktop, always keep layer list visible
       setIsLayerListVisible(true)
     }
-  }, [hasLayersToShow])
+  }, [hasLayersToShow, checkedLayers])
 
   // Handle window resize - ensure layer list stays visible on desktop
   useEffect(() => {
@@ -178,11 +183,25 @@ export const MapTab: React.FC<MapTabProps> = ({
   // Handle layer toggle
   const handleToggleLayer = (checkbox: CustomEvent, layerName: string) => {
     const isChecked = checkbox.detail.checked
+    console.log('[MapTab] Layer toggled:', { layerName, isChecked, userId });
 
-    setCheckedLayers((prev) => ({
-      ...prev,
-      [layerName]: isChecked,
-    }))
+    setCheckedLayers((prev) => {
+      const newState = {
+        ...prev,
+        [layerName]: isChecked,
+      }
+
+      // Get site name from isMarkerClicked (it contains the site name when a site is selected)
+      const siteName = typeof isMarkerClicked === "string" ? isMarkerClicked : ""
+      console.log('[MapTab] Saving preferences:', { siteName, userId, newState });
+      if (siteName && userId) {
+        saveLayerPreferences(userId, siteName, newState)
+      } else {
+        console.warn('[MapTab] Cannot save preferences - missing siteName or userId:', { siteName, userId });
+      }
+
+      return newState
+    })
 
     if (allOverlays && Array.isArray(allOverlays)) {
       allOverlays.forEach((overlay: OverlayItem) => {
@@ -191,9 +210,10 @@ export const MapTab: React.FC<MapTabProps> = ({
 
         if (overlay && isMatchByChartDataLayerName) {
           if (isChecked) {
-            if (overlay.show && typeof overlay.show === "function") {
-              overlay.show()
-            }
+            // Show the overlay - ONLY use setMap, don't use show()
+            console.log('[MapTab] Showing overlay:', layerName, overlay?.chartData?.sensorId, 'map:', map);
+
+            // Add to activeOverlays first
             if (activeOverlays && !activeOverlays.includes(overlay)) {
               setActiveOverlays((prevActiveOverlays: OverlayItem[]) => {
                 const exists = prevActiveOverlays.some(
@@ -206,10 +226,20 @@ export const MapTab: React.FC<MapTabProps> = ({
                 return exists ? prevActiveOverlays : [...prevActiveOverlays, overlay]
               })
             }
+
+            // Just call show() since overlay is already on the map
+            requestAnimationFrame(() => {
+              if (overlay.show && typeof overlay.show === "function") {
+                console.log('[MapTab] Calling show() to make overlay visible');
+                overlay.show()
+              }
+            })
           } else {
-            if (overlay.hide && typeof overlay.hide === "function") {
-              overlay.hide()
-            }
+            // Hide the overlay - use hide() but DON'T use setMap(null)
+            // This keeps the overlay attached to the map but makes it invisible
+            console.log('[MapTab] Hiding overlay:', layerName, overlay?.chartData?.sensorId);
+
+            // Remove from activeOverlays first
             setActiveOverlays((prevActiveOverlays: OverlayItem[]) =>
               prevActiveOverlays.filter(
                 (active: OverlayItem) =>
@@ -219,10 +249,27 @@ export const MapTab: React.FC<MapTabProps> = ({
                   active.chartData.sensorId !== overlay.chartData.sensorId,
               ),
             )
+
+            // Only call hide() to make invisible, don't remove from map
+            if (overlay.hide && typeof overlay.hide === "function") {
+              console.log('[MapTab] Calling hide() to make overlay invisible');
+              overlay.hide()
+            }
           }
         }
       })
     }
+  }
+
+  // Map unit type names to display names
+  const getLayerDisplayName = (layerName: string): string => {
+    const displayNameMap: { [key: string]: string } = {
+      "SoilTemp": "Temp/RH",
+      "EXTL": "Links",
+      "Moist": "SoilM",
+      "WXET": "Weather"
+    }
+    return displayNameMap[layerName] || layerName
   }
 
   // Extract layer names from site data
@@ -268,7 +315,7 @@ export const MapTab: React.FC<MapTabProps> = ({
                 className={'my-checkbox'}
                 onIonChange={(checkbox) => handleToggleLayer(checkbox, layer)}
               >
-                {layer === "SoilTemp" ? "Temp/RH" : layer}
+                {getLayerDisplayName(layer)}
               </IonCheckbox>
             </IonItem>
           ))}
