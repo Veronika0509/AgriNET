@@ -816,100 +816,76 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         )
 
         // Selection Data
-        const xAxisValue = chart.xAxes.getIndex(0)
+        const xAxisValue = chart.xAxes.getIndex(0);
 
-        if (xAxisValue && xAxisValue instanceof am5xy.DateAxis) {
-          const downPosX = getPrivateValue(selection, "downPositionX") ?? 0
-          const posX = getPrivateValue(selection, "positionX") ?? 0
-
-          const x1 = (xAxisValue as any).positionToDate((xAxisValue as any).toAxisPosition(downPosX)).getTime()
-          const x2 = (xAxisValue as any).positionToDate((xAxisValue as any).toAxisPosition(posX)).getTime()
-          ((chart.series.each) as any)((series: am5xy.SmoothedXLineSeries) => {
-            const dataItemStart = series.dataItems.find((dataItem: am5.DataItem<am5xy.IXYSeriesDataItem>) => {
-              if (x1 < x2) {
-                return dataItem.get("valueX") >= x1
-              } else {
-                return dataItem.get("valueX") >= x2
-              }
-            })
-            const dataItemEnd = series.dataItems.find((dataItem: am5.DataItem<am5xy.IXYSeriesDataItem>) => {
-              if (x1 < x2) {
-                return dataItem.get("valueX") >= x2
-              } else {
-                return dataItem.get("valueX") >= x1
-              }
-            })
-            if (dataItemStart && dataItemEnd) {
-              const startIndex = series.dataItems.indexOf(dataItemStart)
-              const endIndex = series.dataItems.indexOf(dataItemEnd)
-
-              const relevantDataItems = series.dataItems.slice(startIndex, endIndex)
-
-              const values: number[] = relevantDataItems.map((dataItem: am5.DataItem<am5xy.IXYSeriesDataItem>) => {
-                const value = dataItem.get("valueY");
-                return typeof value === 'number' ? value : 0;
-              });
-
-              if (values && values.length) {
-                const maxInSelection = Math.max(...values).toFixed(2)
-                const minInSelection = Math.min(...values).toFixed(2)
-                const changeInSelection = ((Math.max(...values)) - (Math.min(...values))).toFixed(2)
-                const avgInSelection = ((values.reduce((sum, value) => sum + value, 0)) / values.length).toFixed(2)
-
-                if (!document.querySelector('.selection-info')) {
-                  const selectionInfoDiv = document.createElement('div')
-                  selectionInfoDiv.classList.add('selection-info')
-                  selectionInfoDiv.style.position = 'absolute'
-                  selectionInfoDiv.style.top = '60px'
-                  selectionInfoDiv.style.right = '10px'
-                  selectionInfoDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
-                  selectionInfoDiv.style.padding = '10px'
-                  selectionInfoDiv.style.borderRadius = '5px'
-                  selectionInfoDiv.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)'
-                  selectionInfoDiv.style.zIndex = '1000'
-                  selectionInfoDiv.style.fontSize = '14px'
-                  selectionInfoDiv.innerHTML = `
-                    <div><strong>Selection:</strong></div>
-                    <div>Max: ${maxInSelection}%</div>
-                    <div>Min: ${minInSelection}%</div>
-                    <div>Change: ${changeInSelection}%</div>
-                    <div>Avg: ${avgInSelection}%</div>
-                  `
-                  document.body.appendChild(selectionInfoDiv)
-                } else {
-                  const selectionInfoDiv = document.querySelector('.selection-info')
-                  if (selectionInfoDiv) {
-                    selectionInfoDiv.innerHTML = `
-                      <div><strong>Selection:</strong></div>
-                      <div>Max: ${maxInSelection}%</div>
-                      <div>Min: ${minInSelection}%</div>
-                      <div>Change: ${changeInSelection}%</div>
-                      <div>Avg: ${avgInSelection}%</div>
-                    `
-                  }
-                }
-              }
+        const x1 = (xAxisValue as any).positionToDate((xAxisValue as any).toAxisPosition(getPrivateValue(selection, "downPositionX") ?? 0)).getTime();
+        const x2 = (xAxisValue as any).positionToDate((xAxisValue as any).toAxisPosition(getPrivateValue(selection, "positionX") ?? 0)).getTime();
+        chart.series.each((series: any) => {
+          const dataItemStart = series.dataItems.find((dataItem: any) => {
+            if (x1 < x2) {
+              return dataItem.get("valueX") >= x1
+            } else {
+              return dataItem.get("valueX") >= x2
             }
           })
-        }
-      } else {
-        if (selectionLabel) {
-          selectionLabel.dispose()
-        }
+
+          let dataItemEnd = series.dataItems.find((dataItem: any) => {
+            if (x1 < x2) {
+              return dataItem.get("valueX") >= x2
+            } else {
+              return dataItem.get("valueX") >= x1
+            }
+          })
+          if (!dataItemEnd) {
+            dataItemEnd = series.dataItems.at(-1)
+          }
+          if (dataItemStart && dataItemEnd) {
+            const fixedDataItemStart = parseFloat(dataItemStart.get('valueY').toFixed(1))
+            const fixedDataItemEnd = parseFloat(dataItemEnd.get('valueY').toFixed(1))
+            const difference = (fixedDataItemEnd - fixedDataItemStart).toFixed(1)
+
+            const labelText = fixedDataItemStart + '%' + ' - ' + fixedDataItemEnd + '%' + '\n' + difference + '%' + ' / ' + selectionTime
+            const tooltip = am5.Tooltip.new(props.root.current, {
+              labelText: labelText,
+              tooltipPosition: "fixed",
+              pointerOrientation: "left",
+              tooltipTarget: series,
+              pointTo: dataItemEnd._settings.point,
+              x: series.get("tooltip")._settings.x,
+              y: series.get("tooltip")._settings.y,
+              bounds: series.get("tooltip")._settings.bounds,
+              layer: 30,
+              getFillFromSprite: false,
+            })
+            tooltip.get("background")?.setAll({
+              fill: series.get("tooltip").get("background").get("fill"),
+              stroke: series.get("tooltip").get("background").get("stroke"),
+              fillOpacity: series.get("tooltip").get("background").get("fillOpacity"),
+              strokeOpacity: series.get("tooltip").get("background").get("strokeOpacity"),
+            })
+            tooltip.label.setAll({
+              fill: series.get("tooltip").label.get("fill"),
+              fontSize: series.get("tooltip").label.get("fontSize"),
+              fontFamily: series.get("tooltip").label.get("fontFamily"),
+            })
+            tooltip.show()
+            chart.plotContainer.children.push(tooltip)
+
+            tooltips.push(tooltip)
+          }
+        })
       }
     })
 
     function destroyTooltipsAndLabels() {
-      if (selectionLabel) {
-        selectionLabel.dispose()
+      if (props.comparingMode) {
+        tooltips.forEach((tooltip: am5.Tooltip) => {
+          tooltip.set('forceHidden', true)
+        })
+        if (selectionLabel) {
+          selectionLabel.set('forceHidden', true)
+        }
       }
-      const selectionInfo = document.querySelector('.selection-info')
-      if (selectionInfo) {
-        selectionInfo.remove()
-      }
-      tooltips.forEach((tooltip) => {
-        tooltip.dispose()
-      })
     }
 
     cursor.events.on("selectcancelled", () => {

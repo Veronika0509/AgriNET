@@ -385,7 +385,10 @@
 /*  Alarm  */
 .alarm_container {
   width: 450px;
+  max-width: 100%;
   margin: 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
 .alarm_textTitle {
@@ -399,6 +402,7 @@
   width: 100%;
   margin: 0 auto 0 auto;
   --padding-start: 0;
+  --inner-padding-end: 0;
 }
 
 .alarm_item {
@@ -570,8 +574,28 @@
 }
 
 @media only screen and (max-width: 475px) {
-  .alarm_Container {
-    width: 290px;
+  .alarm_container {
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  .alarm_item {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .alarm_setContainer {
+    flex-wrap: wrap;
+    gap: 0;
+    margin-right: 0;
+  }
+
+  .alarm_itemContent {
+    margin-right: 15px;
+  }
+
+  .alarm_textTitle {
+    margin-top: 30px;
   }
 
   .datetimePicker_wrapperContainer {

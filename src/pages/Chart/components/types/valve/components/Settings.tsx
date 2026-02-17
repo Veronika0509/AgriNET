@@ -202,6 +202,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
       await postValveSettings(updatedSettings, props.userId)
       setHasChanges(false)
     } else {
+      console.log('[Overlay] Alert: "Standby: Data is being re routed" — Valve Settings save, settingsData is null')
       presentAlert({
         header: 'Please standby',
         message: 'Standby: Data is being re routed',

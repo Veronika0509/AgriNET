@@ -9,7 +9,7 @@ import {getStartDate} from "../../DateTimePicker/functions/getStartDate";
 import {createWxetChart} from "../../../functions/types/wxet/createWxetChart";
 import {getWxetMainChartData} from "../../../../Map/data/types/wxet/getWxetMainChartData";
 import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastData";
-import {getBatteryChartData} from "../../../data/types/wxet/getBatteryChartData";
+
 import {TabularData} from "../../TabularData";
 import {Export} from "../../Export";
 import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
@@ -17,6 +17,7 @@ import {compareDates as _compareDates} from "../../../functions/types/moist/comp
 import {formatDate} from "../../../functions/formatDate";
 import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
 import {createAdditionalChart} from "../../../functions/types/moist/createAdditionalChart";
+import {loadChartPreferences} from "../../../../../utils/chartPreferences";
 import _login from "../../../../Login";
 
 export const WxetChartPage = (props: any) => {
@@ -40,13 +41,12 @@ export const WxetChartPage = (props: any) => {
 
   const updateChart = async (chartType: string) => {
     if (chartType === 'battery') {
-      const endDatetime = currentDates ? new Date(currentDates[1]).setHours(0, 0, 0, 0) : new Date().setHours(0, 0, 0, 0)
-      const days = currentDates ? (endDatetime - new Date(currentDates[0]).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000) : 14
-      const newBatteryChartData = await getBatteryChartData(props.sensorId, days, formatDate(new Date(endDatetime + (1000 * 60 * 60 * 24))))
-      setCurrentBatteryChartData(newBatteryChartData.data)
+      const chartDataArray = Array.isArray(currentChartData) ? currentChartData : (currentChartData?.data || [])
+      const batteryData = chartDataArray.filter((item: any) => item.Battery !== undefined && item.Battery !== null)
+      setCurrentBatteryChartData(batteryData)
       createAdditionalChart(
         "battery",
-        newBatteryChartData.data,
+        batteryData,
         batteryRoot,
         undefined as any,
         undefined as any,
@@ -62,6 +62,7 @@ export const WxetChartPage = (props: any) => {
   };
 
   useEffect(() => {
+
     setCurrentChartData({
       data: props.chartData,
       initialData: true
@@ -69,10 +70,26 @@ export const WxetChartPage = (props: any) => {
     handleResize(props.setIsMobile)
     setDynamicChartHeight('wxetChartDiv')
   }, []);
+  const preferencesApplied = useRef(false);
   useEffect(() => {
     if (currentChartData && currentChartData.initialData) {
       createWxetChart(currentChartData.data, root, props.isMobile, props.additionalChartData, nwsForecastData)
       setCurrentChartData(currentChartData.data)
+    }
+    // After initial chart data is set (raw array), check saved preferences and reload if needed
+    if (!preferencesApplied.current && currentChartData && !currentChartData.initialData) {
+      preferencesApplied.current = true
+      const preferences = loadChartPreferences()
+      const savedDays = preferences.dateDifferenceInDays
+      const savedTab = preferences.selectedTab
+
+      if (savedDays !== '14' || savedTab === 'years') {
+        const endDatetime = new Date()
+        endDatetime.setHours(0, 0, 0, 0)
+        const days = savedTab === 'years' ? 365 * Number(savedDays) : Number(savedDays)
+        const startDatetime = new Date(endDatetime.getTime() - (days * 24 * 60 * 60 * 1000))
+        setCurrentDates([startDatetime, endDatetime])
+      }
     }
   }, [currentChartData]);
   useEffect(() => {
@@ -83,6 +100,24 @@ export const WxetChartPage = (props: any) => {
         const newChartData = await getWxetMainChartData(props.sensorId, days, formatDate(new Date(endDatetime + (1000 * 60 * 60 * 24))))
         createWxetChart(newChartData.data.data, root, props.isMobile, props.additionalChartData, nwsForecastData)
         setCurrentChartData(newChartData.data.data)
+        if (batteryChartShowed) {
+          const batteryData = newChartData.data.data.filter((item: any) => item.Battery !== undefined && item.Battery !== null)
+          setCurrentBatteryChartData(batteryData)
+          createAdditionalChart(
+            "battery",
+            batteryData,
+            batteryRoot,
+            undefined as any,
+            undefined as any,
+            props.sensorId,
+            undefined,
+            false,
+            undefined as any,
+            props.userId,
+            undefined,
+            false,
+          )
+        }
       }
       updateCharts()
     }

@@ -294,6 +294,46 @@ export const createTempChart = (
 
     cursor.lineY.set("visible", false)
 
+    // Автоматическое увеличение высоты контейнера если тултипы не помещаются
+    const allSeries = chart.series.values
+    if (allSeries.length > 0) {
+      (allSeries[0] as any).events.once("datavalidated", () => {
+        setTimeout(() => {
+          const chartContainer = document.getElementById("tempChartDiv")
+          if (!chartContainer) return
+
+          const fullChartHeight = chartContainer.getBoundingClientRect().height
+          const sensorCount = dataLabels.length
+
+          const firstSeries = allSeries[0] as any
+          const firstDataItem = firstSeries.dataItems[0]
+          const seriesTooltip = firstSeries.get("tooltip")
+
+          if (seriesTooltip && firstDataItem) {
+            firstSeries.showDataItemTooltip(firstDataItem)
+            setTimeout(() => {
+              const tooltipElement = seriesTooltip.getPrivate("htmlElement")
+              let tooltipHeight = 62
+
+              if (tooltipElement) {
+                tooltipHeight = tooltipElement.getBoundingClientRect().height
+              }
+
+              seriesTooltip.hide()
+
+              const totalTooltipsHeight = tooltipHeight * sensorCount
+              const missingPixels = Math.max(0, totalTooltipsHeight - fullChartHeight)
+
+              if (missingPixels > 0) {
+                const newHeight = fullChartHeight + missingPixels
+                chartContainer.style.height = `${newHeight}px`
+              }
+            }, 150)
+          }
+        }, 100)
+      })
+    }
+
     // Add Comments
     if (tempAddCommentItemShowed) {
       chart.events.on("click", (ev: any) => {
@@ -622,14 +662,34 @@ export const createTempChart = (
     }
 
     // Add legend
-    const legendHeight = dataLabels.length * 29
-    const legend = chart.children.push(
-      am5.Legend.new(root.current, {
-        width: 230,
-        paddingLeft: 15,
-        height: legendHeight,
-      }),
-    )
+    let legend: am5.Legend
+    if (isMobile) {
+      legend = chart.children.push(
+        am5.Legend.new(root.current, {
+          centerX: am5.percent(50),
+          x: am5.percent(50),
+          layout: am5.GridLayout.new(root.current, {
+            maxColumns: 3,
+            fixedWidthGrid: true
+          }),
+          marginTop: 15,
+        }),
+      )
+    } else {
+      const legendHeight = dataLabels.length * 29
+      legend = chart.children.push(
+        am5.Legend.new(root.current, {
+          width: 230,
+          paddingLeft: 15,
+          height: legendHeight,
+        }),
+      )
+      legend.itemContainers.template.set("width", am5.p100)
+      legend.valueLabels.template.setAll({
+        width: am5.p100,
+        textAlign: "right",
+      })
+    }
 
     legend.itemContainers.template.events.on("pointerdown", (ev: any) => {
       const clickedSeries = ev.target.dataItem?.dataContext
@@ -668,12 +728,6 @@ export const createTempChart = (
       }
 
       sessionStorage.setItem("tempChartLinesVisibility", JSON.stringify(visibilityMap))
-    })
-
-    legend.itemContainers.template.set("width", am5.p100)
-    legend.valueLabels.template.setAll({
-      width: am5.p100,
-      textAlign: "right",
     })
 
     legend.data.setAll(chart.series.values)

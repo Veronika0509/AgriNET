@@ -33,9 +33,16 @@ export const calculateDynamicChartHeight = (chartId?: string): number => {
     minHeight = 365
   }
 
-  // Увеличиваем высоту графика на мобильных устройствах для mainChart
+  // Увеличиваем высоту графика на мобильных устройствах
   if (chartId === 'mainChart' && viewportWidth <= 800) {
-    minHeight = 500 // Увеличенная высота для мобильных устройств
+    minHeight = 500
+  }
+  // На мобильных фиксированная высота чтобы plot area совпадал между графиками
+  if (chartId === 'wxetChartDiv' && viewportWidth <= 800) {
+    return 650
+  }
+  if (chartId === 'tempChartDiv' && viewportWidth <= 800) {
+    return 600
   }
 
   return Math.max(availableHeight, minHeight)

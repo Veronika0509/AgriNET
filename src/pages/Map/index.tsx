@@ -281,37 +281,39 @@ const MapPage: React.FC<MapProps> = (props) => {
               name: site.name,
               layers: site.layers || [],
             })) as unknown as Site[]
-            createSites({
-              page: props.page,
-              map,
-              siteList: sitesAsSensorsGroupData,
-              markers: markers,
-              setMarkers: setMarkers,
-              userId: props.userId,
-              allCoordinatesOfMarkers,
-              setCoordinatesForFitting,
-              setAllCoordinatesOfMarkers,
-              setSecondMap,
-              moistChartsAmount: moistChartsAmount as any,
-              setInvalidMoistChartDataContainer,
-              setMoistChartDataContainer,
-              wxetChartsAmount: wxetChartsAmount as any,
-              setInvalidWxetDataContainer,
-              setWxetDataContainer,
-              tempChartsAmount: tempChartsAmount as any,
-              setInvalidTempChartDataContainer,
-              setTempChartDataContainer,
-              valveChartsAmount: valveChartsAmount as any,
-              setInvalidValveChartDataContainer,
-              setValveChartDataContainer,
-              amountOfSensors,
-              setAmountOfSensors,
-              setIsMarkerClicked,
-              setInitialZoom,
-              extlChartsAmount: extlChartsAmount as any,
-              setExtlDataContainer,
-              mapRefFunc
-            })
+            setTimeout(() => {
+              createSites({
+                page: props.page,
+                map,
+                siteList: sitesAsSensorsGroupData,
+                markers: markers,
+                setMarkers: setMarkers,
+                userId: props.userId,
+                allCoordinatesOfMarkers,
+                setCoordinatesForFitting,
+                setAllCoordinatesOfMarkers,
+                setSecondMap,
+                moistChartsAmount: moistChartsAmount as any,
+                setInvalidMoistChartDataContainer,
+                setMoistChartDataContainer,
+                wxetChartsAmount: wxetChartsAmount as any,
+                setInvalidWxetDataContainer,
+                setWxetDataContainer,
+                tempChartsAmount: tempChartsAmount as any,
+                setInvalidTempChartDataContainer,
+                setTempChartDataContainer,
+                valveChartsAmount: valveChartsAmount as any,
+                setInvalidValveChartDataContainer,
+                setValveChartDataContainer,
+                amountOfSensors,
+                setAmountOfSensors,
+                setIsMarkerClicked,
+                setInitialZoom,
+                extlChartsAmount: extlChartsAmount as any,
+                setExtlDataContainer,
+                mapRefFunc
+              })
+            }, 2000)
           }
         }
       }
@@ -438,6 +440,7 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Chart overlay creation is now handled by useChartOverlays hook
 
   useEffect(() => {
+    if (!map) return
     if (activeOverlays.length !== 0 && activeOverlays.length === amountOfSensors && !areBoundsFitted) {
       CollisionResolver.resolve(activeOverlays)
       setAllOverlays(activeOverlays)
@@ -482,6 +485,7 @@ const MapPage: React.FC<MapProps> = (props) => {
 
       requestAnimationFrame(() => {
         setTimeout(() => {
+          if (!map) return
           google.maps.event.trigger(map, "resize")
           map.fitBounds(bounds, { top: 50, right: 50, bottom: 50, left: 50 })
 

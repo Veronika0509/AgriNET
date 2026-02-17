@@ -150,6 +150,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
           createFuelChart(newChartData.data.data, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper as any, fuelComments as any, isFuelCommentsShowed)
           setCurrentChartData(newChartData.data.data)
         } catch (e) {
+          console.log('[Overlay] Alert: "Standby: Data is being re routed" — Fuel chart update, sensorId:', props.sensorId, 'error:', e)
           presentDataAlert({
             header: 'Please Standby',
             message: 'Standby: Data is being re routed',

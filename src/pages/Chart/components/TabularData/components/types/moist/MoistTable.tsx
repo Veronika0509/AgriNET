@@ -21,7 +21,7 @@ export const MoistTable: React.FC<moistTableProps> = ({type, data, firstRowColor
         <th className={`${s.mainTabularDataTableTh} ${s.mainTabularDataTableThLarge}`}>{data.label}</th>
         {Array.from({length: data.sensorCount}, (_, index) => (
           <th key={index} className={s.mainTabularDataTableTh}
-              style={{backgroundColor: type === 'moistSum' ? `rgb(${colors[0]}, ${colors[1]}, ${colors[2]})` : type === 'moistSoilTemp' ? `rgb(${colors[index].r}, ${colors[index].g}, ${colors[index].b})` : colors[index]}}>
+              style={{backgroundColor: type === 'moistSum' ? '#6771dc' : type === 'moistSoilTemp' ? `rgb(${colors[index].r}, ${colors[index].g}, ${colors[index].b})` : colors[index]}}>
             {type === 'moistMain' && (
               <>{4 * (index + 1)}inch</>
             )}

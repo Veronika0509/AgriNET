@@ -19,6 +19,7 @@ export const getTempMainChartData = async (present: (options: { message: string;
         }
       });
     } catch (error) {
+      console.log('[Overlay] Toast: "Standby: Data is being re routed" — getTempMainChartData, sensorId:', sensorId, 'error:', error)
       showErrorMessage()
     }
   } else {
