@@ -32,8 +32,8 @@ const Info = (props: InfoProps) => {
         }
       }
     } else {
-      // Fallback to browser history if our custom stack is empty
-      history.goBack();
+      // Fallback: navigate to menu if our custom stack is empty
+      history.push('/menu');
     }
   };
 

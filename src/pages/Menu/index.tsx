@@ -57,7 +57,9 @@ const Menu: React.FC<MenuProps> = (props) => {
 
   const handleLogout = () => {
     logout();
-    history.push('/login');
+    // Replace current history entry so back button can't return to menu
+    window.history.replaceState(null, '', '/AgriNET/login');
+    history.replace('/login');
   };
 
   // Fetch site list when menu page loads

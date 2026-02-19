@@ -93,6 +93,55 @@ const AppContent: React.FC = () => {
     return () => unlisten();
   }, [history]);
 
+  // Sync currentPath when URL changes outside of history.listen (e.g. after logout)
+  useEffect(() => {
+    setCurrentPath(window.location.pathname);
+  }, [userId, page]);
+
+  // Push browser history entry when entering pages that don't have their own router
+  // This ensures the browser back button has something to pop
+  useEffect(() => {
+    if (page === 3 || page === 4 || page === 7) {
+      window.history.pushState({ appPage: page }, '');
+    }
+  }, [page]);
+
+  // Handle browser/device back button (popstate) to sync page state with URL
+  useEffect(() => {
+    const handlePopState = () => {
+      // If user is not logged in, always stay on login page
+      if (Number(userId) === 0) {
+        window.history.replaceState(null, '', '/AgriNET/login');
+        setPage(0);
+        return;
+      }
+
+      // Check if a modal/sub-view already handled this popstate event
+      if ((window as any).__popstateHandledByModal) {
+        (window as any).__popstateHandledByModal = false;
+        return;
+      }
+
+      // If we're on a page other than 0 or 1, navigate back
+      if (page === 2 || page === 3 || page === 4 || page === 5 || page === 6 || page === 7) {
+        const path = window.location.pathname.replace('/AgriNET', '');
+        // Route the user based on URL, defaulting to map
+        if (path === '/map' || path === '/layers') {
+          setPage(1);
+        } else if (path === '/menu' || path === '/login' || path === '/info' || path === '/budget' || path === '/') {
+          setPage(0);
+        } else {
+          // Default: go back to map page (same behavior as in-app back button)
+          setPage(1);
+          window.history.replaceState(null, '', '/AgriNET/map');
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [page, setPage, userId]);
+
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);
 
@@ -179,14 +228,14 @@ const AppContent: React.FC = () => {
                     {currentPath.includes('/datalist') ? (
                       <IonTabBar slot="bottom" style={{ display: 'none' }} />
                     ) : (
-                      <IonTabBar slot="bottom">
-                        <IonTabButton tab="menu" layout="icon-start" href="/menu" onClick={() => {
+                      <IonTabBar slot="bottom" selectedTab={currentPath.includes('/info') ? 'info' : currentPath.includes('/budget') ? 'budget' : 'menu'}>
+                        <IonTabButton tab="menu" layout="icon-start" href={Number(userId) === 0 ? '/login' : '/menu'} onClick={() => {
                           const currentPath = window.location.pathname.replace('/AgriNET', '');
                           pushToNavigationHistory(currentPath, page);
                         }}>
                           <IonIcon icon={home}/>
                         </IonTabButton>
-                        <IonTabButton tab="budget" href="/budget" onClick={() => {
+                        <IonTabButton tab="budget" href="/budget" style={Number(userId) === 0 ? { display: 'none' } : undefined} onClick={() => {
                           const currentPath = window.location.pathname.replace('/AgriNET', '');
                           pushToNavigationHistory(currentPath, page);
                         }}>

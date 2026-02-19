@@ -178,6 +178,55 @@ const MapPage: React.FC<MapProps> = (props) => {
 
   const history = useHistory()
 
+  // Handle browser/device back button for Map page views
+  // Push history state when entering overlays view, handle popstate to go back
+  const isMarkerClickedRef = useRef(isMarkerClicked)
+  isMarkerClickedRef.current = isMarkerClicked
+
+  // Push browser history entries for Map page view transitions
+  useEffect(() => {
+    if (props.page === 1 && !isMarkerClicked) {
+      // Entering sites view — push state so back goes to menu
+      window.history.pushState({ mapView: 'sites' }, '')
+    }
+  }, [props.page])
+
+  useEffect(() => {
+    if (isMarkerClicked && props.page === 1) {
+      // Entering overlays view — push state so back goes to sites view
+      window.history.pushState({ mapView: 'overlays' }, '')
+    }
+  }, [isMarkerClicked, props.page])
+
+  // Listen for browser/device back button on the Map page
+  useEffect(() => {
+    if (props.page !== 1) return
+
+    const handlePopState = () => {
+      // Check if another handler already processed this event
+      if ((window as any).__popstateHandledByModal) {
+        (window as any).__popstateHandledByModal = false
+        return
+      }
+      // Only handle if we're on the map page
+      if (props.page !== 1) return
+
+      if (isMarkerClickedRef.current) {
+        // Currently in overlays view → go back to sites view
+        setIsMarkerClicked(false)
+        ;(window as any).__popstateHandledByModal = true
+      } else {
+        // Currently in sites view → go back to menu
+        props.setPage(0)
+        window.history.replaceState(null, '', '/AgriNET/menu')
+        ;(window as any).__popstateHandledByModal = true
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [props.page, props.setPage])
+
   // Cleanup effect: Clear all overlays and sensor data when going back from sensors view (using custom hook)
   useMarkerClickCleanup({
     isMarkerClicked,

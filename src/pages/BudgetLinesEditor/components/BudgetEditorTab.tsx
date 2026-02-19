@@ -40,7 +40,7 @@ export const BudgetEditorTab: React.FC<BudgetEditorTabProps> = ({ siteList, user
         setPage(2)
         history.push('/chart')
       } else {
-        history.goBack()
+        history.push('/menu')
       }
     }
   }

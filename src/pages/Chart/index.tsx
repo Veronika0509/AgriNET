@@ -65,6 +65,63 @@ const Chart = (props: ChartProps) => {
     setAlarmHighSetpoint(typeof value === 'string' ? parseFloat(value) : value)
   }, [])
 
+  // Handle browser/device back button for Chart page modals
+  // Push history state when opening a modal, handle popstate to close it
+  const alarmRef = React.useRef(alarm)
+  const valveArchiveRef = React.useRef(valveArchive)
+  const valveSettingsRef = React.useRef(valveSettings)
+  const valveCreateRef = React.useRef(valveCreate)
+  const autowaterRef = React.useRef(autowater)
+  alarmRef.current = alarm
+  valveArchiveRef.current = valveArchive
+  valveSettingsRef.current = valveSettings
+  valveCreateRef.current = valveCreate
+  autowaterRef.current = autowater
+
+  // Push history entry when any modal opens
+  useEffect(() => {
+    if (alarm) window.history.pushState({ chartModal: 'alarm' }, '')
+  }, [alarm])
+  useEffect(() => {
+    if (valveArchive) window.history.pushState({ chartModal: 'valveArchive' }, '')
+  }, [valveArchive])
+  useEffect(() => {
+    if (valveSettings) window.history.pushState({ chartModal: 'valveSettings' }, '')
+  }, [valveSettings])
+  useEffect(() => {
+    if (valveCreate) window.history.pushState({ chartModal: 'valveCreate' }, '')
+  }, [valveCreate])
+  useEffect(() => {
+    if (autowater) window.history.pushState({ chartModal: 'autowater' }, '')
+  }, [autowater])
+
+  // Listen for popstate to close the topmost modal
+  // Uses a global flag to prevent App.tsx popstate handler from also firing
+  useEffect(() => {
+    const handlePopState = () => {
+      if (autowaterRef.current) {
+        setAutowater(false)
+        ;(window as any).__popstateHandledByModal = true
+      } else if (valveCreateRef.current) {
+        setValveCreate(false)
+        ;(window as any).__popstateHandledByModal = true
+      } else if (valveSettingsRef.current) {
+        setValveSettings(false)
+        ;(window as any).__popstateHandledByModal = true
+      } else if (valveArchiveRef.current) {
+        setValveArchive(false)
+        ;(window as any).__popstateHandledByModal = true
+      } else if (alarmRef.current) {
+        setAlarm(false)
+        ;(window as any).__popstateHandledByModal = true
+      }
+      // If no modal is open, let App.tsx popstate handler deal with page-level navigation
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
   useEffect(() => {
     alarmDataProcessing(
       props.siteId,
