@@ -2,7 +2,7 @@ import {IonContent, IonHeader, IonIcon, IonImg, IonPage, IonRow, IonText, IonTit
 import s from './style.module.css'
 import Logo from '../../assets/images/logo.png'
 import {star, arrowBackOutline} from "ionicons/icons";
-import React from "react";
+import React, { useCallback } from "react";
 import { useHistory } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 
@@ -15,15 +15,11 @@ const Info = (props: InfoProps) => {
   const history = useHistory();
   const { popFromNavigationHistory, setPage } = useAppContext();
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     const previousPage = popFromNavigationHistory();
 
     if (previousPage) {
-      // Navigate to the previous page from our custom history
-      // First navigate with router
       history.push(previousPage.path);
-
-      // Then set page state if different from current (page 0)
       if (previousPage.page !== 0) {
         if (props.setPage) {
           props.setPage(previousPage.page);
@@ -32,10 +28,9 @@ const Info = (props: InfoProps) => {
         }
       }
     } else {
-      // Fallback: navigate to menu if our custom stack is empty
       history.push('/menu');
     }
-  };
+  }, [history, popFromNavigationHistory, props.setPage, setPage]);
 
   return (
     <IonPage>

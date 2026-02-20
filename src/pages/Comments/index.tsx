@@ -24,7 +24,7 @@ const CommentsPage: React.FC<CommentsPageProps> = ({ userId, setPage }) => {
 
   const handleBack = () => {
     setPage(0);
-    history.push('/menu');
+    window.history.replaceState(null, '', '/AgriNET/menu');
   };
 
   return (

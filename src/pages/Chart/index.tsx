@@ -122,6 +122,31 @@ const Chart = (props: ChartProps) => {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
+  // Handle Capacitor/Ionic hardware back button for Chart modals
+  useEffect(() => {
+    const handler = (ev: any) => {
+      ev.detail.register(20, (processNextHandler: () => void) => {
+        if (autowaterRef.current) {
+          setAutowater(false)
+        } else if (valveCreateRef.current) {
+          setValveCreate(false)
+        } else if (valveSettingsRef.current) {
+          setValveSettings(false)
+        } else if (valveArchiveRef.current) {
+          setValveArchive(false)
+        } else if (alarmRef.current) {
+          setAlarm(false)
+        } else {
+          // No modal open — let lower priority handlers deal with page navigation
+          processNextHandler()
+        }
+      })
+    }
+
+    document.addEventListener('ionBackButton', handler)
+    return () => document.removeEventListener('ionBackButton', handler)
+  }, [])
+
   useEffect(() => {
     alarmDataProcessing(
       props.siteId,

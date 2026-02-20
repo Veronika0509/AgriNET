@@ -22,5 +22,4 @@ export const onWxetSensorClick = async (
   setChartPageType('wxet')
   setPage(2)
   setAdditionalChartData({metric: newChartData.data.metric, type: newChartData.data.type})
-  history.push('/AgriNET/chart');
 }

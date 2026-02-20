@@ -80,11 +80,23 @@ const AppContent: React.FC = () => {
     setSelectedMoistureSensor,
     reloadMapPage,
     pushToNavigationHistory,
+    popFromNavigationHistory,
+    budgetEditorReturnPage,
+    setBudgetEditorReturnPage,
+    logout,
   } = useAppContext();
 
   const history = useHistory();
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
   const [currentPath, setCurrentPath] = React.useState(window.location.pathname);
+  const pageRef = React.useRef(page);
+  pageRef.current = page;
+  const isNavigatingBackRef = React.useRef(false);
+  const lastPopstateNavRef = React.useRef(0);
+  // currentPathRef tracks path from the last render — gives us path BEFORE a popstate fires
+  const currentPathRef = React.useRef(window.location.pathname);
+  // logoutRef always points to the latest logout function without needing it in effect deps
+  const logoutRef = React.useRef(logout);
 
   useEffect(() => {
     const unlisten = history.listen((location) => {
@@ -93,54 +105,179 @@ const AppContent: React.FC = () => {
     return () => unlisten();
   }, [history]);
 
+  // Keep refs fresh so handlers always use latest values without re-registering effects
+  useEffect(() => {
+    currentPathRef.current = currentPath;
+  }, [currentPath]);
+
+  useEffect(() => {
+    logoutRef.current = logout;
+  }, [logout]);
+
   // Sync currentPath when URL changes outside of history.listen (e.g. after logout)
   useEffect(() => {
     setCurrentPath(window.location.pathname);
   }, [userId, page]);
 
-  // Push browser history entry when entering pages that don't have their own router
+  // Push browser history entry when entering pages outside the IonReactRouter
   // This ensures the browser back button has something to pop
+  // Only push on forward navigation, not when navigating back (popstate)
   useEffect(() => {
-    if (page === 3 || page === 4 || page === 7) {
+    if (page >= 1 && page <= 7 && !isNavigatingBackRef.current) {
       window.history.pushState({ appPage: page }, '');
+      console.log('[NAV] pushState for page', page, 'history.length:', window.history.length);
+    } else {
+      console.log('[NAV] SKIP pushState for page', page, 'isBack:', isNavigatingBackRef.current, 'history.length:', window.history.length);
     }
+    isNavigatingBackRef.current = false;
   }, [page]);
 
   // Handle browser/device back button (popstate) to sync page state with URL
+  // Uses pageRef to always access the latest page value (avoids stale closures)
   useEffect(() => {
     const handlePopState = () => {
-      // If user is not logged in, always stay on login page
+      const currentPage = pageRef.current;
+      const now = Date.now();
+      const timeSinceLast = now - lastPopstateNavRef.current;
+      console.log('[NAV] popstate fired, currentPage:', currentPage, 'URL:', window.location.pathname, 'timeSinceLast:', timeSinceLast, 'history.length:', window.history.length);
+
+      // If user is not logged in, block ALL back navigation immediately (before debounce)
       if (Number(userId) === 0) {
-        window.history.replaceState(null, '', '/AgriNET/login');
+        console.log('[NAV] → blocked: not logged in');
+        // pushState (not replaceState) adds a new /login entry on top of the stack,
+        // so every back swipe is intercepted — user can never reach a /menu entry
+        window.history.pushState(null, '', '/AgriNET/login');
+        history.replace('/login');
         setPage(0);
         return;
       }
 
-      // Check if a modal/sub-view already handled this popstate event
-      if ((window as any).__popstateHandledByModal) {
-        (window as any).__popstateHandledByModal = false;
+      // Debounce: ignore popstate events within 500ms of a navigation we already handled
+      if (timeSinceLast < 500) {
+        // Fix URL if it drifted (e.g. browser popped extra entry)
+        window.history.replaceState(null, '', '/AgriNET/menu');
         return;
       }
 
-      // If we're on a page other than 0 or 1, navigate back
-      if (page === 2 || page === 3 || page === 4 || page === 5 || page === 6 || page === 7) {
-        const path = window.location.pathname.replace('/AgriNET', '');
-        // Route the user based on URL, defaulting to map
-        if (path === '/map' || path === '/layers') {
-          setPage(1);
-        } else if (path === '/menu' || path === '/login' || path === '/info' || path === '/budget' || path === '/') {
-          setPage(0);
-        } else {
-          // Default: go back to map page (same behavior as in-app back button)
-          setPage(1);
-          window.history.replaceState(null, '', '/AgriNET/map');
-        }
+      // Clear any stale modal-handled flag from previous events
+      (window as any).__popstateHandledByModal = false;
+
+      // On menu page, back = logout (same as clicking the logout button)
+      // currentPathRef.current has the path BEFORE this popstate (updated after render, not yet refreshed)
+      const pathBeforePop = currentPathRef.current.replace('/AgriNET', '');
+      if (currentPage === 0 && pathBeforePop === '/menu') {
+        logoutRef.current();
+        window.history.pushState(null, '', '/AgriNET/login');
+        window.history.pushState(null, '', '/AgriNET/login');
+        history.replace('/login');
+        return;
+      }
+
+      // Handle page navigation FIRST (before URL checks)
+      // Pages 2-4 (Chart, VirtualValve, AddValve) → back to Map
+      if (currentPage === 2 || currentPage === 3 || currentPage === 4) {
+        lastPopstateNavRef.current = now;
+        isNavigatingBackRef.current = true;
+        pageRef.current = 1;
+        setPage(1);
+        window.history.replaceState(null, '', '/AgriNET/map');
+        // Push guard entry to absorb stale history entries
+        window.history.pushState(null, '', '/AgriNET/map');
+        return;
+      }
+      // Pages 5-7 (Comments, AddUnit, DataList) → back to Menu
+      if (currentPage === 5 || currentPage === 6 || currentPage === 7) {
+        lastPopstateNavRef.current = now;
+        isNavigatingBackRef.current = true;
+        pageRef.current = 0;
+        setPage(0);
+        window.history.replaceState(null, '', '/AgriNET/menu');
+        // Push guard entry to absorb stale history entries
+        window.history.pushState(null, '', '/AgriNET/menu');
+        return;
+      }
+
+      // Block going back to login when logged in — undo the back navigation
+      const currentUrl = window.location.pathname.replace('/AgriNET', '');
+      if (currentUrl === '/login' || currentUrl === '' || currentUrl === '/') {
+        window.history.pushState(null, '', '/AgriNET/menu');
+        window.history.pushState(null, '', '/AgriNET/menu');
+        return;
       }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [page, setPage, userId]);
+  }, [setPage, userId]);
+
+  // Handle Capacitor/Ionic hardware back button (Android, iOS)
+  // Priority 5 (lowest) — Chart modals (20) and Map views (10) handle first
+  // Uses pageRef to always access the latest page value (avoids stale closures)
+  useEffect(() => {
+    const handler = (ev: any) => {
+      ev.detail.register(5, () => {
+        const currentPage = pageRef.current;
+
+        // If user is not logged in, stay on login
+        if (Number(userId) === 0) {
+          return;
+        }
+
+        // Pages 2-4 (Chart, VirtualValve, AddValve) → back to Map
+        if (currentPage === 2 || currentPage === 3 || currentPage === 4) {
+          isNavigatingBackRef.current = true;
+          pageRef.current = 1;
+          window.history.replaceState(null, '', '/AgriNET/map');
+          setPage(1);
+        }
+        // Pages 5-7 (Comments, AddUnit, DataList) → back to Menu
+        else if (currentPage === 5 || currentPage === 6 || currentPage === 7) {
+          isNavigatingBackRef.current = true;
+          pageRef.current = 0;
+          window.history.replaceState(null, '', '/AgriNET/menu');
+          setPage(0);
+        }
+        // Page 0: handle Budget, Info, and Menu → Logout
+        else if (currentPage === 0) {
+          const path = window.location.pathname.replace('/AgriNET', '');
+          // On menu page, back button = logout
+          if (path === '/menu') {
+            logoutRef.current();
+            history.replace('/login');
+            window.history.pushState(null, '', '/AgriNET/login');
+            window.history.pushState(null, '', '/AgriNET/login');
+            return;
+          }
+          if (path === '/login') {
+            return;
+          }
+          if (path === '/budget' || path === '/info') {
+            const previousPage = popFromNavigationHistory();
+            if (previousPage) {
+              window.history.replaceState(null, '', '/AgriNET' + previousPage.path);
+              if (previousPage.page !== 0) {
+                setPage(previousPage.page);
+              } else {
+                history.push(previousPage.path);
+              }
+              if (previousPage.path === '/chart') {
+                setBudgetEditorReturnPage(null);
+              }
+            } else if (path === '/budget' && budgetEditorReturnPage === 'chart') {
+              setBudgetEditorReturnPage(null);
+              setPage(2);
+              window.history.replaceState(null, '', '/AgriNET/chart');
+            } else {
+              history.push('/menu');
+            }
+          }
+        }
+      });
+    };
+
+    document.addEventListener('ionBackButton', handler);
+    return () => document.removeEventListener('ionBackButton', handler);
+  }, [setPage, userId]);
 
   useEffect(() => {
     loadGoogleApi(setGoogleApiLoaded);
@@ -154,7 +291,9 @@ const AppContent: React.FC = () => {
       const parsedUserId = parseInt(storedUserId);
       setUserId(createUserId(parsedUserId));
       setPage(0);
-      history.push('/AgriNET/menu');
+      history.replace('/AgriNET/menu');
+      // Push extra entry so device back button stays on menu
+      setTimeout(() => window.history.pushState(null, '', '/AgriNET/menu'), 100);
     } else {
       // No stored session, go to login
       history.push('/AgriNET/login');
@@ -228,7 +367,7 @@ const AppContent: React.FC = () => {
                     {currentPath.includes('/datalist') ? (
                       <IonTabBar slot="bottom" style={{ display: 'none' }} />
                     ) : (
-                      <IonTabBar slot="bottom" selectedTab={currentPath.includes('/info') ? 'info' : currentPath.includes('/budget') ? 'budget' : 'menu'}>
+                      <IonTabBar slot="bottom">
                         <IonTabButton tab="menu" layout="icon-start" href={Number(userId) === 0 ? '/login' : '/menu'} onClick={() => {
                           const currentPath = window.location.pathname.replace('/AgriNET', '');
                           pushToNavigationHistory(currentPath, page);
@@ -254,15 +393,11 @@ const AppContent: React.FC = () => {
               </div>
               : page === 2
                 ? <div>
-                    <IonReactRouter basename="/AgriNET">
-                        <Route path="/chart">
-                            <Chart additionalChartData={additionalChartData} chartData={chartData} setPage={setPage}
-                                   siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName}
-                                   userId={userId} chartPageType={chartPageType}
-                                   setAdditionalChartData={setAdditionalChartData} setChartData={setChartData}
-                                   setSiteId={setSiteId} setSiteName={setSiteName} setChartPageType={setChartPageType}/>
-                        </Route>
-                    </IonReactRouter>
+                    <Chart additionalChartData={additionalChartData} chartData={chartData} setPage={setPage}
+                           siteList={siteList} setSiteList={setSiteList} siteId={siteId} siteName={siteName}
+                           userId={userId} chartPageType={chartPageType}
+                           setAdditionalChartData={setAdditionalChartData} setChartData={setChartData}
+                           setSiteId={setSiteId} setSiteName={setSiteName} setChartPageType={setChartPageType}/>
                   </div>
                 : page === 3
                   ? <div>
@@ -287,28 +422,20 @@ const AppContent: React.FC = () => {
                       </div>
                     : page === 5
                       ? <div>
-                          <IonReactRouter basename="/AgriNET">
-                            <Route path="/comments">
-                              <CommentsPage userId={userId} setPage={setPage} />
-                            </Route>
-                          </IonReactRouter>
+                          <CommentsPage userId={userId} setPage={setPage} />
                         </div>
                       : page === 6
                         ? <div>
-                            <IonReactRouter basename="/AgriNET">
-                              <Route path="/addunit">
-                                <AddUnitPage
-                                  userId={userId}
-                                  siteList={siteList}
-                                  setSiteList={setSiteList}
-                                  selectedSiteForAddUnit={selectedSiteForAddUnit}
-                                  setSelectedSiteForAddUnit={setSelectedSiteForAddUnit}
-                                  setSelectedMoistureSensor={setSelectedMoistureSensor}
-                                  setPage={setPage}
-                                  isGoogleApiLoaded={isGoogleApiLoaded}
-                                />
-                              </Route>
-                            </IonReactRouter>
+                            <AddUnitPage
+                              userId={userId}
+                              siteList={siteList}
+                              setSiteList={setSiteList}
+                              selectedSiteForAddUnit={selectedSiteForAddUnit}
+                              setSelectedSiteForAddUnit={setSelectedSiteForAddUnit}
+                              setSelectedMoistureSensor={setSelectedMoistureSensor}
+                              setPage={setPage}
+                              isGoogleApiLoaded={isGoogleApiLoaded}
+                            />
                           </div>
                         : page === 7
                           ? <div>

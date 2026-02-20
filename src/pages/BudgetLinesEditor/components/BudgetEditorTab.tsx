@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useCallback } from "react"
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon } from "@ionic/react"
 import { arrowBackOutline } from "ionicons/icons"
 import { useHistory } from "react-router-dom"
@@ -16,25 +16,18 @@ export const BudgetEditorTab: React.FC<BudgetEditorTabProps> = ({ siteList, user
   const history = useHistory()
   const { budgetEditorReturnPage, setBudgetEditorReturnPage, setPage, popFromNavigationHistory } = useAppContext()
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     const previousPage = popFromNavigationHistory()
 
     if (previousPage) {
-      // Navigate to the previous page from our custom history
-      // First navigate with router
       history.push(previousPage.path)
-
-      // Then set page state if different
       if (previousPage.page !== 0) {
         setPage(previousPage.page)
       }
-
-      // If we're going back to chart, clear the return flag
       if (previousPage.path === '/chart') {
         setBudgetEditorReturnPage(null)
       }
     } else {
-      // Fallback to old behavior if navigation history is empty
       if (budgetEditorReturnPage === 'chart') {
         setBudgetEditorReturnPage(null)
         setPage(2)
@@ -43,7 +36,7 @@ export const BudgetEditorTab: React.FC<BudgetEditorTabProps> = ({ siteList, user
         history.push('/menu')
       }
     }
-  }
+  }, [history, popFromNavigationHistory, setPage, setBudgetEditorReturnPage, budgetEditorReturnPage])
 
   return (
     <IonPage>

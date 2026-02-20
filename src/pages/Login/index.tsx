@@ -50,7 +50,9 @@ const Login: React.FC<LoginProps> = (props) => {
       }
 
       props.setPage(0);
-      history.push('/menu');
+      history.replace('/menu');
+      // Push extra entry so device back button stays on menu
+      setTimeout(() => window.history.pushState(null, '', '/AgriNET/menu'), 100);
       props.setUserId(createUserId(response.data.id));
     }).catch((error) => {
       console.error('[LOGIN] Login failed:', error);

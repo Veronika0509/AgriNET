@@ -183,33 +183,20 @@ const MapPage: React.FC<MapProps> = (props) => {
   const isMarkerClickedRef = useRef(isMarkerClicked)
   isMarkerClickedRef.current = isMarkerClicked
 
-  // Push browser history entries for Map page view transitions
-  useEffect(() => {
-    if (props.page === 1 && !isMarkerClicked) {
-      // Entering sites view — push state so back goes to menu
-      window.history.pushState({ mapView: 'sites' }, '')
-    }
-  }, [props.page])
-
-  useEffect(() => {
-    if (isMarkerClicked && props.page === 1) {
-      // Entering overlays view — push state so back goes to sites view
-      window.history.pushState({ mapView: 'overlays' }, '')
-    }
-  }, [isMarkerClicked, props.page])
-
   // Listen for browser/device back button on the Map page
-  useEffect(() => {
-    if (props.page !== 1) return
+  const pagePropRef = useRef(props.page)
+  pagePropRef.current = props.page
 
+  useEffect(() => {
     const handlePopState = () => {
+      // Only handle if we're on the map page
+      if (pagePropRef.current !== 1) return
+
       // Check if another handler already processed this event
       if ((window as any).__popstateHandledByModal) {
         (window as any).__popstateHandledByModal = false
         return
       }
-      // Only handle if we're on the map page
-      if (props.page !== 1) return
 
       if (isMarkerClickedRef.current) {
         // Currently in overlays view → go back to sites view
@@ -225,7 +212,27 @@ const MapPage: React.FC<MapProps> = (props) => {
 
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
-  }, [props.page, props.setPage])
+  }, [props.setPage])
+
+  // Handle Capacitor/Ionic hardware back button on Map page
+  useEffect(() => {
+    const handler = (ev: any) => {
+      ev.detail.register(10, () => {
+        // Only handle if we're on the map page
+        if (pagePropRef.current !== 1) return
+
+        if (isMarkerClickedRef.current) {
+          setIsMarkerClicked(false)
+        } else {
+          window.history.replaceState(null, '', '/AgriNET/menu')
+          props.setPage(0)
+        }
+      })
+    }
+
+    document.addEventListener('ionBackButton', handler)
+    return () => document.removeEventListener('ionBackButton', handler)
+  }, [props.setPage])
 
   // Cleanup effect: Clear all overlays and sensor data when going back from sensors view (using custom hook)
   useMarkerClickCleanup({

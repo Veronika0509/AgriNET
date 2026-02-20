@@ -21,5 +21,4 @@ export const onValveSensorClick = async (
   setSiteName(name)
   setChartPageType('valve')
   setPage(2)
-  history.push('/AgriNET/chart');
 };

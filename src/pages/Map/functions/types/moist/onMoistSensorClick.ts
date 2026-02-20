@@ -26,7 +26,6 @@ export const onMoistSensorClick = async (
   setSiteName(name)
   setChartPageType('moist')
   setPage(2)
-  history.push('/AgriNET/chart');
   // } else {
   //   setSiteId(id)
   //   setSiteName(name)

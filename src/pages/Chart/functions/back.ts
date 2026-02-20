@@ -10,8 +10,7 @@ export const back = (
 ): void => {
   setPage(1);
   // Navigate back to map page
-  // The Chart Header sets forceMapTab flag in AppContext to ensure Map tab is shown
-  history.push('/map');
+  window.history.replaceState(null, '', '/AgriNET/map');
   if (clearReturnToMapTab) {
     clearReturnToMapTab();
   }

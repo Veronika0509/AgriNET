@@ -31,19 +31,23 @@ const Menu: React.FC<MenuProps> = (props) => {
   const userData = localStorage.getItem('userData');
   const username = userData ? JSON.parse(userData).name : 'User';
 
+  // Guard: redirect to login if user is not authenticated
+  useEffect(() => {
+    if (Number(props.userId) === 0) {
+      history.replace('/login');
+    }
+  }, [props.userId, history]);
+
   const navigateToMap = () => {
     props.setPage(1);
-    history.push('/map');
   };
 
   const navigateToComments = () => {
     props.setPage(5);
-    history.push('/comments');
   };
 
   const navigateToAddUnit = () => {
     props.setPage(6);
-    history.push('/addunit');
   };
 
   const navigateToInfo = () => {
@@ -57,9 +61,10 @@ const Menu: React.FC<MenuProps> = (props) => {
 
   const handleLogout = () => {
     logout();
-    // Replace current history entry so back button can't return to menu
-    window.history.replaceState(null, '', '/AgriNET/login');
     history.replace('/login');
+    // Push extra /login entries so back swipes hit /login, not /menu
+    window.history.pushState(null, '', '/AgriNET/login');
+    window.history.pushState(null, '', '/AgriNET/login');
   };
 
   // Fetch site list when menu page loads

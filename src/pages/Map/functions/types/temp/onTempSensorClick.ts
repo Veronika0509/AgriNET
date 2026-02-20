@@ -34,6 +34,5 @@ export const onTempSensorClick = async (
     setSiteName(name)
     setChartPageType('temp')
     setPage(2)
-    history.push('/AgriNET/chart');
   }
 }
