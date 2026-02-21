@@ -187,10 +187,23 @@ const MapPage: React.FC<MapProps> = (props) => {
   const pagePropRef = useRef(props.page)
   pagePropRef.current = props.page
 
+  // Tracks the previous page value — updated after render (via useEffect), so during
+  // async events (ionBackButton, popstate) that fire after React commits, we can detect
+  // that we just navigated back FROM Chart (page 2 → 1) and skip resetting isMarkerClicked
+  const prevPagePropRef = useRef(props.page)
+  useEffect(() => {
+    prevPagePropRef.current = props.page
+  }, [props.page])
+
   useEffect(() => {
     const handlePopState = () => {
       // Only handle if we're on the map page
       if (pagePropRef.current !== 1) return
+
+      // If we just navigated back from chart/valve page (< 500ms ago), skip this popstate.
+      // On Mac, pressing the device back button can trigger a spurious second popstate
+      // after React re-renders with page=1, which would incorrectly clear the overlays view.
+      if (Date.now() - ((window as any).__chartToMapNavTimestamp || 0) < 500) return
 
       // Check if another handler already processed this event
       if ((window as any).__popstateHandledByModal) {
@@ -217,9 +230,18 @@ const MapPage: React.FC<MapProps> = (props) => {
   // Handle Capacitor/Ionic hardware back button on Map page
   useEffect(() => {
     const handler = (ev: any) => {
-      ev.detail.register(10, () => {
-        // Only handle if we're on the map page
-        if (pagePropRef.current !== 1) return
+      ev.detail.register(10, (processNextHandler: () => void) => {
+        // Only handle if we're on the map page.
+        // Otherwise pass control to lower-priority handlers (e.g. App.tsx priority 5)
+        // so they can handle chart/comments/datalist/etc. back navigation on Android.
+        if (pagePropRef.current !== 1) {
+          processNextHandler()
+          return
+        }
+
+        // If prevPagePropRef is still the old page (useEffect hasn't updated it yet),
+        // we just navigated back from another page — don't reset tier 2 overlay state
+        if (prevPagePropRef.current !== 1) return
 
         if (isMarkerClickedRef.current) {
           setIsMarkerClicked(false)

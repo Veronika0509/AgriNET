@@ -105,18 +105,18 @@ const AppContent: React.FC = () => {
     return () => unlisten();
   }, [history]);
 
-  // Keep refs fresh so handlers always use latest values without re-registering effects
-  useEffect(() => {
-    currentPathRef.current = currentPath;
-  }, [currentPath]);
-
   useEffect(() => {
     logoutRef.current = logout;
   }, [logout]);
 
-  // Sync currentPath when URL changes outside of history.listen (e.g. after logout)
+  // Sync currentPath (UI state) and currentPathRef (used in popstate handler) when
+  // userId or page changes (login/logout/page switch).
+  // NOTE: currentPathRef is intentionally NOT updated via history.listen because
+  // IonReactRouter fires internal history events (e.g. '/menu') during tab animations
+  // that would corrupt the "path before pop" value used for logout detection.
   useEffect(() => {
     setCurrentPath(window.location.pathname);
+    currentPathRef.current = window.location.pathname;
   }, [userId, page]);
 
   // Push browser history entry when entering pages outside the IonReactRouter
@@ -162,8 +162,20 @@ const AppContent: React.FC = () => {
       // Clear any stale modal-handled flag from previous events
       (window as any).__popstateHandledByModal = false;
 
-      // On menu page, back = logout (same as clicking the logout button)
-      // currentPathRef.current has the path BEFORE this popstate (updated after render, not yet refreshed)
+      // Map page (page 1): Map.tsx has its own popstate handler that manages
+      // navigation back to menu. Set the debounce timestamp here so that if
+      // Mac fires a spurious second popstate AFTER Map.tsx calls setPage(0)
+      // (which re-renders with page=0), the logout condition won't trigger.
+      if (currentPage === 1) {
+        lastPopstateNavRef.current = now;
+        currentPathRef.current = window.location.pathname;
+        return;
+      }
+
+      // On menu page, back = logout (same as clicking the logout button).
+      // pathBeforePop is reliable here because tab button onClick handlers explicitly
+      // update currentPathRef.current when navigating to sub-pages (/budget, /info),
+      // so we can correctly distinguish "was on /menu" vs "was on /budget".
       const pathBeforePop = currentPathRef.current.replace('/AgriNET', '');
       if (currentPage === 0 && pathBeforePop === '/menu') {
         logoutRef.current();
@@ -175,14 +187,14 @@ const AppContent: React.FC = () => {
 
       // Handle page navigation FIRST (before URL checks)
       // Pages 2-4 (Chart, VirtualValve, AddValve) → back to Map
+      // Matches back arrow behavior exactly: setPage(1) + replaceState, let useEffect([page]) handle pushState
       if (currentPage === 2 || currentPage === 3 || currentPage === 4) {
-        lastPopstateNavRef.current = now;
-        isNavigatingBackRef.current = true;
         pageRef.current = 1;
         setPage(1);
         window.history.replaceState(null, '', '/AgriNET/map');
-        // Push guard entry to absorb stale history entries
-        window.history.pushState(null, '', '/AgriNET/map');
+        // Set timestamp so Map's popstate handler ignores any spurious popstate
+        // that may fire after React re-renders with page=1 (Mac back gesture quirk)
+        (window as any).__chartToMapNavTimestamp = Date.now();
         return;
       }
       // Pages 5-7 (Comments, AddUnit, DataList) → back to Menu
@@ -204,6 +216,17 @@ const AppContent: React.FC = () => {
         window.history.pushState(null, '', '/AgriNET/menu');
         return;
       }
+
+      // If we just navigated naturally to /menu from another page (e.g. /budget or /info),
+      // debounce the next popstate. This prevents a spurious second popstate (Mac back
+      // gesture can fire twice) from seeing pathBeforePop='/menu' and triggering logout.
+      if (currentUrl === '/menu' && pathBeforePop !== '/menu') {
+        lastPopstateNavRef.current = now;
+      }
+
+      // Update currentPathRef so the NEXT popstate has an accurate pathBeforePop.
+      // This handles tab navigations where history.listen may not fire.
+      currentPathRef.current = window.location.pathname;
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -225,10 +248,9 @@ const AppContent: React.FC = () => {
 
         // Pages 2-4 (Chart, VirtualValve, AddValve) → back to Map
         if (currentPage === 2 || currentPage === 3 || currentPage === 4) {
-          isNavigatingBackRef.current = true;
           pageRef.current = 1;
-          window.history.replaceState(null, '', '/AgriNET/map');
           setPage(1);
+          window.history.replaceState(null, '', '/AgriNET/map');
         }
         // Pages 5-7 (Comments, AddUnit, DataList) → back to Menu
         else if (currentPage === 5 || currentPage === 6 || currentPage === 7) {
@@ -254,21 +276,25 @@ const AppContent: React.FC = () => {
           if (path === '/budget' || path === '/info') {
             const previousPage = popFromNavigationHistory();
             if (previousPage) {
-              window.history.replaceState(null, '', '/AgriNET' + previousPage.path);
               if (previousPage.page !== 0) {
+                // Navigate to a non-router page (chart, map, etc.) via setPage
+                window.history.replaceState(null, '', '/AgriNET' + previousPage.path);
                 setPage(previousPage.page);
+                if (previousPage.path === '/chart') {
+                  setBudgetEditorReturnPage(null);
+                }
               } else {
-                history.push(previousPage.path);
-              }
-              if (previousPage.path === '/chart') {
-                setBudgetEditorReturnPage(null);
+                // Navigate back within the router (to /menu, /info, etc.)
+                // window.history.back() triggers popstate which IonReactRouter handles correctly
+                window.history.back();
               }
             } else if (path === '/budget' && budgetEditorReturnPage === 'chart') {
               setBudgetEditorReturnPage(null);
               setPage(2);
               window.history.replaceState(null, '', '/AgriNET/chart');
             } else {
-              history.push('/menu');
+              // Fallback: go back in history (React Router will render /menu)
+              window.history.back();
             }
           }
         }
@@ -371,18 +397,24 @@ const AppContent: React.FC = () => {
                         <IonTabButton tab="menu" layout="icon-start" href={Number(userId) === 0 ? '/login' : '/menu'} onClick={() => {
                           const currentPath = window.location.pathname.replace('/AgriNET', '');
                           pushToNavigationHistory(currentPath, page);
+                          // After navigating to menu, the next back press should trigger logout
+                          currentPathRef.current = '/AgriNET/menu';
                         }}>
                           <IonIcon icon={home}/>
                         </IonTabButton>
-                        <IonTabButton tab="budget" href="/budget" style={Number(userId) === 0 ? { display: 'none' } : undefined} onClick={() => {
+                        <IonTabButton tab="budget" href="/budget" style={(Number(userId) === 0 || currentPath.endsWith('/login')) ? { display: 'none' } : undefined} onClick={() => {
                           const currentPath = window.location.pathname.replace('/AgriNET', '');
                           pushToNavigationHistory(currentPath, page);
+                          // Update currentPathRef so popstate knows we navigated away from /menu
+                          currentPathRef.current = '/AgriNET/budget';
                         }}>
                           <IonIcon icon={settings}/>
                         </IonTabButton>
                         <IonTabButton tab="info" href="/info" onClick={() => {
                           const currentPath = window.location.pathname.replace('/AgriNET', '');
                           pushToNavigationHistory(currentPath, page);
+                          // Update currentPathRef so popstate knows we navigated away from /menu
+                          currentPathRef.current = '/AgriNET/info';
                         }}>
                           <IonIcon icon={informationCircle}/>
                         </IonTabButton>
