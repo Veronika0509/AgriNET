@@ -217,6 +217,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         ;(window as any).__popstateHandledByModal = true
       } else {
         // Currently in sites view → go back to menu
+        ;(window as any).__mapToMenuTimestamp = Date.now()
         props.setPage(0)
         window.history.replaceState(null, '', '/AgriNET/menu')
         ;(window as any).__popstateHandledByModal = true
@@ -246,6 +247,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         if (isMarkerClickedRef.current) {
           setIsMarkerClicked(false)
         } else {
+          ;(window as any).__mapToMenuTimestamp = Date.now()
           window.history.replaceState(null, '', '/AgriNET/menu')
           props.setPage(0)
         }

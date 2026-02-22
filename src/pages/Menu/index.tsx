@@ -24,7 +24,7 @@ interface MenuProps {
 
 const Menu: React.FC<MenuProps> = (props) => {
   const history = useHistory();
-  const { logout, setSiteList } = useAppContext();
+  const { logout, setSiteList, pushToNavigationHistory } = useAppContext();
   const [present] = useIonToast();
 
   // Get username from localStorage
@@ -51,6 +51,9 @@ const Menu: React.FC<MenuProps> = (props) => {
   };
 
   const navigateToInfo = () => {
+    const currentPath = window.location.pathname.replace('/AgriNET', '');
+    pushToNavigationHistory(currentPath, 0);
+    (window as any).__infoFromMenu = true;
     props.setPage(0);
     history.push('/info');
   };

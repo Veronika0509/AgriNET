@@ -101,6 +101,14 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const unlisten = history.listen((location) => {
       setCurrentPath(location.pathname);
+      // Update currentPathRef when navigating TO /info or /budget so the popstate
+      // handler correctly sees where we came from when the user presses back.
+      // We intentionally skip /menu here — IonReactRouter fires internal '/menu'
+      // history events during tab animations that would corrupt pathBeforePop.
+      const path = location.pathname.replace('/AgriNET', '');
+      if (path === '/info' || path === '/budget') {
+        currentPathRef.current = location.pathname;
+      }
     });
     return () => unlisten();
   }, [history]);
@@ -178,6 +186,19 @@ const AppContent: React.FC = () => {
       // so we can correctly distinguish "was on /menu" vs "was on /budget".
       const pathBeforePop = currentPathRef.current.replace('/AgriNET', '');
       if (currentPage === 0 && pathBeforePop === '/menu') {
+        // Guard: user navigated to /info via the Menu button — the flag was set on click
+        // and is immune to currentPathRef being reset by internal IonReactRouter events.
+        if ((window as any).__infoFromMenu) {
+          (window as any).__infoFromMenu = false;
+          window.history.replaceState(null, '', '/AgriNET/menu');
+          return;
+        }
+        // Guard: on Android, ionBackButton (Map → Menu) can trigger a spurious popstate
+        // that fires after React commits page=0. Skip logout if we just came from Map.
+        if (Date.now() - ((window as any).__mapToMenuTimestamp || 0) < 500) {
+          window.history.replaceState(null, '', '/AgriNET/menu');
+          return;
+        }
         logoutRef.current();
         window.history.pushState(null, '', '/AgriNET/login');
         window.history.pushState(null, '', '/AgriNET/login');
@@ -222,6 +243,11 @@ const AppContent: React.FC = () => {
       // gesture can fire twice) from seeing pathBeforePop='/menu' and triggering logout.
       if (currentUrl === '/menu' && pathBeforePop !== '/menu') {
         lastPopstateNavRef.current = now;
+        // Flag for ionBackButton handler: if Capacitor fires ionBackButton AFTER popstate
+        // (Android), the back navigation is already done — don't trigger logout.
+        (window as any).__subpageBackHandledByPopstate = Date.now();
+        // Clear infoFromMenu flag: we've successfully returned to /menu.
+        (window as any).__infoFromMenu = false;
       }
 
       // Update currentPathRef so the NEXT popstate has an accurate pathBeforePop.
@@ -264,6 +290,17 @@ const AppContent: React.FC = () => {
           const path = window.location.pathname.replace('/AgriNET', '');
           // On menu page, back button = logout
           if (path === '/menu') {
+            // Guard: user navigated to /info via "AgriNET Contact" menu button
+            if ((window as any).__infoFromMenu) {
+              (window as any).__infoFromMenu = false;
+              return;
+            }
+            // Guard: on Android, Capacitor can fire popstate (which navigates /info→/menu)
+            // and then ionBackButton. By the time ionBackButton fires, path is already '/menu'.
+            // If popstate already handled the back navigation, skip logout.
+            if (Date.now() - ((window as any).__subpageBackHandledByPopstate || 0) < 500) {
+              return;
+            }
             logoutRef.current();
             history.replace('/login');
             window.history.pushState(null, '', '/AgriNET/login');
@@ -346,7 +383,10 @@ const AppContent: React.FC = () => {
                         <Login setPage={setPage} setUserId={setUserId}/>
                       </Route>
                       <Route exact path="/menu">
-                        <Menu setPage={setPage} userId={userId} />
+                        <Menu setPage={setPage} userId={userId} onBeforeNavigateToInfo={() => {
+                          currentPathRef.current = '/AgriNET/info';
+                          (window as any).__infoFromMenu = true;
+                        }} />
                       </Route>
                       <Route exact path="/comments">
                         <CommentsPage userId={userId} setPage={setPage} />
