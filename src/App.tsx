@@ -267,8 +267,12 @@ const AppContent: React.FC = () => {
       ev.detail.register(5, () => {
         const currentPage = pageRef.current;
 
-        // If user is not logged in, stay on login
+        // If user is not logged in, navigate back (handles /info → back → /login on Android)
         if (Number(userId) === 0) {
+          const path = window.location.pathname.replace('/AgriNET', '');
+          if (path !== '/login') {
+            window.history.back();
+          }
           return;
         }
 
