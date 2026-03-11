@@ -73,6 +73,7 @@ export const WxetChartPage = (props: any) => {
   const preferencesApplied = useRef(false);
   useEffect(() => {
     if (currentChartData && currentChartData.initialData) {
+      console.log('[WXET] chart data (initial):', currentChartData.data)
       createWxetChart(currentChartData.data, root, props.isMobile, props.additionalChartData, nwsForecastData)
       setCurrentChartData(currentChartData.data)
     }
@@ -98,6 +99,7 @@ export const WxetChartPage = (props: any) => {
         const endDatetime = new Date(currentDates[1]).setHours(0, 0, 0, 0)
         const days = (endDatetime - new Date(currentDates[0]).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000)
         const newChartData = await getWxetMainChartData(props.sensorId, days, formatDate(new Date(endDatetime + (1000 * 60 * 60 * 24))))
+        console.log('[WXET] chart data (updated):', newChartData.data.data)
         createWxetChart(newChartData.data.data, root, props.isMobile, props.additionalChartData, nwsForecastData)
         setCurrentChartData(newChartData.data.data)
         if (batteryChartShowed) {

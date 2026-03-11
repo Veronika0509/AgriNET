@@ -117,6 +117,7 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
         params: { layers, userId },
       });
       console.log('Tabular data response:', response.data);
+      console.log('[DataList] items:', response.data.items);
       setTabularData(response.data.items || []);
       setSelectedTypes(types);
       setError(null);
@@ -234,13 +235,15 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
       groups[sensorType].push(item);
     });
 
-    return typeOrder
+    const result = typeOrder
       .filter(type => groups[type] && groups[type].length > 0)
       .map(type => ({
         type,
         displayName: typeDisplayNames[type] || type,
         items: groups[type]
       }));
+    console.log('[DataList] groupedData:', result);
+    return result;
   }, [tabularData, siteList]);
 
   const renderDataTable = (item: TabularDataItem) => {

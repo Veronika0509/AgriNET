@@ -115,7 +115,7 @@ export const createWxetChart = (
     }
 
     function createChartDataArray(lineLabel: string) {
-      const data: Array<{ date: number; value: number }> = [];
+      const data: Array<{ date: number; value: number; rainOriginal?: number; solarDisplay?: number }> = [];
       const dataArray: any[] = lineLabel === 'forecastTemp' ? (nwsForecastData?.data || []) : chartData;
 
       dataArray.forEach((chartDataItem) => {
@@ -132,8 +132,14 @@ export const createWxetChart = (
           return; // Skip invalid items
         }
 
-        const chartData = createChartData(chartDate, chartValue);
-        data.push(chartData);
+        if (lineLabel === 'rain_display') {
+          data.push({ date: chartDate, value: chartValue * 100, rainOriginal: chartValue });
+        } else if (lineLabel === 'Solar') {
+          const solarDisplay = Number(chartDataItem['solar_display'] ?? chartValue);
+          data.push({ date: chartDate, value: chartValue, solarDisplay });
+        } else {
+          data.push(createChartData(chartDate, chartValue));
+        }
       });
       return data;
     }
@@ -167,10 +173,13 @@ export const createWxetChart = (
     let lastSeries: am5xy.SmoothedXLineSeries | null = null;
     dataLabels.forEach((dataLabel) => {
       const name = dataLabel.name
+      const tooltipValueField = dataLabel.label === 'rain_display' ? "{rainOriginal}"
+        : dataLabel.label === 'Solar' ? "{solarDisplay}"
+        : "{value}";
       const tooltip: am5.Tooltip = am5.Tooltip.new(root.current, {
         pointerOrientation: "horizontal",
         getFillFromSprite: false,
-        labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + ' - ' + "{value}" + dataLabel.metric,
+        labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + ' - ' + tooltipValueField + dataLabel.metric,
       })
       if (tooltip) {
         tooltip.get("background").setAll({

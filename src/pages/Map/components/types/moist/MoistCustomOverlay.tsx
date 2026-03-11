@@ -373,6 +373,9 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
           const panes = this.getPanes();
           if (panes && this.div) {
             panes.floatPane.appendChild(this.div);
+            if (this._pendingHidden) {
+              this.div.style.visibility = "hidden";
+            }
           }
 
           if (!this.root && this.div) {
@@ -449,12 +452,14 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
       }
 
       hide() {
+        this._pendingHidden = true;
         if (this.div) {
           this.div.style.visibility = "hidden";
         }
       }
 
       show() {
+        this._pendingHidden = false;
         if (this.div) {
           this.div.style.visibility = "visible";
         }
