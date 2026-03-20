@@ -21,6 +21,7 @@ import { getComments } from "../../AddComment/data/getComments"
 import { getSoilTempChartData } from "../../../data/types/moist/getSoilTempChartData"
 import { getBatteryChartData } from "../../../data/types/moist/getBatteryChartData"
 import { Autowater } from "./components/Autowater"
+import { getRefillPrediction, RefillPredictionResponse } from "../../../data/types/moist/getRefillPrediction"
 import { updateCommentsArray } from "../../../functions/types/moist/updateCommentsArray"
 import { compareDates } from "../../../functions/types/moist/compareDates"
 import { getSetAddCommentItemShowed } from "../../../functions/types/moist/getSetAddCommentItemShowed"
@@ -202,6 +203,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
   const [showForecast, setShowForecast] = useState<boolean>(true)
   const [isMoistCommentsShowed, setIsMoistCommentsShowed] = useState<boolean>(false)
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false)
+  const [refillPrediction, setRefillPrediction] = useState<RefillPredictionResponse | undefined>(undefined)
 
   // Chart visibility state
   const [batteryChartShowed, setBatteryChartShowed] = useState<boolean>(false)
@@ -916,6 +918,10 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
     )
     setDynamicChartHeight('mainChart')
     setDynamicChartHeight('sumChart')
+
+    getRefillPrediction(props.sensorId, props.userId)
+      .then(setRefillPrediction)
+      .catch(() => setRefillPrediction(undefined))
   }, [])
 
   useEffect(() => {
@@ -1288,7 +1294,25 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setIsLoading={(isLoading: boolean) => updateTabularData("sum", {isLoading})}
           />
         </div>
-        <div id="sumChart" className={s.sumChart}></div>
+        <div style={{ position: 'relative' }}>
+          {refillPrediction && refillPrediction.days_to_refill >= 0 && (
+            <p style={{
+              position: 'absolute',
+              bottom: '10%',
+              left: '50%',
+              textAlign: 'center',
+              transform: 'translateX(-50%)',
+              zIndex: 10,
+              color: '#CC0000',
+              fontWeight: 600,
+              margin: 0,
+              pointerEvents: 'none',
+            }}>
+              Sum chart will reach refill zone in {Math.round(refillPrediction.days_to_refill)} days without irrigation
+            </p>
+          )}
+          <div id="sumChart" className={s.sumChart}></div>
+        </div>
 
         {/* Comment Modal */}
         {moistAddCommentModal && (
