@@ -91,3 +91,30 @@ ion-content {
 ion-tab-bar[style*="display: none"] {
   display: none !important;
 }
+
+/* Always-visible tab bar - fixed at bottom above overlays */
+ion-tab-bar[slot="bottom"] {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 10000 !important;
+}
+
+/* Compensate for fixed tab bar in normal tab content flow */
+ion-tabs > .tabs-inner {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Page overlays - fill viewport above the fixed tab bar */
+.page-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  background: #fff;
+  overflow: hidden;
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
