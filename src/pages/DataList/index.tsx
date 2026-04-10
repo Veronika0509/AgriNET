@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   IonPage,
   IonContent,
@@ -62,6 +63,7 @@ const STORAGE_KEY = 'dataList_selectedTypes';
 
 const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
   const { userId } = useAppContext();
+  const history = useHistory();
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [tabularData, setTabularData] = useState<TabularDataItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -187,6 +189,7 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
 
   const handleBack = () => {
     setPage(0);
+    history.replace('/menu');
   };
 
   const fetchTabularData = async () => {

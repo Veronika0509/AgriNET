@@ -94,7 +94,7 @@ const AddUnitPage: React.FC<AddUnitPageProps> = (props) => {
 
   const handleBack = () => {
     props.setPage(0);
-    window.history.replaceState(null, '', '/AgriNET/menu');
+    history.replace('/menu');
   };
 
   const handleNavigateToMap = () => {

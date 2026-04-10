@@ -1,4 +1,4 @@
-import {Route, Redirect, useLocation} from 'react-router-dom';
+import {Route, Redirect} from 'react-router-dom';
 import {
   IonApp,
   IonIcon,
@@ -49,6 +49,8 @@ import { AppProvider, useAppContext } from "./context/AppContext";
 import { createUserId } from "./types";
 import './App.css'
 import {BudgetEditorTab} from "./pages/BudgetLinesEditor/components/BudgetEditorTab";
+import { useUrlSync } from "./hooks/useUrlSync";
+import { pageToUrl, parseCurrentUrl, isDeepLink, buildUrl } from "./utils/url";
 
 setupIonicReact();
 
@@ -89,6 +91,12 @@ const AppContent: React.FC = () => {
   const history = useHistory();
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
   const [currentPath, setCurrentPath] = React.useState(window.location.pathname);
+
+  const { restoreFromUrl } = useUrlSync(
+    { page, siteId, chartPageType, userId },
+    { setPage, setSiteId, setSiteName, setChartData, setAdditionalChartData, setChartPageType, setSiteList, setUserId }
+  );
+
   const pageRef = React.useRef(page);
   pageRef.current = page;
   const isNavigatingBackRef = React.useRef(false);
@@ -132,8 +140,9 @@ const AppContent: React.FC = () => {
   // Only push on forward navigation, not when navigating back (popstate)
   useEffect(() => {
     if (page >= 1 && page <= 7 && !isNavigatingBackRef.current) {
-      window.history.pushState({ appPage: page }, '');
-      console.log('[NAV] pushState for page', page, 'history.length:', window.history.length);
+      const url = pageToUrl(page, { siteId, chartPageType });
+      window.history.pushState({ appPage: page }, '', url || undefined);
+      console.log('[NAV] pushState for page', page, 'url:', url, 'history.length:', window.history.length);
     } else {
       console.log('[NAV] SKIP pushState for page', page, 'isBack:', isNavigatingBackRef.current, 'history.length:', window.history.length);
     }
@@ -212,7 +221,7 @@ const AppContent: React.FC = () => {
       if (currentPage === 2 || currentPage === 3 || currentPage === 4) {
         pageRef.current = 1;
         setPage(1);
-        window.history.replaceState(null, '', '/AgriNET/map');
+        window.history.replaceState(null, '', buildUrl('/map'));
         // Set timestamp so Map's popstate handler ignores any spurious popstate
         // that may fire after React re-renders with page=1 (Mac back gesture quirk)
         (window as any).__chartToMapNavTimestamp = Date.now();
@@ -357,19 +366,39 @@ const AppContent: React.FC = () => {
       // User has a stored session, auto-login
       const parsedUserId = parseInt(storedUserId);
       setUserId(createUserId(parsedUserId));
-      setPage(0);
-      history.replace('/menu');
-      // Push extra entry so device back button stays on menu
-      setTimeout(() => window.history.pushState(null, '', '/AgriNET/menu'), 100);
-    } else {
-      // No stored session, go to login
-      history.push('/login');
-    }
 
-    // Mark initial load as complete after a short delay
-    setTimeout(() => {
-      setIsInitialLoad(false);
-    }, 1500);
+      // Check URL synchronously to decide path (avoids React strict mode race)
+      const { path } = parseCurrentUrl();
+      if (isDeepLink(path)) {
+        // Deep link detected — restore state from URL
+        restoreFromUrl().then((restored) => {
+          if (!restored) {
+            // Deep link path not recognized — fallback to menu
+            setPage(0);
+            history.replace('/menu');
+            setTimeout(() => window.history.pushState(null, '', '/AgriNET/menu'), 100);
+          }
+          setTimeout(() => { setIsInitialLoad(false); }, 500);
+        });
+      } else {
+        // No deep link — go to menu as before
+        setPage(0);
+        history.replace('/menu');
+        setTimeout(() => window.history.pushState(null, '', '/AgriNET/menu'), 100);
+        setTimeout(() => { setIsInitialLoad(false); }, 1500);
+      }
+    } else {
+      // No stored session — save deep link target for after login
+      const { path } = parseCurrentUrl();
+      if (isDeepLink(path)) {
+        sessionStorage.setItem('deepLinkTarget', window.location.pathname + window.location.search);
+      }
+      history.push('/login');
+      // Mark initial load as complete after a short delay
+      setTimeout(() => {
+        setIsInitialLoad(false);
+      }, 1500);
+    }
   }, []);
 
   return (

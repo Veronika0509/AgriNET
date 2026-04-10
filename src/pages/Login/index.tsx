@@ -49,11 +49,19 @@ const Login: React.FC<LoginProps> = (props) => {
         localStorage.setItem('userData', JSON.stringify(response.data));
       }
 
-      props.setPage(0);
-      history.replace('/menu');
-      // Push extra entry so device back button stays on menu
-      setTimeout(() => window.history.pushState(null, '', '/AgriNET/menu'), 100);
       props.setUserId(createUserId(response.data.id));
+
+      // Check for saved deep link target from before login
+      const deepLinkTarget = sessionStorage.getItem('deepLinkTarget');
+      if (deepLinkTarget) {
+        sessionStorage.removeItem('deepLinkTarget');
+        window.location.replace(deepLinkTarget);
+      } else {
+        props.setPage(0);
+        history.replace('/menu');
+        // Push extra entry so device back button stays on menu
+        setTimeout(() => window.history.pushState(null, '', '/AgriNET/menu'), 100);
+      }
     }).catch((error) => {
       console.error('[LOGIN] Login failed:', error);
       setMessage(true)
