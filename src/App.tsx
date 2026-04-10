@@ -358,12 +358,12 @@ const AppContent: React.FC = () => {
       const parsedUserId = parseInt(storedUserId);
       setUserId(createUserId(parsedUserId));
       setPage(0);
-      history.replace('/AgriNET/menu');
+      history.replace('/menu');
       // Push extra entry so device back button stays on menu
       setTimeout(() => window.history.pushState(null, '', '/AgriNET/menu'), 100);
     } else {
       // No stored session, go to login
-      history.push('/AgriNET/login');
+      history.push('/login');
     }
 
     // Mark initial load as complete after a short delay
@@ -528,6 +528,50 @@ const AppContent: React.FC = () => {
                  setChartPageType={setChartPageType} key={mapPageKey} reloadMapPage={reloadMapPage}
                  setSelectedMoistureSensor={setSelectedMoistureSensor} />
           </div>
+          {page >= 1 && Number(userId) !== 0 && (
+            <div style={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '56px',
+              display: 'flex',
+              justifyContent: 'space-around',
+              alignItems: 'center',
+              backgroundColor: 'var(--ion-tab-bar-background, #fff)',
+              borderTop: '1px solid var(--ion-tab-bar-border-color, #e0e0e0)',
+              zIndex: 10000,
+              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+            }}>
+              <button onClick={() => {
+                const cp = window.location.pathname.replace('/AgriNET', '');
+                pushToNavigationHistory(cp, page);
+                setPage(0);
+                history.replace('/menu');
+                currentPathRef.current = '/AgriNET/menu';
+              }} style={{background: 'none', border: 'none', cursor: 'pointer', padding: '8px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <IonIcon icon={home} style={{fontSize: '24px', color: 'var(--ion-color-primary, #3880ff)'}} />
+              </button>
+              <button onClick={() => {
+                const cp = window.location.pathname.replace('/AgriNET', '');
+                pushToNavigationHistory(cp, page);
+                setPage(0);
+                history.replace('/budget');
+                currentPathRef.current = '/AgriNET/budget';
+              }} style={{background: 'none', border: 'none', cursor: 'pointer', padding: '8px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <IonIcon icon={settings} style={{fontSize: '24px', color: '#666'}} />
+              </button>
+              <button onClick={() => {
+                const cp = window.location.pathname.replace('/AgriNET', '');
+                pushToNavigationHistory(cp, page);
+                setPage(0);
+                history.replace('/info');
+                currentPathRef.current = '/AgriNET/info';
+              }} style={{background: 'none', border: 'none', cursor: 'pointer', padding: '8px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <IonIcon icon={informationCircle} style={{fontSize: '24px', color: '#666'}} />
+              </button>
+            </div>
+          )}
         </IonApp>
       )}
     </div>
