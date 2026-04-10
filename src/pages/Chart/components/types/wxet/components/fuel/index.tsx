@@ -177,7 +177,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
   window.addEventListener("resize", () => setDynamicChartHeight('fuelChartDiv'))
 
   return (
-    <IonContent>
+    <IonContent style={{'--padding-bottom': '56px'} as React.CSSProperties}>
       <div className={s.wrapper}>
         <div data-chart-section="top">
           <TopSection

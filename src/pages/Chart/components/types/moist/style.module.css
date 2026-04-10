@@ -1,5 +1,6 @@
 .container {
   --background: #fff;
+  --padding-bottom: 56px;
 }
 
 .wrapper {

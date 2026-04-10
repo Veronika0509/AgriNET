@@ -136,7 +136,8 @@ export const createMoistChartForOverlay = async (type: string, chartData: MoistC
   }));
 
   const maximum = chartData.budgetLines[0].value > 0 ? chartData.budgetLines[0].value : undefined
-  const minimum = chartData.budgetLines[5].value > 0 ? chartData.budgetLines[5].value : undefined
+  const refillValue = chartData.budgetLines[4].value
+  const minimum = refillValue > 0 ? refillValue * 0.9 : undefined
   const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
     min: minimum,
     max: maximum,
