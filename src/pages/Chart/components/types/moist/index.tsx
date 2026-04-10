@@ -34,7 +34,7 @@ import { useHistory } from 'react-router-dom';
 import { loadChartPreferences } from "../../../../../utils/chartPreferences";
 import { TimeSeriesDataItem } from "../../../../../types/api";
 import { debugLog } from "../../../../../utils/debugConfig";
-import {loadGoogleApi} from "@/functions/loadGoogleApiFunc";
+
 
 // Define TypeScript interfaces
 type ChartDataItem = TimeSeriesDataItem;
@@ -251,13 +251,13 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
   const updateCommentsArrayWrapper = ((type: string, _data?: unknown) => {
     // Call updateCommentsArray with the appropriate parameters
     if (type === 'main') {
-      updateCommentsArray('M', props.sensorId as any, updateComments, currentChartData);
+      updateCommentsArray('M', props.sensorId as any, updateComments as unknown as (type: string, data: unknown) => void, currentChartData);
     } else if (type === 'sum') {
-      updateCommentsArray('MSum', props.sensorId as any, updateComments, currentSumChartData.data);
+      updateCommentsArray('MSum', props.sensorId as any, updateComments as unknown as (type: string, data: unknown) => void, currentSumChartData.data);
     } else if (type === 'soilTemp') {
-      updateCommentsArray('MST', props.sensorId as any, updateComments, currentSoilTempChartData.data);
+      updateCommentsArray('MST', props.sensorId as any, updateComments as unknown as (type: string, data: unknown) => void, currentSoilTempChartData.data);
     } else if (type === 'battery') {
-      updateCommentsArray('MBattery', props.sensorId as any, updateComments, currentBatteryChartData.data);
+      updateCommentsArray('MBattery', props.sensorId as any, updateComments as unknown as (type: string, data: unknown) => void, currentBatteryChartData.data);
     }
   }) as any;
 
@@ -350,7 +350,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
         if (data) {
           currentData = data
         }
-        const response: CommentsResponse = await getComments(apiChartType, props.sensorId, getDaysFromChartData(currentData))
+        const response: CommentsResponse = await getComments(apiChartType, props.sensorId, getDaysFromChartData(currentData ?? []))
         updateComments(commentType, response.data)
         return response.data
       }
@@ -396,7 +396,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               dataEndDate = new Date(newMoistChartData.data.data[lastIndex - 1].DateTime).getTime()
             }
           }
-          if (isIrrigationButtons) {
+          if (isIrrigationButtons && fullDatesArray && fullDatesArray.length > 0) {
             if (dataEndDate < new Date(new Date(fullDatesArray[fullDatesArray.length - 1]).setHours(0, 0, 0, 0)).getTime()) {
               setDisableNextButton(false)
             }
@@ -564,7 +564,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               props.sensorId,
               () => updateComments("sum", undefined),
               addCommentItemShowed.sum,
-              comments.sum,
+              (comments.sum ?? []) as any,
               props.userId,
               () => updateChart(CHART_TYPES.SUM, 'dates'),
               isMoistCommentsShowed,
@@ -584,7 +584,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             props.sensorId,
             () => updateComments("sum", undefined),
             addCommentItemShowed.sum,
-            comments.sum,
+            (comments.sum ?? []) as any,
             props.userId,
             () => updateChart(CHART_TYPES.SUM, 'sameData'),
             isMoistCommentsShowed,
@@ -610,7 +610,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             props.sensorId,
             () => updateComments("sum", undefined),
             addCommentItemShowed.sum,
-            comments.sum,
+            (comments.sum ?? []) as any,
             props.userId,
             () => updateChart(CHART_TYPES.SUM),
             isMoistCommentsShowed,
@@ -685,7 +685,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               props.sensorId,
               () => updateComments("soilTemp", undefined),
               addCommentItemShowed.soilTemp,
-              comments.soilTemp,
+              (comments.soilTemp ?? []) as any,
               props.userId,
               () => updateChart(CHART_TYPES.SOIL_TEMP, 'dates'),
               isMoistCommentsShowed,
@@ -708,7 +708,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             props.sensorId,
             () => updateComments("soilTemp", undefined),
             addCommentItemShowed.soilTemp,
-            comments.soilTemp,
+            (comments.soilTemp ?? []) as any,
             props.userId,
             () => updateChart(CHART_TYPES.SOIL_TEMP, 'sameData'),
             isMoistCommentsShowed,
@@ -762,7 +762,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               props.sensorId,
               () => updateComments("soilTemp", undefined),
               addCommentItemShowed.soilTemp,
-              comments.soilTemp,
+              (comments.soilTemp ?? []) as any,
               props.userId,
               () => updateChart(CHART_TYPES.SOIL_TEMP),
               isMoistCommentsShowed,
@@ -796,15 +796,15 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             isMoistCommentsShowed,
           )
         } else if (updateReason === "dates") {
-          const newBatteryChartData: ChartResponse = await getBatteryChartData(props.sensorId, days, endDateDays)
-          setCurrentBatteryChartData(newBatteryChartData.data)
+          const newBatteryChartData = await getBatteryChartData(props.sensorId, days, endDateDays)
+          setCurrentBatteryChartData(newBatteryChartData.data as any)
 
           if (isMoistCommentsShowed) {
             // Load comments with the new data directly
-            const newComments: Comment[] = await fetchComments(CHART_TYPES.BATTERY, newBatteryChartData.data.data)
+            const newComments: Comment[] = await fetchComments(CHART_TYPES.BATTERY, newBatteryChartData.data.data as any)
             createAdditionalChart(
               "battery",
-              newBatteryChartData.data.data,
+              newBatteryChartData.data.data as any,
               batteryRoot,
               setMoistAddCommentModalWrapper,
               updateCommentsArrayWrapper,
@@ -819,14 +819,14 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           } else {
             createAdditionalChart(
               "battery",
-              newBatteryChartData.data.data,
+              newBatteryChartData.data.data as any,
               batteryRoot,
               setMoistAddCommentModalWrapper,
               updateCommentsArrayWrapper,
               props.sensorId,
               () => updateComments("battery", undefined),
               addCommentItemShowed.battery,
-              comments.battery,
+              (comments.battery ?? []) as any,
               props.userId,
               () => updateChart(CHART_TYPES.BATTERY),
               isMoistCommentsShowed,
@@ -842,25 +842,25 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             props.sensorId,
             () => updateComments("battery", undefined),
             addCommentItemShowed.battery,
-            comments.battery,
+            (comments.battery ?? []) as any,
             props.userId,
             () => updateChart(CHART_TYPES.BATTERY, 'sameData'),
             isMoistCommentsShowed,
           )
         } else {
-          const newBatteryChartData: ChartResponse = await getBatteryChartData(
+          const newBatteryChartData = await getBatteryChartData(
             props.sensorId,
             Number(currentDates[0]),
             currentDates[1],
           )
-          setCurrentBatteryChartData(newBatteryChartData.data)
+          setCurrentBatteryChartData(newBatteryChartData.data as any)
 
           if (isMoistCommentsShowed) {
             // Load comments with the new data
-            const newComments: Comment[] = await fetchComments(CHART_TYPES.BATTERY, newBatteryChartData.data.data)
+            const newComments: Comment[] = await fetchComments(CHART_TYPES.BATTERY, newBatteryChartData.data.data as any)
             createAdditionalChart(
               "battery",
-              newBatteryChartData.data.data,
+              newBatteryChartData.data.data as any,
               batteryRoot,
               setMoistAddCommentModalWrapper,
               updateCommentsArrayWrapper,
@@ -875,14 +875,14 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           } else {
             createAdditionalChart(
               "battery",
-              newBatteryChartData.data.data,
+              newBatteryChartData.data.data as any,
               batteryRoot,
               setMoistAddCommentModalWrapper,
               updateCommentsArrayWrapper,
               props.sensorId,
               () => updateComments("battery", undefined),
               addCommentItemShowed.battery,
-              comments.battery,
+              (comments.battery ?? []) as any,
               props.userId,
               () => updateChart(CHART_TYPES.BATTERY),
               isMoistCommentsShowed,
@@ -1336,16 +1336,16 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
 
               // First update comments array and refresh chart
               if (type === 'main') {
-                await updateCommentsArray('M', props.sensorId as any, updateComments, currentChartData)
+                await updateCommentsArray('M', props.sensorId as any, updateComments as unknown as (type: string, data: unknown) => void, currentChartData)
                 await updateChart(CHART_TYPES.MAIN, 'comments')
               } else if (type === 'soilTemp') {
-                await updateCommentsArray('MST', props.sensorId as any, updateComments, currentSoilTempChartData.data)
+                await updateCommentsArray('MST', props.sensorId as any, updateComments as unknown as (type: string, data: unknown) => void, currentSoilTempChartData.data)
                 await updateChart(CHART_TYPES.SOIL_TEMP, 'comments')
               } else if (type === 'sum') {
-                await updateCommentsArray('MSum', props.sensorId as any, updateComments, currentSumChartData.data)
+                await updateCommentsArray('MSum', props.sensorId as any, updateComments as unknown as (type: string, data: unknown) => void, currentSumChartData.data)
                 await updateChart(CHART_TYPES.SUM, 'comments')
               } else if (type === 'battery') {
-                await updateCommentsArray('MBattery', props.sensorId as any, updateComments, currentBatteryChartData.data)
+                await updateCommentsArray('MBattery', props.sensorId as any, updateComments as unknown as (type: string, data: unknown) => void, currentBatteryChartData.data)
                 await updateChart(CHART_TYPES.BATTERY, 'comments')
               }
 

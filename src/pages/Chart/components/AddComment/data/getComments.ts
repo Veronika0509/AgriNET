@@ -1,5 +1,4 @@
 import axios from "axios";
-import { debugLog } from "../../../../../utils/debugConfig";
 
 export const getComments = async (chartType: string, sensorId: string, days: number) => {
   try {

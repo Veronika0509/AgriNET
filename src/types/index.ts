@@ -29,7 +29,7 @@ export type Timestamp = string; // ISO 8601 format
 
 export interface DataPoint {
   DateTime: string;
-  [key: string]: string | number | boolean | null; // Strict types instead of any
+  [key: string]: string | number | boolean | undefined | null; // Strict types instead of any
 }
 
 export interface MoistDataPoint extends DataPoint {

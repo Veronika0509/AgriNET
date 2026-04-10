@@ -29,7 +29,7 @@ import { useChartOverlays } from "./hooks/useChartOverlays"
 import { useLayerCreation } from "./hooks/useLayerCreation"
 import { useCollisionResolution } from "./hooks/useCollisionResolution"
 import { useMapVisibility } from "./hooks/useMapVisibility"
-import { loadLayerPreferences, saveLayerPreferences } from "../../utils/chartPreferences"
+import { loadLayerPreferences } from "../../utils/chartPreferences"
 
 interface MapProps {
   page: number
@@ -52,12 +52,11 @@ interface MapProps {
 }
 
 const MapPage: React.FC<MapProps> = (props) => {
-  if (!props.reloadMapPage) {
-  }
+  // no-op: reloadMapPage is optional
   const present = useIonToast()
   const [activeTab, setActiveTab] = useState("map")
   const [navigationHistory, setNavigationHistory] = useState<string[]>(["map"])
-  const [isMarkerClicked, setIsMarkerClicked] = useState<string | boolean>(false)
+  const [isMarkerClicked, setIsMarkerClicked] = useState<string | boolean>(false) as [string | boolean, React.Dispatch<React.SetStateAction<string | boolean>>]
   const mapRefFunc = useRef(null);
   const previousTabRef = useRef("map")
   const previousPageRef = useRef(props.page)
@@ -120,7 +119,7 @@ const MapPage: React.FC<MapProps> = (props) => {
 
   // Map
   const [map, setMap] = React.useState<google.maps.Map | null>(null)
-  const [initialZoom, setInitialZoom] = useState(0)
+  const [initialZoom, setInitialZoom] = useState<number | undefined>(0)
   const [markers, setMarkers] = useState<google.maps.Marker[]>([])
   const [secondMap, setSecondMap] = useState<google.maps.Map | null>(null)
   const [amountOfSensors, setAmountOfSensors] = useState<number>(0)
@@ -355,6 +354,7 @@ const MapPage: React.FC<MapProps> = (props) => {
           setMapInitialized(true)
 
           if (map && sitesData && sitesData.length > 0) {
+            const currentMap = map
             const sitesAsSensorsGroupData = sitesData.map((site: SiteWithLayers) => ({
               lat: site.lat,
               lng: site.lng,
@@ -364,7 +364,7 @@ const MapPage: React.FC<MapProps> = (props) => {
             setTimeout(() => {
               createSites({
                 page: props.page,
-                map,
+                map: currentMap,
                 siteList: sitesAsSensorsGroupData,
                 markers: markers,
                 setMarkers: setMarkers,
@@ -633,7 +633,7 @@ const MapPage: React.FC<MapProps> = (props) => {
       // Wait a bit to ensure all overlays are fully rendered
       const timeoutId = setTimeout(() => {
         allOverlays.forEach((overlay: OverlayItem) => {
-          const layerName = overlay?.chartData?.layerName
+          const layerName = overlay?.chartData?.layerName as string | undefined
           if (layerName && typeof checkedLayers[layerName] !== 'undefined') {
             const shouldShow = checkedLayers[layerName]
             console.log('[Map] Overlay', layerName, 'should show:', shouldShow);
@@ -657,6 +657,7 @@ const MapPage: React.FC<MapProps> = (props) => {
 
       return () => clearTimeout(timeoutId)
     }
+    return undefined
   }, [allOverlays, checkedLayers])
 
   const renderContent = () => {
@@ -693,8 +694,8 @@ const MapPage: React.FC<MapProps> = (props) => {
       <Header
         setPage={props.setPage}
         setIsMarkerClicked={setIsMarkerClicked}
-        isMarkerClicked={isMarkerClicked}
-        reloadMapPage={props.reloadMapPage}
+        isMarkerClicked={!!isMarkerClicked}
+        reloadMapPage={props.reloadMapPage ?? (() => {})}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         navigationHistory={navigationHistory}

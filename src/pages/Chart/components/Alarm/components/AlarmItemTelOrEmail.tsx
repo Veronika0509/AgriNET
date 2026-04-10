@@ -27,11 +27,11 @@ export const AlarmItemTelOrEmail = (props: AlarmItemTelOrEmailProps) => {
   const [actionSheetButtons, setActionSheetButtons] = useState([
     {
       text: 'Email',
-      handler: () => presentTelOrEmail(toString(props.sensorId), props.name, props.setEmailOrTel, presentErrorAlert, presentAlert, 'email')
+      handler: () => presentTelOrEmail(toString(props.sensorId), props.name, props.setEmailOrTel, presentErrorAlert as unknown as (options: unknown) => void, presentAlert as unknown as (options: unknown) => void, 'email')
     },
     {
       text: 'SMS',
-      handler: () => presentTelOrEmail(toString(props.sensorId), props.name, props.setEmailOrTel, presentErrorAlert, presentAlert, 'sms')
+      handler: () => presentTelOrEmail(toString(props.sensorId), props.name, props.setEmailOrTel, presentErrorAlert as unknown as (options: unknown) => void, presentAlert as unknown as (options: unknown) => void, 'sms')
     }
   ])
 
@@ -44,13 +44,13 @@ export const AlarmItemTelOrEmail = (props: AlarmItemTelOrEmailProps) => {
       props.emailOrTel,
       setActionSheetButtons as any,
       setTextRef,
-      presentAlert,
+      presentAlert as unknown as (alert: unknown) => void,
       toString(props.sensorId),
       props.name,
       props.setEmailOrTel,
       props.setIsLowSetpointEnabled,
       props.setIsHighSetpointEnabled,
-      presentRemoveAlert,
+      presentRemoveAlert as unknown as (alert: unknown) => void,
       actionSheetButtons
     )
   }, [props.emailOrTel]);

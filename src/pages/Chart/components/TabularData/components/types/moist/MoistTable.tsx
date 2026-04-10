@@ -1,8 +1,15 @@
 import s from "../../../../types/moist/style.module.css";
 import React from "react";
 
-const colors =
+const hexColors =
   "#FF6600 #FCD202 #B0DE09 #0D8ECF #2A0CD0 #CD0D74 #CC0000 #00CC00 #0000CC #DDDDDD #999999 #333333".split(" ");
+
+const colors = hexColors.map((hex) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return { hex, r, g, b };
+});
 
 interface moistTableProps {
   type: string,
@@ -29,7 +36,7 @@ export const MoistTable: React.FC<moistTableProps> = ({type, data, firstRowColor
         </th>
         {Array.from({length: data.sensorCount}, (_, index) => (
           <th key={index} className={s.mainTabularDataTableTh}
-              style={{backgroundColor: type === 'moistSum' ? '#6771dc' : type === 'moistSoilTemp' ? `rgb(${colors[index].r}, ${colors[index].g}, ${colors[index].b})` : colors[index]}}>
+              style={{backgroundColor: type === 'moistSum' ? '#6771dc' : type === 'moistSoilTemp' ? `rgb(${colors[index].r}, ${colors[index].g}, ${colors[index].b})` : colors[index].hex}}>
             {type === 'moistMain' && (
               <>{4 * (index + 1)}inch</>
             )}
@@ -58,7 +65,7 @@ export const MoistTable: React.FC<moistTableProps> = ({type, data, firstRowColor
             color: (row.freshness === '3d' || row.freshness === 'outdated') ? '#fff' : '#000'
           } : {color: '#000'}}>{row.DateTime}</td>
           {Array.from({length: data.sensorCount}, (_, index) =>
-            <td key={index} data-label={`${4 * (index + 1)}inch`} style={isWxetMobile && type === 'moistSoilTemp' ? {backgroundColor: `rgb(${colors[index].r}, ${colors[index].g}, ${colors[index].b})`, color: '#000'} : {color: '#000'}} className={`${s.mainTabularDataTableTd} ${type === 'moistSoilTemp' && s.mainMoistSoilTempTabularDataTableTd}`}>
+            <td key={index} data-label={`${4 * (index + 1)}inch`} style={isWxetMobile && type === 'moistSoilTemp' ? {backgroundColor: `rgb(${colors[index]?.r}, ${colors[index]?.g}, ${colors[index]?.b})`, color: '#000'} : {color: '#000'}} className={`${s.mainTabularDataTableTd} ${type === 'moistSoilTemp' && s.mainMoistSoilTempTabularDataTableTd}`}>
               {type === 'moistMain' && row[`MABS${index}`]}
               {type === 'moistSum' && `${row[`SumAve`]} inches`}
               {type === 'moistSoilTemp' && `${row[`MABS${index}`]}°F`}

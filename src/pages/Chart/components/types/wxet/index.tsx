@@ -51,11 +51,11 @@ export const WxetChartPage = (props: any) => {
         undefined as any,
         undefined as any,
         props.sensorId,
-        undefined,
+        () => {},
         false,
         undefined as any,
         props.userId,
-        undefined,
+        () => {},
         false,
       )
     }
@@ -112,11 +112,11 @@ export const WxetChartPage = (props: any) => {
             undefined as any,
             undefined as any,
             props.sensorId,
-            undefined,
+            () => {},
             false,
             undefined as any,
             props.userId,
-            undefined,
+            () => {},
             false,
           )
         }

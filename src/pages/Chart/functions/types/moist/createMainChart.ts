@@ -167,7 +167,8 @@ export const createMainChart = (props: CreateMainChartProps): void => {
       listOfSeries.push({ name: "futureSeries", prefix: "P_" })
     }
 
-    let series: am5xy.SmoothedXLineSeries
+    const rootInstance = props.root.current!;
+    let series!: am5xy.SmoothedXLineSeries
     const seriesArray: am5xy.SmoothedXLineSeries[] = []
     const ordinarySeriesArray: am5xy.SmoothedXLineSeries[] = []
     const seriesColors: string[] = []
@@ -177,19 +178,19 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         const name = (props.additionalChartData.legend as Record<string, string>)[`s${count}`]
         let tooltip: am5.Tooltip | undefined
         if (seriesItem.name === "ordinarySeries") {
-          tooltip = am5.Tooltip.new(props.root.current, {
+          tooltip = am5.Tooltip.new(rootInstance, {
             pointerOrientation: "horizontal",
             getFillFromSprite: false,
             labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + "\n" + "[bold]" + name + " = {valueToShow}%",
           })
         }
         if (tooltip) {
-          tooltip.get("background").setAll({
+          tooltip.get("background")?.setAll({
             fill: am5.color(colors[i]),
           })
         }
         series = chart.series.push(
-          am5xy.SmoothedXLineSeries.new(props.root.current, {
+          am5xy.SmoothedXLineSeries.new(rootInstance, {
             name: name,
             xAxis: xAxis,
             yAxis: yAxis,
@@ -206,8 +207,9 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           strokeWidth: 2,
         })
 
-        if (series.get("tooltip")) {
-          series.get("tooltip").label.setAll({
+        const seriesTooltip = series.get("tooltip")
+        if (seriesTooltip) {
+          seriesTooltip.label.setAll({
             fontSize: "15px",
           })
         }
@@ -248,14 +250,14 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         value: new Date().getTime(),
       })
       series.createAxisRange(seriesRangeDataItem)
-      seriesRangeDataItem.get("grid").setAll({
+      seriesRangeDataItem.get("grid")?.setAll({
         visible: true,
         stroke: am5.color(0xd445d2),
         strokeWidth: 5,
         strokeOpacity: 1,
         strokeDasharray: [2, 2],
       })
-      seriesRangeDataItem.get("label").setAll({
+      seriesRangeDataItem.get("label")?.setAll({
         text: "NOW",
         inside: true,
         visible: true,
@@ -271,7 +273,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           value: new Date(date).getTime(),
         })
         series.createAxisRange(seriesRangeDataItem)
-        seriesRangeDataItem.get("grid").setAll({
+        seriesRangeDataItem.get("grid")?.setAll({
           strokeOpacity: 1,
           visible: true,
           stroke: am5.color(0x000000),
@@ -300,7 +302,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
 
     const cursor = chart.set(
       "cursor",
-      am5xy.XYCursor.new(props.root.current, {
+      am5xy.XYCursor.new(rootInstance, {
         behavior: cursorBehavior,
         xAxis: xAxis,
       }),
@@ -475,10 +477,10 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         xAxis.createAxisRange(rangeDataItem)
         let isContainerDragging = false
 
-        const container = am5.Container.new(props.root.current, {
+        const container = am5.Container.new(rootInstance, {
           centerX: am5.p50,
           draggable: true,
-          layout: props.root.current!.horizontalLayout,
+          layout: rootInstance.horizontalLayout,
           dy: 4,
         })
 
@@ -530,14 +532,14 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           isContainerDragging = false
           cursor.set("behavior", "zoomX")
           const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
-          const newDate = props.root.current.dateFormatter.format(
+          const newDate = rootInstance.dateFormatter.format(
             new Date(xAxis.positionToValue(position)),
             "yyyy-MM-dd HH:mm",
           )
           new Promise<void>((resolve: () => void) => {
             updateCommentDate(moistMainComment.id, newDate, props.userId || '', resolve)
           }).then(async () => {
-            await props.updateCommentsArray("M", props.sensorId, props.updateComments, props.data)
+            await props.updateCommentsArray?.("M", props.sensorId || '', props.updateComments || (() => {}), props.data)
             rotationAnimation?.stop()
             icon?.set("src", "https://img.icons8.com/?size=100&id=98070&format=png&color=000000")
             icon?.set("rotation", 0)
@@ -546,21 +548,21 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         xAxis.topGridContainer.children.push(container)
         rangeDataItem.set(
           "bullet",
-          am5xy.AxisBullet.new(props.root.current, {
+          am5xy.AxisBullet.new(rootInstance, {
             sprite: container,
           }),
         )
-        rangeDataItem.get("grid").setAll({
+        rangeDataItem.get("grid")?.setAll({
           strokeOpacity: 1,
           visible: true,
           stroke: am5.color(commentColor),
           strokeWidth: 6,
           location: 0,
         })
-        container.set("background", am5.RoundedRectangle.new(props.root.current, { fill: am5.color(commentColor) }))
+        container.set("background", am5.RoundedRectangle.new(rootInstance, { fill: am5.color(commentColor) }))
         // const text: string = `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[(moistMainComment.color_id as number) - 1]}\n` : ""}${moistMainComment.text}`
         const label = container.children.push(
-          am5.Label.new(props.root.current, {
+          am5.Label.new(rootInstance, {
             text: "",
             fontSize: 12,
             fill: am5.color(0x000000),
@@ -575,26 +577,26 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         labelsArray.push(label)
 
         const buttonsContainer = container.children.push(
-          am5.Container.new(props.root.current, {
-            layout: props.root.current.horizontalLayout,
+          am5.Container.new(rootInstance, {
+            layout: rootInstance.horizontalLayout,
             marginLeft: 8,
             paddingTop: 3,
             paddingRight: 7,
           }),
         )
         const dragButton = buttonsContainer.children.push(
-          am5.Button.new(props.root.current, {
+          am5.Button.new(rootInstance, {
             width: 20,
             height: 20,
             cursorOverStyle: "ew-resize",
-            background: am5.Rectangle.new(props.root.current, {
+            background: am5.Rectangle.new(rootInstance, {
               fill: am5.color(0xffffff),
               fillOpacity: 0,
             }),
           }),
         )
         dragButton.children.push(
-          am5.Picture.new(props.root.current, {
+          am5.Picture.new(rootInstance, {
             src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
             width: 12,
             height: 12,
@@ -607,18 +609,18 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           isContainerDragging = true
         })
         const closeButton = buttonsContainer.children.push(
-          am5.Button.new(props.root.current, {
+          am5.Button.new(rootInstance, {
             width: 20,
             height: 20,
             cursorOverStyle: "pointer",
-            background: am5.Rectangle.new(props.root.current, {
+            background: am5.Rectangle.new(rootInstance, {
               fill: am5.color(0xffffff),
               fillOpacity: 0,
             }),
           }),
         )
         closeButton.children.push(
-          am5.Picture.new(props.root.current, {
+          am5.Picture.new(rootInstance, {
             src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
             width: 12,
             height: 12,
@@ -652,7 +654,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
             new Promise<void>((resolve: () => void) => {
               removeComment(moistMainComment.id, props.userId || '', resolve)
             }).then(async () => {
-              await props.updateCommentsArray("M", props.sensorId, props.updateComments, props.data)
+              await props.updateCommentsArray?.("M", props.sensorId || '', props.updateComments || (() => {}), props.data)
               rotationAnimation?.stop()
               icon?.set("src", "https://img.icons8.com/?size=100&id=8112&format=png&color=000000")
               icon?.set("rotation", 0)
@@ -686,7 +688,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
 
           label.set(
             "text",
-            `${props.root.current!.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[(moistMainComment.color_id as number) - 1]}\n` : ""}${moistMainComment.text}`,
+            `${rootInstance.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[(moistMainComment.color_id as number) - 1]}\n` : ""}${moistMainComment.text}`,
           )
 
           rangeDataItem.set("value", value)
@@ -710,7 +712,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
 
       // Add zoom event listeners to position labels after zoom
       if (!props.comparingMode) {
-        xAxis.onPrivate("selectionMax", (value: number | undefined) => {
+        xAxis.onPrivate("selectionMax", (_value: number | undefined) => {
           if (labelsArray.length > 0) {
             setTimeout(() => {
               positionLabels()
@@ -726,14 +728,14 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         const xAxis = chart.xAxes.getIndex(0) as am5xy.DateAxis<am5xy.AxisRendererX>
         const xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width())
         const clickDate = xAxis.positionToDate(xPosition)
-        props.setMoistAddCommentModal({ isOpen: true, date: clickDate.getTime(), type: "main" })
+        props.setMoistAddCommentModal?.({ isOpen: true, date: clickDate.getTime(), type: "main" })
       })
     }
 
     // Comparing Mode
     if (!props.comparingMode) {
-      xAxis.onPrivate("selectionMin", (value: number) => {
-        startDateForZooming = value
+      xAxis.onPrivate("selectionMin", (value: number | undefined) => {
+        startDateForZooming = value ?? null
       })
       xAxis.onPrivate("selectionMax", (value: number | undefined) => {
         endDateForZooming = value || 0
@@ -797,7 +799,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         // Adjust x position to keep label within bounds
         const adjustedX = Math.min(Math.max(labelWidth / 2, selectionPixelX), plotWidth - labelWidth / 2)
         selectionLabel = chart.plotContainer.children.push(
-          am5.Label.new(props.root.current, {
+          am5.Label.new(rootInstance, {
             height: 25,
             dy: -25,
             text: selectionTime,
@@ -808,7 +810,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
             y: selectionPixelY,
             centerX: am5.percent(50),
             centerY: am5.percent(100),
-            background: am5.Rectangle.new(props.root.current, {
+            background: am5.Rectangle.new(rootInstance, {
               fill: am5.color(0xffffff),
               fillOpacity: 1,
             }),
@@ -845,7 +847,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
             const difference = (fixedDataItemEnd - fixedDataItemStart).toFixed(1)
 
             const labelText = fixedDataItemStart + '%' + ' - ' + fixedDataItemEnd + '%' + '\n' + difference + '%' + ' / ' + selectionTime
-            const tooltip = am5.Tooltip.new(props.root.current, {
+            const tooltip = am5.Tooltip.new(rootInstance, {
               labelText: labelText,
               tooltipPosition: "fixed",
               pointerOrientation: "left",
@@ -896,27 +898,24 @@ export const createMainChart = (props: CreateMainChartProps): void => {
     })
 
     // Legend - определяем layout заранее в зависимости от условий
-    let legendLayout = props.root.current.horizontalLayout
+    let legendLayout = rootInstance.horizontalLayout
 
     // Для 12+ сенсоров на маленьких экранах используем GridLayout
     if (props.additionalChartData.linesCount >= 12 && (props.smallScreen || props.middleScreen)) {
-      legendLayout = am5.GridLayout.new(props.root.current, {
+      legendLayout = am5.GridLayout.new(rootInstance, {
         maxColumns: 6,
         fixedWidthGrid: false
       })
     }
 
     const legend = chart.children.push(
-      am5.Legend.new(props.root.current, {
+      am5.Legend.new(rootInstance, {
         centerX: am5.percent(50),
         x: am5.percent(50),
         layout: legendLayout,
         marginTop: 15,
       }),
     )
-
-    // Track if we're on mobile with vertical legend
-    const isMobileVerticalLegend = false
 
     // if (props.additionalChartData.linesCount > 3 && props.additionalChartData.linesCount <= 6) {
     //   if (props.smallScreen) {
@@ -977,7 +976,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
 
         console.log(`Переносим легенду на 2 строки, maxColumns: ${maxColumns}`)
 
-        legend.set("layout", am5.GridLayout.new(props.root.current!, {
+        legend.set("layout", am5.GridLayout.new(rootInstance, {
           maxColumns: maxColumns,
           fixedWidthGrid: true
         }))
@@ -997,7 +996,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           if (difference2 < 0) {
             console.log(`Делаем легенду вертикальной`)
 
-            legend.set("layout", props.root.current!.verticalLayout)
+            legend.set("layout", rootInstance.verticalLayout)
             legend.set("centerX", am5.percent(0))
             legend.set("x", am5.percent(0))
           }

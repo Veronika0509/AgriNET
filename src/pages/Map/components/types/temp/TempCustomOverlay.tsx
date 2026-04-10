@@ -57,6 +57,7 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private longPressTimer: NodeJS.Timeout | null = null;
       private showInfoDialog: boolean = false;
       private wasLongPress: boolean = false;
+      private _pendingHidden: boolean = false;
 
       constructor(
         bounds: google.maps.LatLngBounds,
@@ -107,7 +108,7 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
         });
       }
 
-      private handleTouchStart = (e: React.TouchEvent) => {
+      private handleTouchStart = (_e: React.TouchEvent) => {
         this.wasLongPress = false;
         this.longPressTimer = setTimeout(() => {
           this.wasLongPress = true;

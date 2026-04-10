@@ -20,6 +20,7 @@ import { getSiteList } from '../Map/data/getSiteList';
 interface MenuProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
   userId: number;
+  onBeforeNavigateToInfo?: () => void;
 }
 
 const Menu: React.FC<MenuProps> = (props) => {
@@ -54,6 +55,7 @@ const Menu: React.FC<MenuProps> = (props) => {
     const currentPath = window.location.pathname.replace('/AgriNET', '');
     pushToNavigationHistory(currentPath, 0);
     (window as any).__infoFromMenu = true;
+    props.onBeforeNavigateToInfo?.();
     props.setPage(0);
     history.push('/info');
   };

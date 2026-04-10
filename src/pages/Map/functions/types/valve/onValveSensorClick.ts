@@ -5,7 +5,7 @@ interface History {
 }
 
 export const onValveSensorClick = async (
-  history: History,
+  _history: History,
   userId: string | number,
   sensorId: string,
   name: string,

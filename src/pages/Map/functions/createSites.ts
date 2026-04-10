@@ -93,7 +93,7 @@ export const createSites = async (props: CreateSitesProps) => {
       // Auto-click disabled - user must manually click on site to see sensors
       if (props.siteList.length === 1) {
         setTimeout(() => {
-          props.setIsMarkerClicked(props.siteList[0].name);
+          props.setIsMarkerClicked?.(props.siteList[0].name);
           onSiteClick({
             page: props.page,
             userId: props.userId,
@@ -121,12 +121,12 @@ export const createSites = async (props: CreateSitesProps) => {
             markers: (props.markers.length > 0 ? props.markers : markers) as any,
             extlChartsAmount: props.extlChartsAmount,
             setExtlDataContainer: props.setExtlDataContainer,
-          });
+          } as any);
         }, 2000);
       }
 
       groupMarker.addListener('click', async () => {
-        props.setIsMarkerClicked(groupMarker.title);
+        props.setIsMarkerClicked?.(groupMarker.title ?? '');
         onSiteClick({
           page: props.page,
           userId: props.userId,
@@ -154,7 +154,7 @@ export const createSites = async (props: CreateSitesProps) => {
           markers: (props.markers.length > 0 ? props.markers : markers) as any,
           extlChartsAmount: props.extlChartsAmount,
           setExtlDataContainer: props.setExtlDataContainer,
-        });
+        } as any);
       });
     });
 

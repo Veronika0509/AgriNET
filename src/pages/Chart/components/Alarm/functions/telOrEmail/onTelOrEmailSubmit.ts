@@ -28,7 +28,7 @@ export const onTelOrEmailSubmit = (
         }
       })
     } else {
-      presentValidationError(presentErrorAlert, sensorId, nameNum, setEmailOrTel, presentAlert, typeOfAction, event[0], toEnable, setIsSetpointEnabled, setIsEnabledToastOpen, setIsDisabledToastOpen, setIsEnableActionSheet)
+      presentValidationError(presentErrorAlert, sensorId, nameNum, setEmailOrTel, presentAlert, typeOfAction, event[0], toEnable, setIsSetpointEnabled as (enabled: boolean) => void, setIsEnabledToastOpen, setIsDisabledToastOpen, setIsEnableActionSheet)
     }
   }
 

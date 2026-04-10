@@ -4,7 +4,6 @@ import {truncateText} from "../../../functions/truncateTextFunc";
 import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
 import {getOptions} from "../../../data/getOptions";
 import skull from '../../../../../assets/images/skull.svg'
-import {loadGoogleApi} from "@/functions/loadGoogleApiFunc";
 import {IonAlert} from '@ionic/react';
 import React from 'react';
 
@@ -78,6 +77,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private longPressTimer: NodeJS.Timeout | null = null;
       private showInfoDialog: boolean = false;
       private wasLongPress: boolean = false;
+      private _pendingHidden: boolean = false;
 
       constructor(
         isBudgetEditorMap: boolean,
@@ -169,7 +169,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private _onMouseLeave: () => void = () => {
       };
 
-      private handleTouchStart = (e: React.TouchEvent) => {
+      private handleTouchStart = (_e: React.TouchEvent) => {
         this.wasLongPress = false;
         this.longPressTimer = setTimeout(() => {
           this.wasLongPress = true;

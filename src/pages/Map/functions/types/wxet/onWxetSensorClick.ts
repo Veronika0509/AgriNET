@@ -5,7 +5,7 @@ interface History {
 }
 
 export const onWxetSensorClick = async (
-  history: History,
+  _history: History,
   sensorId: string,
   name: string,
   setChartData: (data: unknown) => void,

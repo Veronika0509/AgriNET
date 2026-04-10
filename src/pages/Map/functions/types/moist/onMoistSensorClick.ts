@@ -2,7 +2,7 @@ import {getMoistMainChartData} from "../../../data/types/moist/getMoistMainChart
 import {getSensorItems} from "../../../data/getSensorItems";
 
 export const onMoistSensorClick = async (
-  history: any,
+  _history: any,
   sensorId: string,
   mainId: any,
   name: string,

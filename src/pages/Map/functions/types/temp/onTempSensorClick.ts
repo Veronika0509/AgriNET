@@ -14,7 +14,7 @@ interface PresentFunction {
 }
 
 export const onTempSensorClick = async (
-  history: History,
+  _history: History,
   sensorId: string,
   name: string,
   setChartData: (data: unknown[]) => void,

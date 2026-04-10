@@ -73,6 +73,7 @@ export const createFuelChart = (
     }));
 
 // Create axes
+    const rootInstance = root.current!;
     const xAxis = chart.xAxes.push(am5xy.DateAxis.new(root.current, {
       maxDeviation: 0.2,
       baseInterval: {
@@ -130,7 +131,7 @@ export const createFuelChart = (
     // Add Comments
     if (fuelAddCommentItemShowed) {
       chart.events.on("click", (ev: am5.ISpritePointerEvent) => {
-        const xAxis = chart.xAxes.getIndex(0);
+        const xAxis = chart.xAxes.getIndex(0)!;
 
         const xPosition = xAxis.toAxisPosition(ev.point.x / chart.plotContainer.width());
 
@@ -226,10 +227,10 @@ export const createFuelChart = (
         const rangeDataItem = xAxis.makeDataItem({})
         xAxis.createAxisRange(rangeDataItem)
         let isContainerDragging: boolean = false
-        const container = am5.Container.new(root.current, {
+        const container = am5.Container.new(rootInstance, {
           centerX: am5.p50,
           draggable: true,
-          layout: (root as any).verticalLayout,
+          layout: rootInstance.verticalLayout,
           dy: 4,
         })
         container.adapters.add("y", function () {
@@ -259,21 +260,21 @@ export const createFuelChart = (
         xAxis.topGridContainer.children.push(container)
         rangeDataItem.set(
           "bullet",
-          am5xy.AxisBullet.new(root.current, {
+          am5xy.AxisBullet.new(rootInstance, {
             sprite: container,
           })
         )
-        rangeDataItem.get("grid").setAll({
+        rangeDataItem.get("grid")?.setAll({
           strokeOpacity: 1,
           visible: true,
           stroke: am5.color(commentColor),
           strokeWidth: 6,
           location: 0,
         })
-        container.set("background", am5.RoundedRectangle.new(root.current, {fill: am5.color(commentColor)}))
+        container.set("background", am5.RoundedRectangle.new(rootInstance, {fill: am5.color(commentColor)}))
 
         const label = container.children.push(
-          am5.Label.new(root.current, {
+          am5.Label.new(rootInstance, {
             text: `${moistMainComment.key}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`,
             fill: am5.color(0x000000),
             maxWidth: 130,
@@ -287,25 +288,25 @@ export const createFuelChart = (
         );
 
         labelsArray.push(label);
-        const buttonsContainer = label.children.push(am5.Container.new(root.current, {
-          layout: root.current.horizontalLayout,
+        const buttonsContainer = label.children.push(am5.Container.new(rootInstance, {
+          layout: rootInstance.horizontalLayout,
           x: am5.p100,
           y: 0,
           centerX: am5.p100,
           paddingTop: 3,
           paddingRight: 3,
         }));
-        const dragButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        const dragButton = buttonsContainer.children.push(am5.Button.new(rootInstance, {
           width: 20,
           height: 20,
           cursorOverStyle: "ew-resize",
-          background: am5.Rectangle.new(root.current, {
+          background: am5.Rectangle.new(rootInstance, {
             fill: am5.color(0xffffff),
             fillOpacity: 0,
           }),
           dx: -20
         }));
-        dragButton.children.push(am5.Picture.new(root.current, {
+        dragButton.children.push(am5.Picture.new(rootInstance, {
           src: "https://img.icons8.com/?size=100&id=98070&format=png&color=000000",
           width: 12,
           height: 12,
@@ -315,16 +316,16 @@ export const createFuelChart = (
         dragButton.events.on('pointerdown', () => {
           isContainerDragging = true
         })
-        const closeButton = buttonsContainer.children.push(am5.Button.new(root.current, {
+        const closeButton = buttonsContainer.children.push(am5.Button.new(rootInstance, {
           width: 20,
           height: 20,
           cursorOverStyle: "pointer",
-          background: am5.Rectangle.new(root.current, {
+          background: am5.Rectangle.new(rootInstance, {
             fill: am5.color(0xffffff),
             fillOpacity: 0,
           }),
         }));
-        closeButton.children.push(am5.Picture.new(root.current, {
+        closeButton.children.push(am5.Picture.new(rootInstance, {
           src: "https://img.icons8.com/?size=100&id=8112&format=png&color=000000",
           width: 12,
           height: 12,
@@ -366,7 +367,7 @@ export const createFuelChart = (
             value = xAxis.positionToValue(position)
           }
 
-          label.set("text", `${root.current.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`)
+          label.set("text", `${rootInstance.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ''}${moistMainComment.text}`)
 
           rangeDataItem.set("value", value)
         }
@@ -388,11 +389,11 @@ export const createFuelChart = (
       })
 
       // Position labels on frame updates (for smooth repositioning during interactions)
-      root.current.events.on("frameended", positionLabels)
+      rootInstance.events.on("frameended", positionLabels)
     }
 
 // Add cursor
-    const cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
+    const cursor = chart.set("cursor", am5xy.XYCursor.new(rootInstance, {
       behavior: "zoomX",
       xAxis: xAxis,
     }));

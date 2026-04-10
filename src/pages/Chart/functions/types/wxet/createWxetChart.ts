@@ -170,23 +170,24 @@ export const createWxetChart = (
         dataLabels.push({label: 'forecastWindSpeed', name: 'Forecast Wind Speed', metric: windMetric, color: '#f6b23b'},)
     }
 
-    let lastSeries: am5xy.SmoothedXLineSeries | null = null;
+    const rootInstance = root.current!;
+    let lastSeries: am5xy.SmoothedXLineSeries | undefined;
     dataLabels.forEach((dataLabel) => {
       const name = dataLabel.name
       const tooltipValueField = dataLabel.label === 'rain_display' ? "{rainOriginal}"
         : dataLabel.label === 'Solar' ? "{solarDisplay}"
         : "{value}";
-      const tooltip: am5.Tooltip = am5.Tooltip.new(root.current, {
+      const tooltip: am5.Tooltip = am5.Tooltip.new(rootInstance, {
         pointerOrientation: "horizontal",
         getFillFromSprite: false,
         labelText: "{valueX.formatDate('yyyy-MM-dd hh:mm')}" + '\n' + '[bold]' + name + ' - ' + tooltipValueField + dataLabel.metric,
       })
       if (tooltip) {
-        tooltip.get("background").setAll({
+        tooltip.get("background")?.setAll({
           fill: am5.color(dataLabel.color),
         })
       }
-      const series = chart.series.push(am5xy.SmoothedXLineSeries.new(root.current, {
+      const series = chart.series.push(am5xy.SmoothedXLineSeries.new(rootInstance, {
         name: name,
         xAxis: xAxis,
         yAxis: yAxis,
@@ -216,14 +217,14 @@ export const createWxetChart = (
         value: new Date(nwsForecastData.now).getTime()
       });
       lastSeries.createAxisRange(seriesRangeDataItem);
-      seriesRangeDataItem.get("grid").setAll({
+      seriesRangeDataItem.get("grid")?.setAll({
         visible: true,
         stroke: am5.color(0xd445d2),
         strokeWidth: 5,
         strokeOpacity: 1,
         strokeDasharray: [2, 2]
       });
-      seriesRangeDataItem.get('label').setAll({
+      seriesRangeDataItem.get('label')?.setAll({
         text: "NOW",
         inside: true,
         visible: true,
@@ -237,14 +238,14 @@ export const createWxetChart = (
         endValue: new Date(nwsForecastData.now).getTime() + 86400000 * 6
       });
       lastSeries.createAxisRange(seriesRangeDataItemDate);
-      seriesRangeDataItemDate.get("axisFill").setAll({
+      seriesRangeDataItemDate.get("axisFill")?.setAll({
         fill: am5.color(0xF7C815),
         fillOpacity: 0.1,
         visible: true
       });
 
-      seriesRangeDataItem.get("grid").toFront();
-      seriesRangeDataItem.get("label").toFront();
+      seriesRangeDataItem.get("grid")?.toFront();
+      seriesRangeDataItem.get("label")?.toFront();
     }
 
 // Add cursor

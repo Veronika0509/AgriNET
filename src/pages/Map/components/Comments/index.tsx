@@ -12,7 +12,7 @@ import {
   IonSpinner, IonTitle, IonToolbar, IonTextarea, IonButtons, IonButton, IonFooter, useIonAlert
 } from "@ionic/react";
 import s from '../../style.module.css'
-import {closeOutline, logoHackernews, pencilOutline, refreshOutline, trashOutline} from "ionicons/icons";
+import {closeOutline, pencilOutline, refreshOutline, trashOutline} from "ionicons/icons";
 import {deleteComment} from "./data/deleteComment";
 import {saveComment} from "./data/saveComment";
 

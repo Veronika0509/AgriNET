@@ -182,7 +182,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   }
   countMoistFuel.length !== 0 && countMoistFuel.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
-    const layer: string = getLayerName(marker.id) as any
+    const layer: string = getLayerName(marker.id) ?? ''
     createMoistMarker(
       props.moistChartsAmount as any,
       marker as any,
@@ -209,7 +209,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   })
   countWxet.length !== 0 && countWxet.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
-    const layer: string = getLayerName(marker.id)
+    const layer: string = getLayerName(marker.id) ?? ''
     createWxetMarker(
       props.wxetChartsAmount as any,
       marker as any,
@@ -236,7 +236,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   })
   countExtl.length !== 0 && countExtl.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
-    const layer: string = getLayerName(marker.id)
+    const layer: string = getLayerName(marker.id) ?? ''
     createExtlMarker(
       props.extlChartsAmount as any,
       marker as any,
@@ -260,7 +260,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   })
   countTemp.length !== 0 && countTemp.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
-    const layer: string = getLayerName(marker.id)
+    const layer: string = getLayerName(marker.id) ?? ''
     createTempMarker(
       props.tempChartsAmount as any,
       marker as any,
@@ -287,7 +287,7 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   })
   countValve.length !== 0 && countValve.map((marker: Marker) => {
     props.setAmountOfSensors(props.amountOfSensors += 1)
-    const layer: string = getLayerName(marker.id)
+    const layer: string = getLayerName(marker.id) ?? ''
     createValveMarker(
       props.valveChartsAmount as any,
       marker as any,

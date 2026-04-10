@@ -42,12 +42,12 @@ export class CollisionResolver {
   }
 
   private static setOverlayPosition(overlay: OverlayItem, x: number, y: number) {
-    const div = overlay.getDiv();
+    const div = overlay.getDiv?.();
     if (!div) return;
 
     div.style.left = `${x}px`;
     div.style.top = `${y}px`;
-    overlay.draw();
+    overlay.draw?.();
   }
 
   private static resolveCollisions(overlays: OverlayItem[], iteration: number = 0) {
@@ -75,8 +75,8 @@ export class CollisionResolver {
   }
 
   private static checkCollision(overlay1: OverlayItem, overlay2: OverlayItem): CollisionData | null {
-    const div1 = overlay1.getDiv();
-    const div2 = overlay2.getDiv();
+    const div1 = overlay1.getDiv?.();
+    const div2 = overlay2.getDiv?.();
     if (!div1 || !div2) return null;
 
     const bounds1 = div1.getBoundingClientRect();
@@ -100,8 +100,8 @@ export class CollisionResolver {
   }
 
   private static resolveCollision(overlay1: OverlayItem, overlay2: OverlayItem, collision: CollisionData): void {
-    const div1 = overlay1.getDiv();
-    const div2 = overlay2.getDiv();
+    const div1 = overlay1.getDiv?.();
+    const div2 = overlay2.getDiv?.();
     if (!div1 || !div2) return;
 
     const distance = Math.sqrt(
@@ -133,8 +133,8 @@ export class CollisionResolver {
   }
 
   private static attractOverlays(overlay1: OverlayItem, overlay2: OverlayItem) {
-    const div1 = overlay1.getDiv();
-    const div2 = overlay2.getDiv();
+    const div1 = overlay1.getDiv?.();
+    const div2 = overlay2.getDiv?.();
     if (!div1 || !div2) return;
 
     const bounds1 = div1.getBoundingClientRect();
@@ -160,7 +160,7 @@ export class CollisionResolver {
     const centerY = window.innerHeight / 2;
 
     overlays.forEach(overlay => {
-      const div = overlay.getDiv();
+      const div = overlay.getDiv?.();
       if (!div) return;
 
       const bounds = div.getBoundingClientRect();
@@ -181,7 +181,7 @@ export class CollisionResolver {
   }
 
   private static moveOverlay(overlay: OverlayItem, dx: number, dy: number) {
-    const div = overlay.getDiv();
+    const div = overlay.getDiv?.();
     if (!div) return;
 
     const currentLeft = parseFloat(div.style.left) || 0;
@@ -194,6 +194,6 @@ export class CollisionResolver {
     (overlay as any).offset.x += dx;
     (overlay as any).offset.y += dy;
 
-    overlay.draw();
+    overlay.draw?.();
   }
 }

@@ -114,7 +114,7 @@ export const handleJSONQRData = (data: QRData, siteList: Site[], handlers: QRSca
       if (!groupExists) {
         const newGroup = {
           id: prevGroups.length + 1,
-          name: data.siteGroup,
+          name: data.siteGroup!,
         }
         return [...prevGroups, newGroup]
       }

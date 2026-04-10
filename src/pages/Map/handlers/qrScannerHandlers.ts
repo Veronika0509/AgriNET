@@ -85,7 +85,7 @@ export const handleJSONQRData = (data: QRData, siteList: Site[], handlers: QRSca
 
   // Handle site name from QR data
   if (data.siteName || data.site) {
-    const qrSiteName = data.siteName || data.site
+    const qrSiteName = (data.siteName || data.site)!
 
     const siteExists = siteList.some((site) => site.name.toLowerCase() === qrSiteName.toLowerCase())
 
@@ -105,14 +105,15 @@ export const handleJSONQRData = (data: QRData, siteList: Site[], handlers: QRSca
 
   // Set siteGroup from JSON data
   if (data.siteGroup) {
-    handlers.setSelectedSiteGroup(data.siteGroup)
+    const siteGroup = data.siteGroup
+    handlers.setSelectedSiteGroup(siteGroup)
 
     handlers.setSiteGroups((prevGroups) => {
-      const groupExists = prevGroups.some((g) => g.name === data.siteGroup)
+      const groupExists = prevGroups.some((g) => g.name === siteGroup)
       if (!groupExists) {
         const newGroup = {
           id: prevGroups.length + 1,
-          name: data.siteGroup,
+          name: siteGroup,
         }
         return [...prevGroups, newGroup]
       }
@@ -122,7 +123,7 @@ export const handleJSONQRData = (data: QRData, siteList: Site[], handlers: QRSca
 
   // Set layer from JSON data
   if (data.locall || data.local) {
-    const layerValue = data.locall || data.local
+    const layerValue = (data.locall || data.local)!
     const capitalizedLayer = layerValue.charAt(0).toUpperCase() + layerValue.slice(1).toLowerCase()
     handlers.setSelectedLayer(capitalizedLayer)
   }

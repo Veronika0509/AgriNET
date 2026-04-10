@@ -33,7 +33,7 @@ export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => 
   const [toDate, setToDate] = useState(toDateValue)
   const [reportDuration, setRepostDuration] = useState(30)
   const [format, setFormat] = useState('Comma-separated')
-  const [validationResult, setValidationResult] = useState<string | null>(null)
+  const [validationResult, setValidationResult] = useState<string | undefined>(undefined)
   const mModal = useRef<HTMLIonModalElement>(null);
   const mstModal = useRef<HTMLIonModalElement>(null);
   const mSumModal = useRef<HTMLIonModalElement>(null);
@@ -59,7 +59,7 @@ export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => 
       toDateTime.setHours(0, 0, 0, 0);
       const differenceInDays = Math.ceil((toDateTime.getTime() - fromDateTime.getTime()) / (1000 * 60 * 60 * 24));
       setRepostDuration(differenceInDays)
-      setValidationResult(null)
+      setValidationResult(undefined)
     }
   }, [fromDate, toDate]);
 
@@ -93,8 +93,8 @@ export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => 
             </div>
             <div className={s.export_modalBody}>
               <IonItem className={s.export_item}>
-                <ExportDateTime type={'from'} value={fromDate} setValue={setFromDate}/>
-                <ExportDateTime type={'to'} value={toDate} setValue={setToDate}/>
+                <ExportDateTime type={'from'} value={fromDate} setValue={(v) => { if (v !== null) setFromDate(v) }}/>
+                <ExportDateTime type={'to'} value={toDate} setValue={(v) => { if (v !== null) setToDate(v) }}/>
               </IonItem>
               <div className={s.export_container}>
                 <IonText color='light'>Format</IonText>

@@ -113,6 +113,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
     if (moistChartDataContainer.length !== 0) {
       moistChartDataContainer.map((chartData: ChartDataTuple) => {
         const MoistCustomOverlayExport = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
+        if (!MoistCustomOverlayExport) return
         const overlay = new MoistCustomOverlayExport(
           false,
           chartData[1] as any,
@@ -136,7 +137,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays as any, props.map!)
           })
         }
       })
@@ -148,6 +149,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
     if (invalidMoistChartDataContainer.length !== 0) {
       invalidMoistChartDataContainer.map((chartData: ChartDataTuple) => {
         const CustomOverlayExport = initializeMoistCustomOverlay(props.isGoogleApiLoaded)
+        if (!CustomOverlayExport) return
         const overlay = new CustomOverlayExport(
           false,
           chartData[1] as any,
@@ -171,7 +173,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays as any, props.map!)
           })
         }
       })
@@ -232,7 +234,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
         }
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays as any, props.map!)
           })
         }
       })
@@ -279,7 +281,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
 
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays as any, props.map!)
           })
         }
       })
@@ -325,7 +327,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays as any, props.map!)
           })
         }
       })
@@ -356,7 +358,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays as any, props.map!)
           })
         }
       })
@@ -401,7 +403,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays as any, props.map!)
           })
         }
       })
@@ -430,7 +432,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
         )
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as unknown as OverlayItem, props.setActiveOverlays as any, props.map!)
           })
         }
       })
@@ -484,7 +486,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
         const overlay = new ExtlCustomOverlayExport(bounds, extlChartData as any)
         if (overlay) {
           React.startTransition(() => {
-            addOverlayToOverlaysArray(overlay as any, props.setActiveOverlays, props.map)
+            addOverlayToOverlaysArray(overlay as any, props.setActiveOverlays as any, props.map!)
           })
         }
       })

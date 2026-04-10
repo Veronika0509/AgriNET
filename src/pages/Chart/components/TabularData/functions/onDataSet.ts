@@ -55,7 +55,7 @@ export const onDataSet = (
       // Check if data is already processed to prevent infinite loop
       if ('data' in data && Array.isArray(data.data)) {
         // If the data has already been processed (has isReady flag), skip processing
-        const isAlreadyProcessed = data.data.length > 0 && data.data[0]?.isReady;
+        const isAlreadyProcessed = data.data.length > 0 && (data.data[0] as any)?.isReady;
         if (!isAlreadyProcessed) {
           const dataWithColors: any[] = []
           data.data.map((table: any) => {

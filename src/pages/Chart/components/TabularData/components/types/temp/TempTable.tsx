@@ -8,20 +8,8 @@ interface TempTableProps {
   scrollable?: boolean
 }
 
-export const TempTable: React.FC<TempTableProps> = ({tabularData, isMobile, freshnessColors, scrollable}) => {
+export const TempTable: React.FC<TempTableProps> = ({tabularData, freshnessColors, scrollable}) => {
   const [data, setData] = useState<any>(undefined)
-
-  // Define colors array matching the table headers
-  const colors = [
-    { r: 255, g: 143, b: 143 }, // Temp: #FF8F8F
-    { r: 158, g: 20, b: 245 },  // Dew Point: #9e14f5
-    { r: 40, g: 178, b: 247 },  // RH: #28B2F7
-    { r: 95, g: 246, b: 39 },   // Leaf Wetness: #5ff627
-    { r: 210, g: 186, b: 0 },   // Analog 1: #d2ba00
-    { r: 255, g: 0, b: 0 },     // Analog 2: #ff0000
-    { r: 0, g: 116, b: 91 },    // PSI: #00745b
-    { r: 0, g: 15, b: 113 }     // Water Temp: #000f71
-  ];
 
   useEffect(() => {
     if (!tabularData.freshnessColor) {

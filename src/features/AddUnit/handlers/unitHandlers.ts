@@ -286,7 +286,7 @@ export const createUnit = async (
   const timezone = qrTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone
 
   // Check if sensor ID was modified after QR scan
-  const sensorIdModified = isQRScanned && scannedSensorId && scannedSensorId !== fullSensorId
+  const sensorIdModified = isQRScanned && !!scannedSensorId && scannedSensorId !== fullSensorId
 
   const unitData: UnitData = {
     // Required Fields
@@ -304,7 +304,7 @@ export const createUnit = async (
         ? Boolean(overrideFlags.warnIfSensorIdExist)
         : !isQRScanned || sensorIdModified,
     askOverrideInstallDate:
-      overrideFlags?.askOverrideInstallDate !== undefined ? overrideFlags.askOverrideInstallDate : true,
+      overrideFlags?.askOverrideInstallDate !== undefined ? Boolean(overrideFlags.askOverrideInstallDate) : true,
     requestHardware: requestHardware,
 
     // Optional Fields

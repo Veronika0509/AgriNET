@@ -92,7 +92,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
         this.draw()
       }
 
-      private handleTouchStart = (e: React.TouchEvent) => {
+      private handleTouchStart = (_e: React.TouchEvent) => {
         this.wasLongPress = false;
         this.longPressTimer = setTimeout(() => {
           this.wasLongPress = true;

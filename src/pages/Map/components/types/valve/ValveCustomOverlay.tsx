@@ -13,6 +13,7 @@ interface ValveChartData {
   name: string;
   bgColor?: string;
   enabled?: boolean;
+  freshness?: string;
 }
 
 interface History {
@@ -93,7 +94,7 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: boolean) => {
         });
       }
 
-      private handleTouchStart = (e: React.TouchEvent) => {
+      private handleTouchStart = (_e: React.TouchEvent) => {
         this.wasLongPress = false;
         this.longPressTimer = setTimeout(() => {
           this.wasLongPress = true;

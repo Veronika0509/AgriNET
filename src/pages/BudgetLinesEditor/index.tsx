@@ -108,24 +108,25 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
           freshness: overlayChartData.data.freshness
         };
         const MoistCustomOverlayExport = initializeMoistCustomOverlay(props.isGoogleApiLoaded);
+        if (!MoistCustomOverlayExport) return;
         const overlay = new MoistCustomOverlayExport(
           true,
           bounds,
           invalidChartDataImage,
           overlayChartData.data.data.length > 1,
           marker,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
+          undefined as any,
+          undefined as any,
+          undefined as any,
+          undefined as any,
+          undefined as any,
           isMoistMarkerChartDrawn,
-          undefined,
-          undefined,
+          undefined as any,
+          undefined as any,
           setMoistOverlays as any,
-          undefined,
+          undefined as any,
           moistOverlaysRef as any,
-          currentSensorId,
+          currentSensorId as any,
           setCurrentSensorId as any,
           true
         );

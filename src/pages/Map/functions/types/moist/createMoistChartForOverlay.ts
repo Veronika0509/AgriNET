@@ -175,7 +175,7 @@ export const createMoistChartForOverlay = async (type: string, chartData: MoistC
     endValue: 100
   });
   series.createAxisRange(topBudgetRegion);
-  topBudgetRegion.get("axisFill").setAll({
+  topBudgetRegion.get("axisFill")!.setAll({
     fill: am5.color(0x02c5fd),
     fillOpacity: 1,
     visible: true
@@ -186,7 +186,7 @@ export const createMoistChartForOverlay = async (type: string, chartData: MoistC
     endValue: -100
   });
   series.createAxisRange(bottomBudgetRegion);
-  bottomBudgetRegion.get("axisFill").setAll({
+  bottomBudgetRegion.get("axisFill")!.setAll({
     fill: am5.color(0xf6363b),
     fillOpacity: 1,
     visible: true

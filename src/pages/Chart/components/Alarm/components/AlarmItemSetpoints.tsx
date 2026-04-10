@@ -47,7 +47,7 @@ export const AlarmItemSetpoints = (props: AlarmItemSetpointsProps) => {
         props.name,
         props.sensorId,
         props.setSelectedSensor,
-        presentSelectToast,
+        presentSelectToast as unknown as (options: unknown) => void,
         buttonString
       )
     })
@@ -71,7 +71,7 @@ export const AlarmItemSetpoints = (props: AlarmItemSetpointsProps) => {
             header="Select Sensor"
             buttons={sensorActionSheetButtons}
           ></IonActionSheet>
-          <IonButton fill='clear' color='light' onClick={() => presentSetpointChangeAlert(presentAlert, props.name, toString(props.sensorId), props.setSetpoint, presentSetpointToast)}>{props.setpoint}</IonButton>
+          <IonButton fill='clear' color='light' onClick={() => presentSetpointChangeAlert(presentAlert as unknown as (options: unknown) => void, props.name, toString(props.sensorId), props.setSetpoint, presentSetpointToast as unknown as (options: unknown) => void)}>{props.setpoint}</IonButton>
           <IonButton fill={props.isSetpointEnabled ? 'clear' : 'solid'} onClick={
             () => onEnableCLick(props.sensorId, props.name, props.isSetpointEnabled, props.setIsSetpointEnabled, props.setIsEnabledToastOpen, props.setIsDisabledToastOpen, props.setIsEnableActionSheet)
           }>
@@ -87,8 +87,8 @@ export const AlarmItemSetpoints = (props: AlarmItemSetpointsProps) => {
                   toString(props.sensorId),
                   1,
                   props.setEmailOrTel,
-                  presentErrorAlert,
-                  presentAlert,
+                  presentErrorAlert as unknown as (options: unknown) => void,
+                  presentAlert as unknown as (options: unknown) => void,
                   'email',
                   undefined,
                   props.name,
@@ -103,8 +103,8 @@ export const AlarmItemSetpoints = (props: AlarmItemSetpointsProps) => {
                   toString(props.sensorId),
                   1,
                   props.setEmailOrTel,
-                  presentErrorAlert,
-                  presentAlert,
+                  presentErrorAlert as unknown as (options: unknown) => void,
+                  presentAlert as unknown as (options: unknown) => void,
                   'sms',
                   undefined,
                   props.name,

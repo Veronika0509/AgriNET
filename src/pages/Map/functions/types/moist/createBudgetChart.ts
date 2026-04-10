@@ -117,13 +117,13 @@ export const createBudgetChart = (props: CreateBudgetChartProps) => {
         value: props.budgetLines[2].value
       });
       series.createAxisRange(seriesRangeDataItem);
-      seriesRangeDataItem.get("grid").setAll({
+      seriesRangeDataItem.get("grid")!.setAll({
         strokeOpacity: 1,
         visible: true,
         stroke: am5.color(0x000000),
         strokeDasharray: [15, 15],
       });
-      seriesRangeDataItem.get("label").setAll({
+      seriesRangeDataItem.get("label")!.setAll({
         text: props.budgetLines[2].label,
         fill: am5.color(0x000000),
         background: am5.RoundedRectangle.new(props.chartRoot.current, {
@@ -142,13 +142,13 @@ export const createBudgetChart = (props: CreateBudgetChartProps) => {
         value: props.budgetLines[3].value
       });
       series.createAxisRange(seriesRangeDataItem);
-      seriesRangeDataItem.get("grid").setAll({
+      seriesRangeDataItem.get("grid")!.setAll({
         strokeOpacity: 1,
         visible: true,
         stroke: am5.color(0x000000),
         strokeDasharray: [15, 15],
       });
-      seriesRangeDataItem.get("label").setAll({
+      seriesRangeDataItem.get("label")!.setAll({
         text: props.budgetLines[3].label,
         fill: am5.color(0x000000),
         background: am5.RoundedRectangle.new(props.chartRoot.current, {
@@ -166,13 +166,13 @@ export const createBudgetChart = (props: CreateBudgetChartProps) => {
       value: props.budgetLines[4].value
     });
     series.createAxisRange(middleBottomLine);
-    middleBottomLine.get("grid").setAll({
+    middleBottomLine.get("grid")!.setAll({
       strokeOpacity: 1,
       visible: true,
       stroke: am5.color(0xCCCC00),
       strokeDasharray: [4, 4],
     });
-    middleBottomLine.get("label").setAll({
+    middleBottomLine.get("label")!.setAll({
       text: props.budgetLines[4].label,
       fill: am5.color(0x000000),
       background: am5.RoundedRectangle.new(props.chartRoot.current, {
@@ -189,13 +189,13 @@ export const createBudgetChart = (props: CreateBudgetChartProps) => {
       value: props.budgetLines[1].value
     });
     series.createAxisRange(topMiddleLine);
-    topMiddleLine.get("grid").setAll({
+    topMiddleLine.get("grid")!.setAll({
       strokeOpacity: 1,
       visible: true,
       stroke: am5.color(0xCCCC00),
       strokeDasharray: [4, 4],
     });
-    topMiddleLine.get("label").setAll({
+    topMiddleLine.get("label")!.setAll({
       text: props.budgetLines[1].label,
       fill: am5.color(0x000000),
       background: am5.RoundedRectangle.new(props.chartRoot.current, {
@@ -214,18 +214,18 @@ export const createBudgetChart = (props: CreateBudgetChartProps) => {
       endValue: 100
     });
     series.createAxisRange(topBudgetRegion);
-    topBudgetRegion.get("grid").setAll({
+    topBudgetRegion.get("grid")!.setAll({
       strokeOpacity: 1,
       visible: true,
       stroke: am5.color(0xCCCC00),
       strokeDasharray: [4, 4]
     });
-    topBudgetRegion.get("axisFill").setAll({
+    topBudgetRegion.get("axisFill")!.setAll({
       fill: am5.color(0x02c5fd),
       fillOpacity: .2,
       visible: true,
     });
-    topBudgetRegion.get("label").setAll({
+    topBudgetRegion.get("label")!.setAll({
       text: props.budgetLines[1].label,
       fill: am5.color(0x000000),
       background: am5.RoundedRectangle.new(props.chartRoot.current, {
@@ -244,13 +244,13 @@ export const createBudgetChart = (props: CreateBudgetChartProps) => {
       endValue: props.budgetLines[4].value
     });
     series.createAxisRange(middleBudgetRegion);
-    middleBudgetRegion.get("grid").setAll({
+    middleBudgetRegion.get("grid")!.setAll({
       strokeOpacity: 1,
       visible: true,
       stroke: am5.color(0xCC0000),
       strokeDasharray: [4, 4]
     });
-    middleBudgetRegion.get("axisFill").setAll({
+    middleBudgetRegion.get("axisFill")!.setAll({
       fill: am5.color(0x08f908),
       fillOpacity: .2,
       visible: true
@@ -261,18 +261,18 @@ export const createBudgetChart = (props: CreateBudgetChartProps) => {
       endValue: 0
     });
     series.createAxisRange(bottomBudgetRegion);
-    bottomBudgetRegion.get("grid").setAll({
+    bottomBudgetRegion.get("grid")!.setAll({
       strokeOpacity: 1,
       visible: true,
       stroke: am5.color(0xCCCC00),
       strokeDasharray: [4, 4]
     });
-    bottomBudgetRegion.get("axisFill").setAll({
+    bottomBudgetRegion.get("axisFill")!.setAll({
       fill: am5.color(0xf6363b),
       fillOpacity: .2,
       visible: true
     });
-    bottomBudgetRegion.get("label").setAll({
+    bottomBudgetRegion.get("label")!.setAll({
       text: props.budgetLines[4].label,
       fill: am5.color(0x000000),
       background: am5.RoundedRectangle.new(props.chartRoot.current, {

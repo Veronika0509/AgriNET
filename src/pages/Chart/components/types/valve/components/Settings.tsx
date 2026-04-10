@@ -266,10 +266,10 @@ export const Settings: React.FC<SettingsProps> = (props) => {
     const fieldsLabelsData = await getFieldLabels(settingsData.probeId)
     const depthSetpointSensor = `Depth ${settingsData.setPointSensor}`
     if (props.setLowSelectedSensor) {
-      onSensorSelect(fieldsLabelsData.data, 'Low', settingsData.probeId, props.setLowSelectedSensor,  presentSensorSelectToast, depthSetpointSensor)
+      onSensorSelect(fieldsLabelsData.data, 'Low', settingsData.probeId, props.setLowSelectedSensor, presentSensorSelectToast as unknown as (options: unknown) => void, depthSetpointSensor)
     }
     if (props.setLowSetpoint) {
-      onSetpointSubmit('Low', settingsData.probeId, props.setLowSetpoint, presentSetpointSubmitToast, settingsData.msetPoint)
+      onSetpointSubmit('Low', settingsData.probeId, props.setLowSetpoint, presentSetpointSubmitToast as unknown as (options: unknown) => void, settingsData.msetPoint)
     }
     if (props.setIsSetpointEnabled) {
       onEnableCLick(settingsData.probeId, 'Low', props.isSetpointEnabled ?? false, props.setIsSetpointEnabled, props.setIsEnabledToastOpen, props.setIsDisabledToastOpen, props.setIsEnableActionSheet)

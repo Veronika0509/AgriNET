@@ -5,7 +5,7 @@ interface History {
 }
 
 export const onFuelSensorClick = async (
-  history: History,
+  _history: History,
   sensorId: string,
   name: string,
   setChartData: (data: unknown) => void,

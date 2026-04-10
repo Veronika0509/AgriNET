@@ -186,7 +186,7 @@ export const createTempChart = (
         getFillFromSprite: false,
       })
       if (tooltip) {
-        tooltip.get("background").setAll({
+        tooltip.get("background")?.setAll({
           fill: am5.color(dataLabel.color),
         })
       }
@@ -635,7 +635,7 @@ export const createTempChart = (
 
           label.set(
             "text",
-            `${root.current.dateFormatter.format(new Date(value), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ""}${moistMainComment.text}`,
+            `${root.current.dateFormatter.format(new Date(value!), "yyyy-MM-dd HH:mm")}\n${moistMainComment.color_id ? `${Object.keys(colors)[moistMainComment.color_id - 1]}\n` : ""}${moistMainComment.text}`,
           )
 
           rangeDataItem.set("value", value)

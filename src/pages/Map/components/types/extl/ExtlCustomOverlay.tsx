@@ -77,7 +77,7 @@ export const initializeExtlCustomOverlay = (isGoogleApiLoaded: boolean): any => 
 
       onAdd() {
         const divId = `overlay-extl-${this.chartData.id}`;
-        this.div = document.getElementById(divId) as HTMLElement | null;
+        this.div = document.getElementById(divId) as HTMLElement | undefined;
 
         if (!this.div) {
           this.div = document.createElement("div");
