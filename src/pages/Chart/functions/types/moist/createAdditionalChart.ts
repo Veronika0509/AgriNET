@@ -135,7 +135,7 @@ export const createAdditionalChart = (
 
     const refillLine = chartType === 'sum' ? getBudgetLine(budgetLines, 4) : undefined
     const sumChartMin = refillLine && typeof refillLine.value === 'number' && refillLine.value > 0
-      ? refillLine.value * 0.9
+      ? refillLine.value * 0.98
       : undefined
     const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(rootInstance, {
       renderer: am5xy.AxisRendererY.new(rootInstance, {}),

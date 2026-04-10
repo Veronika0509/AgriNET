@@ -1298,7 +1298,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           {refillPrediction && (
             <p style={{
               position: 'absolute',
-              bottom: '1px',
+              bottom: '30px',
               left: '50%',
               textAlign: 'center',
               transform: 'translateX(-50%)',
