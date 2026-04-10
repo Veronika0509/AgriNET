@@ -1,18 +1,22 @@
 import legacy from '@vitejs/plugin-legacy'
 import react from '@vitejs/plugin-react'
 import basicSsl from '@vitejs/plugin-basic-ssl'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd());
+  const useHttps = !env.VITE_NO_SSL;
+
+  return {
   base: './',
   plugins: [
     react(),
     legacy(),
-    basicSsl()
+    ...(useHttps ? [basicSsl()] : []),
   ],
   server: {
-    https: true,
+    ...(useHttps ? { https: true } : {}),
   },
   build: {
     rollupOptions: {
@@ -27,4 +31,5 @@ export default defineConfig({
     // Отключаем строгую проверку TypeScript при сборке
     logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
+  };
 })

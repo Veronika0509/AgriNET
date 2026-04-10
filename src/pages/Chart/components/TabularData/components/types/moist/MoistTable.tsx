@@ -9,16 +9,24 @@ interface moistTableProps {
   data: any,
   firstRowColor: any,
   isWxetMobile: boolean,
-  scrollable?: boolean
+  scrollable?: boolean,
+  daysToRefill?: number
 }
 
-export const MoistTable: React.FC<moistTableProps> = ({type, data, firstRowColor, isWxetMobile, scrollable}) => {
+export const MoistTable: React.FC<moistTableProps> = ({type, data, firstRowColor, isWxetMobile, scrollable, daysToRefill}) => {
   return (
     <div style={scrollable ? { overflowX: 'auto' } : undefined}>
     <table className={`${s.mainTabularDataTable} ${type === 'moistSoilTemp' && s.mainMoistSoilTempTabularDataTable}`} style={scrollable ? { tableLayout: 'auto', whiteSpace: 'nowrap' } : undefined}>
       <thead className={s.mainTabularDataTableThead}>
       <tr>
-        <th className={`${s.mainTabularDataTableTh} ${s.mainTabularDataTableThLarge}`}>{data.label}</th>
+        <th className={`${s.mainTabularDataTableTh} ${s.mainTabularDataTableThLarge}`}>
+          {data.label}
+          {daysToRefill !== undefined && (
+            <span style={{ color: '#CC0000', fontWeight: 600, marginLeft: '8px', fontSize: '11px' }}>
+              {daysToRefill <= 0 ? 'below refill zone' : `${daysToRefill}d to refill`}
+            </span>
+          )}
+        </th>
         {Array.from({length: data.sensorCount}, (_, index) => (
           <th key={index} className={s.mainTabularDataTableTh}
               style={{backgroundColor: type === 'moistSum' ? '#6771dc' : type === 'moistSoilTemp' ? `rgb(${colors[index].r}, ${colors[index].g}, ${colors[index].b})` : colors[index]}}>

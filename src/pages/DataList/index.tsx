@@ -16,6 +16,7 @@ import {arrowBackOutline, refreshOutline} from 'ionicons/icons';
 import { useAppContext } from '../../context/AppContext';
 import axios from 'axios';
 import { MoistTable } from '../Chart/components/TabularData/components/types/moist/MoistTable';
+import { getRefillPrediction } from '../Chart/data/types/moist/getRefillPrediction';
 import { TempTable } from '../Chart/components/TabularData/components/types/temp/TempTable';
 import { WxetTable } from '../Chart/components/TabularData/components/types/wxet/WxetTable';
 
@@ -68,6 +69,7 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
   const [isMobile] = useState(window.innerWidth < 750);
   const [isWxetMobile] = useState(window.innerWidth < 425);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [predictions, setPredictions] = useState<Record<string, number | undefined>>({});
 
   const sensorTypes = useMemo(() => {
     const typesMap = new Map<string, string>();
@@ -159,6 +161,30 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
     }
   }, [selectedTypes]);
 
+  useEffect(() => {
+    if (!tabularData.length || !userId) return;
+
+    const moistSensors = tabularData.filter(item => getSensorType(item.sensorId) === 'Moist');
+    if (moistSensors.length === 0) return;
+
+    const fetchPredictions = async () => {
+      const results: Record<string, number | undefined> = {};
+      await Promise.all(
+        moistSensors.map(async (item) => {
+          try {
+            const prediction = await getRefillPrediction(item.sensorId, userId);
+            results[item.sensorId] = prediction.days_to_refill;
+          } catch {
+            // fail silently
+          }
+        })
+      );
+      setPredictions(results);
+    };
+
+    fetchPredictions();
+  }, [tabularData, userId]);
+
   const handleBack = () => {
     setPage(0);
   };
@@ -235,6 +261,18 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
       groups[sensorType].push(item);
     });
 
+    // Sort Moist group by days_to_refill (shortest first)
+    if (groups['Moist']) {
+      groups['Moist'].sort((a, b) => {
+        const aDays = predictions[a.sensorId];
+        const bDays = predictions[b.sensorId];
+        if (aDays === undefined && bDays === undefined) return 0;
+        if (aDays === undefined) return 1;
+        if (bDays === undefined) return -1;
+        return aDays - bDays;
+      });
+    }
+
     const result = typeOrder
       .filter(type => groups[type] && groups[type].length > 0)
       .map(type => ({
@@ -244,7 +282,7 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
       }));
     console.log('[DataList] groupedData:', result);
     return result;
-  }, [tabularData, siteList]);
+  }, [tabularData, siteList, predictions]);
 
   const renderDataTable = (item: TabularDataItem) => {
     if (!item.data || item.data.length === 0) return null;
@@ -271,6 +309,7 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
             firstRowColor={firstRowColor}
             isWxetMobile={isWxetMobile}
             scrollable
+            daysToRefill={predictions[item.sensorId]}
           />
         ) : sensorType === 'SoilTemp' ? (
           <TempTable

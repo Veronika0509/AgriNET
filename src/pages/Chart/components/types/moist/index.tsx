@@ -1295,10 +1295,10 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
           />
         </div>
         <div style={{ position: 'relative' }}>
-          {refillPrediction && refillPrediction.days_to_refill >= 0 && (
+          {refillPrediction && (
             <p style={{
               position: 'absolute',
-              bottom: '10%',
+              bottom: '20px',
               left: '50%',
               textAlign: 'center',
               transform: 'translateX(-50%)',
@@ -1308,7 +1308,9 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               margin: 0,
               pointerEvents: 'none',
             }}>
-              Sum chart will reach refill zone in {Math.round(refillPrediction.days_to_refill)} days without irrigation
+              {refillPrediction.days_to_refill <= 0
+                ? 'Sum chart is below refill zone'
+                : `Sum chart will reach refill zone in ${Math.round(refillPrediction.days_to_refill)} days without irrigation`}
             </p>
           )}
           <div id="sumChart" className={s.sumChart}></div>
