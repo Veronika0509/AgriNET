@@ -694,7 +694,7 @@ const MapPage: React.FC<MapProps> = (props) => {
       <Header
         setPage={props.setPage}
         setIsMarkerClicked={setIsMarkerClicked}
-        isMarkerClicked={!!isMarkerClicked}
+        isMarkerClicked={isMarkerClicked}
         reloadMapPage={props.reloadMapPage ?? (() => {})}
         activeTab={activeTab}
         setActiveTab={setActiveTab}

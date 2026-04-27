@@ -4,8 +4,8 @@ import {arrowBackOutline, menuOutline} from "ionicons/icons";
 import { useHistory } from 'react-router-dom';
 
 interface HeaderProps {
-  isMarkerClicked: boolean;
-  setIsMarkerClicked: (clicked: boolean) => void;
+  isMarkerClicked: string | boolean;
+  setIsMarkerClicked: (clicked: boolean | string) => void;
   reloadMapPage: () => void;
   setPage: (page: number) => void;
   navigationHistory: string[];
