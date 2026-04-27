@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   IonAlert
 } from '@ionic/react';
@@ -25,17 +25,16 @@ const SensorSelector: React.FC<SensorSelectorProps> = ({
   selectedSensor,
   sensors
 }) => {
-  // Фильтруем только Moist сенсоры и отображаем имя сайта
-  const inputs = sensors
+  const inputs = useMemo(() => sensors
     .filter(sensor => sensor.layerName === 'Moist')
     .map(sensor => ({
       type: 'radio' as const,
       label: sensor.siteName ? `${sensor.name}` : sensor.name,
       value: sensor.sensorId.toString(),
       checked: selectedSensor?.sensorId === sensor.sensorId
-    }));
+    })), [sensors, selectedSensor]);
 
-  const buttons = [
+  const buttons = useMemo(() => [
     {
       text: 'CANCEL',
       role: 'cancel',
@@ -53,7 +52,9 @@ const SensorSelector: React.FC<SensorSelectorProps> = ({
         }
       }
     }
-  ];
+  ], [sensors, onClose, onConfirm]);
+
+  if (!isOpen) return undefined;
 
   return (
     <IonAlert

@@ -4,7 +4,6 @@ import {truncateText} from "../../../functions/truncateTextFunc";
 import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
 import {getOptions} from "../../../data/getOptions";
 import skull from '../../../../../assets/images/skull.svg'
-import {IonAlert} from '@ionic/react';
 import React from 'react';
 
 // Интерфейсы для типизации
@@ -75,7 +74,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private isCurrentOverlay: boolean;
       private isTextTruncated: boolean
       private longPressTimer: NodeJS.Timeout | null = null;
-      private showInfoDialog: boolean = false;
       private wasLongPress: boolean = false;
       private _pendingHidden: boolean = false;
 
@@ -169,14 +167,25 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private _onMouseLeave: () => void = () => {
       };
 
+      private getInfoMessage(): string {
+        return this.isValidChartData
+          ? [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
+              this.chartData.battery ? `Battery: ${this.chartData.battery}` : undefined,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n')
+          : [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n');
+      }
+
       private handleTouchStart = (_e: React.TouchEvent) => {
         this.wasLongPress = false;
         this.longPressTimer = setTimeout(() => {
           this.wasLongPress = true;
-          this.showInfoDialog = true;
-          if (this.root) {
-            this.root.render(this.renderContent());
-          }
+          const msg = this.getInfoMessage();
+          if (msg) window.alert(`Sensor Information\n\n${msg}`);
         }, 600); // 600ms long press
       };
 
@@ -195,13 +204,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
         if (this.longPressTimer) {
           clearTimeout(this.longPressTimer);
           this.longPressTimer = null;
-        }
-      };
-
-      private closeInfoDialog = () => {
-        this.showInfoDialog = false;
-        if (this.root) {
-          this.root.render(this.renderContent());
         }
       };
 
@@ -232,22 +234,8 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
             )
           }
         }
-        if (this.isValidChartData && !this.chartData.freshness) {
-        }
-        const infoMessage = this.isValidChartData
-          ? [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
-              this.chartData.battery ? `Battery: ${this.chartData.battery}` : null,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n')
-          : [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n');
-
         return (
-          <>
-            <div
+          <div
               className={s.overlay_container}
               onClick={onMarkerClick}
               onTouchStart={this.handleTouchStart}
@@ -305,14 +293,6 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
               </div>
             )}
           </div>
-          <IonAlert
-            isOpen={this.showInfoDialog}
-            onDidDismiss={this.closeInfoDialog}
-            header="Sensor Information"
-            message={infoMessage}
-            buttons={['OK']}
-          />
-          </>
         );
       }
 

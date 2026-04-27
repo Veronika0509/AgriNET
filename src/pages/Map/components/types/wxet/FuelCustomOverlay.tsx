@@ -4,7 +4,6 @@ import {truncateText} from "../../../functions/truncateTextFunc";
 import {getOptions} from "../../../data/getOptions";
 import skull from "../../../../../assets/images/skull.svg";
 import {onFuelSensorClick} from "../../../functions/types/wxet/onFuelSensorClick";
-import {IonAlert} from '@ionic/react';
 import React from 'react';
 
 // Интерфейсы для типизации
@@ -50,7 +49,6 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private div?: HTMLElement | null;
       private isTextTruncated: boolean
       private longPressTimer: NodeJS.Timeout | null = null;
-      private showInfoDialog: boolean = false;
       private wasLongPress: boolean = false;
 
       constructor(
@@ -95,14 +93,25 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
         });
       }
 
+      private getInfoMessage(): string {
+        return this.isValidData
+          ? [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
+              this.chartData.batteryPercentage ? `Battery: ${this.chartData.batteryPercentage}%` : undefined,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n')
+          : [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n');
+      }
+
       private handleTouchStart = (_e: React.TouchEvent) => {
         this.wasLongPress = false;
         this.longPressTimer = setTimeout(() => {
           this.wasLongPress = true;
-          this.showInfoDialog = true;
-          if (this.root) {
-            this.root.render(this.renderContent());
-          }
+          const msg = this.getInfoMessage();
+          if (msg) window.alert(`Sensor Information\n\n${msg}`);
         }, 600);
       };
 
@@ -123,27 +132,8 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
         }
       };
 
-      private closeInfoDialog = () => {
-        this.showInfoDialog = false;
-        if (this.root) {
-          this.root.render(this.renderContent());
-        }
-      };
-
       renderContent() {
-        const infoMessage = this.isValidData
-          ? [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
-              this.chartData.batteryPercentage ? `Battery: ${this.chartData.batteryPercentage}%` : null,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n')
-          : [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n');
-
         return (
-          <React.Fragment>
           <div
             className={s.overlay_fuelContainer}
             onTouchStart={this.handleTouchStart}
@@ -194,14 +184,6 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
               </div>
             )}
           </div>
-          <IonAlert
-            isOpen={this.showInfoDialog}
-            onDidDismiss={this.closeInfoDialog}
-            header="Sensor Information"
-            message={infoMessage}
-            buttons={['OK']}
-          />
-          </React.Fragment>
         );
       }
 

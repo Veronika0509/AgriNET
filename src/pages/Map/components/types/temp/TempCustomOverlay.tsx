@@ -4,7 +4,6 @@ import {truncateText} from "../../../functions/truncateTextFunc";
 import {onTempSensorClick} from "../../../functions/types/temp/onTempSensorClick";
 import skull from "../../../../../assets/images/skull.svg";
 import alarm from "../../../../../assets/images/icons/wxetAlarm.png";
-import {IonAlert} from '@ionic/react';
 import React from 'react';
 
 interface TempChartData {
@@ -55,7 +54,6 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private isTextTruncated: boolean
       private borderColor: string
       private longPressTimer: NodeJS.Timeout | null = null;
-      private showInfoDialog: boolean = false;
       private wasLongPress: boolean = false;
       private _pendingHidden: boolean = false;
 
@@ -108,14 +106,25 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
         });
       }
 
+      private getInfoMessage(): string {
+        return this.isValidChartData
+          ? [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
+              this.chartData.batteryPercentage ? `Battery: ${this.chartData.batteryPercentage}%` : undefined,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n')
+          : [
+              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
+              `Sensor ID: ${String(this.chartData.sensorId)}`
+            ].filter(Boolean).join('\n');
+      }
+
       private handleTouchStart = (_e: React.TouchEvent) => {
         this.wasLongPress = false;
         this.longPressTimer = setTimeout(() => {
           this.wasLongPress = true;
-          this.showInfoDialog = true;
-          if (this.root) {
-            this.root.render(this.renderContent());
-          }
+          const msg = this.getInfoMessage();
+          if (msg) window.alert(`Sensor Information\n\n${msg}`);
         }, 600);
       };
 
@@ -136,30 +145,9 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
         }
       };
 
-      private closeInfoDialog = () => {
-        this.showInfoDialog = false;
-        if (this.root) {
-          this.root.render(this.renderContent());
-        }
-      };
-
       renderContent() {
-        if (this.isValidChartData && !this.chartData.freshness) {
-        }
-        const infoMessage = this.isValidChartData
-          ? [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
-              this.chartData.batteryPercentage ? `Battery: ${this.chartData.batteryPercentage}%` : null,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n')
-          : [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : null,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n');
-
         return (
-          <React.Fragment>
-            <div
+          <div
               className={s.overlay_container}
               onTouchStart={this.handleTouchStart}
               onTouchEnd={this.handleTouchEnd}
@@ -216,14 +204,6 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
               </div>
             )}
           </div>
-          <IonAlert
-            isOpen={this.showInfoDialog}
-            onDidDismiss={this.closeInfoDialog}
-            header="Sensor Information"
-            message={infoMessage}
-            buttons={['OK']}
-          />
-          </React.Fragment>
         );
       }
 
