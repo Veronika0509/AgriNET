@@ -82,19 +82,36 @@ export const createTempDataContainers = async (props: TempDataContainerProps) =>
   if (props.tempChartsAmount.length === props.tempChartData.length) {
     const updatedTempChartData: Array<[TempChartDataItem, TempBounds]> = []
     props.boundsArray.map((bounds: TempBounds, index: number) => {
-      if (props.tempChartData[index]?.data?.length > 1 && props.response.data.freshness !== 'outdated') {
+      const item = props.tempChartData[index]
+      const battery = item?.batteryPercentage
+      const freshness = item?.freshness
+      const dataPoints = (item?.data as unknown[] | undefined) ?? []
+      const temp = item?.temp ?? 0
+
+      const isBatteryDead =
+        battery !== undefined &&
+        battery > 0 &&
+        battery <= 10 &&
+        freshness !== '30m' &&
+        freshness !== '3h'
+
+      const isDataEmpty = dataPoints.length === 0 && temp === 0
+
+      const isValid = !isBatteryDead && !isDataEmpty
+
+      if (isValid) {
         const exists = updatedTempChartData.some(
-          (updatedTempChartDataItem: [TempChartDataItem, TempBounds]) => updatedTempChartDataItem[0].mainId === props.tempChartData[index].mainId
+          (updatedTempChartDataItem: [TempChartDataItem, TempBounds]) => updatedTempChartDataItem[0].mainId === item.mainId
         );
         if (!exists) {
-          updatedTempChartData.push([props.tempChartData[index], bounds]);
+          updatedTempChartData.push([item, bounds]);
         }
       } else {
         const exists = props.invalidChartData.some(
-          (invalidChartDataItem: [TempChartDataItem, TempBounds]) => invalidChartDataItem[0].mainId === props.tempChartData[index].mainId
+          (invalidChartDataItem: [TempChartDataItem, TempBounds]) => invalidChartDataItem[0].mainId === item.mainId
         );
         if (!exists) {
-          props.invalidChartData.push([props.tempChartData[index], bounds]);
+          props.invalidChartData.push([item, bounds]);
         }
       }
       new Promise<void>((resolve: () => void) => {
