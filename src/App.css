@@ -28,6 +28,10 @@ p, h1, h2, h3, h4, h5, h6, div, img, a, button {
   display: none !important;
 }
 
+.sensor-info-alert .alert-message {
+  white-space: pre-line;
+}
+
 /* Sensor ID Validation Alert Styles */
 .sensor-id-validation-alert .alert-button {
   color: #04a65b !important;

@@ -4,7 +4,8 @@ import {onValveSensorClick} from "../../../functions/types/valve/onValveSensorCl
 import {truncateText} from "../../../functions/truncateTextFunc";
 import {simpleColors} from "../../../../../assets/getColors";
 import skull from "../../../../../assets/images/skull.svg";
-import React from 'react';
+import type { SensorInfo } from "../../modals/SensorInfoDialog";
+import { LongPressTracker } from "../../../utils/longPress";
 
 interface ValveChartData {
   id: string | number;
@@ -40,13 +41,13 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private setValveOverlays: (fn: (overlays: ValveCustomOverlayInstance[]) => ValveCustomOverlayInstance[]) => void
       private userId: string | number
       private bgColor: string | undefined
+      private onLongPress: (info: SensorInfo) => void
 
       private root: ReturnType<typeof createRoot> | null;
       private offset: { x: number; y: number };
       private div: HTMLElement | null;
       private isTextTruncated: boolean
-      private longPressTimer: NodeJS.Timeout | null = null;
-      private wasLongPress: boolean = false;
+      private longPress: LongPressTracker = new LongPressTracker(() => this.onLongPress(this.getSensorInfo()));
 
       constructor(
         bounds: google.maps.LatLngBounds,
@@ -60,7 +61,8 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: boolean) => {
         history: History,
         isValveMarkerChartDrawn: boolean,
         setValveOverlays: (fn: (overlays: ValveCustomOverlayInstance[]) => ValveCustomOverlayInstance[]) => void,
-        userId: string | number
+        userId: string | number,
+        onLongPress: (info: SensorInfo) => void
       ) {
         super();
         this.bounds = bounds;
@@ -75,6 +77,7 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: boolean) => {
         this.isValveMarkerChartDrawn = isValveMarkerChartDrawn
         this.setValveOverlays = setValveOverlays
         this.userId = userId
+        this.onLongPress = onLongPress
         this.bgColor = this.chartData.bgColor ? simpleColors[this.chartData.bgColor.toLowerCase()] : undefined
 
         this.root = null
@@ -92,45 +95,19 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: boolean) => {
         });
       }
 
-      private getInfoMessage(): string {
-        return [
-          this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
-          `Sensor ID: ${String(this.chartData.sensorId)}`
-        ].filter(Boolean).join('\n');
+      private getSensorInfo(): SensorInfo {
+        return {
+          name: this.chartData.name,
+          sensorId: String(this.chartData.sensorId),
+        };
       }
-
-      private handleTouchStart = (_e: React.TouchEvent) => {
-        this.wasLongPress = false;
-        this.longPressTimer = setTimeout(() => {
-          this.wasLongPress = true;
-          const msg = this.getInfoMessage();
-          if (msg) window.alert(`Sensor Information\n\n${msg}`);
-        }, 600);
-      };
-
-      private handleTouchEnd = () => {
-        if (this.longPressTimer) {
-          clearTimeout(this.longPressTimer);
-          this.longPressTimer = null;
-        }
-        setTimeout(() => {
-          this.wasLongPress = false;
-        }, 100);
-      };
-
-      private handleTouchMove = () => {
-        if (this.longPressTimer) {
-          clearTimeout(this.longPressTimer);
-          this.longPressTimer = null;
-        }
-      };
 
       renderContent() {
         return (
           <div
             className={`${s.overlay_container}`}
             onClick={() => {
-              if (this.wasLongPress) return;
+              if (this.longPress.wasLongPress) return;
               onValveSensorClick(
                 this.history,
                 this.userId,
@@ -143,9 +120,9 @@ export const initializeValveCustomOverlay = (isGoogleApiLoaded: boolean) => {
                 this.setChartPageType
               );
             }}
-            onTouchStart={this.handleTouchStart}
-            onTouchEnd={this.handleTouchEnd}
-            onTouchMove={this.handleTouchMove}
+            onTouchStart={this.longPress.start}
+            onTouchEnd={this.longPress.end}
+            onTouchMove={this.longPress.move}
           >
             {this.isValidChartData ? (
               <div>

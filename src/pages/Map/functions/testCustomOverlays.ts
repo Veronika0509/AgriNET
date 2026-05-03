@@ -65,7 +65,8 @@ export const testCustomOverlays = (
         { current: [] }, // moistOverlaysRef
         testMoistData.sensorId,
         () => {}, // setCurrentSensorId
-        false // toUpdate
+        false, // toUpdate
+        () => {} // onLongPress
       );
 
       moistOverlay.setMap(map);
@@ -93,7 +94,8 @@ export const testCustomOverlays = (
         () => {}, // setTempOverlays
         setChartPageType,
         'test-user-001', // userId
-        () => {} // present
+        () => {}, // present
+        () => {} // onLongPress
       );
 
       tempOverlay.setMap(map);

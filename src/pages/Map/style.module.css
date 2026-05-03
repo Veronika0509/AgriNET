@@ -82,12 +82,14 @@
   text-decoration: none;
 }
 
-.overlay_container:hover .overlay_info,
-.overlay_wxetOverlay:hover .overlay_info,
-.overlay_extlOverlayWrapper:hover .overlay_info,
-.overlay_fuelContainer:hover .overlay_info
-{
-  display: block;
+@media (hover: hover) and (pointer: fine) {
+  .overlay_container:hover .overlay_info,
+  .overlay_wxetOverlay:hover .overlay_info,
+  .overlay_extlOverlayWrapper:hover .overlay_info,
+  .overlay_fuelContainer:hover .overlay_info
+  {
+    display: block;
+  }
 }
 
 .overlay_chartContainer {

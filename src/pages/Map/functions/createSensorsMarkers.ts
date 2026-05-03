@@ -101,7 +101,8 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
               { current: [] }, // moistOverlaysRef
               sensorItem.sensorId, // currentSensorId
               () => {}, // setCurrentSensorId
-              false // toUpdate
+              false, // toUpdate
+              () => {} // onLongPress
             );
             overlay.setMap(map);
           }
@@ -140,7 +141,8 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
             props.setTempOverlays || (() => {}),
             props.setChartPageType,
             props.userId,
-            props.present || (() => {})
+            props.present || (() => {}),
+            () => {} // onLongPress
           );
           overlay.setMap(map);
         }
@@ -176,7 +178,8 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
             bounds,
             true, // isValidData
             wxetChartData,
-            props.setChartPageType
+            props.setChartPageType,
+            () => {} // onLongPress
           );
           overlay.setMap(map);
         }
@@ -211,7 +214,8 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
             fuelChartData,
             props.setChartPageType,
             false, // isFuelMarkerChartDrawn
-            props.setFuelOverlays || (() => {})
+            props.setFuelOverlays || (() => {}),
+            () => {} // onLongPress
           );
           overlay.setMap(map);
         }
@@ -245,7 +249,8 @@ export const createSensorsMarkers = (props: CreateSensorsMarkersProps): void => 
             props.history,
             false, // isValveMarkerChartDrawn
             props.setValveOverlays || (() => {}),
-            props.userId
+            props.userId,
+            () => {} // onLongPress
           );
           overlay.setMap(map);
         }

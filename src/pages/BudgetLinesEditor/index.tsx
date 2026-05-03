@@ -128,7 +128,8 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
           moistOverlaysRef as any,
           currentSensorId as any,
           setCurrentSensorId as any,
-          true
+          true,
+          () => {} // onLongPress
         );
         await overlay.setMap(map);
       });

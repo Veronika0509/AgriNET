@@ -4,7 +4,8 @@ import {truncateText} from "../../../functions/truncateTextFunc";
 import {onTempSensorClick} from "../../../functions/types/temp/onTempSensorClick";
 import skull from "../../../../../assets/images/skull.svg";
 import alarm from "../../../../../assets/images/icons/wxetAlarm.png";
-import React from 'react';
+import type { SensorInfo } from "../../modals/SensorInfoDialog";
+import { LongPressTracker } from "../../../utils/longPress";
 
 interface TempChartData {
   id: string | number;
@@ -47,14 +48,14 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private setChartPageType: (type: string) => void
       private userId: string | number
       private present: PresentFunction
+      private onLongPress: (info: SensorInfo) => void
 
       private root: ReturnType<typeof createRoot> | null;
       private offset: { x: number; y: number };
       private div: HTMLElement | null;
       private isTextTruncated: boolean
       private borderColor: string
-      private longPressTimer: NodeJS.Timeout | null = null;
-      private wasLongPress: boolean = false;
+      private longPress: LongPressTracker = new LongPressTracker(() => this.onLongPress(this.getSensorInfo()));
       private _pendingHidden: boolean = false;
 
       constructor(
@@ -71,7 +72,8 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
         setTempOverlays: (fn: (overlays: TempCustomOverlayInstance[]) => TempCustomOverlayInstance[]) => void,
         setChartPageType: (type: string) => void,
         userId: string | number,
-        present: PresentFunction
+        present: PresentFunction,
+        onLongPress: (info: SensorInfo) => void
       ) {
         super();
 
@@ -89,6 +91,7 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
         this.setChartPageType = setChartPageType
         this.userId = userId
         this.present = present
+        this.onLongPress = onLongPress
 
         this.root = null
         this.div = null
@@ -106,56 +109,27 @@ export const initializeTempCustomOverlay = (isGoogleApiLoaded: boolean) => {
         });
       }
 
-      private getInfoMessage(): string {
-        return this.isValidChartData
-          ? [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
-              this.chartData.batteryPercentage ? `Battery: ${this.chartData.batteryPercentage}%` : undefined,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n')
-          : [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n');
+      private getSensorInfo(): SensorInfo {
+        return {
+          name: this.chartData.name,
+          sensorId: String(this.chartData.sensorId),
+          battery: this.isValidChartData && this.chartData.batteryPercentage
+            ? `${this.chartData.batteryPercentage}%`
+            : undefined,
+        };
       }
-
-      private handleTouchStart = (_e: React.TouchEvent) => {
-        this.wasLongPress = false;
-        this.longPressTimer = setTimeout(() => {
-          this.wasLongPress = true;
-          const msg = this.getInfoMessage();
-          if (msg) window.alert(`Sensor Information\n\n${msg}`);
-        }, 600);
-      };
-
-      private handleTouchEnd = () => {
-        if (this.longPressTimer) {
-          clearTimeout(this.longPressTimer);
-          this.longPressTimer = null;
-        }
-        setTimeout(() => {
-          this.wasLongPress = false;
-        }, 100);
-      };
-
-      private handleTouchMove = () => {
-        if (this.longPressTimer) {
-          clearTimeout(this.longPressTimer);
-          this.longPressTimer = null;
-        }
-      };
 
       renderContent() {
         return (
           <div
               className={s.overlay_container}
-              onTouchStart={this.handleTouchStart}
-              onTouchEnd={this.handleTouchEnd}
-              onTouchMove={this.handleTouchMove}
+              onTouchStart={this.longPress.start}
+              onTouchEnd={this.longPress.end}
+              onTouchMove={this.longPress.move}
             >
             {this.isValidChartData ? (
               <div className={s.mainContainer} onClick={() => {
-                if (this.wasLongPress) return;
+                if (this.longPress.wasLongPress) return;
                 onTempSensorClick(
                   this.history,
                   this.chartData.sensorId,

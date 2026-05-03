@@ -7,6 +7,7 @@ import {
   useIonToast,
 } from "@ionic/react"
 import SensorModal from "./components/modals/SensorModal"
+import SensorInfoDialog, { type SensorInfo } from "./components/modals/SensorInfoDialog"
 import { NewLayerModal } from "./components/modals/NewLayerModal"
 import { useHistory } from "react-router-dom"
 import type { Site, SensorData, ChartPageType, UserId, SiteId } from "../../types"
@@ -96,6 +97,15 @@ const MapPage: React.FC<MapProps> = (props) => {
   const [selectedSensor, setSelectedSensor] = useState<any>(null)
   const [availableSensors, _setAvailableSensors] = useState<any[]>([])
 
+  // Long-press sensor info dialog state
+  const [sensorInfo, setSensorInfo] = useState<SensorInfo | undefined>(undefined)
+  const handleLongPress = useCallback((info: SensorInfo) => {
+    setSensorInfo(info)
+  }, [])
+  const handleCloseSensorInfo = useCallback(() => {
+    setSensorInfo(undefined)
+  }, [])
+
   const handleCloseSensorModal = useCallback(() => {
     setIsSensorModalOpen(false)
   }, [])
@@ -168,6 +178,7 @@ const MapPage: React.FC<MapProps> = (props) => {
     userId: props.userId,
     present,
     setActiveOverlays,
+    onLongPress: handleLongPress,
   })
 
   // LayerList state
@@ -744,6 +755,8 @@ const MapPage: React.FC<MapProps> = (props) => {
           selectedSensor={selectedSensor}
           sensors={availableSensors}
         />
+
+        <SensorInfoDialog info={sensorInfo} onClose={handleCloseSensorInfo} />
 
         <NewLayerModal
           isOpen={isNewLayerModalOpen}

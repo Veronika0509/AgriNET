@@ -15,6 +15,7 @@ import { createValveChartForOverlay } from "../functions/types/valve/createValve
 import { createFuelChartForOverlay } from "../functions/types/wxet/createFuelChartForOverlay"
 import { addOverlayToOverlaysArray } from "../functions/types/moist/addOverlayToOverlaysArray"
 import invalidChartDataImage from "../../../assets/images/invalidChartData.png"
+import type { SensorInfo } from "../components/modals/SensorInfoDialog"
 
 interface ChartDataItem {
   sensorId: string
@@ -68,6 +69,7 @@ interface UseChartOverlaysProps {
   userId: number
   present: any
   setActiveOverlays: React.Dispatch<React.SetStateAction<OverlayItem[]>>
+  onLongPress: (info: SensorInfo) => void
 }
 
 /**
@@ -134,6 +136,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           currentSensorId,
           setCurrentSensorId,
           false,
+          props.onLongPress,
         )
         if (overlay) {
           React.startTransition(() => {
@@ -170,6 +173,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           currentSensorId,
           setCurrentSensorId,
           false,
+          props.onLongPress,
         )
         if (overlay) {
           React.startTransition(() => {
@@ -214,6 +218,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
             true,
             data[0] as any,
             props.setChartPageType,
+            props.onLongPress,
           ) as any
         } else if (data[0].markerType === "fuel") {
           const FuelCustomOverlayExport = initializeFuelCustomOverlay(props.isGoogleApiLoaded)
@@ -230,6 +235,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
             props.setChartPageType,
             isFuelMarkerChartDrawn,
             setFuelOverlays as any,
+            props.onLongPress,
           ) as any
         }
         if (overlay) {
@@ -260,6 +266,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
             false,
             data[0] as any,
             props.setChartPageType,
+            props.onLongPress,
           ) as any
         } else if (data[0].markerType === "fuel") {
           const FuelCustomOverlayExport = initializeFuelCustomOverlay(props.isGoogleApiLoaded)
@@ -276,6 +283,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
             props.setChartPageType,
             isFuelMarkerChartDrawn,
             setFuelOverlays as any,
+            props.onLongPress,
           ) as any
         }
 
@@ -324,6 +332,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           props.setChartPageType,
           props.userId,
           props.present,
+          props.onLongPress,
         )
         if (overlay) {
           React.startTransition(() => {
@@ -355,6 +364,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           props.setChartPageType,
           props.userId,
           props.present,
+          props.onLongPress,
         )
         if (overlay) {
           React.startTransition(() => {
@@ -400,6 +410,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           isValveMarkerChartDrawn,
           setValveOverlays as any,
           props.userId,
+          props.onLongPress,
         )
         if (overlay) {
           React.startTransition(() => {
@@ -429,6 +440,7 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
           isValveMarkerChartDrawn,
           setValveOverlays as any,
           props.userId,
+          props.onLongPress,
         )
         if (overlay) {
           React.startTransition(() => {

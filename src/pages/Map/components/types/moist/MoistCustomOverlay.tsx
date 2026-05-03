@@ -4,7 +4,8 @@ import {truncateText} from "../../../functions/truncateTextFunc";
 import {onMoistSensorClick} from "../../../functions/types/moist/onMoistSensorClick";
 import {getOptions} from "../../../data/getOptions";
 import skull from '../../../../../assets/images/skull.svg'
-import React from 'react';
+import type { SensorInfo } from "../../modals/SensorInfoDialog";
+import { LongPressTracker } from "../../../utils/longPress";
 
 // Интерфейсы для типизации
 interface MoistChartData {
@@ -66,6 +67,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private setCurrentSensorId: (id: string | number) => void
       private borderColor: string
       public toUpdate: boolean
+      private onLongPress: (info: SensorInfo) => void
 
       private div?: HTMLElement | null;
       private root: ReturnType<typeof createRoot> | null;
@@ -73,8 +75,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private prefix: string;
       private isCurrentOverlay: boolean;
       private isTextTruncated: boolean
-      private longPressTimer: NodeJS.Timeout | null = null;
-      private wasLongPress: boolean = false;
+      private longPress: LongPressTracker = new LongPressTracker(() => this.onLongPress(this.getSensorInfo()));
       private _pendingHidden: boolean = false;
 
       constructor(
@@ -96,7 +97,8 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
         moistOverlaysRef: MoistOverlayRef,
         currentSensorId: string | number,
         setCurrentSensorId: (id: string | number) => void,
-        _toUpdate: boolean
+        _toUpdate: boolean,
+        onLongPress: (info: SensorInfo) => void
       ) {
         super();
         this.isBudgetEditorMap = isBudgetEditorMap
@@ -117,6 +119,7 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
         this.currentSensorId = currentSensorId
         this.setCurrentSensorId = setCurrentSensorId
         this.toUpdate = _toUpdate
+        this.onLongPress = onLongPress
 
         this.offset = {x: 0, y: 0};
         this.prefix = this.isBudgetEditorMap ? 'b' : 'm'
@@ -167,50 +170,20 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private _onMouseLeave: () => void = () => {
       };
 
-      private getInfoMessage(): string {
-        return this.isValidChartData
-          ? [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
-              this.chartData.battery ? `Battery: ${this.chartData.battery}` : undefined,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n')
-          : [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n');
+      private getSensorInfo(): SensorInfo {
+        return {
+          name: this.chartData.name,
+          sensorId: String(this.chartData.sensorId),
+          battery: this.isValidChartData && this.chartData.battery
+            ? String(this.chartData.battery)
+            : undefined,
+        };
       }
-
-      private handleTouchStart = (_e: React.TouchEvent) => {
-        this.wasLongPress = false;
-        this.longPressTimer = setTimeout(() => {
-          this.wasLongPress = true;
-          const msg = this.getInfoMessage();
-          if (msg) window.alert(`Sensor Information\n\n${msg}`);
-        }, 600); // 600ms long press
-      };
-
-      private handleTouchEnd = () => {
-        if (this.longPressTimer) {
-          clearTimeout(this.longPressTimer);
-          this.longPressTimer = null;
-        }
-        // Reset wasLongPress after a short delay to allow onClick to check it
-        setTimeout(() => {
-          this.wasLongPress = false;
-        }, 100);
-      };
-
-      private handleTouchMove = () => {
-        if (this.longPressTimer) {
-          clearTimeout(this.longPressTimer);
-          this.longPressTimer = null;
-        }
-      };
 
       renderContent() {
         const onMarkerClick = () => {
           // Don't navigate if this was a long press
-          if (this.wasLongPress) {
+          if (this.longPress.wasLongPress) {
             return;
           }
 
@@ -238,9 +211,9 @@ export const initializeMoistCustomOverlay = (isGoogleApiLoaded: boolean) => {
           <div
               className={s.overlay_container}
               onClick={onMarkerClick}
-              onTouchStart={this.handleTouchStart}
-              onTouchEnd={this.handleTouchEnd}
-              onTouchMove={this.handleTouchMove}
+              onTouchStart={this.longPress.start}
+              onTouchEnd={this.longPress.end}
+              onTouchMove={this.longPress.move}
               style={{width: this.isCurrentOverlay ? '62px' : '58px'}}
             >
             {this.isValidChartData ? (

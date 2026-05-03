@@ -7,7 +7,8 @@ import {onWxetSensorClick} from "../../../functions/types/wxet/onWxetSensorClick
 import {getOptions} from "../../../data/getOptions";
 import skull from "../../../../../assets/images/skull.svg";
 import alarm from '../../../../../assets/images/icons/wxetAlarm.png'
-import React from 'react';
+import type { SensorInfo } from "../../modals/SensorInfoDialog";
+import { LongPressTracker } from "../../../utils/longPress";
 
 interface WxetChartData {
   sensorId: string;
@@ -43,13 +44,13 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private chartData: WxetChartData;
       private setChartPageType: (type: string) => void
       private borderColor: string
+      private onLongPress: (info: SensorInfo) => void
 
       private root: ReturnType<typeof createRoot> | null;
       private offset: { x: number; y: number };
       private div: HTMLElement | null;
       private isTextTruncated: boolean
-      private longPressTimer: NodeJS.Timeout | null = null;
-      private wasLongPress: boolean = false;
+      private longPress: LongPressTracker = new LongPressTracker(() => this.onLongPress(this.getSensorInfo()));
 
       constructor(
         setChartData: (data: unknown) => void,
@@ -61,7 +62,8 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
         bounds: google.maps.LatLngBounds,
         isValidData: boolean,
         data: WxetChartData,
-        setChartPageType: (type: string) => void
+        setChartPageType: (type: string) => void,
+        onLongPress: (info: SensorInfo) => void
       ) {
         super();
 
@@ -75,6 +77,7 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
         this.isValidData = isValidData
         this.chartData = data
         this.setChartPageType = setChartPageType
+        this.onLongPress = onLongPress
 
         this.root = null
         this.div = null
@@ -90,47 +93,22 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
         this.draw()
       }
 
-      private getInfoMessage(): string {
-        const isBattery: boolean = this.chartData.data.battery !== undefined && this.chartData.data.battery !== null;
-        const isBatteryPercentage: boolean = this.chartData.data.batteryPercentage !== undefined && this.chartData.data.batteryPercentage !== null;
-        return this.isValidData
-          ? [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
-              isBatteryPercentage ? `Battery: ${this.chartData.data.batteryPercentage}%` : undefined,
-              isBattery && !isBatteryPercentage ? `Battery: ${this.chartData.data.battery} VDC` : undefined,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n')
-          : [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n');
+      private getSensorInfo(): SensorInfo {
+        const battery = this.chartData.data.battery;
+        const batteryPercentage = this.chartData.data.batteryPercentage;
+        const hasBattery = battery !== undefined && battery !== null;
+        const hasBatteryPercentage = batteryPercentage !== undefined && batteryPercentage !== null;
+        let batteryStr: string | undefined;
+        if (this.isValidData) {
+          if (hasBatteryPercentage) batteryStr = `${batteryPercentage}%`;
+          else if (hasBattery) batteryStr = `${battery} VDC`;
+        }
+        return {
+          name: this.chartData.name,
+          sensorId: String(this.chartData.sensorId),
+          battery: batteryStr,
+        };
       }
-
-      private handleTouchStart = (_e: React.TouchEvent) => {
-        this.wasLongPress = false;
-        this.longPressTimer = setTimeout(() => {
-          this.wasLongPress = true;
-          const msg = this.getInfoMessage();
-          if (msg) window.alert(`Sensor Information\n\n${msg}`);
-        }, 600);
-      };
-
-      private handleTouchEnd = () => {
-        if (this.longPressTimer) {
-          clearTimeout(this.longPressTimer);
-          this.longPressTimer = null;
-        }
-        setTimeout(() => {
-          this.wasLongPress = false;
-        }, 100);
-      };
-
-      private handleTouchMove = () => {
-        if (this.longPressTimer) {
-          clearTimeout(this.longPressTimer);
-          this.longPressTimer = null;
-        }
-      };
 
       renderContent() {
         const tempMetric: string = this.chartData.data.metric === 'AMERICA' ? "°F" : "°C"
@@ -150,14 +128,14 @@ export const initializeWxetCustomOverlay = (isGoogleApiLoaded: boolean) => {
         return (
           <div
               className={s.overlay_wxetOverlay}
-              onTouchStart={this.handleTouchStart}
-              onTouchEnd={this.handleTouchEnd}
-              onTouchMove={this.handleTouchMove}
+              onTouchStart={this.longPress.start}
+              onTouchEnd={this.longPress.end}
+              onTouchMove={this.longPress.move}
             >
             {
               this.isValidData ? (
                 <div onClick={() => {
-                  if (this.wasLongPress) return;
+                  if (this.longPress.wasLongPress) return;
                   onWxetSensorClick(
                     this.history,
                     String(this.chartData.sensorId),

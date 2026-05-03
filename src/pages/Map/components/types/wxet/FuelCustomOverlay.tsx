@@ -4,7 +4,8 @@ import {truncateText} from "../../../functions/truncateTextFunc";
 import {getOptions} from "../../../data/getOptions";
 import skull from "../../../../../assets/images/skull.svg";
 import {onFuelSensorClick} from "../../../functions/types/wxet/onFuelSensorClick";
-import React from 'react';
+import type { SensorInfo } from "../../modals/SensorInfoDialog";
+import { LongPressTracker } from "../../../utils/longPress";
 
 // Интерфейсы для типизации
 interface FuelChartData {
@@ -43,13 +44,13 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
       private isFuelMarkerChartDrawn: boolean
       private borderColor: string
       private setFuelOverlays: (overlays: FuelCustomOverlayInstance[] | ((prev: FuelCustomOverlayInstance[]) => FuelCustomOverlayInstance[])) => void
+      private onLongPress: (info: SensorInfo) => void
 
       private root: ReturnType<typeof createRoot> | null;
       private offset: { x: number; y: number };
       private div?: HTMLElement | null;
       private isTextTruncated: boolean
-      private longPressTimer: NodeJS.Timeout | null = null;
-      private wasLongPress: boolean = false;
+      private longPress: LongPressTracker = new LongPressTracker(() => this.onLongPress(this.getSensorInfo()));
 
       constructor(
         setChartData: (data: unknown) => void,
@@ -62,7 +63,8 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
         data: FuelChartData,
         setChartPageType: (type: string) => void,
         isFuelMarkerChartDrawn: boolean,
-        setFuelOverlays: (overlays: FuelCustomOverlayInstance[] | ((prev: FuelCustomOverlayInstance[]) => FuelCustomOverlayInstance[])) => void
+        setFuelOverlays: (overlays: FuelCustomOverlayInstance[] | ((prev: FuelCustomOverlayInstance[]) => FuelCustomOverlayInstance[])) => void,
+        onLongPress: (info: SensorInfo) => void
       ) {
         super();
 
@@ -77,6 +79,7 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
         this.setChartPageType = setChartPageType
         this.isFuelMarkerChartDrawn = isFuelMarkerChartDrawn
         this.setFuelOverlays = setFuelOverlays
+        this.onLongPress = onLongPress
 
         this.offset = {x: 0, y: 0};
         this.isTextTruncated = this.chartData.name.length > 7
@@ -93,56 +96,27 @@ export const initializeFuelCustomOverlay = (isGoogleApiLoaded: boolean) => {
         });
       }
 
-      private getInfoMessage(): string {
-        return this.isValidData
-          ? [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
-              this.chartData.batteryPercentage ? `Battery: ${this.chartData.batteryPercentage}%` : undefined,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n')
-          : [
-              this.isTextTruncated ? `Name: ${this.chartData.name}` : undefined,
-              `Sensor ID: ${String(this.chartData.sensorId)}`
-            ].filter(Boolean).join('\n');
+      private getSensorInfo(): SensorInfo {
+        return {
+          name: this.chartData.name,
+          sensorId: String(this.chartData.sensorId),
+          battery: this.isValidData && this.chartData.batteryPercentage
+            ? `${this.chartData.batteryPercentage}%`
+            : undefined,
+        };
       }
-
-      private handleTouchStart = (_e: React.TouchEvent) => {
-        this.wasLongPress = false;
-        this.longPressTimer = setTimeout(() => {
-          this.wasLongPress = true;
-          const msg = this.getInfoMessage();
-          if (msg) window.alert(`Sensor Information\n\n${msg}`);
-        }, 600);
-      };
-
-      private handleTouchEnd = () => {
-        if (this.longPressTimer) {
-          clearTimeout(this.longPressTimer);
-          this.longPressTimer = null;
-        }
-        setTimeout(() => {
-          this.wasLongPress = false;
-        }, 100);
-      };
-
-      private handleTouchMove = () => {
-        if (this.longPressTimer) {
-          clearTimeout(this.longPressTimer);
-          this.longPressTimer = null;
-        }
-      };
 
       renderContent() {
         return (
           <div
             className={s.overlay_fuelContainer}
-            onTouchStart={this.handleTouchStart}
-            onTouchEnd={this.handleTouchEnd}
-            onTouchMove={this.handleTouchMove}
+            onTouchStart={this.longPress.start}
+            onTouchEnd={this.longPress.end}
+            onTouchMove={this.longPress.move}
           >
             {this.isValidData ? (
               <div className={s.mainContainer} onClick={() => {
-                if (this.wasLongPress) return;
+                if (this.longPress.wasLongPress) return;
                 onFuelSensorClick(
                   this.history,
                   String(this.chartData.sensorId),
