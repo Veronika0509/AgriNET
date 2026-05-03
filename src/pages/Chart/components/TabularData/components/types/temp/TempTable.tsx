@@ -61,7 +61,9 @@ export const TempTable: React.FC<TempTableProps> = ({tabularData, freshnessColor
           </tr>
           </thead>
           <tbody className={s.mainTabularDataTableTbody}>
-          {data.data.map((row: any, index: any) => (
+          {data.data.map((row: any, index: any) => {
+            const isNull = (v: any) => v === null || v === undefined;
+            return (
             <tr key={index} className={s.mainTabularDataTableTr}>
               <td
                 className={`${scrollable ? s.mainTabularDataTableTd : s.TTabularDataTableTd} ${scrollable ? '' : s.mainTempWxetTabularDataTableTd} ${
@@ -78,29 +80,46 @@ export const TempTable: React.FC<TempTableProps> = ({tabularData, freshnessColor
                 } : {color: '#000'}}
                 data-label={data.label}
               >{row.DateTime}</td>
-              <td className={tdClass} style={{color: '#000'}}
-                  data-label="Temp">{row['MS 1'] === null ? 'null' : row['MS 1']}°F
-              </td>
-              <td className={tdClass} style={{color: '#000'}}
-                  data-label="Dew Point">{row['MS DU'] === null ? 'null' : row['MS DU']}°F
-              </td>
-              <td className={tdClass} style={{color: '#000'}}
-                  data-label="RH">{row['MS 3'] === null ? 'null' : row['MS 3']}%
-              </td>
-              <td className={tdClass} style={{color: '#000'}}
-                  data-label="Leaf Wetness">{row['leafWetness'] === null ? 'null' : row['leafWetness']}%
-              </td>
-              <td className={tdClass} style={{color: '#000'}}
-                  data-label="Analog 1">{row['analog1'] === null ? 'null' : row['analog1']}</td>
-              <td className={tdClass} style={{color: '#000'}}
-                  data-label="Analog 2">{row['analog2'] === null ? 'null' : row['analog2']}</td>
-              <td className={tdClass} style={{color: '#000'}}
-                  data-label="PSI">{row['psi'] === null ? 'null' : row['psi']}</td>
-              <td className={tdClass} style={{color: '#000'}}
-                  data-label="Water Temp">{row['waterTemp'] === null ? 'null' : row['waterTemp']}°F
-              </td>
+              {!isNull(row['MS 1']) && (
+                <td className={tdClass} style={{color: '#000'}}
+                    data-label="Temp">{row['MS 1']}°F
+                </td>
+              )}
+              {!isNull(row['MS DU']) && (
+                <td className={tdClass} style={{color: '#000'}}
+                    data-label="Dew Point">{row['MS DU']}°F
+                </td>
+              )}
+              {!isNull(row['MS 3']) && (
+                <td className={tdClass} style={{color: '#000'}}
+                    data-label="RH">{row['MS 3']}%
+                </td>
+              )}
+              {!isNull(row['leafWetness']) && (
+                <td className={tdClass} style={{color: '#000'}}
+                    data-label="Leaf Wetness">{row['leafWetness']}%
+                </td>
+              )}
+              {!isNull(row['analog1']) && (
+                <td className={tdClass} style={{color: '#000'}}
+                    data-label="Analog 1">{row['analog1']}</td>
+              )}
+              {!isNull(row['analog2']) && (
+                <td className={tdClass} style={{color: '#000'}}
+                    data-label="Analog 2">{row['analog2']}</td>
+              )}
+              {!isNull(row['psi']) && (
+                <td className={tdClass} style={{color: '#000'}}
+                    data-label="PSI">{row['psi']}</td>
+              )}
+              {!isNull(row['waterTemp']) && (
+                <td className={tdClass} style={{color: '#000'}}
+                    data-label="Water Temp">{row['waterTemp']}°F
+                </td>
+              )}
             </tr>
-          ))}
+            );
+          })}
           </tbody>
         </table>
       )}

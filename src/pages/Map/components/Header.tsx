@@ -26,7 +26,7 @@ const Header = (props: HeaderProps) => {
       // Don't call reloadMapPage() - let the cleanup effect in Map component handle everything
     } else {
       // Navigate back to menu page
-      history.push('/AgriNET/menu');
+      history.push('/menu');
       props.setPage(0);
     }
   };

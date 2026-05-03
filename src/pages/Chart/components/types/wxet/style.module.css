@@ -36,6 +36,16 @@
   }
 }
 
+@media (max-width: 750px) {
+  .wrapper {
+    padding: 0 12px;
+    box-sizing: border-box;
+  }
+  .chart {
+    margin-left: 0;
+  }
+}
+
 @media (max-width: 640px) {
   .wrapper {
     margin-top: 20px;

@@ -350,7 +350,7 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
         </IonToolbar>
       </IonHeader>
       <div style={{ position: "relative", height: "100%" }}>
-        <IonContent style={{ "--background": "white" }}>
+        <IonContent style={{ "--background": "white", "--padding-bottom": "calc(72px + env(safe-area-inset-bottom, 0px))" }}>
           <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
             <IonSelect
               multiple={true}
