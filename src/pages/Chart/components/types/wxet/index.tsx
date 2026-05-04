@@ -186,9 +186,9 @@ export const WxetChartPage = (props: any) => {
         <div data-chart-section="main-header">
           <h2 className='ion-text-center ion-margin-top'>Weather Station</h2>
           <div className={s.additionalButtons}>
-            <ButtonAndSpinner data={wxetTabularData} setData={setWxetTabularData}
+            {/*<ButtonAndSpinner data={wxetTabularData} setData={setWxetTabularData}
                               setIsLoading={setIsWxetTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode}
-                              isLoading={isWxetTabularDataLoading}/>
+                              isLoading={isWxetTabularDataLoading}/>*/}
             <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId}/>
           </div>
           <TabularData
