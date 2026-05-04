@@ -36,7 +36,9 @@ function BudgetEditorLine(props: BudgetEditorLineProps) {
       inputs: [
         {
           cssClass: s.budget_lineInput,
-          value: type === 'value' ? (value === 0 || String(value) === '0' ? '' : String(value)) : label,
+          value: type === 'value'
+            ? (value === undefined || value === null || value === 0 || String(value) === '0' ? '' : String(value))
+            : (label === undefined || label === null ? '' : label),
         }
       ],
       buttons: [
