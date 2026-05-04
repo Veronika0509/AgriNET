@@ -409,7 +409,7 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
           style={{
             cursor: "pointer",
             position: "fixed",
-            bottom: "20px",
+            bottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
             right: "20px",
             '--padding-start': '5px',
             '--padding-end': '5px',
