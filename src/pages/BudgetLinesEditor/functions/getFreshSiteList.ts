@@ -9,8 +9,28 @@ export const getFreshSiteList = async (props: any) => {
   })
 
   props.setSites(checkedSites)
-  props.setCurrentSite(checkedSites[0].name)
-  checkedSites[0].layers.map((layer: any) => {
+
+  let targetSite = checkedSites[0]
+  let targetSensorId: string | undefined
+
+  if (props.targetSensorId) {
+    for (const site of checkedSites) {
+      for (const layer of site.layers) {
+        if (layer.name === 'Moist' || layer.name === 'moist') {
+          const found = layer.markers.find((m: any) => m.sensorId === props.targetSensorId)
+          if (found) {
+            targetSite = site
+            targetSensorId = props.targetSensorId
+            break
+          }
+        }
+      }
+      if (targetSensorId) break
+    }
+  }
+
+  props.setCurrentSite(targetSite.name)
+  targetSite.layers.map((layer: any) => {
     if (layer.name === 'Moist' || layer.name === 'moist') {
       // Remove duplicates by sensorId - keep only the first occurrence
       const uniqueMarkers = layer.markers.filter((marker: any, index: number, self: any[]) =>
@@ -22,15 +42,20 @@ export const getFreshSiteList = async (props: any) => {
         const newMarkers = uniqueMarkers.filter((marker: any) => !existingIds.has(marker.sensorId))
         return [...prev, ...newMarkers]
       })
-      props.setCurrentSensorId(uniqueMarkers[0].sensorId)
+
+      const initialSensor = targetSensorId
+        ? uniqueMarkers.find((m: any) => m.sensorId === targetSensorId) ?? uniqueMarkers[0]
+        : uniqueMarkers[0]
+
+      props.setCurrentSensorId(initialSensor.sensorId)
       props.setMap(
         new window.google.maps.Map(props.mapRef.current, {
-          center: {lat: uniqueMarkers[0].lat, lng: uniqueMarkers[0].lng},
+          center: {lat: initialSensor.lat, lng: initialSensor.lng},
           zoom: 15,
           mapTypeId: "satellite",
         })
       );
-      getNewData(props.currentAmountOfDays, props.currentSensorId, props.setChartData, props.setDataExists, uniqueMarkers[0].sensorId)
+      getNewData(props.currentAmountOfDays, props.currentSensorId, props.setChartData, props.setDataExists, initialSensor.sensorId)
     }
   })
 }

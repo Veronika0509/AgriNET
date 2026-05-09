@@ -21,10 +21,11 @@ interface BudgetEditorProps {
   siteList: Site[];
   userId: number;
   isGoogleApiLoaded: boolean;
+  initialSensorId?: string;
   [key: string]: unknown;
 }
 
-const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
+const BudgetEditor = ({ previousPage, initialSensorId, ...props }: BudgetEditorProps) => {
   const [sites, setSites] = useState<Site[]>([])
   const [currentSite, setCurrentSite] = useState<string | undefined>()
   const [moistSensors, setMoistSensors] = useState<MoistSensor[]>([])
@@ -52,7 +53,8 @@ const BudgetEditor = ({ previousPage, ...props }: BudgetEditorProps) => {
       currentAmountOfDays,
       currentSensorId,
       setChartData,
-      setDataExists
+      setDataExists,
+      targetSensorId: initialSensorId
     })
     setCurrentAmountOfDays(14)
     return () => {

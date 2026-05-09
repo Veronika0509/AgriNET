@@ -14,7 +14,7 @@ interface BudgetEditorTabProps {
 
 export const BudgetEditorTab: React.FC<BudgetEditorTabProps> = ({ siteList, userId, isGoogleApiLoaded }) => {
   const history = useHistory()
-  const { budgetEditorReturnPage, setBudgetEditorReturnPage, setPage, popFromNavigationHistory } = useAppContext()
+  const { budgetEditorReturnPage, setBudgetEditorReturnPage, setPage, popFromNavigationHistory, siteId } = useAppContext()
 
   const handleBack = useCallback(() => {
     const previousPage = popFromNavigationHistory()
@@ -51,7 +51,7 @@ export const BudgetEditorTab: React.FC<BudgetEditorTabProps> = ({ siteList, user
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        <BudgetEditor siteList={siteList} userId={userId} isGoogleApiLoaded={isGoogleApiLoaded} />
+        <BudgetEditor siteList={siteList} userId={userId} isGoogleApiLoaded={isGoogleApiLoaded} initialSensorId={siteId || undefined} />
       </IonContent>
     </IonPage>
   )
