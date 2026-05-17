@@ -22,13 +22,10 @@ const Header = (props: HeaderProps) => {
 
   const back = () => {
     if (props.isMarkerClicked) {
-      props.setIsMarkerClicked(false)
-      // Don't call reloadMapPage() - let the cleanup effect in Map component handle everything
-    } else {
-      // Navigate back to menu page
-      history.push('/menu');
-      props.setPage(0);
+      props.setIsMarkerClicked(false);
     }
+    history.push('/menu');
+    props.setPage(0);
   };
   const onBudgetEditorBack = () => {
     if (props.navigationHistory.length > 1) {

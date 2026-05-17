@@ -419,7 +419,7 @@ const MapPage: React.FC<MapProps> = (props) => {
     // 1. Map exists and site list is loaded
     // 2. Markers array is empty
     // Note: Create markers even when restoring, as they're needed for overlay recreation
-    if (map && props.siteList.length > 0 && markers.length === 0) {
+    if (map && props.siteList.length > 0 && markers.length === 0 && props.page === 1) {
       // Map Site[] to SensorsGroupData[]
       const sitesAsSensorsGroupData = props.siteList.map((site: SiteWithLayers) => ({
         lat: site.lat,
@@ -467,7 +467,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         mapRefFunc
       })
     }
-  }, [map, props.siteList, markers, mapRefFunc])
+  }, [map, props.siteList, markers, mapRefFunc, props.page])
 
   // Fix map display after returning from overlay
   useEffect(() => {

@@ -20,6 +20,19 @@ export const useCollisionResolution = ({ map, activeOverlays, areBoundsFitted }:
     }
   }, [activeOverlays])
 
+  // After bounds are fitted and all overlays are drawn, nudge the map by 1px
+  // to force overlays to recalculate their pixel positions and re-run collision resolution
+  useEffect(() => {
+    if (!map || activeOverlays.length === 0 || !areBoundsFitted) return
+    const id = setTimeout(() => {
+      map.panBy(1, 0)
+      requestAnimationFrame(() => {
+        CollisionResolver.resolve(activeOverlays)
+      })
+    }, 300)
+    return () => clearTimeout(id)
+  }, [areBoundsFitted])
+
   // Handle collisions on resize and zoom events after bounds are fitted
   useEffect((): void | (() => void) => {
     if (!map || activeOverlays.length === 0 || !areBoundsFitted) {
