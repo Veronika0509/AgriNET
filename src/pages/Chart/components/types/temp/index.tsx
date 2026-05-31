@@ -20,6 +20,7 @@ import {formatDate} from "../../../functions/formatDate";
 import {getDaysFromChartData} from "../../../functions/getDaysFromChartData";
 import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
 import { loadChartPreferences } from "../../../../../utils/chartPreferences";
+import { setZoomMode as setGlobalZoomMode } from "../../../functions/zoomModeStore";
 
 export const TempChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -65,6 +66,7 @@ export const TempChartPage = (props: any) => {
   const [tempComments, setTempComments] = useState();
   const [tempAddCommentItemShowed, setTempAddCommentItemShowed] = useState<any>(false)
   const [isTempCommentsShowed, setIsTempCommentsShowed] = useState(false)
+  const [zoomMode, setZoomMode] = useState(false)
 
   const updateCommentsArray = async (type: string) => {
     const newComments: any = await getComments(type, props.sensorId, getDaysFromChartData(currentChartData))
@@ -224,6 +226,12 @@ export const TempChartPage = (props: any) => {
       }
     }
   }, [isTempCommentsShowed]);
+  useEffect(() => {
+    setGlobalZoomMode(zoomMode)
+    if (currentChartData && !currentChartData.initialData) {
+      updateChart('sameData')
+    }
+  }, [zoomMode]);
   window.addEventListener("resize", () => setDynamicChartHeight('tempChartDiv'))
 
   return (
@@ -251,6 +259,8 @@ export const TempChartPage = (props: any) => {
             setIsCommentsShowed={setIsTempCommentsShowed}
             dateDifferenceInDays={dateDifferenceInDays}
             setDateDifferenceInDays={setDateDifferenceInDays}
+            zoomMode={zoomMode}
+            setZoomMode={setZoomMode}
           />
         </div>
         <div data-chart-section="main-header">

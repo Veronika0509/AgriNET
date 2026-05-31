@@ -28,6 +28,8 @@ interface TopSectionProps {
   setNwsForecast?: (value: boolean) => void;
   nwsForecastDays?: string | number;
   setNwsForecastDays?: (value: unknown) => void;
+  zoomMode?: boolean;
+  setZoomMode?: (value: boolean) => void;
   [key: string]: unknown;
 }
 
@@ -226,39 +228,48 @@ const TopSection = (props: TopSectionProps) => {
           </div>
         )}
       </div>
-      {props.type === "moist" && (
-        <div className={s.topSection_secondaryRow}>
-          <div className={s.topSection_modesSection}>
-            <span className={s.topSection_sectionLabel}>Modes:</span>
-            <div className={s.topSection_togglesGroup}>
-              <IonToggle
-                className={`${s.topSection_compactToggle} ${s.topSection_moistCompactToggle}`}
-                disabled={disabledComparingMode}
-                onIonChange={(event: CustomEvent) => onMoistToggle(event, "comparingMode")}
-              >
-                Comparing
-              </IonToggle>
-              <IonToggle
-                className={`${s.topSection_compactToggle} ${s.topSection_moistCompactToggle}`}
-                disabled={disabledHistoricMode}
-                onIonChange={(event: CustomEvent) => onMoistToggle(event, "historicMode")}
-              >
-                Historical
-              </IonToggle>
-              <IonToggle
-                className={`${s.topSection_compactToggle} ${s.topSection_moistCompactToggle}`}
-                checked={props.isCommentsShowed}
-                onIonChange={(event: CustomEvent) => {
-                  debugLog.comments(`[TopSection] Comments toggle changed to: ${event.detail.checked}`);
-                  props.setIsCommentsShowed?.(event.detail.checked);
-                }}
-              >
-                Comments
-              </IonToggle>
-            </div>
+      <div className={s.topSection_secondaryRow}>
+        <div className={s.topSection_modesSection}>
+          <span className={s.topSection_sectionLabel}>Modes:</span>
+          <div className={s.topSection_togglesGroup}>
+            {props.type === "moist" && (
+              <>
+                <IonToggle
+                  className={`${s.topSection_compactToggle} ${s.topSection_moistCompactToggle}`}
+                  disabled={disabledComparingMode}
+                  onIonChange={(event: CustomEvent) => onMoistToggle(event, "comparingMode")}
+                >
+                  Comparing
+                </IonToggle>
+                <IonToggle
+                  className={`${s.topSection_compactToggle} ${s.topSection_moistCompactToggle}`}
+                  disabled={disabledHistoricMode}
+                  onIonChange={(event: CustomEvent) => onMoistToggle(event, "historicMode")}
+                >
+                  Historical
+                </IonToggle>
+                <IonToggle
+                  className={`${s.topSection_compactToggle} ${s.topSection_moistCompactToggle}`}
+                  checked={props.isCommentsShowed}
+                  onIonChange={(event: CustomEvent) => {
+                    debugLog.comments(`[TopSection] Comments toggle changed to: ${event.detail.checked}`);
+                    props.setIsCommentsShowed?.(event.detail.checked);
+                  }}
+                >
+                  Comments
+                </IonToggle>
+              </>
+            )}
+            <IonToggle
+              className={`${s.topSection_compactToggle} ${props.type === "moist" ? s.topSection_moistCompactToggle : ''}`}
+              checked={!!props.zoomMode}
+              onIonChange={(event: CustomEvent) => props.setZoomMode?.(event.detail.checked)}
+            >
+              Zoom
+            </IonToggle>
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }

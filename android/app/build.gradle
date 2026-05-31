@@ -3,11 +3,17 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
 android {
-    namespace "io.ionic.starter"
+    namespace "com.agrinet.app"
     compileSdkVersion 34
 
+    def localProps = new Properties()
+    def localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localProps.load(new FileInputStream(localPropertiesFile))
+    }
+
     defaultConfig {
-        applicationId "io.ionic.starter"
+        applicationId "com.agrinet.app"
         minSdkVersion 24
         targetSdkVersion 34
         versionCode 1
@@ -17,20 +23,26 @@ android {
         aaptOptions {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
-        def properties = new Properties()
-        def localPropertiesFile = rootProject.file("local.properties")
-        if (localPropertiesFile.exists()) {
-            properties.load(new FileInputStream(localPropertiesFile))
-        }
         manifestPlaceholders = [
-                MAPS_API_KEY: properties.getProperty("MAPS_API_KEY", "")
+                MAPS_API_KEY: localProps.getProperty("MAPS_API_KEY", "")
         ]
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(localProps.getProperty("KEYSTORE_FILE", "agrinet-release.keystore"))
+            storePassword localProps.getProperty("KEYSTORE_PASSWORD", "")
+            keyAlias localProps.getProperty("KEY_ALIAS", "agrinet")
+            keyPassword localProps.getProperty("KEY_PASSWORD", "")
+        }
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 

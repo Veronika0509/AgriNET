@@ -4,6 +4,7 @@ import * as am5xy from "@amcharts/amcharts5/xy"
 import { updateCommentDate } from "../../../components/AddComment/data/updateCommentDate"
 import { removeComment } from "../../../components/AddComment/data/removeComment"
 import { UserId, SensorId } from '../../../../../types';
+import { getZoomMode } from "../../zoomModeStore";
 
 // Интерфейсы для данных графика
 interface TempChartData {
@@ -99,7 +100,7 @@ export const createTempChart = (
     // Create chart
     const chart = root.current.container.children.push(
       am5xy.XYChart.new(root.current, {
-        wheelY: "zoomX",
+        wheelY: getZoomMode() ? "zoomX" : "none",
         maxTooltipDistance: undefined,
         layout: isMobile ? root.current.verticalLayout : root.current.horizontalLayout,
         paddingLeft: 0,

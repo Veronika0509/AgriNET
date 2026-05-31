@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'agrinet',
+  appId: 'com.agrinet.app',
+  appName: 'AgriNET',
   webDir: 'dist',
   server: {
     androidScheme: 'https'

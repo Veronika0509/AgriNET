@@ -14,6 +14,7 @@ import {AddCommentMessage} from "../../../../AddComment/components/AddCommentMes
 import {AddCommentButton} from "../../../../AddComment/components/AddCommentButton";
 import AddCommentModal from "../../../../AddComment/components/AddCommentModal";
 import {setDynamicChartHeight} from "../../../../../functions/chartHeightCalculator";
+import { setZoomMode as setGlobalZoomMode } from "../../../../../functions/zoomModeStore";
 
 interface FuelChartPageProps {
   sensorId: string;
@@ -60,6 +61,7 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
   const [isFuelCommentsShowed, setIsFuelCommentsShowed] = useState(false)
   const [fuelComments, _setFuelComments] = useState<FuelComment[]>();
   const [fuelAddCommentItemShowed, setFuelAddCommentItemShowed] = useState<boolean>(false)
+  const [zoomMode, setZoomMode] = useState(false)
   // Tabular Data
   const [fuelTabularData, setFuelTabularData] = useState<Record<string, unknown>[] | null>(null)
   const [isFuelTabularDataLoading, setIsFuelTabularDataLoading] = useState(false)
@@ -174,6 +176,12 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
       createFuelChart(currentChartData, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper as any, fuelComments as any, isFuelCommentsShowed)
     }
   }, [fuelAddCommentItemShowed]);
+  useEffect(() => {
+    setGlobalZoomMode(zoomMode)
+    if (currentChartData && !currentChartData.initialData) {
+      createFuelChart(currentChartData, root as any, fuelAddCommentItemShowed, setFuelAddCommentModalWrapper as any, fuelComments as any, isFuelCommentsShowed)
+    }
+  }, [zoomMode]);
   window.addEventListener("resize", () => setDynamicChartHeight('fuelChartDiv'))
 
   return (
@@ -200,6 +208,8 @@ export const FuelChartPage = (props: FuelChartPageProps) => {
             locationSelectRef={locationSelectRef}
             isCommentsShowed={isFuelCommentsShowed}
             setIsCommentsShowed={setIsFuelCommentsShowed}
+            zoomMode={zoomMode}
+            setZoomMode={setZoomMode}
           />
         </div>
         <div data-chart-section="main-header">

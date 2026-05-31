@@ -1,6 +1,7 @@
 import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
+import { getZoomMode } from "../../zoomModeStore";
 
 interface ChartDataItem {
   DateTime: string;
@@ -80,7 +81,7 @@ export const createWxetChart = (
 
 // Create chart
     const chart = root.current.container.children.push(am5xy.XYChart.new(root.current, {
-      wheelY: "zoomX",
+      wheelY: getZoomMode() ? "zoomX" : "none",
       maxTooltipDistance: undefined,
       layout: isMobile ? root.current.verticalLayout : root.current.horizontalLayout,
       paddingLeft: 0,

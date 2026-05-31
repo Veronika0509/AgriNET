@@ -12,13 +12,13 @@ import {getNwsForecastData} from "../../../data/types/temp&wxet/getNwsForecastDa
 
 import {TabularData} from "../../TabularData";
 import {Export} from "../../Export";
-import {ButtonAndSpinner} from "../../TabularData/components/ButtonAndSpinner";
 import {compareDates as _compareDates} from "../../../functions/types/moist/compareDates";
 import {formatDate} from "../../../functions/formatDate";
 import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
 import {createAdditionalChart} from "../../../functions/types/moist/createAdditionalChart";
 import {loadChartPreferences} from "../../../../../utils/chartPreferences";
 import _login from "../../../../Login";
+import { setZoomMode as setGlobalZoomMode } from "../../../functions/zoomModeStore";
 
 export const WxetChartPage = (props: any) => {
   const root = useRef<any>(null);
@@ -36,6 +36,7 @@ export const WxetChartPage = (props: any) => {
   const [wxetTabularData, setWxetTabularData] = useState<any>(null)
   const [isWxetTabularDataLoading, setIsWxetTabularDataLoading] = useState(false)
   const [batteryChartShowed, setBatteryChartShowed] = useState<boolean>(false)
+  const [zoomMode, setZoomMode] = useState(false)
   const chartCode: string = 'weather_leaf'
   const [dateDifferenceInDays, setDateDifferenceInDays] = React.useState('14');
 
@@ -146,6 +147,17 @@ export const WxetChartPage = (props: any) => {
       createWxetChart(currentChartData, root, props.isMobile, props.additionalChartData, nwsForecastData)
     }
   }, [props.isMobile]);
+  useEffect(() => {
+    setGlobalZoomMode(zoomMode)
+    if (currentChartData && !currentChartData.initialData) {
+      createWxetChart(currentChartData, root, props.isMobile, props.additionalChartData, nwsForecastData)
+      if (batteryChartShowed) {
+        const chartDataArray = Array.isArray(currentChartData) ? currentChartData : []
+        const batteryData = chartDataArray.filter((item: any) => item.Battery !== undefined && item.Battery !== null)
+        createAdditionalChart("battery", batteryData, batteryRoot, undefined as any, undefined as any, props.sensorId, () => {}, false, undefined as any, props.userId, () => {}, false)
+      }
+    }
+  }, [zoomMode]);
   window.addEventListener("resize", () => setDynamicChartHeight('wxetChartDiv'))
 
   return (
@@ -174,6 +186,8 @@ export const WxetChartPage = (props: any) => {
             setBatteryChartShowed={setBatteryChartShowed}
             batteryRoot={batteryRoot}
             updateChart={updateChart}
+            zoomMode={zoomMode}
+            setZoomMode={setZoomMode}
           />
         </div>
 

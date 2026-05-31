@@ -5,6 +5,7 @@ import * as am5xy from "@amcharts/amcharts5/xy";
 import {updateCommentDate} from "../../../components/AddComment/data/updateCommentDate";
 import {removeComment} from "../../../components/AddComment/data/removeComment";
 import { TimeSeriesDataItem } from "../../../../../types/api";
+import { getZoomMode } from "../../zoomModeStore";
 
 // Интерфейсы для данных графика
 type ChartDataItem = TimeSeriesDataItem;
@@ -115,7 +116,7 @@ export const createAdditionalChart = (
 
     // Create chart
     const chart = rootInstance.container.children.push(am5xy.XYChart.new(rootInstance, {
-      wheelY: "zoomX",
+      wheelY: getZoomMode() ? "zoomX" : "none",
       maxTooltipDistance: undefined,
       paddingLeft: 0
     }));

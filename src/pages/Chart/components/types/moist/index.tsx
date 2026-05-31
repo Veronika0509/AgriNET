@@ -34,6 +34,7 @@ import { useHistory } from 'react-router-dom';
 import { loadChartPreferences } from "../../../../../utils/chartPreferences";
 import { TimeSeriesDataItem } from "../../../../../types/api";
 import { debugLog } from "../../../../../utils/debugConfig";
+import { setZoomMode as setGlobalZoomMode } from "../../../functions/zoomModeStore";
 
 
 // Define TypeScript interfaces
@@ -200,6 +201,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
   const [isIrrigationDataIsLoading, setIsIrrigationDataIsLoading] = useState<boolean>(false)
   const [comparingMode, setComparingMode] = useState<boolean>(false)
   const [historicMode, setHistoricMode] = useState<boolean>(false)
+  const [zoomMode, setZoomMode] = useState<boolean>(false)
   const [showForecast, setShowForecast] = useState<boolean>(true)
   const [isMoistCommentsShowed, setIsMoistCommentsShowed] = useState<boolean>(false)
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false)
@@ -1047,6 +1049,15 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
     }
   }, [comparingMode]);
   useEffect(() => {
+    setGlobalZoomMode(zoomMode)
+    if (fullDatesArray !== undefined) {
+      updateChart(CHART_TYPES.MAIN, 'sameData')
+      updateChart(CHART_TYPES.SUM, 'sameData')
+      if (soilTempChartShowed) updateChart(CHART_TYPES.SOIL_TEMP, 'sameData')
+      if (batteryChartShowed) updateChart(CHART_TYPES.BATTERY, 'sameData')
+    }
+  }, [zoomMode]);
+  useEffect(() => {
     if (newDaysData.days) {
       updateChart('main', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
       updateChart('sum', 'dates', newDaysData.days, newDaysData.newEndDateFormatted, newDaysData.endDatetime)
@@ -1111,6 +1122,8 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
             setDateDifferenceInDays={setDateDifferenceInDays}
             setShowForecast={setShowForecast}
             setNewDaysData={setNewDaysData}
+            zoomMode={zoomMode}
+            setZoomMode={setZoomMode}
           />
         </div>
 

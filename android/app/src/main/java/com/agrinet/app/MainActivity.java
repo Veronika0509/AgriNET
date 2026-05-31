@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package com.agrinet.app;
 
 import android.os.Bundle;
 import android.view.View;

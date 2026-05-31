@@ -4,6 +4,7 @@ import * as am5xy from "@amcharts/amcharts5/xy"
 import { removeComment } from "../../../components/AddComment/data/removeComment"
 import { updateCommentDate } from "../../../components/AddComment/data/updateCommentDate"
 import { TimeSeriesDataItem } from "../../../../../types/api"
+import { getZoomMode } from "../../zoomModeStore"
 
 type ChartDataItem = TimeSeriesDataItem;
 
@@ -105,7 +106,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
 
     const chart = props.root.current.container.children.push(
       am5xy.XYChart.new(props.root.current, {
-        wheelY: props.comparingMode ? "none" : "zoomX",
+        wheelY: props.comparingMode ? "none" : (getZoomMode() ? "zoomX" : "none"),
         layout: props.root.current.verticalLayout,
         maxTooltipDistance: undefined,
       }),
