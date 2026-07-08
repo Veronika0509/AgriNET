@@ -251,7 +251,7 @@ export const createWxetChart = (
 
 // Add cursor
     const cursor = chart.set("cursor", am5xy.XYCursor.new(root.current, {
-      behavior: "zoomX",
+      behavior: getZoomMode() ? "zoomX" : "none",
       xAxis: xAxis,
     }));
 

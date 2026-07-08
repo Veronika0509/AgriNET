@@ -481,7 +481,7 @@ export const createAdditionalChart = (
 
     // Add cursor
     const cursor = chart.set("cursor", am5xy.XYCursor.new(rootInstance, {
-      behavior: "zoomX",
+      behavior: getZoomMode() ? "zoomX" : "none",
       xAxis: xAxis,
     }));
 
@@ -646,7 +646,7 @@ export const createAdditionalChart = (
             icon.set("dy", 7)
           })
           isContainerDragging = false
-          cursor.set('behavior', 'zoomX')
+          cursor.set('behavior', getZoomMode() ? 'zoomX' : 'none')
           const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
           const newDate = rootInstance.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
           new Promise<void>((resolve: () => void) => {

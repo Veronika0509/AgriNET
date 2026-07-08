@@ -28,8 +28,8 @@ export default defineConfig(({ mode }) => {
     }
   },
   esbuild: {
-    // Отключаем строгую проверку TypeScript при сборке
-    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+    logOverride: { 'this-is-undefined-in-esm': 'silent' },
+    ...(mode === 'production' ? { drop: ['console', 'debugger'] } : {}),
   }
   };
 })

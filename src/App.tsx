@@ -39,7 +39,6 @@ import Menu from "./pages/Menu";
 import Info from "./pages/Info";
 import Map from "./pages/Map";
 import Chart from "./pages/Chart";
-import TestOverlays from "./pages/TestOverlays";
 import VirtualValve from "./pages/VirtualValve";
 import AddValvePage from "./pages/AddValvePage";
 import CommentsPage from "./pages/Comments";
@@ -438,9 +437,6 @@ const AppContent: React.FC = () => {
                       </Route>
                       <Route exact path="/info">
                         <Info showHeader={true} setPage={setPage} />
-                      </Route>
-                      <Route exact path="/test-overlays">
-                        <TestOverlays />
                       </Route>
                       <Route path="/map">
                         <Map page={page} isGoogleApiLoaded={isGoogleApiLoaded} chartData={chartData} setChartData={setChartData}

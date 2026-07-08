@@ -249,7 +249,7 @@ export const createFuelChart = (
         })
         container.events.on("dragstop", function () {
           isContainerDragging = false
-          cursor.set('behavior', 'zoomX')
+          cursor.set('behavior', getZoomMode() ? 'zoomX' : 'none')
           // const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
           // const newDate = root.current.dateFormatter.format(new Date(xAxis.positionToValue(position)), "yyyy-MM-dd HH:mm")
           // new Promise((resolve: any) => {
@@ -395,7 +395,7 @@ export const createFuelChart = (
 
 // Add cursor
     const cursor = chart.set("cursor", am5xy.XYCursor.new(rootInstance, {
-      behavior: "zoomX",
+      behavior: getZoomMode() ? "zoomX" : "none",
       xAxis: xAxis,
     }));
 

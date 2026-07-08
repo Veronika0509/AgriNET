@@ -277,7 +277,7 @@ export const createTempChart = (
     const cursor = chart.set(
       "cursor",
       am5xy.XYCursor.new(root.current, {
-        behavior: "zoomX",
+        behavior: getZoomMode() ? "zoomX" : "none",
         xAxis: xAxis,
       }),
     )
@@ -479,7 +479,7 @@ export const createTempChart = (
           })
 
           isContainerDragging = false
-          cursor.set("behavior", "zoomX")
+          cursor.set("behavior", getZoomMode() ? "zoomX" : "none")
           const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
           const newDate = root.current.dateFormatter.format(
             new Date(xAxis.positionToValue(position)),

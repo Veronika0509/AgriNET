@@ -904,6 +904,9 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
       isMoistCommentsShowed,
       screenSize,
       addCommentItemShowed,
+      currentSumChartData,
+      currentSoilTempChartData,
+      currentBatteryChartData,
     ],
   )
 

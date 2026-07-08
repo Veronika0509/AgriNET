@@ -292,13 +292,11 @@ export const createMainChart = (props: CreateMainChartProps): void => {
     }
 
     // Cursor
-    let cursorBehavior: "zoomX" | "selectX"
+    let cursorBehavior: "zoomX" | "selectX" | "none"
     if (props.comparingMode) {
       cursorBehavior = "selectX"
-    } else if (props.moistMainAddCommentItemShowed) {
-      cursorBehavior = "zoomX"
     } else {
-      cursorBehavior = "zoomX"
+      cursorBehavior = getZoomMode() ? "zoomX" : "none"
     }
 
     const cursor = chart.set(
@@ -531,7 +529,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           })
 
           isContainerDragging = false
-          cursor.set("behavior", "zoomX")
+          cursor.set("behavior", getZoomMode() ? "zoomX" : "none")
           const position = xAxis.toAxisPosition(container.x() / chart.plotContainer.width())
           const newDate = rootInstance.dateFormatter.format(
             new Date(xAxis.positionToValue(position)),
