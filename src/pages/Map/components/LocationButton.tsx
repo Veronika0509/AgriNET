@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { IonButton, IonIcon } from '@ionic/react';
 import { locateOutline, alertCircleOutline, closeOutline } from 'ionicons/icons';
+import { isMobileOrTouchDevice } from '../hooks/useUserLocation';
 import s from '../style.module.css';
 
 const AUTO_DISMISS_MS = 6000;
@@ -16,12 +17,7 @@ const LocationButton: React.FC<LocationButtonProps> = ({
   isLocationEnabled,
   locationError
 }) => {
-  // Mobile device detection for LocationButton visibility
-  const userAgent = navigator.userAgent;
-  const screenWidth = window.screen?.width || window.innerWidth;
-  const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|IEMobile|Opera Mini|Mobile|Tablet/i.test(userAgent);
-  const isDesktop = /Windows NT|Macintosh|Linux/i.test(userAgent) && screenWidth > 1024;
-  const shouldShowButton = isMobileUserAgent && !isDesktop;
+  const shouldShowButton = isMobileOrTouchDevice();
 
   // Re-show the bubble whenever a new error comes in, and auto-dismiss it after a while
   // so it doesn't sit on top of the map forever if the user just ignores it.

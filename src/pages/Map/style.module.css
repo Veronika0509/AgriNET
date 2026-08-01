@@ -894,8 +894,10 @@
   bottom: 190px;
 }
 
-/* Hide location button on desktop */
-@media (min-width: 1025px) {
+/* Hide location button on real desktops (mouse/trackpad, no touch) - a plain width check
+   would also hide it on large touch tablets (e.g. an iPad Pro in landscape), so this keys
+   off pointer/hover capability instead, which correctly reflects whether a mouse is present. */
+@media (min-width: 1025px) and (hover: hover) and (pointer: fine) {
   .locationButtonContainer {
     display: none !important;
   }
