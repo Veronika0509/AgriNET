@@ -15,6 +15,22 @@ export const isMobileOrTouchDevice = (): boolean => {
   return isMobileUserAgent || isTouchDevice;
 };
 
+// Once geolocation has been denied, re-requesting it goes through two completely different
+// places depending on the platform:
+// - Native (Capacitor): the OS permission can often still be re-prompted (see
+//   'prompt-with-rationale' handling below), or as a last resort reset via the device's own
+//   Settings app.
+// - Web: there is no "app settings" - the browser itself remembers a site-level decision to
+//   deny location and will keep rejecting getCurrentPosition()/watchPosition() immediately,
+//   with no prompt, no matter how many times the code asks again. Only the user, through the
+//   browser's OWN per-site permission UI, can undo that - no JS API can force a re-prompt.
+const getPermissionDeniedMessage = (): string => {
+  if (Capacitor.isNativePlatform()) {
+    return 'Location access is blocked. Enable it in your device Settings > Apps > AgriNET > Permissions.';
+  }
+  return 'Location was blocked for this site. Reset it in your browser\'s site settings (Safari: tap "aA" in the address bar > Website Settings > Location) and reload.';
+};
+
 export const useUserLocation = (map?: google.maps.Map | null) => {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [userLocationMarker, setUserLocationMarker] = useState<google.maps.Marker | null>(null);
@@ -49,9 +65,7 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
             // time. Once it's fully 'denied' (typically after 2 refusals), Android will no
             // longer show the dialog at all, and only the phone's own Settings can fix it.
             setLocationError(
-              requestResult.location === 'denied'
-                ? 'Location access is blocked. Enable it in your device Settings > Apps > AgriNET > Permissions.'
-                : 'Location permission denied'
+              requestResult.location === 'denied' ? getPermissionDeniedMessage() : 'Location permission denied'
             );
             return;
           }
@@ -112,6 +126,12 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
               return;
             }
 
+            if (err.code === 1) { // PERMISSION_DENIED
+              setLocationError(getPermissionDeniedMessage());
+              console.error('Geolocation permission denied:', err);
+              return;
+            }
+
             const errorMessage = `Location error: ${err.message || 'Unknown error'}`;
             setLocationError(errorMessage);
             console.error('Geolocation error:', err);
@@ -156,7 +176,9 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
 
       setWatchId(id);
     } catch (error: any) {
-      const errorMessage = `Location error: ${error.message || 'Unknown error'}`;
+      const errorMessage = error?.code === 1 // PERMISSION_DENIED
+        ? getPermissionDeniedMessage()
+        : `Location error: ${error.message || 'Unknown error'}`;
       setLocationError(errorMessage);
       console.error('Geolocation error:', error);
     }
