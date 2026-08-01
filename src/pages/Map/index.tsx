@@ -142,6 +142,7 @@ const MapPage: React.FC<MapProps> = (props) => {
     isLocationEnabled,
     locationError,
     centerOnUserLocation,
+    getCurrentLocation,
   } = useUserLocation(map)
 
   // Chart overlays (using custom hook)
@@ -523,10 +524,16 @@ const MapPage: React.FC<MapProps> = (props) => {
   // GPS Location functions are now handled by useUserLocation hook
   // Wrapper for MapTab component that doesn't pass map parameter
   const centerMapOnUserLocation = useCallback(() => {
-    if (map) {
+    if (!map) return
+    if (isLocationEnabled) {
+      // Already have a position - just re-center on it.
       centerOnUserLocation(map)
+    } else {
+      // No position yet (never requested, permission was denied, GPS timed out, etc.) -
+      // (re)request it instead of silently doing nothing.
+      getCurrentLocation(map)
     }
-  }, [map, centerOnUserLocation])
+  }, [map, isLocationEnabled, centerOnUserLocation, getCurrentLocation])
 
   // Chart overlay creation is now handled by useChartOverlays hook
 

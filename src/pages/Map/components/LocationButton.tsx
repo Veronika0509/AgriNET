@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { IonButton, IonIcon } from '@ionic/react';
-import { locateOutline } from 'ionicons/icons';
+import { locateOutline, alertCircleOutline, closeOutline } from 'ionicons/icons';
 import s from '../style.module.css';
 
-
+const AUTO_DISMISS_MS = 6000;
 
 interface LocationButtonProps {
   onLocationClick: () => void;
@@ -11,10 +11,10 @@ interface LocationButtonProps {
   locationError: string | null;
 }
 
-const LocationButton: React.FC<LocationButtonProps> = ({ 
-  onLocationClick, 
-  isLocationEnabled, 
-  locationError 
+const LocationButton: React.FC<LocationButtonProps> = ({
+  onLocationClick,
+  isLocationEnabled,
+  locationError
 }) => {
   // Mobile device detection for LocationButton visibility
   const userAgent = navigator.userAgent;
@@ -22,11 +22,23 @@ const LocationButton: React.FC<LocationButtonProps> = ({
   const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|IEMobile|Opera Mini|Mobile|Tablet/i.test(userAgent);
   const isDesktop = /Windows NT|Macintosh|Linux/i.test(userAgent) && screenWidth > 1024;
   const shouldShowButton = isMobileUserAgent && !isDesktop;
-  
+
+  // Re-show the bubble whenever a new error comes in, and auto-dismiss it after a while
+  // so it doesn't sit on top of the map forever if the user just ignores it.
+  const [dismissed, setDismissed] = useState(false);
+  useEffect(() => {
+    if (!locationError) return;
+    setDismissed(false);
+    const timeout = setTimeout(() => setDismissed(true), AUTO_DISMISS_MS);
+    return () => clearTimeout(timeout);
+  }, [locationError]);
+
   // Only show on mobile devices
   if (!shouldShowButton) {
     return null;
   }
+
+  const showError = !!locationError && !dismissed;
 
   return (
     <div className={s.locationButtonContainer}>
@@ -38,14 +50,26 @@ const LocationButton: React.FC<LocationButtonProps> = ({
         onClick={onLocationClick}
         title={locationError || (isLocationEnabled ? 'Center on your location' : 'Enable location')}
       >
-        <IonIcon 
-          icon={locateOutline} 
+        <IonIcon
+          icon={locateOutline}
           className={s.locationIcon}
         />
       </IonButton>
-      {locationError && (
-        <div className={s.locationError}>
-          {locationError}
+      {showError && (
+        <div className={s.locationError} role="alert">
+          <IonIcon icon={alertCircleOutline} className={s.locationErrorIcon} />
+          <span className={s.locationErrorText}>{locationError}</span>
+          <button
+            type="button"
+            className={s.locationErrorClose}
+            aria-label="Dismiss"
+            onClick={(event) => {
+              event.stopPropagation();
+              setDismissed(true);
+            }}
+          >
+            <IonIcon icon={closeOutline} />
+          </button>
         </div>
       )}
     </div>

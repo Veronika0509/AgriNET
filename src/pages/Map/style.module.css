@@ -946,17 +946,79 @@
 
 .locationError {
   position: absolute;
-  top: 55px;
-  right: 0;
-  background-color: rgba(244, 67, 54, 0.9);
+  top: 50px;
+  right: 4px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  background-color: #3a3a3a;
   color: white;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  max-width: 200px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  white-space: normal;
+  width: max-content;
+  max-width: 220px;
+  text-align: left;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  animation: locationErrorPop 0.2s ease-out;
+  transform-origin: top right;
+}
+
+/* Little speech-bubble pointer connecting the bubble back to the button */
+.locationError::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 14px;
+  width: 12px;
+  height: 12px;
+  background-color: #3a3a3a;
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+
+@keyframes locationErrorPop {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.locationErrorIcon {
+  flex-shrink: 0;
+  font-size: 16px;
+  color: #ff6b6b;
+  margin-top: 1px;
+}
+
+.locationErrorText {
+  flex: 1;
+}
+
+.locationErrorClose {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin: -2px -2px 0 0;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.locationErrorClose:hover {
+  color: white;
 }
 
 @media (max-width: 600px) {
@@ -971,8 +1033,8 @@
   }
 
   .locationError {
-    max-width: 150px;
-    font-size: 11px;
+    max-width: 170px;
+    font-size: 11.5px;
   }
 }
 
