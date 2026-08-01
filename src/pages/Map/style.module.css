@@ -823,16 +823,6 @@
     --padding-end: 6px;
   }
 
-  .budget_secondHalf {
-    width: 100%;
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 0;
-    margin-bottom: 0;
-  }
-
   .budget_map {
     width: 100%;
     height: 100%;

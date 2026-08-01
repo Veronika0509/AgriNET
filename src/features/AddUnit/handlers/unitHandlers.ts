@@ -163,7 +163,7 @@ export const reloadAndLogChanges = async (options: {
   fullSensorId: string
   oldSiteList: any[]
 }) => {
-  const { userId, markers, setMarkers, setSiteList, siteList, fullSensorId, oldSiteList } = options
+  const { userId, markers, setMarkers, setSiteList, fullSensorId, oldSiteList } = options
 
   // Fetch fresh site list data
   const sites = await getSiteList(userId)
@@ -173,6 +173,10 @@ export const reloadAndLogChanges = async (options: {
     console.error("Failed to reload site list:", sites.error)
     return
   }
+
+  // Compare against the freshly fetched list, not the stale `siteList` argument (the list
+  // from BEFORE the new unit was added).
+  const freshSiteList = sites.data as any[]
 
   // Clear existing markers
   markers.forEach((marker: any) => {
@@ -189,16 +193,16 @@ export const reloadAndLogChanges = async (options: {
   setSiteList(sites.data)
 
   // Compare old and new site lists
-  const newSites = siteList.filter((newSite: any) => !oldSiteList.some((oldSite: any) => oldSite.id === newSite.id))
+  const newSites = freshSiteList.filter((newSite: any) => !oldSiteList.some((oldSite: any) => oldSite.id === newSite.id))
   if (newSites.length > 0) {
   }
 
-  const removedSites = oldSiteList.filter((oldSite: any) => !siteList.some((newSite: any) => newSite.id === oldSite.id))
+  const removedSites = oldSiteList.filter((oldSite: any) => !freshSiteList.some((newSite: any) => newSite.id === oldSite.id))
   if (removedSites.length > 0) {
   }
 
   // Check for modified sites
-  siteList.forEach((newSite: any) => {
+  freshSiteList.forEach((newSite: any) => {
     const oldSite = oldSiteList.find((old: any) => old.id === newSite.id)
     if (oldSite) {
       const oldLayers = oldSite.layers || []
@@ -224,7 +228,7 @@ export const reloadAndLogChanges = async (options: {
   })
 
   // Search for the new unit
-  siteList.forEach((site: any) => {
+  freshSiteList.forEach((site: any) => {
     if (site.layers) {
       site.layers.forEach((layer: any) => {
         if (layer.markers) {

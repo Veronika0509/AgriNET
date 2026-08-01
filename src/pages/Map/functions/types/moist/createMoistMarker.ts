@@ -36,7 +36,17 @@ export const createMoistMarker = async (
 ) => {
   const exists = moistChartsAmount.some((secondItemMoist: SensorItem) => secondItemMoist.id === sensorItem.id);
   if (!exists) {
-    const response = await getMoistMarkerChartData(sensorItem.sensorId, userId)
+    let response
+    try {
+      response = await getMoistMarkerChartData(sensorItem.sensorId, userId)
+    } catch (error) {
+      // Without this catch, a single failing fetch (e.g. a brand-new sensor with no chart
+      // data yet) becomes an unhandled promise rejection - since createMoistMarker is called
+      // without await/.catch() in onSiteClick.ts, that silently drops just this one marker
+      // while every other sensor on the same site still renders fine.
+      console.error("Failed to fetch moist chart data for sensorId:", sensorItem.sensorId, error)
+      return
+    }
     moistId.value++;
     moistChartsAmount.push(sensorItem);
     const bounds = new google.maps.LatLngBounds(

@@ -112,6 +112,33 @@ export const createMainChart = (props: CreateMainChartProps): void => {
       }),
     )
 
+    // If a comparison tooltip is currently showing where the user just pressed, bring it to
+    // front and keep the current comparison selection - otherwise a tap anywhere (including
+    // right on a tooltip) reaches the cursor below and immediately clears everything. This is
+    // a plain coordinate check (not amCharts' own interactive/hit-testing) registered here,
+    // before the cursor itself is attached further below, so it always runs first.
+    chart.plotContainer.events.on("pointerdown", (event: any) => {
+      if (!props.comparingMode) return
+      const point = event.point
+      const hitTooltip = tooltips.find((tooltip: am5.Tooltip) => {
+        const left = tooltip.x()
+        const top = tooltip.y()
+        return point.x >= left && point.x <= left + tooltip.width() && point.y >= top && point.y <= top + tooltip.height()
+      })
+      if (hitTooltip) {
+        topComparisonTooltipLayer += 1
+        hitTooltip.set("layer", topComparisonTooltipLayer)
+        // Disable the cursor's own select behavior for the duration of this one press, so
+        // it doesn't treat it as the start/cancel of a selection - then restore it once the
+        // user actually releases (a timer would fire well before that and restore too soon).
+        const previousBehavior = cursor.get("behavior")
+        cursor.set("behavior", "none")
+        chart.plotContainer.events.once("globalpointerup", () => {
+          cursor.set("behavior", previousBehavior)
+        })
+      }
+    })
+
     const xAxis = chart.xAxes.push(
       am5xy.DateAxis.new(props.root.current, {
         maxDeviation: 0.2,
@@ -748,6 +775,23 @@ export const createMainChart = (props: CreateMainChartProps): void => {
     }
     const tooltips: am5.Tooltip[] = []
     let selectionLabel: am5.Label | undefined
+    // amCharts' own cursor.selection rectangle gets its drawing wiped on every single
+    // pointerdown (even one we neutralize to protect the tooltips - see below), so the
+    // persisted highlight of the selected range is drawn as our own independent rectangle
+    // instead, which nothing but our own code ever touches.
+    let selectionZone: am5.Rectangle | undefined
+    // If two comparison tooltips overlap, tapping one brings it in front of the others by
+    // giving it a higher "layer" than anything so far (see the click handler below).
+    let topComparisonTooltipLayer = 40
+
+    // While comparing mode is on, the regular tap tooltips stay visible until a selection
+    // is completed - only then do they get hidden so they don't overlap the comparison tooltips.
+    const setOrdinaryTooltipsHidden = (hidden: boolean) => {
+      ordinarySeriesArray.forEach((ordinarySeries: am5xy.SmoothedXLineSeries) => {
+        ordinarySeries.get("tooltip")?.set("forceHidden", hidden)
+      })
+    }
+
     cursor.events.on("selectended", (event: CursorSelectEvent) => {
       if (props.comparingMode) {
         const selection = event.target
@@ -795,6 +839,24 @@ export const createMainChart = (props: CreateMainChartProps): void => {
         const labelWidth = selectionTime.length * 6
         const plotWidth = chart.plotContainer.width()
 
+        // Persistent highlight of the selected range, drawn independently of amCharts' own
+        // cursor.selection (see the note where selectionZone is declared).
+        const zoneLeft = Math.min(startSelectionPosition, newEndSelectionPosition) * plotWidth
+        const zoneRight = Math.max(startSelectionPosition, newEndSelectionPosition) * plotWidth
+        selectionZone = chart.plotContainer.children.push(
+          am5.Rectangle.new(rootInstance, {
+            x: zoneLeft,
+            y: 0,
+            width: zoneRight - zoneLeft,
+            height: chart.plotContainer.height(),
+            fill: am5.color(0xfb6909),
+            fillOpacity: 0.2,
+          }),
+        )
+        // Hide amCharts' own selection rectangle now that ours is showing the same area -
+        // otherwise the two would stack and look like one double-opacity highlight.
+        cursor.selection.hide()
+
         // Adjust x position to keep label within bounds
         const adjustedX = Math.min(Math.max(labelWidth / 2, selectionPixelX), plotWidth - labelWidth / 2)
         selectionLabel = chart.plotContainer.children.push(
@@ -821,6 +883,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
 
         const x1 = (xAxisValue as any).positionToDate((xAxisValue as any).toAxisPosition(getPrivateValue(selection, "downPositionX") ?? 0)).getTime();
         const x2 = (xAxisValue as any).positionToDate((xAxisValue as any).toAxisPosition(getPrivateValue(selection, "positionX") ?? 0)).getTime();
+
         chart.series.each((series: any) => {
           const dataItemStart = series.dataItems.find((dataItem: any) => {
             if (x1 < x2) {
@@ -840,7 +903,10 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           if (!dataItemEnd) {
             dataItemEnd = series.dataItems.at(-1)
           }
-          if (dataItemStart && dataItemEnd) {
+          // Only "ordinarySeries" get their own tooltip (see series creation above) - the
+          // historic/forecast overlay series for the same sensor don't, and would otherwise
+          // crash on series.get("tooltip") below or add a second, confusing tooltip.
+          if (dataItemStart && dataItemEnd && series.get("tooltip")) {
             const fixedDataItemStart = parseFloat(dataItemStart.get('valueY').toFixed(1))
             const fixedDataItemEnd = parseFloat(dataItemEnd.get('valueY').toFixed(1))
             const difference = (fixedDataItemEnd - fixedDataItemStart).toFixed(1)
@@ -855,7 +921,12 @@ export const createMainChart = (props: CreateMainChartProps): void => {
               x: series.get("tooltip")._settings.x,
               y: series.get("tooltip")._settings.y,
               bounds: series.get("tooltip")._settings.bounds,
-              layer: 30,
+              // Comparing-mode tooltips should render above everything else in the chart,
+              // including the legend below the plot area - amCharts' "layer" is a global
+              // stacking order (independent of where the sprite sits in the tree), so a
+              // value higher than anything else in this chart (the legend/series/axes all
+              // use the default layer) keeps these tooltips on top no matter where they land.
+              layer: 40,
               getFillFromSprite: false,
             })
             tooltip.get("background")?.setAll({
@@ -875,17 +946,29 @@ export const createMainChart = (props: CreateMainChartProps): void => {
             tooltips.push(tooltip)
           }
         })
+
+        // Comparison tooltips are now visible - hide the regular tap tooltips so they
+        // don't overlap. They come back as soon as this selection is cleared/replaced
+        // (see destroyTooltipsAndLabels, called on selectstarted/selectcancelled).
+        setOrdinaryTooltipsHidden(true)
       }
     })
 
     function destroyTooltipsAndLabels() {
       if (props.comparingMode) {
         tooltips.forEach((tooltip: am5.Tooltip) => {
-          tooltip.set('forceHidden', true)
+          tooltip.dispose()
         })
+        tooltips.length = 0
         if (selectionLabel) {
-          selectionLabel.set('forceHidden', true)
+          selectionLabel.dispose()
+          selectionLabel = undefined
         }
+        if (selectionZone) {
+          selectionZone.dispose()
+          selectionZone = undefined
+        }
+        setOrdinaryTooltipsHidden(false)
       }
     }
 

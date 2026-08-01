@@ -498,6 +498,49 @@ export const createAdditionalChart = (
 
     cursor.lineY.set("visible", false);
 
+    // Automatically grow the chart container if the sensor tooltips wouldn't otherwise fit -
+    // same technique used in createMainChart.ts/createTempChart.ts/createWxetChart.ts. Only
+    // "soilTemp" can have more than one line/tooltip; "sum" and "battery" always show exactly
+    // one, which can never overlap itself, so there's nothing for this to do there.
+    const sensorCount = linesCount || 0
+    const allSeries = chart.series.values
+    if (chartType === 'soilTemp' && allSeries.length > 0 && sensorCount > 0) {
+      (allSeries[0] as any).events.once("datavalidated", () => {
+        setTimeout(() => {
+          const chartContainer = document.getElementById(divId)
+          if (!chartContainer) return
+
+          const fullChartHeight = chartContainer.getBoundingClientRect().height
+
+          const firstSeries = allSeries[0] as any
+          const firstDataItem = firstSeries.dataItems[0]
+          const seriesTooltip = firstSeries.get("tooltip")
+
+          if (seriesTooltip && firstDataItem) {
+            firstSeries.showDataItemTooltip(firstDataItem)
+            setTimeout(() => {
+              const tooltipElement = seriesTooltip.getPrivate("htmlElement")
+              let tooltipHeight = 62
+
+              if (tooltipElement) {
+                tooltipHeight = tooltipElement.getBoundingClientRect().height
+              }
+
+              seriesTooltip.hide()
+
+              const totalTooltipsHeight = tooltipHeight * sensorCount
+              const missingPixels = Math.max(0, totalTooltipsHeight - fullChartHeight)
+
+              if (missingPixels > 0) {
+                const newHeight = fullChartHeight + missingPixels
+                chartContainer.style.height = `${newHeight}px`
+              }
+            }, 150)
+          }
+        }, 100)
+      })
+    }
+
     // Add Comments
     if (moistAddCommentItemShowed) {
       chart.events.on("click", (ev: any) => {
