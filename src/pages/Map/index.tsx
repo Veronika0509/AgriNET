@@ -227,7 +227,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         ;(window as any).__popstateHandledByModal = true
       } else {
         // Currently in sites view → go back to menu
-        ;(window as any).__mapToMenuTimestamp = Date.now()
+        (window as any).__mapToMenuTimestamp = Date.now()
         props.setPage(0)
         window.history.replaceState(null, '', '/AgriNET/menu')
         ;(window as any).__popstateHandledByModal = true
@@ -257,7 +257,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         if (isMarkerClickedRef.current) {
           setIsMarkerClicked(false)
         } else {
-          ;(window as any).__mapToMenuTimestamp = Date.now()
+          (window as any).__mapToMenuTimestamp = Date.now()
           window.history.replaceState(null, '', '/AgriNET/menu')
           props.setPage(0)
         }
@@ -717,7 +717,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         toggleLayerList={layerListState.toggleLayerList}
       />
       <IonContent className={s.ionContent} style={{ "--background": "white" }}>
-        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+        <div style={{ display: "flex", flexDirection: "column", height: "100%", paddingBottom: '56px' }}>
           <div
             className={activeTab === "map" ? undefined : s.contentWrapper}
             style={{ flex: 1, position: "relative" }}
