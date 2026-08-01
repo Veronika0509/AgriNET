@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
 
 export const useUserLocation = (map?: google.maps.Map | null) => {
@@ -14,27 +15,33 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
     try {
       setLocationError(null);
 
-      // Check and request permissions using Capacitor. Any state other than 'granted'
-      // ('prompt', 'prompt-with-rationale', or 'denied') needs a fresh request - in
-      // particular, after a single denial Android reports 'prompt-with-rationale', not
-      // 'denied', and the OS *will* show the permission dialog again for that state. Only
-      // checking for 'denied' here missed that case, so tapping the button again after the
-      // first refusal silently tried to read the position without ever re-asking for access.
-      const permission = await Geolocation.checkPermissions();
+      // Capacitor's web shim has no explicit "request permission" step - calling
+      // requestPermissions() there always throws "Not implemented on web". On web, the
+      // browser itself pops its own permission prompt as soon as getCurrentPosition()/
+      // watchPosition() is called below, so there's nothing to do here except on native.
+      if (Capacitor.isNativePlatform()) {
+        // Check and request permissions using Capacitor. Any state other than 'granted'
+        // ('prompt', 'prompt-with-rationale', or 'denied') needs a fresh request - in
+        // particular, after a single denial Android reports 'prompt-with-rationale', not
+        // 'denied', and the OS *will* show the permission dialog again for that state. Only
+        // checking for 'denied' here missed that case, so tapping the button again after the
+        // first refusal silently tried to read the position without ever re-asking for access.
+        const permission = await Geolocation.checkPermissions();
 
-      if (permission.location !== 'granted') {
-        const requestResult = await Geolocation.requestPermissions();
-        if (requestResult.location !== 'granted') {
-          // If Android still reports 'prompt-with-rationale' here, the OS dialog was shown
-          // again but the user just said no once more - a plain retry will still work next
-          // time. Once it's fully 'denied' (typically after 2 refusals), Android will no
-          // longer show the dialog at all, and only the phone's own Settings can fix it.
-          setLocationError(
-            requestResult.location === 'denied'
-              ? 'Location access is blocked. Enable it in your device Settings > Apps > AgriNET > Permissions.'
-              : 'Location permission denied'
-          );
-          return;
+        if (permission.location !== 'granted') {
+          const requestResult = await Geolocation.requestPermissions();
+          if (requestResult.location !== 'granted') {
+            // If Android still reports 'prompt-with-rationale' here, the OS dialog was shown
+            // again but the user just said no once more - a plain retry will still work next
+            // time. Once it's fully 'denied' (typically after 2 refusals), Android will no
+            // longer show the dialog at all, and only the phone's own Settings can fix it.
+            setLocationError(
+              requestResult.location === 'denied'
+                ? 'Location access is blocked. Enable it in your device Settings > Apps > AgriNET > Permissions.'
+                : 'Location permission denied'
+            );
+            return;
+          }
         }
       }
 
