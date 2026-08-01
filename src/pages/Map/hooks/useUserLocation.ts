@@ -2,6 +2,19 @@ import { useState, useCallback, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
 
+// Shared by every place that needs to know "is this a phone/tablet, on web or native" -
+// keeping one definition means the location button, its auto-request-on-mount effect, and
+// its visibility check can never disagree with each other about what counts as mobile.
+export const isMobileOrTouchDevice = (): boolean => {
+  const userAgent = navigator.userAgent;
+  const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|IEMobile|Opera Mini|Mobile|Tablet/i.test(userAgent);
+  // navigator.maxTouchPoints > 1 catches touch devices whose user-agent alone looks like a
+  // desktop - most notably iPadOS Safari, which has reported a plain "Macintosh" UA (desktop
+  // site request) by default since iOS 13, even though an iPad is very much a mobile device.
+  const isTouchDevice = navigator.maxTouchPoints > 1;
+  return isMobileUserAgent || isTouchDevice;
+};
+
 export const useUserLocation = (map?: google.maps.Map | null) => {
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [userLocationMarker, setUserLocationMarker] = useState<google.maps.Marker | null>(null);
@@ -178,14 +191,7 @@ export const useUserLocation = (map?: google.maps.Map | null) => {
 
   // Automatically get user location when map is available (only on mobile/tablet devices)
   useEffect(() => {
-    // Check if this is a mobile or tablet device
-    const userAgent = navigator.userAgent;
-    const screenWidth = window.screen?.width || window.innerWidth;
-    const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|IEMobile|Opera Mini|Mobile|Tablet/i.test(userAgent);
-    const isDesktop = /Windows NT|Macintosh|Linux/i.test(userAgent) && screenWidth > 1024;
-    const shouldEnableLocation = isMobileUserAgent && !isDesktop;
-
-    if (map && !userLocation && !isLocationEnabled && !locationError && shouldEnableLocation) {
+    if (map && !userLocation && !isLocationEnabled && !locationError && isMobileOrTouchDevice()) {
       // Call async function properly
       getCurrentLocation(map).catch(error => {
         console.error('Failed to get location on mount:', error);

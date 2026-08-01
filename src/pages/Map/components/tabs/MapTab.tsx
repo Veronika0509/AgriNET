@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { IonItem, IonCheckbox } from "@ionic/react"
 import LocationButton from "../LocationButton"
+import { isMobileOrTouchDevice } from "../../hooks/useUserLocation"
 import type { Site, UserId } from "@/types"
 import type { OverlayItem } from "../../types/OverlayItem"
 import s from "../../style.module.css"
@@ -151,14 +152,7 @@ export const MapTab: React.FC<MapTabProps> = ({
   }, [hasLayersToShow])
 
   // Determine if location button should be shown
-  const shouldShowLocationButton = (() => {
-    const userAgent = navigator.userAgent
-    const screenWidth = window.screen?.width || window.innerWidth
-    const isMobileUserAgent =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|Windows Phone|IEMobile|Opera Mini|Mobile|Tablet/i.test(userAgent)
-    const isDesktop = /Windows NT|Macintosh|Linux/i.test(userAgent) && screenWidth > 1024
-    return isMobileUserAgent && !isDesktop
-  })()
+  const shouldShowLocationButton = isMobileOrTouchDevice()
 
   // Determine if we're on mobile (screen width < 500px)
   const isMobileScreen = window.innerWidth < 500
