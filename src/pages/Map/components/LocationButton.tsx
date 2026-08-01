@@ -4,7 +4,7 @@ import { locateOutline, alertCircleOutline, closeOutline } from 'ionicons/icons'
 import { isMobileOrTouchDevice } from '../hooks/useUserLocation';
 import s from '../style.module.css';
 
-const AUTO_DISMISS_MS = 6000;
+const AUTO_DISMISS_MS = 10000;
 
 interface LocationButtonProps {
   onLocationClick: () => void;
