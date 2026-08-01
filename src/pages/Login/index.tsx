@@ -98,7 +98,7 @@ const Login: React.FC<LoginProps> = (props) => {
               ></IonInput>
               {message && <IonText color="danger">Incorrect login or password</IonText>}
               <IonButton expand="full" type="submit" className={`${s.button} ${'ion-margin-top'}`}>
-                sign in123
+                sign in
               </IonButton>
             </form>
           </IonCol>
