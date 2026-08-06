@@ -202,7 +202,7 @@ const TopSection = (props: TopSectionProps) => {
                   NWS Forecast
                 </IonToggle>
                 <IonInput
-                  className={s.topSection_daysInput}
+                  className={`${s.topSection_daysInput} ${props.type === 'wxet' && s.topSection_wxetDaysInput}`}
                   min={1}
                   max={6}
                   label="Days"
@@ -219,7 +219,11 @@ const TopSection = (props: TopSectionProps) => {
                     Comments
                   </IonToggle>
                 )}
-                <IonButton fill="outline" className={s.topSection_addAlarm} onClick={() => props.setAlarm?.(true)}>
+                <IonButton
+                  fill="outline"
+                  className={`${s.topSection_addAlarm} ${(props.type === 'temp' || props.type === 'wxet') && s.topSection_tempAddAlarmButton} ${props.type === 'wxet' && s.topSection_wxetAddAlarmButton}`}
+                  onClick={() => props.setAlarm?.(true)}
+                >
                   <IonIcon slot="start" icon={alarmOutline}></IonIcon>
                   Add Alarm
                 </IonButton>
@@ -229,7 +233,7 @@ const TopSection = (props: TopSectionProps) => {
         )}
       </div>
       <div className={s.topSection_secondaryRow}>
-        <div className={s.topSection_modesSection}>
+        <div className={`${s.topSection_modesSection} ${(props.type === 'wxet' || props.type === 'temp') && s.topSection_wxetModesSection}`}>
           <span className={s.topSection_sectionLabel}>Modes:</span>
           <div className={s.topSection_togglesGroup}>
             {props.type === "moist" && (

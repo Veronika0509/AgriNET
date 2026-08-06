@@ -201,6 +201,11 @@
   font-size: 13px;
 }
 
+.topSection_wxetDaysInput {
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
 /* Fuel Section */
 .topSection_fuelSection {
   display: flex;
@@ -251,6 +256,10 @@
     order: 2;
   }
 
+  .topSection_wxetAddAlarmButton {
+    margin-top: -8px;
+  }
+
   .topSection_moistPrimaryRow {
     display: block;
   }
@@ -287,7 +296,35 @@
   }
 }
 
+@media (max-width: 597px) {
+  .topSection_tempForecastSection {
+    gap: 0;
+  }
+  .topSection_tempAddAlarmButton {
+    margin-top: -8px;
+  }
+}
+
+@media (max-width: 522px) {
+  .topSection_forecastSection {
+    margin-top: 8px;
+  }
+  .topSection_wxetForecastSection {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 465px) {
+  .topSection_wxetForecastSection {
+    margin-top: 0;
+    /*gap: 0;*/
+  }
+}
+
 @media (max-width: 480px) {
+  .topSection_wxetModesSection {
+    margin-top: 10px;
+  }
   .topSection_togglesGroup {
     flex-direction: column;
     align-items: flex-start;
@@ -296,9 +333,6 @@
   }
   .topSection_wxetAddAlarm {
     display: block;
-  }
-  .topSection_wxetForecastSection {
-    margin-top: 16px;
   }
   .topSection_secondaryRow {
     flex-direction: column;
@@ -509,6 +543,15 @@
   height: 100%;
 }
 
+@media (max-width: 1024px) {
+  .topSection_addAlarm {
+    margin-left: 0;
+  }
+  .topSection_wxetForecastSection {
+    margin-top: 10px;
+  }
+}
+
 @media only screen and (max-width: 950px) {
   .topSection_mainContainer {
     max-width: 95vw;
@@ -518,10 +561,6 @@
 @media (max-width: 800px) {
   .topSection_wrapper {
     display: block;
-  }
-
-  .topSection_addAlarm {
-    margin-left: 0;
   }
 
   .topSection_timeItem {
