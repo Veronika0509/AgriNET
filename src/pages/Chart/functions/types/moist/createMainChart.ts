@@ -915,7 +915,10 @@ export const createMainChart = (props: CreateMainChartProps): void => {
             const tooltip = am5.Tooltip.new(rootInstance, {
               labelText: labelText,
               tooltipPosition: "fixed",
-              pointerOrientation: "left",
+              // "horizontal" (unlike a fixed "left"/"right") lets amCharts auto-flip the
+              // tooltip to the side that fits, so selections near the right edge of the
+              // chart don't get clipped by the plot container's overflow:hidden.
+              pointerOrientation: "horizontal",
               tooltipTarget: series,
               pointTo: dataItemEnd._settings.point,
               x: series.get("tooltip")._settings.x,
