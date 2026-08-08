@@ -1,0 +1,13 @@
+diff --git a/node_modules/@capacitor/google-maps/android/src/main/java/com/capacitorjs/plugins/googlemaps/CapacitorGoogleMapsPlugin.kt b/node_modules/@capacitor/google-maps/android/src/main/java/com/capacitorjs/plugins/googlemaps/CapacitorGoogleMapsPlugin.kt
+index 143eca8..3a73f59 100644
+--- a/node_modules/@capacitor/google-maps/android/src/main/java/com/capacitorjs/plugins/googlemaps/CapacitorGoogleMapsPlugin.kt
++++ b/node_modules/@capacitor/google-maps/android/src/main/java/com/capacitorjs/plugins/googlemaps/CapacitorGoogleMapsPlugin.kt
+@@ -888,7 +888,7 @@ class CapacitorGoogleMapsPlugin : Plugin(), OnMapsSdkInitializedCallback {
+                     } else {
+                         this.bridge.webView.onTouchEvent(event)
+                     }
+-                    events.removeFirst()
++                    events.removeAt(0)
+                 }
+             }
+ 

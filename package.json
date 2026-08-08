@@ -12,7 +12,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test.unit": "vitest",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@amcharts/amcharts5": "^5.10.8",
@@ -68,6 +69,7 @@
     "eslint-plugin-react": "^7.32.2",
     "gh-pages": "^6.3.0",
     "jsdom": "^22.1.0",
+    "patch-package": "^8.0.1",
     "style-loader": "^3.3.3",
     "terser": "^5.4.0",
     "ts-node": "^10.9.2",
