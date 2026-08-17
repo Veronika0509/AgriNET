@@ -95,27 +95,40 @@ export const TempChartPage = (props: any) => {
         isTempCommentsShowed
       )
     } else if (updateReason === 'nwsForecast') {
-      let newChartData: any
       if (nwsForecast) {
-        newChartData = await getNwsForecastData(props.sensorId, props.userId, nwsForecastDays)
+        const newChartData: any = await getNwsForecastData(props.sensorId, props.userId, nwsForecastDays)
         setNwsForecastData(newChartData.data[0])
-      } else {
+        createTempChart(
+          currentChartData,
+          root,
+          props.isMobile,
+          props.additionalChartData,
+          newChartData.data[0],
+          setTempAddCommentModal,
+          tempAddCommentItemShowed,
+          (tempComments ?? []) as any,
+          updateCommentsArray,
+          props.userId,
+          props.sensorId,
+          isTempCommentsShowed
+        )
+      } else if (nwsForecastData) {
         setNwsForecastData(null)
+        createTempChart(
+          currentChartData,
+          root,
+          props.isMobile,
+          props.additionalChartData,
+          null,
+          setTempAddCommentModal,
+          tempAddCommentItemShowed,
+          (tempComments ?? []) as any,
+          updateCommentsArray,
+          props.userId,
+          props.sensorId,
+          isTempCommentsShowed
+        )
       }
-      createTempChart(
-        currentChartData,
-        root,
-        props.isMobile,
-        props.additionalChartData,
-        nwsForecast ? newChartData.data[0] : null,
-        setTempAddCommentModal,
-        tempAddCommentItemShowed,
-        (tempComments ?? []) as any,
-        updateCommentsArray,
-        props.userId,
-        props.sensorId,
-        isTempCommentsShowed
-      )
     } else if (updateReason === 'dates') {
       const newChartData: any = await getTempMainChartData(present, props.sensorId, props.userId, days, endDateDays)
       setCurrentChartData(newChartData.data.data)

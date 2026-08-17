@@ -4,7 +4,7 @@ apply plugin: 'kotlin-kapt'
 
 android {
     namespace "com.agrinet.app"
-    compileSdkVersion 35
+    compileSdkVersion 36
 
     def localProps = new Properties()
     def localPropertiesFile = rootProject.file("local.properties")
@@ -15,9 +15,9 @@ android {
     defaultConfig {
         applicationId "com.agrinet.app"
         minSdkVersion 24
-        targetSdkVersion 35
-        versionCode 7
-        versionName "1.0.7"
+        targetSdkVersion 36
+        versionCode 8
+        versionName "1.0.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         aaptOptions {
