@@ -104,6 +104,24 @@ const AppContent: React.FC = () => {
   const currentPathRef = React.useRef(window.location.pathname);
   // logoutRef always points to the latest logout function without needing it in effect deps
   const logoutRef = React.useRef(logout);
+  // Tracks the fallback bottom menu's real rendered height so floating buttons (e.g. comments refresh)
+  // can sit above it without hardcoding a distance from the screen bottom.
+  const bottomMenuRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = bottomMenuRef.current;
+    if (!el) {
+      document.documentElement.style.removeProperty('--bottom-menu-height');
+      return;
+    }
+    const updateHeight = () => {
+      document.documentElement.style.setProperty('--bottom-menu-height', `${el.offsetHeight}px`);
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [page, userId]);
 
   useEffect(() => {
     const unlisten = history.listen((location) => {
@@ -463,7 +481,7 @@ const AppContent: React.FC = () => {
                       <IonTabBar slot="bottom" style={{ display: 'none' }} />
                     ) : (
                       <IonTabBar slot="bottom">
-                        <IonTabButton tab="menu" layout="icon-start" href={Number(userId) === 0 ? '/login' : '/menu'} onClick={() => {
+                        <IonTabButton tab="menu" href={Number(userId) === 0 ? '/login' : '/menu'} onClick={() => {
                           const currentPath = window.location.pathname.replace('/AgriNET', '');
                           pushToNavigationHistory(currentPath, page);
                           // After navigating to menu, the next back press should trigger logout
@@ -554,19 +572,19 @@ const AppContent: React.FC = () => {
                  setSelectedMoistureSensor={setSelectedMoistureSensor} />
           </div>
           {page >= 1 && Number(userId) !== 0 && (
-            <div style={{
+            <div ref={bottomMenuRef} style={{
               position: 'fixed',
               bottom: 0,
               left: 0,
               right: 0,
-              height: '56px',
               display: 'flex',
               justifyContent: 'space-around',
               alignItems: 'center',
+              paddingTop: '8px',
+              paddingBottom: 'calc(8px + env(safe-area-inset-bottom, 0px))',
               backgroundColor: 'var(--ion-tab-bar-background, #fff)',
               borderTop: '1px solid var(--ion-tab-bar-border-color, #e0e0e0)',
               zIndex: 10000,
-              paddingBottom: 'env(safe-area-inset-bottom, 0px)',
             }}>
               <button onClick={() => {
                 const cp = window.location.pathname.replace('/AgriNET', '');

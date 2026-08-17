@@ -216,11 +216,14 @@
 
 .settingsWrapper {
   width: 100%;
+  --padding-start: 16px;
+  --padding-end: 16px;
 }
 
 .settingsInputWrapper {
   --padding-start: 0;
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   margin: 0 auto;
   outline: none;
   border-bottom: 2px solid #33db64;
@@ -255,7 +258,8 @@
 }
 
 .settingsButton {
-  width: 500px;
+  width: 100%;
+  max-width: 500px;
   display: block;
   margin-left: auto;
   margin-right: auto;
@@ -264,8 +268,11 @@
 /*   Create   */
 
 .createModalContent {
+  width: 100%;
   max-width: 600px;
   margin: 40px auto 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
 .createModalItem {
@@ -393,6 +400,27 @@
     width: 100%;
     margin: 0;
   }
+
+  /*   Settings   */
+
+  .settingsInputWrapper:nth-child(1) {
+    margin-top: 24px;
+  }
+
+  .settingsInput > label > div:nth-child(1) {
+    min-width: 130px;
+  }
+
+  /*   Create   */
+
+  .createModalContent {
+    margin-top: 20px;
+  }
+
+  .createPulseButton::part(native) {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 
@@ -402,5 +430,12 @@
   .tableHeadTitle,
   .tableRowItem {
     font-size: 14px;
+  }
+
+  /*   Settings   */
+
+  .settingsInput > label > div:nth-child(1) {
+    min-width: 105px;
+    font-size: 13px;
   }
 }

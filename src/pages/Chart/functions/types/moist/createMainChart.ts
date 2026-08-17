@@ -906,7 +906,9 @@ export const createMainChart = (props: CreateMainChartProps): void => {
           // Only "ordinarySeries" get their own tooltip (see series creation above) - the
           // historic/forecast overlay series for the same sensor don't, and would otherwise
           // crash on series.get("tooltip") below or add a second, confusing tooltip.
-          if (dataItemStart && dataItemEnd && series.get("tooltip")) {
+          // series.isHidden() skips lines the user toggled off via the legend, so hidden
+          // lines don't get a comparison tooltip either.
+          if (dataItemStart && dataItemEnd && series.get("tooltip") && !series.isHidden()) {
             const fixedDataItemStart = parseFloat(dataItemStart.get('valueY').toFixed(1))
             const fixedDataItemEnd = parseFloat(dataItemEnd.get('valueY').toFixed(1))
             const difference = (fixedDataItemEnd - fixedDataItemStart).toFixed(1)

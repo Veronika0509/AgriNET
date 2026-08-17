@@ -717,15 +717,14 @@
 .comments_refreshButton {
   cursor: pointer;
   position: fixed;
-  bottom: 50px;
-  right: 50px;
+  bottom: calc(var(--bottom-menu-height, 56px) + 12px);
+  right: 16px;
+  width: 35px;
+  height: 36px;
 }
 
 .comments_refreshButton::part(native) {
   padding: 5px;
-  position: absolute;
-  width: 35px;
-  height: 36px;
 }
 
 @media (max-width: 500px) {
