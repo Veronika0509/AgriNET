@@ -5,6 +5,8 @@ import {createWxetMarker} from "./types/wxet/createWxetMarker";
 import {createTempMarker} from "./types/temp/createTempMarker";
 import {createValveMarker} from "./types/valve/createValveMarker";
 import {createExtlMarker} from "./types/extl/createExtlMarker";
+import {createUniversalMarker} from "./types/universal/createUniversalMarker";
+import {UNIVERSAL_MARKER_TYPE} from "../config/universalMarker";
 import {getSensorItems} from "../../Map/data/getSensorItems";
 // import axios from "axios";
 
@@ -107,6 +109,8 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   const valveBoundsArray: unknown[] = []
   const valveInvalidChartData: unknown[] = []
   const countValve: Marker[] = []
+  // universal props (scaffold — not rendered yet)
+  const countUniversal: Marker[] = []
 
   props.siteList.map((site: SiteWithLayers) => {
     if (site.name === props.groupMarker.title) {
@@ -130,6 +134,10 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
         } else if (sensItem.markerType === 'graphic' || sensItem.markerType === 'extl') {
           if (!countExtl.some((item: Marker) => item.id === sensItem.id)) {
             countExtl.push(sensItem)
+          }
+        } else if (sensItem.markerType === UNIVERSAL_MARKER_TYPE) {
+          if (!countUniversal.some((item: Marker) => item.id === sensItem.id)) {
+            countUniversal.push(sensItem)
           }
         }
       })
@@ -311,6 +319,12 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       props.groupMarker.title,
       'Valve'
     )
+  })
+  // Universal marker — SCAFFOLD. Empty until a real 'universal' markerType is
+  // served, so this loop is a no-op today. Does not touch amountOfSensors /
+  // pushAllCoordinates yet — see TODO(universal) in createUniversalMarker.
+  countUniversal.length !== 0 && countUniversal.map((marker: Marker) => {
+    createUniversalMarker(marker as any, props.page as number, props.userId)
   })
 }
 

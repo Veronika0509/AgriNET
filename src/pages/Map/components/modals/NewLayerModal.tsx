@@ -88,6 +88,9 @@ export const NewLayerModal: React.FC<NewLayerModalProps> = ({
             <IonSelectOption value="infra-red">Infra-Red</IonSelectOption>
             <IonSelectOption value="neutron">Neutron</IonSelectOption>
             <IonSelectOption value="virtual-weather-station">Virtual Weather Station</IonSelectOption>
+            {/* SCAFFOLD — universal/custom marker. Extend the form (range, sparkline
+                window, database) once the data source is defined. */}
+            <IonSelectOption value="universal">Universal (custom)</IonSelectOption>
           </IonSelect>
         </IonItem>
 
