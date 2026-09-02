@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>agrinet</string>
+        <string>AgriNET</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -45,11 +45,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<key>NSLocationAlwaysUsageDescription</key>
-		<string>We want to track you</string>
   <key>NSLocationWhenInUseUsageDescription</key>
-  	<string>We want your current position</string>
+  	<string>AgriNET uses your location to show your current position on the farm map.</string>
   <key>NSCameraUsageDescription</key>
-  	<string>We need camera access to scan QR codes</string>
+  	<string>AgriNET uses the camera to scan QR codes on field equipment and sensors.</string>
 </dict>
 </plist>

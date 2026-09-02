@@ -3,6 +3,7 @@ import {back} from "../functions/back";
 import s from "../style.module.css";
 import {arrowBackOutline} from "ionicons/icons";
 import {useHistory} from "react-router-dom";
+import {useAppContext} from "../../../context/AppContext";
 import {addOutline} from "ionicons/icons";
 import {timeOutline} from "ionicons/icons";
 import {settings} from "ionicons/icons";
@@ -30,11 +31,20 @@ interface HeaderProps {
 
 const Header = (props: HeaderProps) => {
   const history = useHistory();
+  const { chartReturnPage, setChartReturnPage } = useAppContext();
 
   const onBackClick = () => {
     if (props.type === 'chartPage') {
       if (props.setPage) {
-        back(props.setPage, history, null)
+        // If the Chart page was opened from another page (e.g. Data List), return there
+        // instead of the default Map page.
+        if (chartReturnPage !== null) {
+          const target = chartReturnPage
+          setChartReturnPage(null)
+          props.setPage(target)
+        } else {
+          back(props.setPage, history, null)
+        }
       }
     } else if (props.type === 'alarmPage') {
       props.setAlarm?.(false)

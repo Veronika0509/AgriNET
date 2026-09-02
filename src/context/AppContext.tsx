@@ -25,6 +25,9 @@ export interface AppState {
   budgetEditorReturnPage: 'chart' | 'menu' | null
   budgetEditorNavigationStack: string[]
   navigationHistory: NavigationHistoryEntry[]
+  // Page to return to from the Chart page's back arrow instead of the default Map page
+  // (e.g. when the Chart page was opened from the Data List page). null = default behavior.
+  chartReturnPage: number | null
 
   // User data
   userId: UserId
@@ -53,6 +56,7 @@ export interface AppActions {
   setPage: React.Dispatch<React.SetStateAction<number>>
   setMapPageKey: React.Dispatch<React.SetStateAction<number>>
   setBudgetEditorReturnPage: React.Dispatch<React.SetStateAction<'chart' | 'menu' | null>>
+  setChartReturnPage: React.Dispatch<React.SetStateAction<number | null>>
   setBudgetEditorNavigationStack: React.Dispatch<React.SetStateAction<string[]>>
   pushToBudgetEditorNavigationStack: (page: string) => void
   popFromBudgetEditorNavigationStack: () => string | undefined
@@ -117,6 +121,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [selectedSiteForAddUnit, setSelectedSiteForAddUnit] = useState<string>('')
   const [selectedMoistureSensor, setSelectedMoistureSensor] = useState<any>(null)
   const [budgetEditorReturnPage, setBudgetEditorReturnPage] = useState<'chart' | 'menu' | null>(null)
+  const [chartReturnPage, setChartReturnPage] = useState<number | null>(null)
   const [budgetEditorNavigationStack, setBudgetEditorNavigationStack] = useState<string[]>([])
   const [navigationHistory, setNavigationHistory] = useState<NavigationHistoryEntry[]>([])
 
@@ -190,6 +195,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setPage(0)
     setMapPageKey(0)
     setBudgetEditorReturnPage(null)
+    setChartReturnPage(null)
     setBudgetEditorNavigationStack([])
     clearNavigationHistory()
   }, [userId, page, siteList, siteId, mapPageKey, chartPageType, navigationHistory, budgetEditorNavigationStack, clearNavigationHistory])
@@ -210,6 +216,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     selectedSiteForAddUnit,
     selectedMoistureSensor,
     budgetEditorReturnPage,
+    chartReturnPage,
     budgetEditorNavigationStack,
     navigationHistory,
 
@@ -228,6 +235,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setSelectedSiteForAddUnit,
     setSelectedMoistureSensor,
     setBudgetEditorReturnPage,
+    setChartReturnPage,
     setBudgetEditorNavigationStack,
     pushToBudgetEditorNavigationStack,
     popFromBudgetEditorNavigationStack,

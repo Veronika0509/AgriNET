@@ -17,11 +17,13 @@ import {arrowBackOutline, refreshOutline} from 'ionicons/icons';
 import { useAppContext } from '../../context/AppContext';
 import axios from 'axios';
 import { MoistTable } from '../Chart/components/TabularData/components/types/moist/MoistTable';
+import { SumChartCard } from './components/SumChartCard';
 import { getRefillPrediction } from '../Chart/data/types/moist/getRefillPrediction';
 import { TempTable } from '../Chart/components/TabularData/components/types/temp/TempTable';
 import { WxetTable } from '../Chart/components/TabularData/components/types/wxet/WxetTable';
 
 import {getSensorItems} from "../Map/data/getSensorItems";
+import { onMoistSensorClick } from "../Map/functions/types/moist/onMoistSensorClick";
 
 interface DataListPageProps {
   setPage: React.Dispatch<React.SetStateAction<number>>;
@@ -62,14 +64,44 @@ const freshnessColors: Record<string, string> = {
 const STORAGE_KEY = 'dataList_selectedTypes';
 
 const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
-  const { userId } = useAppContext();
+  const {
+    userId,
+    setSiteId,
+    setSiteName,
+    setChartData,
+    setAdditionalChartData,
+    setChartPageType,
+    setChartReturnPage,
+  } = useAppContext();
   const history = useHistory();
+
+  const openMoistChart = (item: TabularDataItem) => {
+    const sensor = getSensorItems('moist-fuel', siteList).find(
+      (s: any) => s.sensorId === item.sensorId
+    );
+    // Come back to the Data List page (7) when leaving the Chart page via its back arrow.
+    setChartReturnPage(7);
+    onMoistSensorClick(
+      history,
+      item.sensorId,
+      sensor?.id,
+      item.label,
+      setChartData,
+      setPage,
+      setSiteId,
+      setSiteName,
+      setAdditionalChartData,
+      siteList,
+      setChartPageType
+    );
+  };
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [tabularData, setTabularData] = useState<TabularDataItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isMobile] = useState(window.innerWidth < 750);
   const [isWxetMobile] = useState(window.innerWidth < 425);
+  const [isLargeScreen] = useState(window.innerWidth >= 1024);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [predictions, setPredictions] = useState<Record<string, number | undefined>>({});
 
@@ -306,14 +338,34 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
     return (
       <div key={item.sensorId} style={{ marginBottom: "16px" }}>
         {sensorType === 'Moist' ? (
-          <MoistTable
-            type="moistMain"
-            data={tabularDataFormatted}
-            firstRowColor={firstRowColor}
-            isWxetMobile={isWxetMobile}
-            scrollable
-            daysToRefill={predictions[item.sensorId]}
-          />
+          <div
+            style={{
+              border: '1px solid #d5d8f2',
+              borderRadius: '10px',
+              overflow: 'hidden',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
+              // On large screens keep the sensor card compact and centered instead of full width.
+              maxWidth: isLargeScreen ? '760px' : undefined,
+              marginLeft: isLargeScreen ? 'auto' : undefined,
+              marginRight: isLargeScreen ? 'auto' : undefined,
+            }}
+          >
+            <div style={{ padding: '4px 4px 8px' }}>
+              <MoistTable
+                type="moistMain"
+                data={tabularDataFormatted}
+                firstRowColor={firstRowColor}
+                isWxetMobile={isWxetMobile}
+                scrollable
+                daysToRefill={predictions[item.sensorId]}
+              />
+            </div>
+            <SumChartCard
+              sensorId={item.sensorId}
+              label={item.label}
+              onOpenChart={() => openMoistChart(item)}
+            />
+          </div>
         ) : sensorType === 'SoilTemp' ? (
           <TempTable
             tabularData={tabularDataFormatted}

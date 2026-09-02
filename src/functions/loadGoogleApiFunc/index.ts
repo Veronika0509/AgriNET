@@ -1,4 +1,6 @@
 // loadGoogleApiFunctions.ts
+import { Capacitor } from '@capacitor/core';
+
 export const loadGoogleApi = (setLoaded: React.Dispatch<React.SetStateAction<boolean>>) => {
   // Check if Google Maps API has already been loaded
   if (window.google && window.google.maps) {
@@ -16,7 +18,11 @@ export const loadGoogleApi = (setLoaded: React.Dispatch<React.SetStateAction<boo
     return;
   }
 
-  const apiKey = import.meta.env.VITE_MAP_API_KEY;
+  // Native apps (iOS/Android) can't satisfy the website's HTTP-referrer key
+  // restriction, so mobile builds use a separate, unrestricted-by-referrer key.
+  const apiKey = Capacitor.isNativePlatform()
+    ? import.meta.env.VITE_MAP_API_KEY_MOBILE
+    : import.meta.env.VITE_MAP_API_KEY;
 
   if (apiKey) {
     const script = document.createElement('script');
@@ -30,7 +36,7 @@ export const loadGoogleApi = (setLoaded: React.Dispatch<React.SetStateAction<boo
     script.onerror = (_error) => {
       // Silent error handling
     };
-    
+
     document.head.appendChild(script);
   }
 };

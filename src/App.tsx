@@ -84,6 +84,8 @@ const AppContent: React.FC = () => {
     popFromNavigationHistory,
     budgetEditorReturnPage,
     setBudgetEditorReturnPage,
+    chartReturnPage,
+    setChartReturnPage,
     logout,
   } = useAppContext();
 
@@ -165,6 +167,14 @@ const AppContent: React.FC = () => {
     }
     isNavigatingBackRef.current = false;
   }, [page]);
+
+  // Drop the Chart page's custom return target once we're no longer on the Chart page
+  // (or heading into it), so a stale value can't hijack a later Map → Chart back press.
+  useEffect(() => {
+    if (page !== 2 && page !== 7 && chartReturnPage !== null) {
+      setChartReturnPage(null);
+    }
+  }, [page, chartReturnPage, setChartReturnPage]);
 
   // Handle browser/device back button (popstate) to sync page state with URL
   // Uses pageRef to always access the latest page value (avoids stale closures)

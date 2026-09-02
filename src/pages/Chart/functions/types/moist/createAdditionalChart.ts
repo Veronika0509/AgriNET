@@ -75,6 +75,8 @@ export const createAdditionalChart = (
   linesCount?: number,
   metric?: string,
   setSoilTempColor?: SetterFunction<string[]>,
+  // optional target div id (defaults to the well-known per-type ids used on the Chart page)
+  divIdOverride?: string,
 ) => {
   if (root.current) {
     root.current.dispose();
@@ -82,7 +84,9 @@ export const createAdditionalChart = (
   }
   if (!root.current) {
     let divId: string
-    if (chartType === 'sum') {
+    if (divIdOverride) {
+      divId = divIdOverride
+    } else if (chartType === 'sum') {
       divId = 'sumChart'
     } else if (chartType === 'soilTemp') {
       divId = 'soilTempChart'
