@@ -51,7 +51,10 @@ import {BudgetEditorTab} from "./pages/BudgetLinesEditor/components/BudgetEditor
 import { useUrlSync } from "./hooks/useUrlSync";
 import { pageToUrl, parseCurrentUrl, isDeepLink, buildUrl } from "./utils/url";
 
-setupIonicReact();
+// Force Material ("md") mode on every platform so the iOS app renders the same
+// way the web build does (Ionic otherwise auto-switches to the "ios" look inside
+// an iOS WebView).
+setupIonicReact({ mode: 'md' });
 
 // Internal application component with access to context
 const AppContent: React.FC = () => {

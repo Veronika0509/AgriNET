@@ -104,6 +104,9 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
   const [isLargeScreen] = useState(window.innerWidth >= 1024);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [predictions, setPredictions] = useState<Record<string, number | undefined>>({});
+  // Per-moist-sensor: does its Summed graph actually render? When it doesn't, the
+  // table is shown plain, without the sensor card.
+  const [sumChartVisible, setSumChartVisible] = useState<Record<string, boolean>>({});
 
   const sensorTypes = useMemo(() => {
     const typesMap = new Map<string, string>();
@@ -289,6 +292,9 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
     const groups: Record<string, TabularDataItem[]> = {};
 
     tabularData.forEach(item => {
+      // Skip sensors that have no rows — they render nothing, so their layer
+      // shouldn't get a heading either.
+      if (!item.data || item.data.length === 0) return;
       const sensorType = getSensorType(item.sensorId);
       if (!groups[sensorType]) {
         groups[sensorType] = [];
@@ -319,6 +325,24 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
     return result;
   }, [tabularData, siteList, predictions]);
 
+  // Sensor types that actually returned at least one table. Used to hide layers
+  // with no data from the picker and the list.
+  const typesWithData = useMemo(() => {
+    const s = new Set<string>();
+    tabularData.forEach(item => {
+      if (item.data && item.data.length > 0) {
+        s.add(getSensorType(item.sensorId).toLowerCase());
+      }
+    });
+    return s;
+  }, [tabularData, siteList]);
+
+  const visibleSensorTypes = useMemo(() => {
+    // Before the first load we don't know what has data yet — show everything.
+    if (!initialLoadDone) return sensorTypes;
+    return sensorTypes.filter(type => typesWithData.has(type.toLowerCase()));
+  }, [sensorTypes, typesWithData, initialLoadDone]);
+
   const renderDataTable = (item: TabularDataItem) => {
     if (!item.data || item.data.length === 0) return null;
 
@@ -338,19 +362,25 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
     return (
       <div key={item.sensorId} style={{ marginBottom: "16px" }}>
         {sensorType === 'Moist' ? (
+          // One card per sensor: the table and its summed graph read as a single unit.
+          // If the sensor has no summed-graph data, drop the card and show a plain table.
           <div
-            style={{
-              border: '1px solid #d5d8f2',
-              borderRadius: '10px',
-              overflow: 'hidden',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
-              // On large screens keep the sensor card compact and centered instead of full width.
-              maxWidth: isLargeScreen ? '760px' : undefined,
-              marginLeft: isLargeScreen ? 'auto' : undefined,
-              marginRight: isLargeScreen ? 'auto' : undefined,
-            }}
+            style={
+              sumChartVisible[item.sensorId] === false
+                ? undefined
+                : {
+                    border: '1px solid #e6e6ef',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    background: '#fff',
+                    boxShadow: '0 1px 4px rgba(20, 20, 60, 0.06)',
+                    maxWidth: isLargeScreen ? '780px' : undefined,
+                    marginLeft: isLargeScreen ? 'auto' : undefined,
+                    marginRight: isLargeScreen ? 'auto' : undefined,
+                  }
+            }
           >
-            <div style={{ padding: '4px 4px 8px' }}>
+            <div style={sumChartVisible[item.sensorId] === false ? undefined : { padding: '4px 12px 14px' }}>
               <MoistTable
                 type="moistMain"
                 data={tabularDataFormatted}
@@ -360,10 +390,15 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
                 daysToRefill={predictions[item.sensorId]}
               />
             </div>
+            {/* Renders nothing when the sensor has no summed-graph data. */}
             <SumChartCard
               sensorId={item.sensorId}
-              label={item.label}
               onOpenChart={() => openMoistChart(item)}
+              onChartVisibilityChange={(visible) =>
+                setSumChartVisible((prev) =>
+                  prev[item.sensorId] === visible ? prev : { ...prev, [item.sensorId]: visible }
+                )
+              }
             />
           </div>
         ) : sensorType === 'SoilTemp' ? (
@@ -414,7 +449,7 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
               labelPlacement="start"
               style={{ flex: 1, minWidth: "200px" }}
             >
-              {sensorTypes.map((type) => (
+              {visibleSensorTypes.map((type) => (
                 <IonSelectOption key={type} value={type}>
                   {getDisplayName(type)}
                 </IonSelectOption>

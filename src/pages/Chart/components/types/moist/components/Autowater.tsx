@@ -99,8 +99,22 @@ export const Autowater = (props: AutowaterProps) => {
   }
   const setNewAutowaterData = async () => {
     setIsAutowaterLoading(true)
-    const newAutowaterData = await getAutowaterData(props.sensorId)
-    setAutowaterData(newAutowaterData.data)
+    try {
+      const newAutowaterData = await getAutowaterData(props.sensorId)
+      const data = newAutowaterData?.data
+      if (data && data.valve) {
+        // effect on [autowaterData] clears the loading flag and computes irrigationNeeded
+        setAutowaterData(data)
+      } else {
+        // No autowater data for this sensor -> show the standby notice
+        setAutowaterData(null)
+        setIsAutowaterLoading(false)
+      }
+    } catch (err) {
+      console.error(`[Autowater] Failed to load autowater data for sensorId=${props.sensorId}:`, err)
+      setAutowaterData(null)
+      setIsAutowaterLoading(false)
+    }
   }
 
   return (
@@ -113,7 +127,7 @@ export const Autowater = (props: AutowaterProps) => {
           <IonSpinner name="circular" className={s.autowaterLoading}></IonSpinner>
         ) : (
           <div className={s.autowaterModalWrapper} ref={contentRef}>
-            {autowaterData !== null ? (
+            {autowaterData !== null && autowaterData.valve ? (
               <div>
                 <h2>AutoWATER {autowaterData.valve.enabled ? 'Enabled' : 'Disabled'}</h2>
                 <IonText className={`${s.autowaterModalText} ${s.autowaterModalTextOne}`}>Irrigation
@@ -170,7 +184,7 @@ export const Autowater = (props: AutowaterProps) => {
               </div>
             ) : (
               <div>
-                <IonTitle>Auto water is not set up</IonTitle>
+                <IonTitle>Standby: Data is being re routed</IonTitle>
               </div>
             )}
           </div>

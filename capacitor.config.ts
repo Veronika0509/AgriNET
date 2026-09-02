@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.agrinet.app',
-  appName: 'AgriNET',
+  appId: 'com.agrinet.app.v2',
+  appName: 'AgriNET V2',
   webDir: 'dist',
   server: {
     androidScheme: 'https'

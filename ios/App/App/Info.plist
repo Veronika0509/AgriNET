@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>AgriNET</string>
+        <string>AgriNET V2</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -28,7 +28,7 @@
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
@@ -49,5 +49,7 @@
   	<string>AgriNET uses your location to show your current position on the farm map.</string>
   <key>NSCameraUsageDescription</key>
   	<string>AgriNET uses the camera to scan QR codes on field equipment and sensors.</string>
+  <key>ITSAppUsesNonExemptEncryption</key>
+  	<false/>
 </dict>
 </plist>

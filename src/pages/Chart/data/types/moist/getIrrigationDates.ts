@@ -17,14 +17,25 @@ export const getIrrigationDates = async (
   try {
     const idForIrrigationDataRequest = await axios.get(`https://app.agrinet.us/api/autowater/${sensorId}`)
     setIsIrrigationDataIsLoading(true)
-    
-    if (idForIrrigationDataRequest.data === '') {
+
+    const autowaterData = idForIrrigationDataRequest.data as { valve?: { sensorId?: string } } | string | null
+
+    // No autowater set up (empty response) OR the response has no usable valve id.
+    // Either way there are no irrigation dates — but the charts must still render, so
+    // always resolve fullDatesArray instead of leaving it undefined.
+    if (
+      autowaterData === '' ||
+      autowaterData == null ||
+      typeof autowaterData !== 'object' ||
+      !autowaterData.valve ||
+      !autowaterData.valve.sensorId
+    ) {
       setIsIrrigationButtons(false)
       setIsIrrigationDataIsLoading(false)
       setFullDatesArray([])
     } else {
       setIsIrrigationDataIsLoading(false)
-      const idForIrrigationData = (idForIrrigationDataRequest.data as { valve: { sensorId: string } }).valve.sensorId
+      const idForIrrigationData = autowaterData.valve.sensorId
       const response = await getValveData(idForIrrigationData, userId)
       if (response.data.length !== 0) {
         let index: number = 0
@@ -65,6 +76,11 @@ export const getIrrigationDates = async (
       }
     }
   } catch (error) {
-    // Error handling
+    // Autowater/valve request failed — don't leave the chart update chain blocked.
+    // Resolve fullDatesArray so the main and sum charts still render (without irrigation markers).
+    console.error(`[getIrrigationDates] failed for sensorId=${sensorId}:`, error)
+    setIsIrrigationButtons(false)
+    setIsIrrigationDataIsLoading(false)
+    setFullDatesArray([])
   }
 }
