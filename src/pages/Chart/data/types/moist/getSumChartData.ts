@@ -16,11 +16,8 @@ export const getSumChartData = async (sensorId: string, historicMode: boolean, d
       nocache: Date.now()
     }
 
-  console.log('[moist sum chart] request params:', params)
-
   try {
     const response = await axios.get('https://app.agrinet.us/api/chart/m-sum?v=43', { params })
-    console.log('[moist sum chart] response data:', response.data)
     return response
   } catch (err) {
     const axiosErr = err as { response?: { status?: number; data?: unknown }; message?: string }

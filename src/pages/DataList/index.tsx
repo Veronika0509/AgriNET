@@ -61,8 +61,6 @@ const freshnessColors: Record<string, string> = {
   'outdated': '#000000FF'
 };
 
-const STORAGE_KEY = 'dataList_selectedTypes';
-
 const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
   const {
     userId,
@@ -110,7 +108,6 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
 
   const sensorTypes = useMemo(() => {
     const typesMap = new Map<string, string>();
-    console.log(siteList)
     siteList.forEach((site: any) => {
       if (site.layers && Array.isArray(site.layers)) {
         site.layers.forEach((layer: any) => {
@@ -124,9 +121,11 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
         });
       }
     });
-    return Array.from(typesMap.values())
+    const allLayerNames = Array.from(typesMap.values());
+    const implemented = allLayerNames
       .filter(name => implementedMapTypes.has(name.toLowerCase()))
       .sort();
+    return implemented;
   }, [siteList]);
 
   const getDisplayName = (type: string) => {
@@ -141,24 +140,25 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
     return displayNames[type] || type;
   };
 
-  const fetchAllTypes = async (types: string[]) => {
-    if (types.length === 0) {
-      console.log('No sensor types available');
+  // Always fetches every available type — the dropdown selection only controls
+  // what's shown from the already-fetched data (see groupedData), it never
+  // triggers its own request.
+  const fetchData = async () => {
+    if (sensorTypes.length === 0) {
       return;
     }
 
-    const layers = types.join(',');
-    console.log('Fetching tabular data for all types:', layers);
+    const layers = sensorTypes.join(',');
+    const requestUrl = 'https://app.agrinet.us/api/chart/tabular-data-by-layers';
+    const requestParams = { layers, userId };
+    console.log('[DataList] request:', requestUrl, requestParams);
     setLoading(true);
 
     try {
-      const response = await axios.get('https://app.agrinet.us/api/chart/tabular-data-by-layers', {
-        params: { layers, userId },
+      const response = await axios.get(requestUrl, {
+        params: requestParams,
       });
-      console.log('Tabular data response:', response.data);
-      console.log('[DataList] items:', response.data.items);
       setTabularData(response.data.items || []);
-      setSelectedTypes(types);
       setError(null);
     } catch (err) {
       console.error('Error fetching tabular data:', err);
@@ -171,32 +171,11 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
 
   useEffect(() => {
     if (sensorTypes.length > 0 && userId && !initialLoadDone) {
-      const savedTypes = localStorage.getItem(STORAGE_KEY);
-      if (savedTypes) {
-        try {
-          const parsed = JSON.parse(savedTypes);
-          const validTypes = parsed.filter((t: string) =>
-            sensorTypes.some(st => st.toLowerCase() === t.toLowerCase())
-          );
-          if (validTypes.length > 0) {
-            fetchAllTypes(validTypes);
-            setInitialLoadDone(true);
-            return;
-          }
-        } catch (e) {
-          console.error('Error parsing saved types:', e);
-        }
-      }
-      fetchAllTypes(sensorTypes);
+      fetchData();
+      setSelectedTypes(sensorTypes);
       setInitialLoadDone(true);
     }
   }, [sensorTypes, userId, initialLoadDone]);
-
-  useEffect(() => {
-    if (selectedTypes.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(selectedTypes));
-    }
-  }, [selectedTypes]);
 
   useEffect(() => {
     if (!tabularData.length || !userId) return;
@@ -225,32 +204,6 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
   const handleBack = () => {
     setPage(0);
     history.replace('/menu');
-  };
-
-  const fetchTabularData = async () => {
-    if (selectedTypes.length === 0) {
-      console.log('No sensor types selected');
-      return;
-    }
-
-    const layers = selectedTypes.join(',');
-    console.log('Fetching tabular data for layers:', layers);
-    setLoading(true);
-
-    try {
-      const response = await axios.get('https://app.agrinet.us/api/chart/tabular-data-by-layers', {
-        params: { layers, userId },
-      });
-      console.log('Tabular data response:', response.data);
-      setTabularData(response.data.items || []);
-      setError(null);
-    } catch (err) {
-      console.error('Error fetching tabular data:', err);
-      setError('Failed to load data');
-      setTabularData([]);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const markerTypeMap: Record<string, string> = {
@@ -314,34 +267,20 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
       });
     }
 
+    // Groups always cover every fetched type — the dropdown selection only
+    // toggles their visibility below (see `selected`), it never removes them
+    // from the tree, so mounted chart components (SumChartCard) don't get
+    // torn down and refetched just from checking/unchecking a type.
     const result = typeOrder
       .filter(type => groups[type] && groups[type].length > 0)
       .map(type => ({
         type,
         displayName: typeDisplayNames[type] || type,
-        items: groups[type]
+        items: groups[type],
+        selected: selectedTypes.some(t => t.toLowerCase() === type.toLowerCase()),
       }));
-    console.log('[DataList] groupedData:', result);
     return result;
-  }, [tabularData, siteList, predictions]);
-
-  // Sensor types that actually returned at least one table. Used to hide layers
-  // with no data from the picker and the list.
-  const typesWithData = useMemo(() => {
-    const s = new Set<string>();
-    tabularData.forEach(item => {
-      if (item.data && item.data.length > 0) {
-        s.add(getSensorType(item.sensorId).toLowerCase());
-      }
-    });
-    return s;
-  }, [tabularData, siteList]);
-
-  const visibleSensorTypes = useMemo(() => {
-    // Before the first load we don't know what has data yet — show everything.
-    if (!initialLoadDone) return sensorTypes;
-    return sensorTypes.filter(type => typesWithData.has(type.toLowerCase()));
-  }, [sensorTypes, typesWithData, initialLoadDone]);
+  }, [tabularData, siteList, predictions, selectedTypes]);
 
   const renderDataTable = (item: TabularDataItem) => {
     if (!item.data || item.data.length === 0) return null;
@@ -449,13 +388,13 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
               labelPlacement="start"
               style={{ flex: 1, minWidth: "200px" }}
             >
-              {visibleSensorTypes.map((type) => (
+              {sensorTypes.map((type) => (
                 <IonSelectOption key={type} value={type}>
                   {getDisplayName(type)}
                 </IonSelectOption>
               ))}
             </IonSelect>
-            <IonButton size="default" onClick={fetchTabularData}>
+            <IonButton size="default" onClick={fetchData}>
               Update
             </IonButton>
           </div>
@@ -474,7 +413,10 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
               </div>
             ) : (
               groupedData.map(group => (
-                <div key={group.type} style={{ marginBottom: "24px" }}>
+                <div
+                  key={group.type}
+                  style={{ marginBottom: "24px", display: group.selected ? undefined : "none" }}
+                >
                   <h2 style={{
                     fontSize: "18px",
                     fontWeight: "600",
@@ -492,7 +434,7 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
         </IonContent>
         <IonButton
           shape='round'
-          onClick={fetchTabularData}
+          onClick={fetchData}
           style={{
             cursor: "pointer",
             position: "fixed",
