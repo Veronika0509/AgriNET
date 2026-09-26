@@ -88,7 +88,11 @@ export const createFuelChart = (
     }));
 
     const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root.current, {
-      renderer: am5xy.AxisRendererY.new(root.current, {})
+      renderer: am5xy.AxisRendererY.new(root.current, {}),
+      // Padding so the line stroke never sits exactly on the plot edge and
+      // gets visually clipped by the chart container.
+      extraMin: 0.05,
+      extraMax: 0.05,
     }));
 
 // Add series

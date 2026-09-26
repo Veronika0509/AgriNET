@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { IonSpinner } from '@ionic/react';
+import { IonSpinner, isPlatform } from '@ionic/react';
 import * as am5 from '@amcharts/amcharts5';
 import { getSumChartData } from '../../Chart/data/types/moist/getSumChartData';
 import { createAdditionalChart } from '../../Chart/functions/types/moist/createAdditionalChart';
+import { formatDate } from '../../Chart/functions/formatDate';
 
 interface SumChartCardProps {
   sensorId: string;
@@ -13,6 +14,13 @@ interface SumChartCardProps {
 }
 
 const noop = () => {};
+
+// This card is a compact preview (the full range is a tap away on the Chart page).
+// Phones/tablets (native app or a touch browser - isPlatform('mobile') checks for a
+// coarse pointer, so it's unaffected by just resizing a desktop browser window) get a
+// shorter week so the card stays compact; real computers keep the fuller two-week view.
+const SUM_CHART_DAYS_MOBILE = 7;
+const SUM_CHART_DAYS_DESKTOP = 14;
 
 // Colour of the "Sum Average" column in MoistTable / the sum series stroke (0x6771DC).
 // Reused here so the graph section visually ties back to that table.
@@ -38,6 +46,7 @@ export const SumChartCard: React.FC<SumChartCardProps> = ({
   const [loading, setLoading] = useState(true);
   const [empty, setEmpty] = useState(false);
   const [isLargeScreen] = useState(window.innerWidth >= LARGE_SCREEN_MIN_WIDTH);
+  const [sumChartDays] = useState(isPlatform('mobile') ? SUM_CHART_DAYS_MOBILE : SUM_CHART_DAYS_DESKTOP);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,7 +55,13 @@ export const SumChartCard: React.FC<SumChartCardProps> = ({
       setLoading(true);
       setEmpty(false);
       try {
-        const response = await getSumChartData(sensorId, false);
+        // getSumChartData only honors a custom `days` value when `endDate` is also
+        // passed (see its default branch), so both are supplied here. The API's
+        // endDate is exclusive of "today" - the rest of the app always requests it as
+        // tomorrow's date (see updateMoistChartWithNewDates.ts) - so mirror that here.
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const response = await getSumChartData(sensorId, false, sumChartDays, formatDate(tomorrow));
         const chartData = response?.data?.data ?? [];
         const budgetLines = response?.data?.budgetLines ?? [];
 

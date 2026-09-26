@@ -159,6 +159,10 @@ export const createMainChart = (props: CreateMainChartProps): void => {
     const yAxis = chart.yAxes.push(
       am5xy.ValueAxis.new(props.root.current, {
         renderer: am5xy.AxisRendererY.new(props.root.current, {}),
+        // Padding so the line stroke never sits exactly on the plot edge and
+        // gets visually clipped by the chart container.
+        extraMin: 0.05,
+        extraMax: 0.05,
       }),
     )
 

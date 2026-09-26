@@ -135,13 +135,27 @@ export const createMoistChartForOverlay = async (type: string, chartData: MoistC
     tooltip: am5.Tooltip.new(root, {})
   }));
 
-  const maximum = chartData.budgetLines[0].value > 0 ? chartData.budgetLines[0].value : undefined
+  // Budget lines define a *suggested* scale, but actual sensor values can fall
+  // outside them. With strictMinMax the axis previously locked to the budget
+  // range exactly, so any data point beyond it was pushed off the plot area
+  // and the line appeared clipped by the chart's edge. Widen min/max to also
+  // cover the real data range (plus extraMin/extraMax padding) so the full
+  // line always fits.
+  const dataValues = chartData.data
+    .map((item: ChartDataItem) => item.SumAve)
+    .filter((value): value is number => typeof value === 'number' && !Number.isNaN(value))
+  const budgetMax = chartData.budgetLines[0].value > 0 ? chartData.budgetLines[0].value : undefined
   const refillValue = chartData.budgetLines[4].value
-  const minimum = refillValue > 0 ? refillValue * 0.9 : undefined
+  const budgetMin = refillValue > 0 ? refillValue * 0.9 : undefined
+  const bounds = [budgetMax, budgetMin, ...dataValues].filter((value): value is number => value !== undefined)
+  const maximum = bounds.length ? Math.max(...bounds) : undefined
+  const minimum = bounds.length ? Math.min(...bounds) : undefined
   const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
     min: minimum,
     max: maximum,
     strictMinMax: true,
+    extraMin: 0.05,
+    extraMax: 0.05,
     renderer: am5xy.AxisRendererY.new(root, {
       pan: "zoom",
     })

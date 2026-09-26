@@ -39,7 +39,7 @@ const CommentsPage: React.FC<CommentsPageProps> = ({ userId, setPage }) => {
           <IonTitle>Comments</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent style={{ "--background": "white" }}>
+      <IonContent style={{ "--background": "white", "--padding-bottom": "calc(var(--bottom-menu-height, 56px) + 12px)" }}>
         <div style={{ height: "100%", padding: "16px" }}>
           <Comments userId={userId} />
         </div>

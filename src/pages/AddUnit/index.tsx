@@ -114,7 +114,7 @@ const AddUnitPage: React.FC<AddUnitPageProps> = (props) => {
           <IonTitle>Add Unit</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent style={{ "--background": "white" }}>
+      <IonContent style={{ "--background": "white", "--padding-bottom": "calc(var(--bottom-menu-height, 56px) + 12px)" }}>
         <div style={{ height: "100%"}} >
           {React.createElement(AddUnitContainer as any, {
             userId: props.userId,

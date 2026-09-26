@@ -139,11 +139,38 @@ export const createAdditionalChart = (
     }));
 
     const refillLine = chartType === 'sum' ? getBudgetLine(budgetLines, 4) : undefined
-    const sumChartMin = refillLine && typeof refillLine.value === 'number' && refillLine.value > 0
+    const budgetBasedMin = refillLine && typeof refillLine.value === 'number' && refillLine.value > 0
       ? refillLine.value * 0.98
       : undefined
+    // Setting yAxis `min` always overrides the real lowest data value, even without
+    // strictMinMax (amCharts just hard-clamps to it). If the sum series ever dips below
+    // the refill-line-based min above, that part of the line would be pushed below the
+    // plot area and disappear behind the chart's edge. Clamp the min down to the actual
+    // lowest SumAve value across all plotted series so the axis floor is never higher
+    // than any point the line needs to draw.
+    let sumChartMin = budgetBasedMin
+    if (chartType === 'sum' && budgetBasedMin !== undefined) {
+      const prefixes = ['']
+      if (historicMode) prefixes.push('H_')
+      if (historicMode && showForecast) prefixes.push('P_')
+      let actualMin = Infinity
+      chartData.forEach((chartDataItem: ChartDataItem) => {
+        prefixes.forEach((prefix) => {
+          const value = chartDataItem[prefix + 'SumAve']
+          if (typeof value === 'number' && value < actualMin) {
+            actualMin = value
+          }
+        })
+      })
+      if (actualMin !== Infinity) {
+        sumChartMin = Math.min(budgetBasedMin, actualMin)
+      }
+    }
     const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(rootInstance, {
       renderer: am5xy.AxisRendererY.new(rootInstance, {}),
+      // Small headroom so the stroke itself never sits exactly on the plot edge.
+      extraMin: 0.05,
+      extraMax: 0.05,
       ...(sumChartMin !== undefined ? { min: sumChartMin } : {})
     }));
 

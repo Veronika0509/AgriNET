@@ -724,7 +724,7 @@ const MapPage: React.FC<MapProps> = (props) => {
         toggleLayerList={layerListState.toggleLayerList}
       />
       <IonContent className={s.ionContent} style={{ "--background": "white" }}>
-        <div style={{ display: "flex", flexDirection: "column", height: "100%", paddingBottom: '56px' }}>
+        <div style={{ display: "flex", flexDirection: "column", height: "100%", paddingBottom: 'var(--bottom-menu-height, 56px)' }}>
           <div
             className={activeTab === "map" ? undefined : s.contentWrapper}
             style={{ flex: 1, position: "relative" }}

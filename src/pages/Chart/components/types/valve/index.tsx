@@ -131,7 +131,7 @@ export const ValveChartPage = (props: ValveChartPageProps) => {
 
 
   return (
-    <IonContent className={s.valveChartPage} style={{'--padding-bottom': '56px'} as React.CSSProperties}>
+    <IonContent className={s.valveChartPage} style={{'--padding-bottom': 'calc(var(--bottom-menu-height, 56px) + 12px)'} as React.CSSProperties}>
       <div className={s.tableContainer}>
         <table className={s.table}>
           <thead>

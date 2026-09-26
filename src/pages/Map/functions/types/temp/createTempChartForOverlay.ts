@@ -132,6 +132,10 @@ export const createTempChartForOverlay = async (
     tooltip: am5.Tooltip.new(root, {})
   }));
   const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+    // Padding so the line stroke never sits exactly on the plot edge and
+    // gets visually clipped by the chart container.
+    extraMin: 0.05,
+    extraMax: 0.05,
     renderer: am5xy.AxisRendererY.new(root, {
       pan: "zoom"
     })

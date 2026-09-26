@@ -161,7 +161,7 @@ export const WxetChartPage = (props: any) => {
   window.addEventListener("resize", () => setDynamicChartHeight('wxetChartDiv'))
 
   return (
-    <IonContent style={{'--padding-bottom': '56px'} as React.CSSProperties}>
+    <IonContent style={{'--padding-bottom': 'calc(var(--bottom-menu-height, 56px) + 12px)'} as React.CSSProperties}>
       <div className={s.wrapper}>
         <div data-chart-section="top">
           <TopSection

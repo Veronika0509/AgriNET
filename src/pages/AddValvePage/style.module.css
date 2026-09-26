@@ -3,7 +3,10 @@
   --padding-start: 16px;
   --padding-end: 16px;
   --padding-top: 16px;
-  --padding-bottom: 16px;
+  /* The app's fixed bottom menu (home/budget/info) sits on top of this page, so its
+     measured height (--bottom-menu-height, set in App.tsx) has to be added on top of
+     the page's own bottom spacing or content ends up hidden behind it. */
+  --padding-bottom: calc(var(--bottom-menu-height, 56px) + 16px);
 }
 
 /* Create Modal Styles */
@@ -117,7 +120,7 @@
     --padding-start: 24px;
     --padding-end: 24px;
     --padding-top: 24px;
-    --padding-bottom: 24px;
+    --padding-bottom: calc(var(--bottom-menu-height, 56px) + 24px);
   }
 
   .createButton {
@@ -131,6 +134,6 @@
     --padding-start: 32px;
     --padding-end: 32px;
     --padding-top: 32px;
-    --padding-bottom: 32px;
+    --padding-bottom: calc(var(--bottom-menu-height, 56px) + 32px);
   }
 }

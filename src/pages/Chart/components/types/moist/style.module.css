@@ -1,6 +1,10 @@
 .container {
   --background: #fff;
-  --padding-bottom: 56px;
+  /* Falls back to 56px (the old hardcoded guess) if the real fixed bottom menu
+     (home/budget/info in App.tsx) hasn't reported its height yet - see --bottom-menu-height
+     in App.tsx. That menu is `position: fixed` on top of the page, so without this the
+     chart's legend/bottom of the graph ends up hidden behind it. */
+  --padding-bottom: calc(var(--bottom-menu-height, 56px) + 12px);
 }
 
 .wrapper {
