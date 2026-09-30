@@ -5,6 +5,7 @@ import { updateCommentDate } from "../../../components/AddComment/data/updateCom
 import { removeComment } from "../../../components/AddComment/data/removeComment"
 import { UserId, SensorId } from '../../../../../types';
 import { getZoomMode } from "../../zoomModeStore";
+import { applyLegendFont } from "../../legendFont";
 
 // Интерфейсы для данных графика
 interface TempChartData {
@@ -695,6 +696,8 @@ export const createTempChart = (
         textAlign: "right",
       })
     }
+
+    applyLegendFont(legend)
 
     legend.itemContainers.template.events.on("pointerdown", (ev: any) => {
       const clickedSeries = ev.target.dataItem?.dataContext

@@ -176,21 +176,6 @@ const TopSection = (props: TopSectionProps) => {
 
         {(props.type === "temp" || props.type === "wxet") && (
           <div className={`${s.topSection_wxetAddAlarm} ${s.topSection_tempAddAlarm}`}>
-            {props.type === "wxet" && (
-              <div className={s.topSection_chartsSection}>
-                <span className={s.topSection_sectionLabel}>Charts:</span>
-                <div className={s.topSection_chartsButtons}>
-                  <IonButton
-                    fill={props.batteryChartShowed ? "outline" : "solid"}
-                    size="small"
-                    className={s.topSection_chartButton}
-                    onClick={() => props.setBatteryChartShowed?.(!props.batteryChartShowed)}
-                  >
-                    Battery
-                  </IonButton>
-                </div>
-              </div>
-            )}
             <div
               className={`${s.topSection_forecastSection} ${props.type === 'wxet' && s.topSection_wxetForecastSection} ${props.type === 'temp' && s.topSection_tempForecastSection}`}>
               <span className={s.topSection_sectionLabel}>Forecast:</span>
@@ -232,7 +217,7 @@ const TopSection = (props: TopSectionProps) => {
           </div>
         )}
       </div>
-      <div className={s.topSection_secondaryRow}>
+      <div className={`${s.topSection_secondaryRow} ${props.type === "temp" ? s.topSection_tempSecondaryRow : ''}`}>
         <div className={`${s.topSection_modesSection} ${(props.type === 'wxet' || props.type === 'temp') && s.topSection_wxetModesSection}`}>
           <span className={s.topSection_sectionLabel}>Modes:</span>
           <div className={s.topSection_togglesGroup}>
@@ -273,6 +258,21 @@ const TopSection = (props: TopSectionProps) => {
             </IonToggle>
           </div>
         </div>
+        {props.type === "temp" && (
+          <div className={`${s.topSection_chartsSection} ${s.topSection_tempChartsSection}`}>
+            <span className={s.topSection_sectionLabel}>Charts:</span>
+            <div className={s.topSection_chartsButtons}>
+              <IonButton
+                fill={props.batteryChartShowed ? "outline" : "solid"}
+                size="small"
+                className={s.topSection_chartButton}
+                onClick={() => props.setBatteryChartShowed?.(!props.batteryChartShowed)}
+              >
+                Battery
+              </IonButton>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

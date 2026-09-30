@@ -267,6 +267,26 @@ const DataListPage: React.FC<DataListPageProps> = ({ setPage, siteList }) => {
       });
     }
 
+    // Sort Temp RH and Weather Station groups by current temperature (lowest first).
+    // The first row is the latest reading; sensors without a temperature go last.
+    const sortByLatestTemp = (items: TabularDataItem[], tempKey: string) => {
+      const getTemp = (item: TabularDataItem) => {
+        const value = item.data[0]?.[tempKey];
+        const num = value === null || value === undefined || value === '' ? NaN : Number(value);
+        return Number.isFinite(num) ? num : undefined;
+      };
+      items.sort((a, b) => {
+        const aTemp = getTemp(a);
+        const bTemp = getTemp(b);
+        if (aTemp === undefined && bTemp === undefined) return 0;
+        if (aTemp === undefined) return 1;
+        if (bTemp === undefined) return -1;
+        return aTemp - bTemp;
+      });
+    };
+    if (groups['SoilTemp']) sortByLatestTemp(groups['SoilTemp'], 'MS 1');
+    if (groups['WXET']) sortByLatestTemp(groups['WXET'], 'Temp');
+
     // Groups always cover every fetched type — the dropdown selection only
     // toggles their visibility below (see `selected`), it never removes them
     // from the tree, so mounted chart components (SumChartCard) don't get

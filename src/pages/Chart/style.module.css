@@ -350,6 +350,37 @@
   }
 }
 
+/* Temp/RH: Charts (Battery) right after Modes (Zoom), on the same row at any width */
+.topSection_secondaryRow.topSection_tempSecondaryRow {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 24px;
+}
+
+.topSection_chartsSection.topSection_tempChartsSection {
+  order: 0;
+  width: auto;
+  margin-left: 0;
+}
+
+.topSection_tempSecondaryRow .topSection_modesSection {
+  margin-top: 0;
+}
+
+/* Temp/RH, 480px and below: keep the Zoom toggle on the same line as the "Modes:" label */
+@media (max-width: 480px) {
+  .topSection_tempSecondaryRow .topSection_modesSection {
+    flex-wrap: nowrap;
+  }
+  .topSection_tempSecondaryRow .topSection_togglesGroup {
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+  }
+}
+
 
 /*  Datetime Picker  */
 .datetimePicker_wrapper {

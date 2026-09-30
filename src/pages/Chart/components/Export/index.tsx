@@ -23,10 +23,13 @@ import {formatDateToISO} from "./functions/formatDate";
 interface ExportProps {
   chartCode: string,
   sensorId: string,
-  userId: string | number
+  userId: string | number,
+  // Dates currently selected in the chart page TopSection
+  startDate?: string,
+  endDate?: string
 }
 
-export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => {
+export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId, startDate, endDate}) => {
   const toDateValue: string = formatDateToISO(new Date())
   const fromDateValue = new Date(toDateValue)
   const [fromDate, setFromDate] = useState(formatDateToISO(new Date(fromDateValue.setDate(new Date(toDateValue).getDate() - 30))))
@@ -34,6 +37,8 @@ export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => 
   const [reportDuration, setRepostDuration] = useState(30)
   const [format, setFormat] = useState('Comma-separated')
   const [validationResult, setValidationResult] = useState<string | undefined>(undefined)
+  // true once the user changes a date inside the modal; otherwise the TopSection dates are used
+  const [isDateEditedInModal, setIsDateEditedInModal] = useState(false)
   const mModal = useRef<HTMLIonModalElement>(null);
   const mstModal = useRef<HTMLIonModalElement>(null);
   const mSumModal = useRef<HTMLIonModalElement>(null);
@@ -63,9 +68,26 @@ export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => 
     }
   }, [fromDate, toDate]);
 
+  // Each time the modal opens, start from the dates chosen in the TopSection
+  const onModalWillPresent = () => {
+    setIsDateEditedInModal(false)
+    if (startDate && !isNaN(new Date(startDate).getTime())) {
+      setFromDate(formatDateToISO(new Date(startDate)))
+    }
+    if (endDate && !isNaN(new Date(endDate).getTime())) {
+      setToDate(formatDateToISO(new Date(endDate)))
+    }
+  }
+
+  const getTopSectionDate = (date: string | undefined, fallback: string) =>
+    date && !isNaN(new Date(date).getTime()) ? formatDateToISO(new Date(date)) : fallback
+
   const onDownloadClick = async () => {
-    const fromDateForFile = fromDate.replace('T', '%20').substring(0, 18)
-    const toDateForFile = toDate.replace('T', '%20').substring(0, 18)
+    // Unless the user picked other dates in the modal, export exactly the TopSection range
+    const exportFromDate = isDateEditedInModal ? fromDate : getTopSectionDate(startDate, fromDate)
+    const exportToDate = isDateEditedInModal ? toDate : getTopSectionDate(endDate, toDate)
+    const fromDateForFile = exportFromDate.replace('T', '%20').substring(0, 18)
+    const toDateForFile = exportToDate.replace('T', '%20').substring(0, 18)
     const url = `https://app.agrinet.us/api/chart/export?sensorId=${sensorId}`
       + `&chartCode=${chartCode}`
       + `&fromDate=${fromDateForFile}`
@@ -81,7 +103,7 @@ export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => 
         <IonIcon icon={download} slot="start"/>
         Export
       </IonButton>
-      <IonModal trigger={chartCode} ref={modalRefs[chartCode]}>
+      <IonModal trigger={chartCode} ref={modalRefs[chartCode]} onWillPresent={onModalWillPresent}>
         <IonContent className={s.export_modalContent}>
           <div className={s.mixed_modalWrapper}>
             <div className={s.export_modalHeader}>
@@ -93,8 +115,8 @@ export const Export: React.FC<ExportProps> = ({chartCode, sensorId, userId}) => 
             </div>
             <div className={s.export_modalBody}>
               <IonItem className={s.export_item}>
-                <ExportDateTime type={'from'} value={fromDate} setValue={(v) => { if (v !== null) setFromDate(v) }}/>
-                <ExportDateTime type={'to'} value={toDate} setValue={(v) => { if (v !== null) setToDate(v) }}/>
+                <ExportDateTime type={'from'} idPrefix={chartCode} value={fromDate} setValue={(v) => { if (v !== null) { setFromDate(v); setIsDateEditedInModal(true) } }}/>
+                <ExportDateTime type={'to'} idPrefix={chartCode} value={toDate} setValue={(v) => { if (v !== null) { setToDate(v); setIsDateEditedInModal(true) } }}/>
               </IonItem>
               <div className={s.export_container}>
                 <IonText color='light'>Format</IonText>

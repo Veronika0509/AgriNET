@@ -1143,7 +1143,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
                 chartCode={CHART_CODES.SOIL_TEMP}
                 isLoading={tabularData.soilTemp.isLoading}
               />
-              <Export chartCode={CHART_CODES.SOIL_TEMP} sensorId={props.sensorId} userId={props.userId}/>
+              <Export chartCode={CHART_CODES.SOIL_TEMP} sensorId={props.sensorId} userId={props.userId} startDate={startDate} endDate={endDate}/>
               <AddCommentButton
                 addCommentItemShowed={addCommentItemShowed.soilTemp}
                 setAddCommentItemShowed={(value: boolean) => updateAddCommentItemShowed("soilTemp", value)}
@@ -1204,7 +1204,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
                   chartCode={CHART_CODES.MAIN}
                   isLoading={tabularData.main.isLoading}
                 />
-                <Export chartCode={CHART_CODES.MAIN} sensorId={props.sensorId} userId={props.userId}/>
+                <Export chartCode={CHART_CODES.MAIN} sensorId={props.sensorId} userId={props.userId} startDate={startDate} endDate={endDate}/>
                 <AddCommentButton
                   addCommentItemShowed={addCommentItemShowed.main}
                   setAddCommentItemShowed={(value: boolean) => updateAddCommentItemShowed("main", value)}
@@ -1285,7 +1285,7 @@ export const MoistChartPage = (props: MoistChartPageProps) => {
               chartCode={CHART_CODES.SUM}
               isLoading={tabularData.sum.isLoading}
             />
-            <Export chartCode={CHART_CODES.SUM} sensorId={props.sensorId} userId={props.userId}/>
+            <Export chartCode={CHART_CODES.SUM} sensorId={props.sensorId} userId={props.userId} startDate={startDate} endDate={endDate}/>
             <AddCommentButton
               addCommentItemShowed={addCommentItemShowed.sum}
               setAddCommentItemShowed={(value: boolean) => updateAddCommentItemShowed("sum", value)}

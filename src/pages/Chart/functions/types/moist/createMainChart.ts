@@ -5,6 +5,7 @@ import { removeComment } from "../../../components/AddComment/data/removeComment
 import { updateCommentDate } from "../../../components/AddComment/data/updateCommentDate"
 import { TimeSeriesDataItem } from "../../../../../types/api"
 import { getZoomMode } from "../../zoomModeStore"
+import { applyLegendFont } from "../../legendFont";
 
 type ChartDataItem = TimeSeriesDataItem;
 
@@ -1037,10 +1038,7 @@ export const createMainChart = (props: CreateMainChartProps): void => {
       paddingRight: 5,
     })
 
-    legend.labels.template.setAll({
-      fontSize: 13,
-      fontWeight: "400",
-    })
+    applyLegendFont(legend)
 
     // Remove value labels
     legend.valueLabels.template.set("forceHidden", true)

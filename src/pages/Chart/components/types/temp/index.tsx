@@ -21,9 +21,12 @@ import {getDaysFromChartData} from "../../../functions/getDaysFromChartData";
 import {setDynamicChartHeight} from "../../../functions/chartHeightCalculator";
 import { loadChartPreferences } from "../../../../../utils/chartPreferences";
 import { setZoomMode as setGlobalZoomMode } from "../../../functions/zoomModeStore";
+import {createAdditionalChart} from "../../../functions/types/moist/createAdditionalChart";
 
 export const TempChartPage = (props: any) => {
   const root = useRef<any>(null);
+  const batteryRoot = useRef<any>(null);
+  const [batteryChartShowed, setBatteryChartShowed] = useState<boolean>(false)
   const [currentChartData, setCurrentChartData] = useState<any>()
   const currentDate: any = getCurrentDatetime()
 
@@ -245,6 +248,16 @@ export const TempChartPage = (props: any) => {
       updateChart('sameData')
     }
   }, [zoomMode]);
+  // Battery chart: uses the battery values from the main chart data returned by the server
+  useEffect(() => {
+    if (!batteryChartShowed || !currentChartData || currentChartData.initialData) return
+    const chartDataArray = Array.isArray(currentChartData) ? currentChartData : (currentChartData?.data || [])
+    const batteryData = chartDataArray
+      .map((item: any) => ({DateTime: item.DateTime, Battery: item.Battery ?? item.battery}))
+      .filter((item: any) => item.Battery !== undefined && item.Battery !== null && item.Battery !== '')
+      .map((item: any) => ({...item, Battery: Number(item.Battery)}))
+    createAdditionalChart("battery", batteryData, batteryRoot, undefined as any, undefined as any, props.sensorId, () => {}, false, undefined as any, props.userId, () => {}, false)
+  }, [batteryChartShowed, currentChartData, zoomMode]);
   window.addEventListener("resize", () => setDynamicChartHeight('tempChartDiv'))
 
   return (
@@ -274,7 +287,16 @@ export const TempChartPage = (props: any) => {
             setDateDifferenceInDays={setDateDifferenceInDays}
             zoomMode={zoomMode}
             setZoomMode={setZoomMode}
+            batteryChartShowed={batteryChartShowed}
+            setBatteryChartShowed={setBatteryChartShowed}
+            batteryRoot={batteryRoot}
           />
+        </div>
+
+        {/* Battery Chart Section */}
+        <div style={{display: batteryChartShowed ? 'block' : 'none'}} className="ion-margin-top">
+          <h2 className="ion-text-center">Battery Volts</h2>
+          <div className={s.additionalChart} id="batteryChart"></div>
         </div>
         <div data-chart-section="main-header">
           <h2 className='ion-text-center ion-margin-top'>Temperature RH</h2>
@@ -282,7 +304,8 @@ export const TempChartPage = (props: any) => {
             <ButtonAndSpinner data={tempTabularData} setData={setTempTabularData}
                               setIsLoading={setIsTempTabularDataLoading} sensorId={props.sensorId} chartCode={chartCode}
                               isLoading={isTempTabularDataLoading}/>
-            <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId}/>
+            <Export chartCode={chartCode} sensorId={props.sensorId} userId={props.userId}
+                    startDate={startDate} endDate={endDate}/>
             <AddCommentButton
               addCommentItemShowed={tempAddCommentItemShowed}
               setAddCommentItemShowed={setTempAddCommentItemShowed}

@@ -2,6 +2,7 @@ import * as am5 from "@amcharts/amcharts5";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import { getZoomMode } from "../../zoomModeStore";
+import { applyLegendFont } from "../../legendFont";
 
 interface ChartDataItem {
   DateTime: string;
@@ -337,6 +338,8 @@ export const createWxetChart = (
         textAlign: "right"
       });
     }
+
+    applyLegendFont(legend)
 
     legend.data.setAll(chart.series.values);
 
