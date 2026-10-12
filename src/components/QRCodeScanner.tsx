@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { isPlatform, IonButton } from '@ionic/react';
-import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+import { CapacitorBarcodeScanner, CapacitorBarcodeScannerTypeHint } from '@capacitor/barcode-scanner';
 import { Html5Qrcode } from 'html5-qrcode';
 import './QRCodeScanner.css';
 
@@ -41,17 +41,8 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
           console.error('Error cleaning up scanner:', error);
         }
       }
-      if (isMobile) {
-        BarcodeScanner.showBackground();
-        BarcodeScanner.stopScan();
-        document.body.classList.remove('scanner-active');
-        document.querySelector('ion-app')?.classList.remove('scanner-active');
-        document.querySelector('ion-content')?.classList.remove('scanner-active');
-        document.querySelector('ion-modal')?.classList.remove('scanner-active');
-        document.querySelector('ion-header')?.classList.remove('scanner-active');
-      }
     };
-  }, [isMobile]);
+  }, []);
 
   // Start scanning when shouldStartScan becomes true
   useEffect(() => {
@@ -76,70 +67,30 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     }
   }, [autoStart]);
 
-  const checkPermissions = async () => {
-    if (isMobile) {
-      try {
-        const status = await BarcodeScanner.checkPermission({ force: false });
-        if (status.granted) {
-          return true;
-        }
-
-        // If not granted, request permission
-        const requestResult = await BarcodeScanner.checkPermission({ force: true });
-        if (requestResult.granted) {
-          return true;
-        }
-
-        // Permission denied
-        onScanError('Camera permission is required to scan QR codes. Please enable camera permission in your device settings.');
-        return false;
-      } catch (error) {
-        console.error('Error checking camera permissions:', error);
-        onScanError('Failed to check camera permissions');
-        return false;
-      }
-    } else {
-      // For web, we'll check permissions when starting the scanner
-      return true;
-    }
-  };
-
   const startNativeScan = async () => {
     try {
-      // Make background transparent
-      document.body.classList.add('scanner-active');
-      document.querySelector('ion-app')?.classList.add('scanner-active');
-      document.querySelector('ion-content')?.classList.add('scanner-active');
-      document.querySelector('ion-modal')?.classList.add('scanner-active');
-      document.querySelector('ion-header')?.classList.add('scanner-active');
+      // Opens the native fullscreen scanner UI (asks for camera permission itself)
+      // and resolves when a code is read
+      const result = await CapacitorBarcodeScanner.scanBarcode({
+        hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
+      });
 
-      // Wait for modal to be fully rendered with transparent background
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Start scanning
-      await BarcodeScanner.hideBackground();
-      const result = await BarcodeScanner.startScan();
-
-      if (result.hasContent) {
-        onScanSuccess(result.content);
+      if (result.ScanResult) {
+        onScanSuccess(result.ScanResult);
+      } else {
+        onScanCancel();
       }
     } catch (error) {
-      console.error('Error during native scan:', error);
-      onScanError(error instanceof Error ? error.message : String(error));
+      const message = error instanceof Error ? error.message : String(error);
+      if (/cancel/i.test(message)) {
+        onScanCancel();
+      } else {
+        console.error('Error during native scan:', error);
+        onScanError(message);
+      }
     } finally {
-      stopNativeScan();
+      setIsScanning(false);
     }
-  };
-
-  const stopNativeScan = () => {
-    BarcodeScanner.showBackground();
-    BarcodeScanner.stopScan();
-    document.body.classList.remove('scanner-active');
-    document.querySelector('ion-app')?.classList.remove('scanner-active');
-    document.querySelector('ion-content')?.classList.remove('scanner-active');
-    document.querySelector('ion-modal')?.classList.remove('scanner-active');
-    document.querySelector('ion-header')?.classList.remove('scanner-active');
-    setIsScanning(false);
   };
 
   const startWebScan = async () => {
@@ -234,22 +185,15 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   };
 
   const startScan = async () => {
-    const hasPermission = await checkPermissions();
-    if (!hasPermission) {
-      onScanError('Camera permission denied');
-      return;
-    }
-
     setIsScanning(true);
     setShouldStartScan(true);
   };
 
   const stopScan = () => {
-    if (isMobile) {
-      stopNativeScan();
-    } else {
+    if (!isMobile) {
       stopWebScan();
     }
+    setIsScanning(false);
     onScanCancel();
   };
 

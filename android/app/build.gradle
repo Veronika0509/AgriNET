@@ -1,6 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 
 android {
     namespace "com.agrinet.app"
@@ -14,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId "com.agrinet.app"
-        minSdkVersion 24
+        minSdkVersion 26
         targetSdkVersion 36
         versionCode 8
         versionName "1.0.8"
@@ -56,12 +54,6 @@ android {
     }
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-}
-
 repositories {
     flatDir {
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
@@ -78,11 +70,6 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
-    
-    // For barcode scanner camera functionality
-    implementation "androidx.camera:camera-camera2:1.5.1"
-    implementation "androidx.camera:camera-lifecycle:1.5.1"
-    implementation "androidx.camera:camera-view:1.5.1"
 }
 
 apply from: 'capacitor.build.gradle'
