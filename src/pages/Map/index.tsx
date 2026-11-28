@@ -161,6 +161,9 @@ const MapPage: React.FC<MapProps> = (props) => {
     setInvalidWxetDataContainer,
     setFuelOverlays,
     setExtlDataContainer,
+    setUniversalChartDataContainer,
+    setInvalidUniversalChartDataContainer,
+    setUniversalOverlays,
     moistChartsAmount,
     tempChartsAmount,
     valveChartsAmount,
@@ -291,6 +294,9 @@ const MapPage: React.FC<MapProps> = (props) => {
     setWxetDataContainer,
     setInvalidWxetDataContainer,
     setExtlDataContainer,
+    setUniversalOverlays,
+    setUniversalChartDataContainer,
+    setInvalidUniversalChartDataContainer,
     setCoordinatesForFitting,
     setAllCoordinatesOfMarkers,
     setAmountOfSensors,
@@ -329,6 +335,7 @@ const MapPage: React.FC<MapProps> = (props) => {
     setTempOverlays([]);
     setValveOverlays([]);
     setFuelOverlays([]);
+    setUniversalOverlays([]);
   }, [props.userId]);
 
   useEffect(() => {
@@ -397,6 +404,8 @@ const MapPage: React.FC<MapProps> = (props) => {
                 valveChartsAmount: valveChartsAmount as any,
                 setInvalidValveChartDataContainer,
                 setValveChartDataContainer,
+                setUniversalChartDataContainer,
+                setInvalidUniversalChartDataContainer,
                 amountOfSensors,
                 setAmountOfSensors,
                 setIsMarkerClicked,
@@ -451,6 +460,8 @@ const MapPage: React.FC<MapProps> = (props) => {
         valveChartsAmount: valveChartsAmount as any,
         setInvalidValveChartDataContainer,
         setValveChartDataContainer,
+        setUniversalChartDataContainer,
+        setInvalidUniversalChartDataContainer,
         amountOfSensors,
         setAmountOfSensors,
         setIsMarkerClicked,

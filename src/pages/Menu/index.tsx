@@ -64,6 +64,10 @@ const Menu: React.FC<MenuProps> = (props) => {
     props.setPage(7);
   };
 
+  const navigateToAlarms = () => {
+    props.setPage(8);
+  };
+
   const handleLogout = () => {
     logout();
     history.replace('/login');
@@ -166,12 +170,20 @@ const Menu: React.FC<MenuProps> = (props) => {
                 Data List
               </IonButton>
             </div>
-            <IonButton
-              className={`${s.menuBlockWide} ${s.menuBlock}`}
-              onClick={navigateToInfo}
-            >
-              AgriNET Contact
-            </IonButton>
+            <div className={s.menuRow}>
+              <IonButton
+                className={s.menuBlock}
+                onClick={navigateToAlarms}
+              >
+                Alarms
+              </IonButton>
+              <IonButton
+                className={s.menuBlock}
+                onClick={navigateToInfo}
+              >
+                AgriNET Contact
+              </IonButton>
+            </div>
           </div>
         </div>
       </IonContent>

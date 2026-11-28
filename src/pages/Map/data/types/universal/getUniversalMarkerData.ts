@@ -1,15 +1,25 @@
-import type { AxiosResponse } from "axios";
+import axios from "axios";
+import {
+  UNIVERSAL_MARKER_ENDPOINT,
+  UNIVERSAL_MOCK_SENSOR_IDS,
+  type UniversalMarkerResponse,
+} from "../../../config/universalMarker";
+import { mockUniversalMarkerData } from "./mockUniversalMarkerData";
 
-/**
- * SCAFFOLD. Mirror of getMoistMarkerChartData for the universal marker type.
- *
- * TODO(universal): implement once the endpoint and query params are confirmed
- * with Todd. Expected to resolve to the same shape as the other map marker
- * endpoints: { data: TimeSeriesDataItem[], battery: number | null, freshness: string }.
- */
 export const getUniversalMarkerData = async (
-  _sensorId: string,
-  _userId: string | number,
-): Promise<AxiosResponse> => {
-  throw new Error("getUniversalMarkerData: not implemented yet");
+  sensorId: string,
+  userId: string | number,
+): Promise<UniversalMarkerResponse> => {
+  if (UNIVERSAL_MOCK_SENSOR_IDS.includes(String(sensorId))) {
+    return mockUniversalMarkerData(String(sensorId));
+  }
+  const response = await axios.get<UniversalMarkerResponse>(UNIVERSAL_MARKER_ENDPOINT, {
+    params: {
+      sensorId,
+      userId,
+      'do-not-catch-error': '',
+      nocache: Date.now(),
+    },
+  });
+  return response.data;
 };

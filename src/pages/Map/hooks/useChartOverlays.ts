@@ -9,10 +9,13 @@ import { initializeTempCustomOverlay } from "../components/types/temp/TempCustom
 import { initializeValveCustomOverlay } from "../components/types/valve/ValveCustomOverlay"
 import { initializeFuelCustomOverlay } from "../components/types/wxet/FuelCustomOverlay"
 import { initializeExtlCustomOverlay } from "../components/types/extl/ExtlCustomOverlay"
+import { initializeUniversalCustomOverlay, type UniversalCustomOverlayInstance } from "../components/types/universal/UniversalCustomOverlay"
 import { createMoistChartForOverlay } from "../functions/types/moist/createMoistChartForOverlay"
 import { createTempChartForOverlay } from "../functions/types/temp/createTempChartForOverlay"
 import { createValveChartForOverlay } from "../functions/types/valve/createValveChartForOverlay"
 import { createFuelChartForOverlay } from "../functions/types/wxet/createFuelChartForOverlay"
+import { createUniversalChartForOverlay } from "../functions/types/universal/createUniversalChartForOverlay"
+import type { UniversalChartDataTuple } from "../functions/types/universal/createUniversalMarker"
 import { addOverlayToOverlaysArray } from "../functions/types/moist/addOverlayToOverlaysArray"
 import invalidChartDataImage from "../../../assets/images/invalidChartData.png"
 import type { SensorInfo } from "../components/modals/SensorInfoDialog"
@@ -103,6 +106,11 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
 
   // Extl type state
   const [extlDataContainer, setExtlDataContainer] = useState<ExtlDataContainerItem[]>([])
+
+  // Universal type state
+  const [universalChartDataContainer, setUniversalChartDataContainer] = useState<UniversalChartDataTuple[]>([])
+  const [invalidUniversalChartDataContainer, setInvalidUniversalChartDataContainer] = useState<UniversalChartDataTuple[]>([])
+  const [universalOverlays, setUniversalOverlays] = useState<UniversalCustomOverlayInstance[]>([])
 
   // Constants
   const isMoistMarkerChartDrawn: boolean = false
@@ -505,6 +513,49 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
     }
   }, [extlDataContainer])
 
+  // Universal Marker - Valid and invalid data
+  const addUniversalOverlays = (container: UniversalChartDataTuple[], isValidChartData: boolean) => {
+    const UniversalCustomOverlayExport = initializeUniversalCustomOverlay(props.isGoogleApiLoaded)
+    if (!UniversalCustomOverlayExport) return
+    container.forEach(([chartData, bounds]: UniversalChartDataTuple) => {
+      const overlay = new UniversalCustomOverlayExport(bounds, isValidChartData, chartData, setUniversalOverlays, props.onLongPress)
+      React.startTransition(() => {
+        addOverlayToOverlaysArray(
+          overlay as unknown as Parameters<typeof addOverlayToOverlaysArray>[0],
+          props.setActiveOverlays as unknown as Parameters<typeof addOverlayToOverlaysArray>[1],
+          props.map!
+        )
+      })
+    })
+  }
+
+  useEffect(() => {
+    if (universalChartDataContainer.length !== 0) {
+      addUniversalOverlays(universalChartDataContainer, true)
+    }
+  }, [universalChartDataContainer])
+
+  useEffect(() => {
+    if (invalidUniversalChartDataContainer.length !== 0) {
+      addUniversalOverlays(invalidUniversalChartDataContainer, false)
+    }
+  }, [invalidUniversalChartDataContainer])
+
+  // Universal Marker - Render charts
+  useEffect(() => {
+    if (universalOverlays.length !== 0) {
+      const roots: ChartRoot[] = []
+      universalOverlays.forEach((universalOverlay: UniversalCustomOverlayInstance) => {
+        createUniversalChartForOverlay(universalOverlay.chartData, roots, universalOverlays)
+      })
+
+      return () => {
+        roots.forEach((root) => root.dispose())
+      }
+    }
+    return undefined
+  }, [universalOverlays])
+
   return {
     // State
     moistChartDataContainer,
@@ -534,6 +585,12 @@ export const useChartOverlays = (props: UseChartOverlaysProps) => {
     setFuelOverlays,
     extlDataContainer,
     setExtlDataContainer,
+    universalChartDataContainer,
+    setUniversalChartDataContainer,
+    invalidUniversalChartDataContainer,
+    setInvalidUniversalChartDataContainer,
+    universalOverlays,
+    setUniversalOverlays,
     // Constants - return empty arrays to be populated by marker creation functions
     moistChartsAmount: [] as any[],
     tempChartsAmount: [] as any[],

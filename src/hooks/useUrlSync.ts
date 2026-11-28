@@ -30,7 +30,7 @@ export function useUrlSync(state: UrlSyncState, setters: UrlSyncSetters): UrlSyn
   const { page, siteId, chartPageType, userId } = state
   const skipNextSyncRef = useRef(false)
 
-  // State → URL sync: update browser URL when page changes (pages 1-7 only)
+  // State → URL sync: update browser URL when page changes (pages 1-8 only)
   // Page 0 is handled by React Router — back handlers must use history.replace()
   useEffect(() => {
     if (page === 0) return
@@ -59,7 +59,7 @@ export function useUrlSync(state: UrlSyncState, setters: UrlSyncSetters): UrlSyn
     if (targetPage === 0) return false
 
     // Simple pages without extra state
-    if (targetPage === 1 || targetPage === 5 || targetPage === 6 || targetPage === 7) {
+    if (targetPage === 1 || targetPage === 5 || targetPage === 6 || targetPage === 7 || targetPage === 8) {
       skipNextSyncRef.current = true
       setters.setPage(targetPage)
       return true

@@ -5,8 +5,8 @@ import {createWxetMarker} from "./types/wxet/createWxetMarker";
 import {createTempMarker} from "./types/temp/createTempMarker";
 import {createValveMarker} from "./types/valve/createValveMarker";
 import {createExtlMarker} from "./types/extl/createExtlMarker";
-import {createUniversalMarker} from "./types/universal/createUniversalMarker";
-import {UNIVERSAL_MARKER_TYPE} from "../config/universalMarker";
+import {createUniversalMarker, type UniversalChartDataTuple, type UniversalMarkerBatch} from "./types/universal/createUniversalMarker";
+import {isUniversalSensor} from "../config/universalMarker";
 import {getSensorItems} from "../../Map/data/getSensorItems";
 // import axios from "axios";
 
@@ -67,6 +67,8 @@ interface OnSiteClickProps {
   setTempChartDataContainer: (data: unknown[]) => void;
   setInvalidValveChartDataContainer: (data: unknown[]) => void;
   setValveChartDataContainer: (data: unknown[]) => void;
+  setUniversalChartDataContainer?: (data: UniversalChartDataTuple[]) => void;
+  setInvalidUniversalChartDataContainer?: (data: UniversalChartDataTuple[]) => void;
   allCoordinatesOfMarkers: { lat: number; lng: number; id: string | number; mainId: string | number }[];
   setCoordinatesForFitting: (coords: { lat: number; lng: number; id: string | number; mainId: string | number }[]) => void;
   setAllCoordinatesOfMarkers: (coords: { lat: number; lng: number; id: string | number; mainId: string | number }[]) => void;
@@ -109,13 +111,18 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
   const valveBoundsArray: unknown[] = []
   const valveInvalidChartData: unknown[] = []
   const countValve: Marker[] = []
-  // universal props (scaffold — not rendered yet)
+  // universal props
   const countUniversal: Marker[] = []
 
   props.siteList.map((site: SiteWithLayers) => {
     if (site.name === props.groupMarker.title) {
       allSensorItems.map((sensItem: any) => {
-        if (sensItem.markerType === 'moist-fuel') {
+        // Checked first: dev-mocked universal sensors keep their real markerType.
+        if (isUniversalSensor(sensItem)) {
+          if (!countUniversal.some((item: Marker) => item.id === sensItem.id)) {
+            countUniversal.push(sensItem)
+          }
+        } else if (sensItem.markerType === 'moist-fuel') {
           if (!countMoistFuel.some((item: Marker) => item.id === sensItem.id)) {
             countMoistFuel.push(sensItem)
           }
@@ -134,10 +141,6 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
         } else if (sensItem.markerType === 'graphic' || sensItem.markerType === 'extl') {
           if (!countExtl.some((item: Marker) => item.id === sensItem.id)) {
             countExtl.push(sensItem)
-          }
-        } else if (sensItem.markerType === UNIVERSAL_MARKER_TYPE) {
-          if (!countUniversal.some((item: Marker) => item.id === sensItem.id)) {
-            countUniversal.push(sensItem)
           }
         }
       })
@@ -320,11 +323,28 @@ export const onSiteClick = async (props: OnSiteClickProps): Promise<void> => {
       'Valve'
     )
   })
-  // Universal marker — SCAFFOLD. Empty until a real 'universal' markerType is
-  // served, so this loop is a no-op today. Does not touch amountOfSensors /
-  // pushAllCoordinates yet — see TODO(universal) in createUniversalMarker.
+  const universalBatch: UniversalMarkerBatch = { total: countUniversal.length, settled: 0, valid: [], invalid: [] }
   countUniversal.length !== 0 && countUniversal.map((marker: Marker) => {
-    createUniversalMarker(marker as any, props.page as number, props.userId)
+    props.setAmountOfSensors(props.amountOfSensors += 1)
+    const layer: string = getLayerName(marker.id) ?? ''
+    createUniversalMarker(
+      marker as any,
+      props.page as number,
+      props.userId,
+      layer,
+      universalBatch,
+      props.setUniversalChartDataContainer ?? (() => {}),
+      props.setInvalidUniversalChartDataContainer ?? (() => {})
+    )
+    pushAllCoordinates(
+      marker,
+      props.allCoordinatesOfMarkers,
+      props.siteList,
+      props.setCoordinatesForFitting,
+      allSensorItems,
+      props.groupMarker.title,
+      'Universal'
+    )
   })
 }
 

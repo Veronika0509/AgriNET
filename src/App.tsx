@@ -44,6 +44,7 @@ import AddValvePage from "./pages/AddValvePage";
 import CommentsPage from "./pages/Comments";
 import AddUnitPage from "./pages/AddUnit";
 import DataListPage from "./pages/DataList";
+import AlarmsPage from "./pages/Alarms";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import { createUserId } from "./types";
 import './App.css'
@@ -89,6 +90,8 @@ const AppContent: React.FC = () => {
     setBudgetEditorReturnPage,
     chartReturnPage,
     setChartReturnPage,
+    reopenAlarmUnits,
+    setReopenAlarmUnits,
     logout,
   } = useAppContext();
 
@@ -174,10 +177,17 @@ const AppContent: React.FC = () => {
   // Drop the Chart page's custom return target once we're no longer on the Chart page
   // (or heading into it), so a stale value can't hijack a later Map → Chart back press.
   useEffect(() => {
-    if (page !== 2 && page !== 7 && chartReturnPage !== null) {
+    if (page !== 2 && page !== 7 && page !== 8 && chartReturnPage !== null) {
       setChartReturnPage(null);
     }
   }, [page, chartReturnPage, setChartReturnPage]);
+
+  // Same for the Alarms page's "reopen this unit's edit window": only valid on the Chart → Alarms round trip.
+  useEffect(() => {
+    if (page !== 2 && page !== 8 && reopenAlarmUnits !== null) {
+      setReopenAlarmUnits(null);
+    }
+  }, [page, reopenAlarmUnits, setReopenAlarmUnits]);
 
   // Handle browser/device back button (popstate) to sync page state with URL
   // Uses pageRef to always access the latest page value (avoids stale closures)
@@ -257,8 +267,8 @@ const AppContent: React.FC = () => {
         (window as any).__chartToMapNavTimestamp = Date.now();
         return;
       }
-      // Pages 5-7 (Comments, AddUnit, DataList) → back to Menu
-      if (currentPage === 5 || currentPage === 6 || currentPage === 7) {
+      // Pages 5-8 (Comments, AddUnit, DataList, Alarms) → back to Menu
+      if (currentPage === 5 || currentPage === 6 || currentPage === 7 || currentPage === 8) {
         lastPopstateNavRef.current = now;
         isNavigatingBackRef.current = true;
         pageRef.current = 0;
@@ -321,8 +331,8 @@ const AppContent: React.FC = () => {
           setPage(1);
           window.history.replaceState(null, '', '/AgriNET/map');
         }
-        // Pages 5-7 (Comments, AddUnit, DataList) → back to Menu
-        else if (currentPage === 5 || currentPage === 6 || currentPage === 7) {
+        // Pages 5-8 (Comments, AddUnit, DataList, Alarms) → back to Menu
+        else if (currentPage === 5 || currentPage === 6 || currentPage === 7 || currentPage === 8) {
           isNavigatingBackRef.current = true;
           pageRef.current = 0;
           window.history.replaceState(null, '', '/AgriNET/menu');
@@ -573,7 +583,11 @@ const AppContent: React.FC = () => {
                           ? <div>
                               <DataListPage setPage={setPage} siteList={siteList} />
                             </div>
-                          : null
+                          : page === 8
+                            ? <div>
+                                <AlarmsPage setPage={setPage} siteList={siteList} />
+                              </div>
+                            : null
             }
           </div>
           <div style={{display: page === 1 ? 'block' : 'none'}}>

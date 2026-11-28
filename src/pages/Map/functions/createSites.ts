@@ -1,5 +1,6 @@
 import { onSiteClick } from "./onSiteClick";
 import type { Site } from "../../../types";
+import type { UniversalChartDataTuple } from "./types/universal/createUniversalMarker";
 
 // Extended marker type with custom infoWindow property
 interface MarkerWithInfoWindow extends google.maps.marker.AdvancedMarkerElement {
@@ -59,6 +60,8 @@ interface CreateSitesProps {
   valveChartsAmount?: number;
   setInvalidValveChartDataContainer?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown[]) => void);
   setValveChartDataContainer?: React.Dispatch<React.SetStateAction<any[]>> | ((data: unknown[]) => void);
+  setUniversalChartDataContainer?: (data: UniversalChartDataTuple[]) => void;
+  setInvalidUniversalChartDataContainer?: (data: UniversalChartDataTuple[]) => void;
   amountOfSensors?: number;
   setAmountOfSensors?: (amount: number) => void;
   extlChartsAmount?: number;
@@ -116,6 +119,8 @@ export const createSites = async (props: CreateSitesProps) => {
             valveChartsAmount: props.valveChartsAmount,
             setInvalidValveChartDataContainer: props.setInvalidValveChartDataContainer,
             setValveChartDataContainer: props.setValveChartDataContainer,
+            setUniversalChartDataContainer: props.setUniversalChartDataContainer,
+            setInvalidUniversalChartDataContainer: props.setInvalidUniversalChartDataContainer,
             amountOfSensors: props.amountOfSensors,
             setAmountOfSensors: props.setAmountOfSensors,
             markers: (props.markers.length > 0 ? props.markers : markers) as any,
@@ -149,6 +154,8 @@ export const createSites = async (props: CreateSitesProps) => {
           valveChartsAmount: props.valveChartsAmount,
           setInvalidValveChartDataContainer: props.setInvalidValveChartDataContainer,
           setValveChartDataContainer: props.setValveChartDataContainer,
+          setUniversalChartDataContainer: props.setUniversalChartDataContainer,
+          setInvalidUniversalChartDataContainer: props.setInvalidUniversalChartDataContainer,
           amountOfSensors: props.amountOfSensors,
           setAmountOfSensors: props.setAmountOfSensors,
           markers: (props.markers.length > 0 ? props.markers : markers) as any,

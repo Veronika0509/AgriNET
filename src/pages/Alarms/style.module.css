@@ -1,0 +1,615 @@
+/* Matches the rest of the app: white page, grey filter block (Comments),
+   thin-bordered tables (Comments / Data List), label-left form rows (Add Unit),
+   AgriNET green #04a65b for actions. */
+
+.content {
+  --background: white;
+  --padding-bottom: calc(var(--bottom-menu-height, 56px) + 60px);
+}
+
+.contentWithBar {
+  --padding-bottom: calc(var(--bottom-menu-height, 56px) + 124px);
+}
+
+.page {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.empty {
+  text-align: center;
+  color: #666;
+  font-size: 13px;
+  padding: 32px 8px;
+}
+
+/* Search + type chips, pinned under the title so they stay while the list scrolls */
+.filters {
+  background: #fff;
+  padding: 10px 16px 12px;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  max-width: 748px;
+  margin: 0 auto;
+  padding: 0 12px;
+  background: #f1f3f2;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: text;
+}
+
+.search:focus-within {
+  background: #fff;
+  border-color: #04a65b;
+}
+
+.searchIcon {
+  flex-shrink: 0;
+  font-size: 18px;
+  color: #888;
+}
+
+.search:focus-within .searchIcon {
+  color: #04a65b;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+  color: #000;
+}
+
+.searchInput::placeholder {
+  color: #8a8a8a;
+}
+
+/* Hide the browser's own clear "x" — we draw our own. */
+.searchInput::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.searchClear {
+  display: flex;
+  flex-shrink: 0;
+  padding: 4px;
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: #9a9a9a;
+  cursor: pointer;
+}
+
+.typeChips {
+  display: flex;
+  gap: 8px;
+  max-width: 748px;
+  margin: 10px auto 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.typeChips::-webkit-scrollbar {
+  display: none;
+}
+
+.typeChip {
+  flex: 1 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px 0 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 17px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.typeChip:hover {
+  border-color: #04a65b;
+}
+
+.typeChipActive,
+.typeChipActive:hover {
+  background: #04a65b;
+  border-color: #04a65b;
+  color: #fff;
+}
+
+.typeChipCount {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #eef0ef;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  color: #555;
+}
+
+.typeChipActive .typeChipCount {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+/* Table — same look as Comments / Data List tables */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: #000;
+  padding: 6px 8px;
+  border-bottom: 1px solid #ddd;
+  background: #fafafa;
+}
+
+.table td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.row:last-child td {
+  border-bottom: none;
+}
+
+/* Type group header on the "All" tab */
+.groupRow td {
+  background: #f1f8f4;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.groupRow:first-child td {
+  border-top: none;
+}
+
+.groupTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #04a65b;
+}
+
+.groupCount {
+  display: inline-block;
+  margin-left: 8px;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #dcefe4;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  color: #2e6b4b;
+}
+
+.rowClickable {
+  cursor: pointer;
+}
+
+.rowClickable:hover {
+  background: #f6fbf8;
+}
+
+.rowChecked,
+.rowChecked:hover {
+  background: #e8f6ee;
+}
+
+.cellCheck {
+  width: 40px;
+  text-align: center !important;
+}
+
+.cellCheck ion-checkbox,
+.groupRow ion-checkbox {
+  --checkbox-background-checked: #04a65b;
+  --border-color-checked: #04a65b;
+}
+
+.unitName {
+  display: block;
+  font-weight: 500;
+  color: #000;
+  word-break: break-word;
+}
+
+.unitSite {
+  display: block;
+  font-size: 12px;
+  color: #777;
+}
+
+.cellSetpoint {
+  width: 72px;
+  text-align: center !important;
+}
+
+.setpointValue {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #000;
+}
+
+.stateOn,
+.stateOff {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stateOn {
+  color: #04a65b;
+}
+
+.stateOff {
+  color: #999;
+}
+
+.cellStatus {
+  text-align: center;
+  font-size: 12px;
+  color: #c62828;
+}
+
+.smallSpinner {
+  width: 20px;
+  height: 20px;
+}
+
+.tableHint {
+  font-size: 12px;
+  color: #777;
+  text-align: center;
+  margin-top: 10px !important;
+}
+
+/* Bottom selection bar, sits right above the app's home/settings/info menu */
+.selectionBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--bottom-menu-height, 56px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 8px 8px;
+  background: #fff;
+  border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.selectionCount {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.selectionNote {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: #b26a00;
+}
+
+.clearButton {
+  --color: #666;
+  margin: 0;
+}
+
+/* Buttons — AgriNET green, like the menu / Data List "Update" */
+.solidButton {
+  --background: #04a65b;
+  --background-hover: #049250;
+  --background-activated: #049250;
+  --color: #fff;
+  margin: 0;
+}
+
+.outlineButton {
+  --border-color: #04a65b;
+  --color: #04a65b;
+  margin: 0;
+}
+
+/* Round refresh button — same as Comments / Data List */
+.refreshFab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(var(--bottom-menu-height, 56px) + 12px);
+  z-index: 101;
+  width: 35px;
+  height: 36px;
+  --padding-start: 5px;
+  --padding-end: 5px;
+  --background: #04a65b;
+  --background-hover: #049250;
+  margin: 0;
+}
+
+.refreshFabRaised {
+  bottom: calc(var(--bottom-menu-height, 56px) + 76px);
+}
+
+.fabSpinner {
+  width: 18px;
+  height: 18px;
+  color: #fff;
+}
+
+/* Edit sheet — form rows like Add Unit */
+.modalContent {
+  --background: white;
+}
+
+.form {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 8px 20px 24px;
+}
+
+.formSubtitle {
+  font-size: 13px;
+  color: #777;
+  padding: 4px 0 8px !important;
+}
+
+/* Compact list of units a bulk edit will change */
+.selectedUnits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0 2px;
+}
+
+.selectedChip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  max-width: 100%;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: #eef0ef;
+  font-size: 13px;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selectedChipId {
+  font-size: 11px;
+  color: #777;
+}
+
+.selectedMore {
+  padding: 3px 8px;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: #04a65b;
+  cursor: pointer;
+}
+
+.formSection {
+  margin-top: 12px;
+}
+
+.formSectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #04a65b;
+  padding: 8px 0 2px !important;
+}
+
+.formRow {
+  display: flex;
+  align-items: center;
+  min-height: 50px;
+  gap: 16px;
+  border-bottom: 1px solid #ccc;
+}
+
+.formRow:focus-within {
+  border-bottom-color: #04a65b;
+}
+
+.formLabel {
+  flex-shrink: 0;
+  width: 92px;
+  font-size: 16px;
+  color: #555;
+}
+
+.formControl {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+  --highlight-color-focused: #04a65b;
+}
+
+.formToggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.formToggle ion-toggle {
+  --track-background-checked: #04a65b;
+}
+
+.hint {
+  font-size: 13px;
+  color: #8a5a00;
+  background: #fff8e1;
+  border-radius: 4px;
+  padding: 8px 10px !important;
+  margin-top: 16px !important;
+}
+
+.hint span {
+  display: block;
+}
+
+.hintSub {
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.hintUnits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.addContactChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 4px 10px 4px 6px;
+  border: 1px solid #04a65b;
+  border-radius: 14px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #04a65b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.addContactChip:hover {
+  background: #e8f6ee;
+}
+
+.addContactChip ion-icon {
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.hintButton {
+  margin: 8px 0 0;
+  --border-color: #04a65b;
+  --color: #04a65b;
+  --background-hover: #e8f6ee;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.formActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.formActions ion-button {
+  flex: 1;
+  height: 44px;
+}
+
+.modal {
+  --border-radius: 12px;
+}
+
+@media (max-width: 480px) {
+  .typeChips {
+    gap: 6px;
+  }
+
+  .typeChip {
+    gap: 4px;
+    height: 32px;
+    padding: 0 8px 0 10px;
+    font-size: 13px;
+  }
+
+  .typeChipCount {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    font-size: 11px;
+    line-height: 18px;
+  }
+}
+
+@media (max-width: 390px) {
+  .filters {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .typeChips {
+    gap: 4px;
+  }
+
+  .typeChip {
+    padding: 0 6px 0 8px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .page {
+    padding: 12px;
+  }
+
+  .filters {
+    padding: 8px 12px 10px;
+  }
+
+  .cellSetpoint {
+    width: 58px;
+  }
+
+  .formLabel {
+    width: 80px;
+  }
+}

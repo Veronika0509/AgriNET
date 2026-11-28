@@ -10,6 +10,7 @@ import {Alarm} from "./components/Alarm";
 import {alarmDataProcessing} from "./functions/alarmDataProcessing";
 import {ValveChartPage} from "./components/types/valve";
 import {FuelChartPage} from "./components/types/wxet/components/fuel";
+import { useAppContext } from "../../context/AppContext";
 
 // Типы
 import type { Site, SensorData, ChartPageType, UserId, SiteId } from '../../types';
@@ -37,6 +38,28 @@ const Chart = (props: ChartProps) => {
   const [settingsOddBack, setSettingsOddBack] = useState(false)
   const [autowater, setAutowater] = useState<any>(false)
   const [alarm, setAlarm] = useState(false)
+  const { openChartAlarm, setOpenChartAlarm, setChartReturnPage } = useAppContext()
+  // True while the Alarm window was opened from the Alarms page's "Add email or phone".
+  const [alarmFromAlarmsPage, setAlarmFromAlarmsPage] = useState(false)
+
+  // Opened from the Alarms page's "Add email or phone": go straight to the Alarm window.
+  useEffect(() => {
+    if (openChartAlarm) {
+      setAlarm(true)
+      setAlarmFromAlarmsPage(true)
+      setOpenChartAlarm(false)
+    }
+  }, [openChartAlarm, setOpenChartAlarm])
+
+  // The Alarm window's back arrow: in that case return straight to the Alarms page, skipping the chart.
+  const closeAlarmWindow = (open: boolean) => {
+    setAlarm(open)
+    if (!open && alarmFromAlarmsPage) {
+      setAlarmFromAlarmsPage(false)
+      setChartReturnPage(null)
+      props.setPage(8)
+    }
+  }
   const [alarmData, setAlarmData] = useState<unknown>()
   const [alarmEmailOrTel1, setAlarmEmailOrTel1] = useState<string>('Unset')
   const [alarmEmailOrTel2, setAlarmEmailOrTel2] = useState<string>('Unset')
@@ -291,7 +314,7 @@ const Chart = (props: ChartProps) => {
       />
       {renderChartPage()}
       <IonModal isOpen={alarm} className={s.alarmPage}>
-        <Header type='alarmPage' setAlarm={setAlarm} alarmOddBack={alarmOddBack} setAlarmOddBack={setAlarmOddBack} settingsOddBack={settingsOddBack} setSettingsOddBack={setSettingsOddBack} setChartPageType={props.setChartPageType as any} />
+        <Header type='alarmPage' setAlarm={closeAlarmWindow} alarmOddBack={alarmOddBack} setAlarmOddBack={setAlarmOddBack} settingsOddBack={settingsOddBack} setSettingsOddBack={setSettingsOddBack} setChartPageType={props.setChartPageType as any} />
         <Alarm
           alarm={alarm}
           setAlarm={setAlarm}

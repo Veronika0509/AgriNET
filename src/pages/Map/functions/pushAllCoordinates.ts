@@ -1,3 +1,5 @@
+import {isUniversalSensor} from "../config/universalMarker";
+
 
 interface SensorItem {
   lat: number;
@@ -44,7 +46,7 @@ export const pushAllCoordinates = (
   const mainId = sensorItem.id
   const neededSensorItemsArray: Marker[] = []
   allSensorItems.map((sensItem: Marker) => {
-    if (sensItem.markerType === 'moist-fuel' || sensItem.markerType === 'wxet' || sensItem.markerType === 'fuel' || sensItem.markerType === 'temp-rh-v2' || sensItem.markerType === 'soiltemp' || sensItem.markerType === 'temp-rh' || sensItem.markerType === 'valve' || sensItem.markerType === 'extl' || sensItem.markerType === 'graphic') {
+    if (isUniversalSensor(sensItem) || sensItem.markerType === 'moist-fuel' || sensItem.markerType === 'wxet' || sensItem.markerType === 'fuel' || sensItem.markerType === 'temp-rh-v2' || sensItem.markerType === 'soiltemp' || sensItem.markerType === 'temp-rh' || sensItem.markerType === 'valve' || sensItem.markerType === 'extl' || sensItem.markerType === 'graphic') {
       if (!neededSensorItemsArray.some((item: Marker) => item.id === sensItem.id)) {
         neededSensorItemsArray.push(sensItem);
       }
@@ -63,7 +65,7 @@ export const pushAllCoordinates = (
   //     })
   //   }
   // })
-  if (type === 'Moist' || type === 'WXET' || type === 'SoilTemp' || type === 'Valve' || type === 'EXTL') {
+  if (type === 'Moist' || type === 'WXET' || type === 'SoilTemp' || type === 'Valve' || type === 'EXTL' || type === 'Universal') {
     const exists = allCoordinatesOfMarkers.some((marker: Coordinate) => marker.mainId === mainId);
 
     if (!exists) {

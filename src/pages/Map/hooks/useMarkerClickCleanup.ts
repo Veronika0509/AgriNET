@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react"
 import type { OverlayItem } from "../types/OverlayItem"
 import type { ExtlDataContainerItem } from "../types"
+import type { UniversalCustomOverlayInstance } from "../components/types/universal/UniversalCustomOverlay"
+import type { UniversalChartDataTuple } from "../functions/types/universal/createUniversalMarker"
 
 interface UseMarkerClickCleanupProps {
   isMarkerClicked: boolean | string
@@ -23,6 +25,9 @@ interface UseMarkerClickCleanupProps {
   setWxetDataContainer: React.Dispatch<React.SetStateAction<any[]>>
   setInvalidWxetDataContainer: React.Dispatch<React.SetStateAction<any[]>>
   setExtlDataContainer: React.Dispatch<React.SetStateAction<ExtlDataContainerItem[]>>
+  setUniversalOverlays: React.Dispatch<React.SetStateAction<UniversalCustomOverlayInstance[]>>
+  setUniversalChartDataContainer: React.Dispatch<React.SetStateAction<UniversalChartDataTuple[]>>
+  setInvalidUniversalChartDataContainer: React.Dispatch<React.SetStateAction<UniversalChartDataTuple[]>>
   setCoordinatesForFitting: React.Dispatch<React.SetStateAction<Array<{ lat: number; lng: number }>>>
   setAllCoordinatesOfMarkers: React.Dispatch<React.SetStateAction<Array<{ lat: number; lng: number }>>>
   setAmountOfSensors: React.Dispatch<React.SetStateAction<number>>
@@ -76,6 +81,7 @@ export const useMarkerClickCleanup = (props: UseMarkerClickCleanupProps) => {
       props.setTempOverlays([])
       props.setValveOverlays([])
       props.setFuelOverlays([])
+      props.setUniversalOverlays([])
       props.setActiveOverlays([])
       props.setAllOverlays([])
 
@@ -89,6 +95,8 @@ export const useMarkerClickCleanup = (props: UseMarkerClickCleanupProps) => {
       props.setWxetDataContainer([])
       props.setInvalidWxetDataContainer([])
       props.setExtlDataContainer([])
+      props.setUniversalChartDataContainer([])
+      props.setInvalidUniversalChartDataContainer([])
 
       // Reset other related state
       props.setCoordinatesForFitting([])

@@ -11,6 +11,7 @@ const PAGE_PATHS: Record<number, string> = {
   5: '/comments',
   6: '/add-unit',
   7: '/datalist',
+  8: '/alarms',
 }
 
 // URL path to page number mapping
@@ -23,6 +24,7 @@ const PATH_PAGES: Record<string, number> = {
   '/comments': 5,
   '/add-unit': 6,
   '/datalist': 7,
+  '/alarms': 8,
 }
 
 // Page 0 routes handled by React Router
